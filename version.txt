@@ -1,0 +1,12 @@
+
+1.0.3     Project code moved to SourceForge (subproject of Morfologik).
+          LICENSE CHANGED FROM PUBLIC DOMAIN TO BSD (doesn't change much, but clarifies
+          legal issues).
+
+1.0.2     Added a Lametyzator constructor which allows custom dictionary stream, field
+          delimiters and encoding. Added an option for building stand-alone 
+          JAR that does not include the default polish dictionary.
+
+1.0.1     Code cleanups. Added a method that returns the third automaton's column (form).
+
+1.0       Initial release
