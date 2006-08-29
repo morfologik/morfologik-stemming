@@ -3,7 +3,7 @@
     <defaultexcludes add="**/CVS"/>
 
     <property name="build.name" value="stempelator" />
-    <property name="build.ver" value="1.0.3"/>
+    <property name="build.ver" value="1.0.4"/>
 
     <property name="tmp.dir"   value="tmp" />
 	<property name="build.dir" value="${tmp.dir}/build"/>
@@ -104,11 +104,13 @@
 	<target name="jar" depends="clean, compile">
 		<jar jarfile="${jarfile}">
 			<fileset dir="${build.dir}" />
+            <zipfileset file="LICENSE.txt" fullpath="META-INF/LICENSE.txt" />
 		</jar>
 		<jar jarfile="${jarfile-nodict}">
 			<fileset dir="${build.dir}">
 				<exclude name="res/*.dict" />
 			</fileset>
+            <zipfileset file="LICENSE.nodict.txt" fullpath="META-INF/LICENSE.txt" />
 		</jar>
 	</target>
 
