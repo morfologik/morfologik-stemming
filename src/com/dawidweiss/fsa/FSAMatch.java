@@ -1,7 +1,7 @@
 package com.dawidweiss.fsa;
 
 /**
- * Match result is returned as an object of this class.
+ * A result returned from {@link FSATraversalHelper#matchSequence(byte[], com.dawidweiss.fsa.FSA.Node)}.
  */
 public final class FSAMatch
 {
@@ -11,23 +11,34 @@ public final class FSAMatch
     public static final int PREFIX_FOUND = 3;
     public static final int PREMATURE_WORD_END_FOUND = 4;
 
-    private int         matchResult;
-    private int         mismatchAtIndex;
-    private FSA.Node    mismatchAtNode;
+    private int matchResult;
+    private int mismatchAtIndex;
+    private FSA.Node mismatchAtNode;
 
-    protected FSAMatch( int result, int mismatchAtIndex, FSA.Node mismatchAtNode )
+    protected FSAMatch(int result, int mismatchAtIndex, FSA.Node mismatchAtNode)
     {
-        this.matchResult     = result;
+        this.matchResult = result;
         this.mismatchAtIndex = mismatchAtIndex;
-        this.mismatchAtNode  = mismatchAtNode;
+        this.mismatchAtNode = mismatchAtNode;
     }
 
-    protected FSAMatch( int result )
+    protected FSAMatch(final int result)
     {
-        this.matchResult     = result;
+        this.matchResult = result;
     }
 
-    public int getMatchResult() { return matchResult; }
-    public int getMismatchIndex() { return mismatchAtIndex; }
-    public FSA.Node getMismatchNode() { return mismatchAtNode; }
+    public int getMatchResult()
+    { 
+        return matchResult; 
+    }
+
+    public int getMismatchIndex()
+    { 
+        return mismatchAtIndex; 
+    }
+    
+    public FSA.Node getMismatchNode()
+    { 
+        return mismatchAtNode;
+    }
 }

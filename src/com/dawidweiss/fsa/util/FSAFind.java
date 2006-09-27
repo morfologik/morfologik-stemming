@@ -11,7 +11,7 @@ import java.util.Iterator;
 
 import com.dawidweiss.fsa.FSA;
 import com.dawidweiss.fsa.FSAMatch;
-import com.dawidweiss.fsa.FSATraverseHelper;
+import com.dawidweiss.fsa.FSATraversalHelper;
 
 
 /**
@@ -75,7 +75,7 @@ public final class FSAFind
         }
 
         FSA fsa = FSA.getInstance( fsaFile, encoding );
-        FSATraverseHelper fsaMatcher = fsa.getTraverseHelper();
+        FSATraversalHelper fsaMatcher = fsa.getTraversalHelper();
 
         long start = System.currentTimeMillis();
 

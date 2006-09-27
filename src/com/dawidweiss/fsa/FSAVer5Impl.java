@@ -10,8 +10,9 @@ import java.io.InputStream;
  * FSA (Finite State Automaton) dictionary traversal implementation
  * for version 5 of the FSA automaton.
  *
- * Version 5 indicates the dictionary was built with these flags:
- * FSA_FLEXIBLE, FSA_STOPBIT and FSA_NEXTBIT. The internal representation
+ * <p>Version 5 indicates the dictionary was built with these flags:
+ * {@link FSA#FSA_FLEXIBLE}, {@link FSA#FSA_STOPBIT} and {@link FSA#FSA_NEXTBIT}. 
+ * The internal representation
  * of the FSA must therefore follow this description (please note this
  * format describes only a single transition (arc), not the entire dictionary file).
  * <pre>
@@ -45,7 +46,7 @@ import java.io.InputStream;
  * gtl+1                           (gtl = gotoLength)
  * </pre>
  *
- * The traversal of such FSA could be made extremely fast using pointers only (or integer
+ * <p>The traversal of such FSA could be made extremely fast using pointers only (or integer
  * indices over a byte array in case of Java). However, for the sake of clarity, this class
  * uses explicit Node/ Arc objects.
  *
@@ -54,170 +55,205 @@ import java.io.InputStream;
 public final class FSAVer5Impl
     extends FSA
 {
-    /** The flag used to indicate that an arc is the last one of node's list and the following one
-     *  will start another node.
+    /** 
+     * Bitmask indicating that an arc is the last one of the node's list and the following one
+     * belongs to another node.
      */
-    protected static final int FLAG_STOPBIT = 0x02;
+    private static final int BITMASK_LASTARC = 1 << 1;
 
-    /** A size, in bytes, of a single arc */
-    protected int       arcSize;
-
-    /** An offset in the arc structure, where 'address' field begins. */
-    protected int       gotoOffset;
-
-    /** An array of bytes holding the "packed" representation of this automaton.
-     *  PLease see the documentation of this class for a more information on
-     *  how this structure is organized.
+    /** 
+     * Bitmask indicating that an arc corresponds to the last character of a sequence available
+     * when building the automaton. 
      */
-    protected byte []   arcs;
+    private static final int BITMASK_FINALARC = 1 << 0;
+
+    /** 
+     * Bitmask indicating that the next node follows this arc in the compressed automaton 
+     * structure. 
+     */
+    private static final int BITMASK_NEXTBIT = 1 << 2;
+
+    /** 
+     * Size of a single arc (in bytes). 
+     */
+    protected int arcSize;
+
+    /** 
+     * An offset in the arc structure, where the address field begins. For this
+     * version of the automaton, this is a constant value. 
+     */
+    protected final static int gotoOffset = 1;
+
+    /** 
+     * An array of bytes with the internal representation of the automaton.
+     * Please see the documentation of this class for more information on
+     * how this structure is organized.
+     */
+    protected byte [] arcs;
 
 
-    /** An arc (a labelled transition between two nodes).
-     *
-     *  An arc has an explicit representation in the transitions array, a pointer
-     *  to that representation is stored in this class.
-     *
-     *  This class is public, so that it can be used directly without unnecessary
-     *  runtime-typing and casting. This should be an extreme case when performance
-     *  counts, though. Use interfaces when portability is the objective.
+    /** 
+     * An arc in version 5 of the automaton structure.
      */
     private final class Arc
         implements FSA.Arc
     {
         /** An index in the dictionary where this arc begins. */
-        private int     offset;
+        private final int offset;
 
-        /** Creates an arc, whose representation starts at <code>offset</code> in the arcs array.
+        /** 
+         * Creates an arc, whose representation starts at <code>offset</code> in the arcs array.
          */
-        public Arc( int offset )
+        public Arc(final int offset)
         {
             this.offset = offset;
         }
 
-        /** Returns the destination node, pointed to by this arc.
-         *  If this arc points to a final node, null is returned.
+        /** 
+         * Returns the destination node, pointed to by this arc.
          */
         public FSA.Node getDestinationNode()
         {
-            if (this.pointsToFinalNode())
-                return null;
+            final int nodeOffset = getDestinationNodeOffset();
+
+            if (0 == nodeOffset) {
+                throw new RuntimeException("This is a terminal arc [" + offset + "]");
+            }
 
             // Return a new object, which is needed simply to hold the value
             // of a pointer in the arcs array.
-            return new Node( getDestinationNodeOffset() );
+            return new Node(nodeOffset);
         }
 
         /** Returns the label of this arc. */
         public byte getLabel()
         {
             // first byte of arc's representation is its label.
-            return arcs[ offset ];
+            return arcs[offset];
         }
 
-        /** Returns true if the destination node is a final node (final state of the FSA). */
-        public boolean pointsToFinalNode()
+        /** 
+         * {@inheritDoc} 
+         */
+        public boolean isLast()
         {
-            return (arcs[ offset + gotoOffset] & 0x01) != 0;
+            return (arcs[offset + gotoOffset] & BITMASK_LASTARC) != 0;
         }
 
-        /** Returns true if this arc is the last arc of some node's representation */
-        protected boolean isLast()
+        /**
+         * {@inheritDoc} 
+         */
+        public boolean isFinal() 
         {
-            return (arcs[ offset + gotoOffset] & 0x02) != 0;
+            return (arcs[offset + gotoOffset] & BITMASK_FINALARC) != 0;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public boolean isTerminal() {
+            return (0 == getDestinationNodeOffset());
+        }
+
+        /** 
+         * @deprecated Use {@link #isFinal()} instead.
+         */
+        public final boolean pointsToFinalNode()
+        {
+            return isFinal();
         }
 
         /** Returns the address of the node pointed to by this arc. */
         private int getDestinationNodeOffset()
         {
-            if ((arcs[ offset + gotoOffset ] & 0x04) != 0)
-            {
+            if ((arcs[offset + gotoOffset] & BITMASK_NEXTBIT) != 0) {
                 /* the destination node follows this arc in the array */
                 return offset + gotoOffset + 1;
-            }
-            else
-            {
+            } else {
                 /* the destination node address has to be extracted from the arc's goto field. */
-                return gotoFieldToOffset( arcs, offset + gotoOffset, gotoLength ) >>> 3;
+                return gotoFieldToOffset(offset + gotoOffset, gotoLength) >>> 3;
             }
         }
     }
 
 
-    /** A node (a collection of outgoing arcs).
+    /** 
+     * A node in version 5 of the automaton structure.
      *
-     *  A node has an implicit representation - it is stored as a consecutive
-     *  vector of arcs. The last arc of the node has a special bit set to 1.
-     *
-     *  This class is public, so that it can be used directly without unnecessary
-     *  runtime-typing and casting. This should be an extreme case when performance
-     *  counts, though. Use interfaces when portability is the objective.
+     * @see FSA.Node
      */
-    private final class Node
-        extends FSAAbstractNode
-    {
-        /** The offset of this node's representation in the arcs array */
-        private int offset;
-
-        /** Creates a node, whose representation starts at <code>offset</code> in
-         *  the arcs array.
+    private final class Node implements FSA.Node {
+        /** 
+         * The offset of this node's representation in the arcs array 
          */
-        public Node( int offset )
+        private final int offset;
+
+        /**
+         * Creates a node at the given offset (first arc's).  
+         */
+        public Node(final int offset)
         {
             this.offset = offset;
         }
 
-        /** Returns the first outgoing arc of this node.
-         *  Theoretically, this method should ALWAYS return at least one arc.
-         *  (final nodes have no representation).
+        /**
+         * {@inheritDoc} 
          */
         public FSA.Arc getFirstArc()
         {
-            return new Arc( offset );
+            return new Arc(offset);
         }
 
-        /** Returns a subsequent arc of this node. null is returned when
-         *  no more arcs are available.
-         *
-         *  This method will not verify whether the "input" arc really
-         *  belongs to this node. Caution is advised.
+        /** 
+         * {@inheritDoc} 
          */
-        public FSA.Arc getNextArc( FSA.Arc arc )
+        public FSA.Arc getNextArc(FSA.Arc arc)
         {
-            Arc myArc = (Arc) arc;
+            final Arc myArc = (Arc) arc;
             if (myArc.isLast())
                 return null;
             else
-            {
-                return new Arc( myArc.offset + arcSize );
+                return new Arc(myArc.offset + arcSize);
+        }
+
+        /** 
+         * Returns an arc with a given label, if it exists in this node.
+         */
+        public final FSA.Arc getArcLabelledWith(byte label)
+        {
+            FSA.Arc arc;
+            for (arc = getFirstArc(); arc != null; arc = getNextArc(arc)) {
+                if (arc.getLabel() == label)
+                    return arc;
             }
+
+            // arc labelled with "label" not found.
+            return null;
         }
     }
 
 
     /**
-     *  Returns the number of arcs in this automaton
+     * Returns the number of arcs in this automaton. 
+     * This method performs a full scan of all arcs in this automaton.
      */
     public int getNumberOfArcs()
     {
-        FSA.Node startNode = getStartNode();
+        final FSA.Node startNode = getStartNode();
+
         FSAVer5Impl.Arc arc = (FSAVer5Impl.Arc) startNode.getFirstArc();
-
+        int arcOffset = arc.offset;
         int arcsNumber = 0;
-
-        while (arc.offset < arcs.length)
-        {
+        while (arcOffset < arcs.length) {
             arcsNumber++;
 
-            // next arc.
-            if ((arcs[ arc.offset + gotoOffset ] & 0x04) != 0)
-            {
+            // go to next arc.
+            if ((arcs[arcOffset + gotoOffset] & BITMASK_NEXTBIT) != 0) {
                 /* the next arc is right after this one. */
-                arc = new Arc( arc.offset + gotoOffset + 1);
-            }
-            else
-            {
+                arcOffset = arcOffset + gotoOffset + 1;
+            } else {
                 /* the destination node address has to be extracted from the arc's goto field. */
-                arc = new Arc( arc.offset + gotoOffset + gotoLength );
+                arcOffset = arcOffset + gotoOffset + gotoLength;
             }
         }
 
@@ -225,18 +261,17 @@ public final class FSAVer5Impl
     }
 
 
-    /** Returns the number of nodes in this automaton.
-     *  This method is not efficient in this representation of an automaton. It takes
-     *  O(N), where N is the number of arcs to calculate the number of nodes.
+    /** 
+     * Returns the number of nodes in this automaton.
+     * This method performs a full scan of all arcs in this automaton.
      */
     public int getNumberOfNodes()
     {
         int offset = gotoOffset;
         int nodes  = 0;
-        while (offset < arcs.length)
-        {
+        while (offset < arcs.length) {
             // This arc marks an end of the list of node's arrays.
-            if ( (arcs[offset] & FLAG_STOPBIT) != 0)
+            if ((arcs[offset] & BITMASK_LASTARC) != 0)
                 nodes++;
             offset += arcSize;
         }
@@ -251,61 +286,56 @@ public final class FSAVer5Impl
     public FSAVer5Impl(InputStream fsaStream, String dictionaryEncoding)
         throws IOException
     {
-        super( fsaStream, dictionaryEncoding );
+        super(fsaStream, dictionaryEncoding);
     }
 
 
-    /** Returns the start node of this automaton.
-     *  May return null if the start node is also an end node.
+    /** 
+     * Returns the start node of this automaton.
+     * May return <code>null</code> if the start node 
+     * is also an end node.
      */
     public FSA.Node getStartNode()
     {
-        return new Node( arcSize ).getFirstArc().getDestinationNode();
+        return new Node(arcSize).getFirstArc().getDestinationNode();
     }
 
 
-    /* *************************************** */
-    /* **** PROTECTED AND PRIVATE METHODS **** */
-    /* *************************************** */
-
-
-    /** Reads a FSA from the stream.
-     *  Throws an exception if magic number is not found.
-     *
-     *  @throws IOException
-     *  @throws ClassNotFoundException  If the magic number doesn't match.
+    /** 
+     * {@inheritDoc}
      */
     protected void readFromStream(DataInput in, long fileSize)
         throws IOException
     {
-        super.readFromStream( in, fileSize );
+        super.readFromStream(in, fileSize);
 
-        // check if we support such version of the automata.
-        if (version!=5)
+        // Check if we support such version of the automata.
+        if (version != FSA.VERSION_5) {
             throw new IOException("Cannot read FSA in version " + version
-               + " (built with flags: " + FSAHelpers.flagsToString( FSAHelpers.getFlags( version ) ) + "). "
-               + "Class " + this.getClass().getName()
-               + " supports version 5 only (" + FSAHelpers.flagsToString( FSAHelpers.getFlags( 5 ) ) + ").");
+               + " (built with flags: " + FSAHelpers.flagsToString(FSAHelpers.getFlags( version )) + ")."
+               + " Class " + this.getClass().getName()
+               + " supports version " + FSA.VERSION_5 + " only (" + FSAHelpers.flagsToString(FSAHelpers.getFlags(FSA.VERSION_5)) + ").");
+        }
 
-        // read transitions data.
+        // Read transitions data.
         gotoLength = (byte) (gotoLength & 0x0f);
-        arcSize    = gotoLength + 1;
-        int numberOfArcs = (int) fileSize - /* header size */ 8;
+        arcSize = gotoLength + 1;
 
+        final int numberOfArcs = (int) fileSize - /* header size */ 8;
         arcs = new byte [ numberOfArcs ];
         in.readFully( arcs );
-
-        // This is a constant value for this type of encoding.
-        gotoOffset = 1;
     }
 
 
-    /** Returns an integer offset from a 'packed' representation */
-    protected static int gotoFieldToOffset(byte [] bytes, int start, int n)
+    /** 
+     * Returns an integer offset from bitpacked representation. 
+     */
+    protected final int gotoFieldToOffset(final int start, final int n)
     {
       int r = 0;
       for (int i = n - 1; i >= 0; --i) {
-        r <<= 8; r = r | ((int)bytes[start + i] & 0xff);
+        r <<= 8; 
+        r = r | (arcs[start + i] & 0xff);
       }
       return r;
     }

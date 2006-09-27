@@ -1,4 +1,11 @@
 
+1.0.5     Added filler and separator char dumps to FSADump.
+          
+          * A major bug in automaton traversal corrected. Upgrade when possible.
+          
+          Certain API changes were introduced; older methods are now deprecated
+          and will be removed in the future.
+
 1.0.4     Licenses for full and no-dict versions.
 
 1.0.3     Project code moved to SourceForge (subproject of Morfologik).

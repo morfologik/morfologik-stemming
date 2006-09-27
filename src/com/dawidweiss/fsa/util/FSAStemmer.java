@@ -7,7 +7,7 @@ import java.util.Iterator;
 
 import com.dawidweiss.fsa.FSA;
 import com.dawidweiss.fsa.FSAMatch;
-import com.dawidweiss.fsa.FSATraverseHelper;
+import com.dawidweiss.fsa.FSATraversalHelper;
 
 
 /**
@@ -28,7 +28,7 @@ public final class FSAStemmer
     private byte  separator;
 
     /** A Finite State Automaton used for look ups. */
-    private FSATraverseHelper  matcher;
+    private FSATraversalHelper  matcher;
 
     /** FSA's root node. */
     private FSA.Node           root;
@@ -53,7 +53,7 @@ public final class FSAStemmer
         throws UnsupportedEncodingException, IllegalArgumentException
     {
         // we don't really need the dictionary itself. A matcher will do.
-        matcher = dictionary.getTraverseHelper();
+        matcher = dictionary.getTraversalHelper();
         root    = dictionary.getStartNode();
 
         if (root==null)

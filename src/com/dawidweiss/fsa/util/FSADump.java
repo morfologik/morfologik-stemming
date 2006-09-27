@@ -23,9 +23,9 @@ public final class FSADump
     // The array where all labels on a path from start to final node are collected.
     // The buffer automatically expands up to MAX_BUFFER_SIZE when an exception
     // is thrown.
-    static final int MAX_BUFFER_SIZE  = 5000;
-    static final int BUFFER_INCREMENT = 1000;
-    static       byte [] word = new byte [BUFFER_INCREMENT];
+    private static final int MAX_BUFFER_SIZE  = 5000;
+    private static final int BUFFER_INCREMENT = 1000;
+    private static byte [] word = new byte [BUFFER_INCREMENT];
 
     // The character encoding used for converting labels to unicode.
     private String encoding;
@@ -75,9 +75,9 @@ public final class FSADump
             }
         }
 
-        // dumps the dictionary using standard FSATraverseHelper api.
+        // dumps the dictionary using standard FSATraversalHelper api.
         boolean apidump = false;
-        if (args.length>2)
+        if (args.length > 2)
         {
             if (args[2].equals("apidump"))
             {
@@ -92,15 +92,16 @@ public final class FSADump
         System.err.println("Compiled with flags : " + FSAHelpers.flagsToString(fsa.getFlags())  );
         System.err.println("Number of arcs      : " + fsa.getNumberOfArcs() );
         System.err.println("Number of nodes     : " + fsa.getNumberOfNodes() );
+        System.err.println("Annotation separator: " + fsa.getAnnotationSeparator());
+        System.err.println("Filler character    : " + fsa.getFillerCharacter());
 
-        if (apidump==false)
-            dumpNode( fsa.getStartNode() , 0 );
+        if (apidump == false)
+            dumpNode(fsa.getStartNode() , 0);
         else
         {
-            for (Iterator i=fsa.getTraverseHelper().getAllSubsequences( fsa.getStartNode() ); i.hasNext();)
-            {
-                byte [] sequence = (byte []) i.next();
-                System.out.println( new String(sequence, encoding) );
+            for (Iterator i = fsa.getTraversalHelper().getAllSubsequences( fsa.getStartNode() ); i.hasNext();) {
+                final byte [] sequence = (byte []) i.next();
+                System.out.println(new String(sequence, encoding));
             }
         }
 
@@ -112,53 +113,42 @@ public final class FSADump
 
 
     /** Called recursively traverses the automaton. */
-    public void dumpNode( FSA.Node node, int depth )
+    public void dumpNode(FSA.Node node, int depth)
         throws UnsupportedEncodingException
     {
         FSA.Arc arc = node.getFirstArc();
 
-        do
-        {
-            try
-            {
-                word[depth] = arc.getLabel();
-            }
-            catch (ArrayIndexOutOfBoundsException e)
-            {
-                if (word.length + BUFFER_INCREMENT > MAX_BUFFER_SIZE)
-                {
-                    System.err.println("Error: Buffer limit of " + MAX_BUFFER_SIZE + " bytes exceeded. A loop in the automaton maybe?");
-                    System.exit(0);
+        do {
+            if (depth >= word.length) {
+                if (word.length + BUFFER_INCREMENT > MAX_BUFFER_SIZE) {
+                    throw new RuntimeException("Error: Buffer limit of " + MAX_BUFFER_SIZE + " bytes exceeded. A loop in the automaton maybe?");
                 }
 
-                System.err.println("Warning: A path in the automaton exceeded " + word.length + " bytes. Expanding buffer.");
-                byte [] newbuffer = new byte [ word.length + BUFFER_INCREMENT ];
-                System.arraycopy( word, 0, newbuffer, 0, word.length);
-                word = newbuffer;
+                word = FSAHelpers.resizeByteBuffer(word, word.length + BUFFER_INCREMENT);
 
-                // redo the operation.
+                // Redo the operation.
                 word[depth] = arc.getLabel();
             }
 
-            if (arc.pointsToFinalNode())
-            {
-                System.out.println( new String( word, 0, depth+1, encoding ) );
+            word[depth] = arc.getLabel();
+
+            if (arc.isFinal()) {
+                System.out.println(new String(word, 0, depth + 1, encoding));
             }
-            else
-            {
-                dumpNode( arc.getDestinationNode(), depth+1 );
+
+            if (!arc.isTerminal()) {
+                dumpNode(arc.getDestinationNode(), depth + 1);
             }
 
             arc = node.getNextArc(arc);
-        } while (arc!=null);
+        } while (arc != null);
     }
 
 
     /** Prints the usage info. */
     public void usage(String message)
     {
-        if (message != null)
-        {
+        if (message != null) {
             System.err.println("Error: " + message);
         }
 

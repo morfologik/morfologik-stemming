@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 
@@ -17,11 +18,11 @@ import java.util.ArrayList;
  * FSA (Finite State Automaton) traversal implementation, abstract base class
  * for all versions of FSA.
  *
- * This class implements Finite State Automaton traversal as described in Jan Daciuk's
+ * <p>This class implements Finite State Automaton traversal as described in Jan Daciuk's
  * <i>Incremental Construction of Finite-State Automata and Transducers, and Their
  * Use in the Natural Language Processing</i> (PhD thesis, Technical University of Gdansk).
  *
- * This is a Java port of the original <code>fsa</code> class, implemented by
+ * <p>This is a Java port of the original <code>fsa</code> class, implemented by
  * Jan Daciuk in the FSA package. Major redesign has been done, however, to fit this
  * implementation to the specifics of Java language and its coding style.
  *
@@ -34,30 +35,44 @@ public abstract class FSA
      * They indicate how transitions (arcs) and nodes are stored. More info
      * in the original FSA package.
      */
-    public final transient static int FSA_FLEXIBLE            = 1 << 0;
-    public final transient static int FSA_STOPBIT             = 1 << 1;
-    public final transient static int FSA_NEXTBIT             = 1 << 2;
-    public final transient static int FSA_TAILS               = 1 << 3;
-    public final transient static int FSA_WEIGHTED            = 1 << 4;
-    public final transient static int FSA_LARGE_DICTIONARIES  = 1 << 5;
+    public final static int FSA_FLEXIBLE            = 1 << 0;
+    public final static int FSA_STOPBIT             = 1 << 1;
+    public final static int FSA_NEXTBIT             = 1 << 2;
+    public final static int FSA_TAILS               = 1 << 3;
+    public final static int FSA_WEIGHTED            = 1 << 4;
+    public final static int FSA_LARGE_DICTIONARIES  = 1 << 5;
+    
+    /** 
+     * Version number for version 5 of the automaton. 
+     */
+    public final static byte VERSION_5 = 5;
 
     /** Dictionary version (derived from the combination of flags). */
-    protected  byte     version;
+    protected byte version;
 
     /** The meaning of this field is not clear (check the FSA docs). */
-    protected  byte     filler;
+    protected byte filler;
 
-    /** Annotation separator is a special character used for separating "tokens" in a FSA.
-     *  For instance an inflected form of a word may be separated from the base form.
+    /**
+     * Annotation separator is a special character used for separating "tokens" in a FSA.
+     * For instance an inflected form of a word may be separated from the base form.
+     * 
+     * @since 1.0.5
      */
-    protected  byte     annotationSeparator;
+    private byte annotationSeparator;
 
-    /** Size of transition's destination node "address". This field may also
-     *  have different interpretation, or may not be used at all. It depends on
-     *  the combination of flags used for building FSA.
+    /** 
+     * Size of transition's destination node "address". This field may also
+     * have different interpretation, or may not be used at all. It depends on
+     * the combination of flags used for building FSA.
      */
-    protected  byte     gotoLength;
+    protected byte gotoLength;
 
+    /**
+     * The encoding (codepage) in which the dictionary has been compiled; byte-to-character
+     * conversion scheme.
+     */
+    private String dictionaryEncoding;
 
     /**
      * Creates a new automaton reading the FSA automaton from an input stream.
@@ -72,29 +87,34 @@ public abstract class FSA
         if (fsaStream == null)
             throw new IllegalArgumentException("The input stream must not be null.");
 
+        if (dictionaryEncoding == null) {
+            throw new IllegalArgumentException("Dictionary encoding must not be null.");
+        }
+        this.dictionaryEncoding = dictionaryEncoding;
+
         /* This implementation requires the length of stream to be known in advance.
            Preload the dictionary entirely. */
-        byte [] fsa = readFullyAndCloseInput(fsaStream);
+        final byte [] fsa = readFullyAndCloseInput(fsaStream);
 
         DataInputStream input = null;
-        try
-        {
-            input = new DataInputStream( new ByteArrayInputStream( fsa ));
-            readFromStream( input, fsa.length );
-        }
-        finally
-        {
-            if (input!=null)
+        try {
+            input = new DataInputStream(new ByteArrayInputStream(fsa));
+            readFromStream(input, fsa.length);
+        } finally {
+            if (input != null) {
                 try { input.close(); } catch (IOException e) { /* Don't do anything. */ }
+            }
         }
     }
 
 
-    /** Returns a version number of this FSA.
-     *  The version number is a derivation of combination of flags and is exactly
-     *  the same as in Jan Daciuk's FSA package.
+    /** 
+     * Returns a version number of this FSA.
+     * 
+     * <p>The version number is a derivation of combination of flags and is exactly
+     * the same as in Jan Daciuk's FSA package.
      */
-    public int getVersion()
+    public final int getVersion()
     {
         return version;
     }
@@ -107,11 +127,52 @@ public abstract class FSA
      * flag, one must perform a bitwise AND:
      * <code>boolean isFlexible = ((dict.getFlags() & FSA.FSA_FLEXIBLE ) != 0)</code>
      */
-    public int getFlags()
+    public final int getFlags()
     {
         return FSAHelpers.getFlags( version );
     }
 
+    /**
+     * @return Return the annotation separator character, converted to a character
+     * according to the encoding scheme passed in in the constructor of this class.
+     * 
+     * @since 1.0.5
+     */
+    public final char getAnnotationSeparator() {
+        try {
+            final String annotationChar = new String(
+                    new byte [] {this.annotationSeparator},
+                    this.dictionaryEncoding);
+            if (annotationChar.length() != 1) {
+                throw new RuntimeException("Unexpected annotation character length (should be 1): "
+                        + annotationChar.length());
+            }
+            return annotationChar.charAt(0);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @return Return the filler character, converted to a character
+     * according to the encoding scheme passed in in the constructor of this class.
+     * 
+     * @since 1.0.5
+     */
+    public final char getFillerCharacter() {
+        try {
+            final String fillerChar = new String(
+                    new byte [] {this.filler},
+                    this.dictionaryEncoding);
+            if (fillerChar.length() != 1) {
+                throw new RuntimeException("Unexpected filler character length (should be 1): "
+                        + fillerChar.length());
+            }
+            return fillerChar.charAt(0);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /** 
      * Returns the number of arcs in this automaton. <b>Depending on the representation
@@ -135,16 +196,22 @@ public abstract class FSA
 
 
     /**
-     * Returns an object which can be used to traverse FSA.
-     * The default implementation simply uses the public methods
-     * of FSA, FSA.Node and FSA.Arc classes, but specific implementations
-     * of FSA may return an optimized version of this class.
+     * @deprecated Deprecated, use {@link #getTraversalHelper()}.
      */
-    public FSATraverseHelper getTraverseHelper()
+    public FSATraversalHelper getTraverseHelper()
     {
-        return new FSATraverseHelper();
+        return this.getTraversalHelper();
     }
 
+    /**
+     * @return Returns an object which can be used to traverse a finite
+     * state automaton.
+     * 
+     * @since 1.0.5
+     */
+    public FSATraversalHelper getTraversalHelper() {
+        return new FSATraversalHelper();
+    }
 
     /**
      * A node of the FSA.
@@ -162,10 +229,10 @@ public abstract class FSA
         public Arc getFirstArc();
 
         /**
-         * Returns a subsequent arc of this node. null is returned when
+         * Returns a subsequent arc of this node, <code>null</code> is returned when
          * no more arcs are available.
          */
-        public Arc getNextArc( Arc arc );
+        public Arc getNextArc(Arc arc);
 
         /**
          * Returns an arc with a given label, if it exists in this node.
@@ -173,7 +240,7 @@ public abstract class FSA
          * the list of arcs from the first, to the last - implementations
          * of Node may implement a more efficient algorithm, if possible.
          */
-        public Arc getArcLabelledWith( byte label );
+        public Arc getArcLabelledWith(byte label);
     }
 
 
@@ -186,16 +253,44 @@ public abstract class FSA
     public interface Arc
     {
         /** 
-         * Returns the destination node, pointed to by this arc.
-         * If this arc points to a final node, null is returned.
+         * Returns the destination node, pointed to by this arc. Terminal nodes
+         * throw a {@link RuntimeException} on this method. 
          */
         public Node getDestinationNode();
 
-        /** Returns the label of this arc. */
+        /** 
+         * Returns the label of this arc. 
+         */
         public byte getLabel();
 
-        /** Returns true if the destination node is a final node (final state of the FSA). */
+        /** 
+         * @return Returns <code>true</code> if the destination node corresponds to an input
+         * sequence of this automaton.
+         *
+         * @since 1.0.5
+         */
+        public boolean isFinal();
+        
+        /**
+         * @return Returns <code>true</code> if this arc is the last one of the owner node's
+         * arcs.
+         * 
+         * @since 1.0.5
+         */
+        public boolean isLast();
+
+        /** 
+         * @deprecated Use {@link #isFinal()} instead. 
+         */
         public boolean pointsToFinalNode();
+
+        /**
+         * @return Returns <code>true</code> if this arc does not have a terminating {@link FSA.Node},
+         * a call to {@link #getDestinationNode()} should thrown an exception on this arc.
+         * 
+         * @since 1.0.5
+         */
+        public boolean isTerminal();
     }
 
 
