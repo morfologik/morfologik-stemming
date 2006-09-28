@@ -155,14 +155,6 @@ public final class FSAVer5Impl
             return (0 == getDestinationNodeOffset());
         }
 
-        /** 
-         * @deprecated Use {@link #isFinal()} instead.
-         */
-        public final boolean pointsToFinalNode()
-        {
-            return isFinal();
-        }
-
         /** Returns the address of the node pointed to by this arc. */
         private int getDestinationNodeOffset()
         {

@@ -1,4 +1,6 @@
 
+          Removed deprecated methods and classes.
+
 1.0.5     Added filler and separator char dumps to FSADump.
           
           * A major bug in automaton traversal corrected. Upgrade when possible.

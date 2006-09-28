@@ -194,15 +194,6 @@ public abstract class FSA
      */
     public abstract FSA.Node getStartNode();
 
-
-    /**
-     * @deprecated Deprecated, use {@link #getTraversalHelper()}.
-     */
-    public FSATraversalHelper getTraverseHelper()
-    {
-        return this.getTraversalHelper();
-    }
-
     /**
      * @return Returns an object which can be used to traverse a finite
      * state automaton.
@@ -278,11 +269,6 @@ public abstract class FSA
          * @since 1.0.5
          */
         public boolean isLast();
-
-        /** 
-         * @deprecated Use {@link #isFinal()} instead. 
-         */
-        public boolean pointsToFinalNode();
 
         /**
          * @return Returns <code>true</code> if this arc does not have a terminating {@link FSA.Node},

@@ -3,7 +3,7 @@
     <defaultexcludes add="**/CVS"/>
 
     <property name="build.name" value="stempelator" />
-    <property name="build.ver" value="1.0.5"/>
+    <property name="build.ver" value="HEAD"/>
 
     <property name="tmp.dir"   value="tmp" />
 	<property name="build.dir" value="${tmp.dir}/build"/>

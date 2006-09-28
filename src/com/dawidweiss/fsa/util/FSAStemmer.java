@@ -106,7 +106,7 @@ public final class FSAStemmer
 
                 // The situation when the arc points to a final node should NEVER happen. After all,
                 // we want the word to have SOME base form.
-                if (arc != null && !arc.pointsToFinalNode())
+                if (arc != null && !arc.isFinal())
                 {
                     // there is such word in the dictionary. Return its base forms.
                     final ArrayList forms = new ArrayList(1);
