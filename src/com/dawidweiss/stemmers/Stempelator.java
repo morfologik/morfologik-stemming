@@ -1,8 +1,11 @@
 package com.dawidweiss.stemmers;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.egothor.stemmer.Trie;
 import org.getopt.stempel.Stemmer;
 
 
@@ -54,15 +57,8 @@ public final class Stempelator implements com.dawidweiss.stemmers.Stemmer {
         String stempelTable = System.getProperty(PROPERTY_NAME_STEMPEL_TABLE);
         if (stempelTable != null && !"".equals(stempelTable)) {
             InputStream is = Utils.getInputStream(stempelTable);
-            Stemmer stempel = null;
-            try {
-                stempel = new Stemmer( is );
-            } catch (NoSuchMethodError e) {
-                is.close();
-                System.err.println("new Stempel(InputStream is) constructor not found. Using default.");
-                stempel = new Stemmer();
-            }
-            this.stempel = stempel;
+            final Trie trie = loadTrie(is);
+            this.stempel = new Stemmer(trie);
         } else {
             this.stempel = new Stemmer();
         }
@@ -71,6 +67,21 @@ public final class Stempelator implements com.dawidweiss.stemmers.Stemmer {
         this.lametyzator = new Lametyzator();
     }
     
+    /**
+     * Loads {@link Trie} data from an input stream.
+     */
+    private static Trie loadTrie(InputStream tableData) throws IOException {
+        final DataInputStream in = new DataInputStream(new BufferedInputStream(tableData));
+        final String method = in.readUTF().toUpperCase();
+        final Trie stemmer;
+        if (method.indexOf('M') < 0) {
+            stemmer = new org.egothor.stemmer.Trie(in);
+        } else {
+            stemmer = new org.egothor.stemmer.MultiTrie2(in);
+        }
+        in.close();
+        return stemmer;
+    }
     
     /**
      * Find a stem for a given word.

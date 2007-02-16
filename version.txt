@@ -1,4 +1,6 @@
 
+1.0.6     Customized version of stempel replaced with a standard distribution.
+
           Removed deprecated methods and classes.
 
 1.0.5     Added filler and separator char dumps to FSADump.
