@@ -39,7 +39,12 @@ public final class FSAStemmer
     /** An empty array used for 'no-matches' return. */
     private final static String [] NO_STEM = new String[0];
 
-
+    /** True if the dictionary uses prefixes **/
+    private boolean fsaPrefixes = false;
+    
+    /** True if the dictionary uses infixes **/
+    private boolean fsaInfixes = false;
+    
     /**
      *  Creates a new object of this class using the given FSA for word lookups
      *  and encoding for converting characters to bytes.
@@ -65,6 +70,26 @@ public final class FSAStemmer
         this.separator = new String( new char [] { separator } ).getBytes(encoding)[0];
     }
 
+    /**
+     *  Creates a new object of this class using the given FSA for word lookups
+     *  and encoding for converting characters to bytes, and additionally defines
+     *  whether the dictionary uses prefixes or infixes compression.
+     *
+     *  @throws UnsupportedEncodingException if the given encoding
+     *          has not been found in the system.
+     *  @throws IllegalArgumentException if FSA's root node cannot be acquired
+     *          (dictionary is empty).
+     */
+    
+    public FSAStemmer( FSA dictionary, String encoding, char separator ,
+    		boolean usesPrefixes, boolean usesInfixes)
+    throws UnsupportedEncodingException, IllegalArgumentException
+    {
+    	this(dictionary, encoding, separator);
+    	fsaPrefixes = usesPrefixes;
+    	fsaInfixes = usesInfixes;    	
+    }
+    
     /**
      * Returns an array of pairs: (base form, tag), or an empty array
      * if the word is not found in the dictionary.
@@ -153,11 +178,11 @@ public final class FSAStemmer
 
     /**
      * Decode the base form of an inflected word.
-     * @todo Decoding prefixes/ infixes?
      */
     private String decompress( String encodedBase, String inflected )
     {
-        // decode suffix only as for now. infixes/ prefixes will have to wait.
+        if (!fsaPrefixes && !fsaInfixes) {
+    	// decode suffix only as for now. infixes/ prefixes will have to wait.
         if (encodedBase.length() > 0 && Character.isUpperCase( encodedBase.charAt(0) ))
         {
             int stripAtEnd = (int) (encodedBase.charAt(0) - 'A');
@@ -165,6 +190,37 @@ public final class FSAStemmer
         }
         else
         {
+            // shouldn't happen, but if so, simply return the encodedBase
+            return encodedBase;
+        }
+        } else if (fsaPrefixes && !fsaInfixes) {
+        	if (encodedBase.length() > 1 && Character.isUpperCase( encodedBase.charAt(0) ))
+            {
+                int stripAtBeginning = (int) (encodedBase.charAt(0) - 'A');                
+        		int stripAtEnd = (int) (encodedBase.charAt(1) - 'A');
+                return inflected.substring(stripAtBeginning, inflected.length() - stripAtEnd ) + encodedBase.substring(2);
+            }
+            else
+            {
+                // shouldn't happen, but if so, simply return the encodedBase
+                return encodedBase;
+            }
+        } else if (fsaInfixes) { //note: prefixes are silently assumed here
+        	if (encodedBase.length() > 2 && Character.isUpperCase( encodedBase.charAt(0) ))
+            {
+                int stripPosition = (int) (encodedBase.charAt(0) - 'A');
+        		int stripAtBeginning = (int) (encodedBase.charAt(1) - 'A');                
+        		int stripAtEnd = (int) (encodedBase.charAt(2) - 'A');
+                return inflected.substring(stripPosition, stripAtBeginning) + inflected.substring(stripAtBeginning, inflected.length() - stripAtEnd) +  encodedBase.substring(3);          
+            }
+            else
+            {
+                // shouldn't happen, but if so, simply return the encodedBase
+                return encodedBase;
+            }
+        
+        } else
+         {
             // shouldn't happen, but if so, simply return the encodedBase
             return encodedBase;
         }

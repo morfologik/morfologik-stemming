@@ -39,7 +39,7 @@ public final class Lametyzator implements Stemmer {
 
     /** An instance of Lametyzator */
     private final FSAStemmer lametyzator;
-    
+        
     
     /**
      * Instantiate Lametyzator with the default dictionary. 
@@ -85,6 +85,34 @@ public final class Lametyzator implements Stemmer {
     {
         this.lametyzator = new FSAStemmer(
                 FSA.getInstance(is, dictionaryEncoding), dictionaryEncoding, fieldDelimiter);
+    }
+    
+    /**
+     * Instantiate Lametyzator with a dictionary read from
+     * an opened {@link InputStream}, specifying internal
+     * dictionary encoding and field delimiter, and whether
+     * it contains prefix and/or infix compression.
+     *
+     * <p><b>Instatiation can be quite time-consuming. Cache
+     * instances of the stemmer and reuse them.</b></p>
+     * 
+     * <p>Stemmer objects are thread-safe.</p>
+     *  
+     * @param is Input stream with the FSA dictionary.
+     * @param dictionaryEncoding Byte encoding used when compiling the dictionary.
+     * @param fieldDelimiter FSA field delimiter used when compiling the dictionary.
+     * @param usesPrefixes Marks whether the dictionary contains prefix compression.
+     * @param usesInfixes Marks whether the dictionary contains infix compression.
+     * 
+     * @since 1.0.2
+     */
+    public Lametyzator(InputStream is, String dictionaryEncoding, char fieldDelimiter,
+    		boolean usesPrefixes, boolean usesInfixes)
+        throws IOException
+    {
+        this.lametyzator = new FSAStemmer(
+                FSA.getInstance(is, dictionaryEncoding), dictionaryEncoding, fieldDelimiter,
+                usesPrefixes, usesInfixes);
     }
     
     
