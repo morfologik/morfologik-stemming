@@ -182,7 +182,6 @@ public final class FSAStemmer
     private String decompress( String encodedBase, String inflected )
     {
         if (!fsaPrefixes && !fsaInfixes) {
-    	// decode suffix only as for now. infixes/ prefixes will have to wait.
         if (encodedBase.length() > 0 && Character.isUpperCase( encodedBase.charAt(0) ))
         {
             int stripAtEnd = (int) (encodedBase.charAt(0) - 'A');
@@ -207,11 +206,15 @@ public final class FSAStemmer
             }
         } else if (fsaInfixes) { //note: prefixes are silently assumed here
         	if (encodedBase.length() > 2 && Character.isUpperCase( encodedBase.charAt(0) ))
-            {
-                int stripPosition = (int) (encodedBase.charAt(0) - 'A');
+            {        		
+        		int stripPosition = (int) (encodedBase.charAt(0) - 'A');
         		int stripAtBeginning = (int) (encodedBase.charAt(1) - 'A');                
-        		int stripAtEnd = (int) (encodedBase.charAt(2) - 'A');
-                return inflected.substring(stripPosition, stripAtBeginning) + inflected.substring(stripAtBeginning, inflected.length() - stripAtEnd) +  encodedBase.substring(3);          
+        		int stripAtEnd = (int) (encodedBase.charAt(2) - 'A');      		
+        		if (stripPosition < stripAtBeginning) {
+        			return inflected.substring(stripPosition, stripAtBeginning) + inflected.substring(stripAtBeginning, inflected.length() - stripAtEnd) +  encodedBase.substring(3);
+        		} else {
+        			return inflected.substring(stripAtBeginning, inflected.length() - stripAtEnd) +  encodedBase.substring(3);
+        		}
             }
             else
             {
