@@ -73,9 +73,9 @@ public class StempelatorTest extends TestCase {
                 s.stem("abradowałoby"));
 
         // We can't test the result because it depends
-        // on the size of the Stempel's dictionary. SO we just
+        // on the size of the Stempel's dictionary. So we just
         // test if something _not_ present in Lametyzator correctly
         // falls back to Stempel.
-        assertTrue( s.stem("martygalski").length > 0);
+        assertTrue(s.stem("martygalski").length > 0);
     }
 }
