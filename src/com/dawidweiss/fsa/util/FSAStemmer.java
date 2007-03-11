@@ -210,11 +210,7 @@ public final class FSAStemmer
         		int stripPosition = (int) (encodedBase.charAt(0) - 'A');
         		int stripAtBeginning = (int) (encodedBase.charAt(1) - 'A');                
         		int stripAtEnd = (int) (encodedBase.charAt(2) - 'A');      		
-        		if (stripPosition < stripAtBeginning) {
-        			return inflected.substring(stripPosition, stripAtBeginning) + inflected.substring(stripAtBeginning, inflected.length() - stripAtEnd) +  encodedBase.substring(3);
-        		} else {
-        			return inflected.substring(stripAtBeginning, inflected.length() - stripAtEnd) +  encodedBase.substring(3);
-        		}
+        		return inflected.substring(0, stripPosition) + inflected.substring(stripPosition + stripAtBeginning, inflected.length() - stripAtEnd) +  encodedBase.substring(3);        		
             }
             else
             {

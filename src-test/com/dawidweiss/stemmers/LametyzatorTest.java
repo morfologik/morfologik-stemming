@@ -1,5 +1,7 @@
 package com.dawidweiss.stemmers;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 
@@ -91,4 +93,47 @@ public class LametyzatorTest extends TestCase {
         // This word is not in lametyzator
         assertTrue(s.stem("martygalski") == null);
     }
+    
+    public void testPrefix() throws IOException {
+            
+     File f = new File("test_prefix.dict");
+     FileInputStream fis = new FileInputStream(f);
+ 	   Lametyzator s = new Lametyzator(fis,
+               "iso8859-2", '+', true, false);
+        
+        ArrayAssert.assertEquals(
+                new String [] {"Rzeczpospolita", "subst:irreg"},
+                s.stemAndForm("Rzeczypospolitej"));
+
+        ArrayAssert.assertEquals(
+                new String [] {"Rzeczpospolita", "subst:irreg"},
+                s.stemAndForm("Rzecząpospolitą"));
+
+        // This word is not in lametyzator
+        assertTrue(s.stem("martygalski") == null);
+    }
+    
+    public void testInfix() throws IOException {
+        
+        File f = new File("test_infix.dict");
+        FileInputStream fis = new FileInputStream(f);
+    	   Lametyzator s = new Lametyzator(fis,
+                  "iso8859-2", '+', true, true);
+           
+           ArrayAssert.assertEquals(
+                   new String [] {"Rzeczpospolita", "subst:irreg"},
+                   s.stemAndForm("Rzeczypospolitej"));
+           
+           ArrayAssert.assertEquals(
+                   new String [] {"Rzeczycki", "adj:pl:nom:m"},
+                   s.stemAndForm("Rzeczyccy"));
+
+           ArrayAssert.assertEquals(
+                   new String [] {"Rzeczpospolita", "subst:irreg"},
+                   s.stemAndForm("Rzecząpospolitą"));
+
+           // This word is not in lametyzator
+           assertTrue(s.stem("martygalski") == null);
+       }
+
 }
