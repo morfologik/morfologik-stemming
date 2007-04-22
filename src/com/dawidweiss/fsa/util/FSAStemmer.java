@@ -182,7 +182,7 @@ public final class FSAStemmer
     private String decompress( String encodedBase, String inflected )
     {
         if (!fsaPrefixes && !fsaInfixes) {
-        if (encodedBase.length() > 0 && Character.isUpperCase( encodedBase.charAt(0) ))
+        if (encodedBase.length() > 0)
         {
             int stripAtEnd = (int) (encodedBase.charAt(0) - 'A');
             return inflected.substring(0, inflected.length() - stripAtEnd ) + encodedBase.substring(1);
@@ -193,7 +193,7 @@ public final class FSAStemmer
             return encodedBase;
         }
         } else if (fsaPrefixes && !fsaInfixes) {
-        	if (encodedBase.length() > 1 && Character.isUpperCase( encodedBase.charAt(0) ))
+        	if (encodedBase.length() > 1)
             {
                 int stripAtBeginning = (int) (encodedBase.charAt(0) - 'A');                
         		int stripAtEnd = (int) (encodedBase.charAt(1) - 'A');
@@ -205,7 +205,7 @@ public final class FSAStemmer
                 return encodedBase;
             }
         } else if (fsaInfixes) { //note: prefixes are silently assumed here
-        	if (encodedBase.length() > 2 && Character.isUpperCase( encodedBase.charAt(0) ))
+        	if (encodedBase.length() > 2)
             {        		
         		int stripPosition = (int) (encodedBase.charAt(0) - 'A');
         		int stripAtBeginning = (int) (encodedBase.charAt(1) - 'A');                
