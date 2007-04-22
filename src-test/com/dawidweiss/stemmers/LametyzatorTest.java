@@ -99,4 +99,16 @@ public class LametyzatorTest extends TestCase {
         // This word is not in lametyzator
         assertTrue(s.stem("martygalski") == null);
     }
+    
+    public void testSynthesis() throws IOException {
+      URL url = this.getClass().getResource("polish_synth.dict");
+      Lametyzator s = new Lametyzator(url.openStream(), "iso8859-2", '+');
+
+      ArrayAssert.assertEquals(new String[] { "miała"}, s.stem("mieć|verb:praet:sg:ter:f:?perf"));
+      ArrayAssert.assertEquals(new String[] { "a" }, s.stem("a|conj"));
+
+      // This word is not in lametyzator
+      assertTrue(s.stem("martygalski") == null);
+  }
+
 }
