@@ -207,7 +207,7 @@ public final class FSAStemmer
                 return encodedBase;
             }
         } else if (fsaInfixes) { //note: prefixes are silently assumed here
-        	if (encodedBase.length() > 2 && ((int) encodedBase.charAt(0) - 'A' >= 0))
+        	if (encodedBaseLength > 2 && ((int) encodedBase.charAt(0) - 'A' >= 0))
             {        		
         		int stripPosition = (int) (encodedBase.charAt(0) - 'A');
         		int stripAtBeginning = (int) (encodedBase.charAt(1) - 'A');                
