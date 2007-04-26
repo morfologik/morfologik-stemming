@@ -188,7 +188,7 @@ public final class FSAStemmer
           {
             int stripAtEnd = (int) (encodedBase.charAt(0) - 'A');
             int infLen = inflected.length();
-            if (stripAtEnd < infLen) {
+            if (stripAtEnd <= infLen) {
               return inflected.substring(0, infLen - stripAtEnd ) + encodedBase.substring(1);
             } else {
               // shouldn't happen, but if so, simply return the encodedBase
@@ -206,7 +206,7 @@ public final class FSAStemmer
             int stripAtBeginning = (int) (encodedBase.charAt(0) - 'A');                
             int stripAtEnd = (int) (encodedBase.charAt(1) - 'A');
             int infLen = inflected.length();
-            if (stripAtEnd < infLen && stripAtBeginning < infLen) {
+            if (stripAtEnd <= infLen && stripAtBeginning <= infLen) {
               return inflected.substring(stripAtBeginning, infLen - stripAtEnd ) + encodedBase.substring(2);
             } else {
               //word simply not found
@@ -225,8 +225,8 @@ public final class FSAStemmer
             int stripAtBeginning = (int) (encodedBase.charAt(1) - 'A');                
             int stripAtEnd = (int) (encodedBase.charAt(2) - 'A');
             int infLen = inflected.length();
-            if (stripPosition < infLen && stripPosition + stripAtBeginning < infLen &&
-                stripAtEnd < infLen) {            
+            if (stripPosition <= infLen && stripPosition + stripAtBeginning <= infLen &&
+                stripAtEnd <= infLen) {            
               return inflected.substring(0, stripPosition) + inflected.substring(stripPosition + stripAtBeginning, infLen - stripAtEnd) +  encodedBase.substring(3);
             } else {
               return "";
