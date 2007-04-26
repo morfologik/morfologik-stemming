@@ -184,46 +184,64 @@ public final class FSAStemmer
       int encodedBaseLength = encodedBase.length(); 
       if (encodedBaseLength > 0) { 
         if (!fsaPrefixes && !fsaInfixes) {
-        if ((encodedBase.charAt(0) - 'A' >= 0))
-        {
+          if ((encodedBase.charAt(0) - 'A' >= 0))
+          {
             int stripAtEnd = (int) (encodedBase.charAt(0) - 'A');
-            return inflected.substring(0, inflected.length() - stripAtEnd ) + encodedBase.substring(1);
-        }
-        else
-        {
+            int infLen = inflected.length();
+            if (stripAtEnd < infLen) {
+              return inflected.substring(0, infLen - stripAtEnd ) + encodedBase.substring(1);
+            } else {
+              // shouldn't happen, but if so, simply return the encodedBase
+              return "";
+            }
+          }
+          else
+          {
             // shouldn't happen, but if so, simply return the encodedBase
             return encodedBase;
-        }
+          }
         } else if (fsaPrefixes && !fsaInfixes) {
-        	if (encodedBaseLength > 1 && ((int) encodedBase.charAt(0) - 'A' >= 0))
-            {
-                int stripAtBeginning = (int) (encodedBase.charAt(0) - 'A');                
-                int stripAtEnd = (int) (encodedBase.charAt(1) - 'A');
-                return inflected.substring(stripAtBeginning, inflected.length() - stripAtEnd ) + encodedBase.substring(2);
+          if (encodedBaseLength > 1 && ((int) encodedBase.charAt(0) - 'A' >= 0))
+          {
+            int stripAtBeginning = (int) (encodedBase.charAt(0) - 'A');                
+            int stripAtEnd = (int) (encodedBase.charAt(1) - 'A');
+            int infLen = inflected.length();
+            if (stripAtEnd < infLen && stripAtBeginning < infLen) {
+              return inflected.substring(stripAtBeginning, infLen - stripAtEnd ) + encodedBase.substring(2);
+            } else {
+              //word simply not found
+              return "";
             }
-            else
-            {
-                // shouldn't happen, but if so, simply return the encodedBase
-                return encodedBase;
-            }
-        } else if (fsaInfixes) { //note: prefixes are silently assumed here
-        	if (encodedBaseLength > 2 && ((int) encodedBase.charAt(0) - 'A' >= 0))
-            {        		
-        		int stripPosition = (int) (encodedBase.charAt(0) - 'A');
-        		int stripAtBeginning = (int) (encodedBase.charAt(1) - 'A');                
-        		int stripAtEnd = (int) (encodedBase.charAt(2) - 'A');      		
-        		return inflected.substring(0, stripPosition) + inflected.substring(stripPosition + stripAtBeginning, inflected.length() - stripAtEnd) +  encodedBase.substring(3);        		
-            }
-            else
-            {
-                // shouldn't happen, but if so, simply return the encodedBase
-                return encodedBase;
-            }
-        
-        } else
-         {
+          }
+          else
+          {
             // shouldn't happen, but if so, simply return the encodedBase
             return encodedBase;
+          }
+        } else if (fsaInfixes) { //note: prefixes are silently assumed here
+          if (encodedBaseLength > 2 && ((int) encodedBase.charAt(0) - 'A' >= 0))
+          {        		
+            int stripPosition = (int) (encodedBase.charAt(0) - 'A');
+            int stripAtBeginning = (int) (encodedBase.charAt(1) - 'A');                
+            int stripAtEnd = (int) (encodedBase.charAt(2) - 'A');
+            int infLen = inflected.length();
+            if (stripPosition < infLen && stripPosition + stripAtBeginning < infLen &&
+                stripAtEnd < infLen) {            
+              return inflected.substring(0, stripPosition) + inflected.substring(stripPosition + stripAtBeginning, infLen - stripAtEnd) +  encodedBase.substring(3);
+            } else {
+              return "";
+            }
+          }
+          else
+          {
+            // shouldn't happen, but if so, simply return the encodedBase
+            return encodedBase;
+          }
+
+        } else
+        {
+          // shouldn't happen, but if so, simply return the encodedBase
+          return encodedBase;
         }
       } else {
         // shouldn't happen, but if so, simply return the encodedBase

@@ -106,6 +106,7 @@ public class LametyzatorTest extends TestCase {
 
       ArrayAssert.assertEquals(new String[] { "miała"}, s.stem("mieć|verb:praet:sg:ter:f:?perf"));
       ArrayAssert.assertEquals(new String[] { "a" }, s.stem("a|conj"));
+      ArrayAssert.assertEquals(new String[] { "" }, s.stem("dziecko|subst:sg:dat:n"));
 
       // This word is not in lametyzator
       assertTrue(s.stem("martygalski") == null);
