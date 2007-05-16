@@ -72,7 +72,7 @@ public final class Tools {
             }
         } else {
             final String toolName = args[0];
-            if (tools.containsKey(toolName)) {
+            if (!tools.containsKey(toolName)) {
                 System.out.println("Tool unknown: " + toolName);
                 return;
             }
@@ -80,9 +80,9 @@ public final class Tools {
             final String [] subArgs = new String [args.length - 1];
             System.arraycopy(args, 1, subArgs, 0, subArgs.length);
 
-            final Class clazz = (Class) tools.get(toolName);
-            final Method m = clazz.getMethod("main", new Class [] {String[].class});
-            m.invoke(null, subArgs);
+            final ToolInfo toolInfo = (ToolInfo) tools.get(toolName);
+            final Method m = toolInfo.clazz.getMethod("main", new Class [] {String[].class});
+            m.invoke(null, new Object [] {subArgs});
         }
     }
 }

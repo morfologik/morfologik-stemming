@@ -4,6 +4,14 @@
           
           The API has changed (repackaging). Some deprecated methods have been removed.
           This is a major redesign/ upgrade, you will have to adjust your source code.
+          
+          Cleaned up APIs and interfaces.
+
+          Added infrastructure for command-line tool launching.
+
+          Cleaned up tests.
+
+          Changed project name to morfologik-stemmers and ownership to (c) Morfologik.
 
 1.0.7     Removed one bug in fsa 'compression' decoding.
 

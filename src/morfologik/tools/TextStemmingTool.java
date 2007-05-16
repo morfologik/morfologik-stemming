@@ -12,6 +12,7 @@ import java.io.Reader;
 import java.io.StreamTokenizer;
 import java.io.Writer;
 import java.text.MessageFormat;
+import java.util.Locale;
 
 import morfologik.stemmers.IStemmer;
 
@@ -69,10 +70,18 @@ class TextStemmingTool extends BaseCommandLineTool {
         final long start = System.currentTimeMillis();
         try {
             final long count = process(input, output);
+
+            output.flush();
+
             final long millis = System.currentTimeMillis() - start;
+            final double time = millis / 1000.0;
+            final double wordsPerSec = time > 0 ? (count / time) : Double.POSITIVE_INFINITY;
             logger.info(
-                    MessageFormat.format("Processed {0} words in {0,number,#.###} seconds.", 
-                            new Object[] {new Long(count), new Float(millis / 1000.0) }));
+                    new MessageFormat("Processed {0} words in {1,number,#.###} seconds ({2,number,#} words per second).", Locale.ENGLISH)
+                        .format(new Object[] {
+                                new Long(count), 
+                                new Double(millis / 1000.0),
+                                new Double(wordsPerSec) }));
         } finally {
             input.close();
             output.close();
@@ -113,7 +122,6 @@ class TextStemmingTool extends BaseCommandLineTool {
                         output.write("\n");
                     }
                 }
-                break;
             }
         }
         

@@ -1,4 +1,4 @@
-<project name="Stempelator" default="dist">
+<project name="Stempelator" default="build">
 
     <defaultexcludes add="**/CVS"/>
 
@@ -10,9 +10,11 @@
 	<property name="dist.dir" value="dist"/>
 
 
-	<property name="jarfile-nodict" value="${dist.dir}/${build.name}-nodict-${build.ver}.jar"/>
-	<property name="jarfile" value="${dist.dir}/${build.name}-${build.ver}.jar"/>
-	<property name="srczip"  value="${dist.dir}/${build.name}-${build.ver}.zip"/>
+	<property name="jarfile-nodict" value="${tmp.dir}/bin/${build.name}-nodict-${build.ver}.jar"/>
+	<property name="jarfile" value="${tmp.dir}/bin/${build.name}-${build.ver}.jar"/>
+
+	<property name="srczip"  value="${dist.dir}/${build.name}-${build.ver}-src.zip"/>
+	<property name="binzip"  value="${dist.dir}/${build.name}-${build.ver}.zip"/>
 
     
     <path id="compile.classpath">
@@ -21,8 +23,12 @@
         </fileset>
     </path>
 
-    
-    
+    <fileset dir="lib" id="runtime.dependencies">
+        <include name="**/*.jar"/>
+        <exclude name="junit*.jar"/>
+    </fileset>
+
+
 	<target name="init">
 		<tstamp/>
 		<mkdir dir="${build.dir}"/>
@@ -100,16 +106,15 @@
 		</javadoc>
 	</target>
 
-
+	
 
 	<target name="jar" depends="clean, compile">
+		<mkdir dir="${tmp.dir}/bin" />
+
 		<pathconvert property="manifest.classpath" pathsep=" ">
 			<map from="${basedir}/lib/" to="" />
 			<path>
-		        <fileset dir="lib">
-		            <include name="**/*.jar"/>
-		            <exclude name="junit*.jar"/>
-		        </fileset>
+		        <fileset refid="runtime.dependencies" />
 			</path>
 		</pathconvert>
 		<jar jarfile="${jarfile}">
@@ -125,20 +130,44 @@
 				<exclude name="res/*.dict" />
 			</fileset>
             <zipfileset file="LICENSE.nodict.txt" fullpath="META-INF/LICENSE.txt" />
+			<manifest>
+				<attribute name="Main-Class" value="morfologik.Tools" />
+			    <attribute name="Class-Path" value="${manifest.classpath}" />
+			</manifest>
 		</jar>
 	</target>
 
+	
 
+	<target name="build" depends="jar">
+		<copy todir="${tmp.dir}/bin">
+			<fileset refid="runtime.dependencies" />
+			<fileset dir=".">
+				<include name="LICENSE*.txt" />
+				<include name="README.txt" />
+				<include name="version.txt" />
+			</fileset>
+		</copy>
+	</target>
 
-	<target name="dist" depends="clean,test,jar,javadoc">
+	
+
+	<target name="dist" depends="clean,test,build,javadoc">
         <!-- Package source distribution -->
 		<fileset dir="." id="srcdistfiles">
             <exclude name="tmp/**"/>
+			<exclude name="dist/**"/>
+            <exclude name=".settings/**"/>
             <exclude name="${srczip}" />
 		</fileset>
+
 		<zip destfile="${srczip}">
 			<fileset refid="srcdistfiles" />
 			<zipfileset prefix="doc/api" dir="${tmp.dir}/javadoc" />
+		</zip>
+		<zip destfile="${binzip}">
+			<fileset dir="${tmp.dir}/bin" />
+			<zipfileset prefix="api" dir="${tmp.dir}/javadoc" />
 		</zip>
 	</target>
 

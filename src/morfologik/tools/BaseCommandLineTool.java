@@ -23,7 +23,7 @@ public abstract class BaseCommandLineTool {
     /**
      * Logger for the application.
      */
-    protected final Logger logger = Logger.getAnonymousLogger();
+    protected final Logger logger = Logger.getLogger(this.getClass().getName());
 
     /** Command line options. */
     protected final Options cliOptions = new Options();
