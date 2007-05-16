@@ -88,8 +88,8 @@ public class LametyzatorTest extends TestCase {
     public void testStemmingAndForm() throws IOException {
         Lametyzator s = new Lametyzator();
 
-        ArrayAssert.assertEquals(new String[] { "żywotopisarstwo", "-" }, s.stemAndForm("żywotopisarstwie"));
-        ArrayAssert.assertEquals(new String[] { "abradować", "-" }, s.stemAndForm("abradowałoby"));
+        ArrayAssert.assertEquals(new String[] { "żywotopisarstwo", "subst:sg:loc:n" }, s.stemAndForm("żywotopisarstwie"));
+        ArrayAssert.assertEquals(new String[] { "bazia", "subst:pl:inst:f" }, s.stemAndForm("baziami"));
 
         // This word is not in the dictionary.
         assertNoStemFor(s, "martygalski");
