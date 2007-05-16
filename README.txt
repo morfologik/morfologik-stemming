@@ -17,28 +17,29 @@ fails to provide a stem for a word, Stempel is used. Stempel is a heuristic
 stemmer for Polish and is available free of charge from 
 http://www.getopt.org/stempel.
 
+
 NOTE
 ====
 
 Lametyzator by itself _does not_ require any additional libraries.
-Stempelator requires Stempel to be present in Classpath (look in the lib/
-folder).
+Stempelator requires Stempel to be present in Java classpath 
+(look in the lib/ folder).
 
-A demo of both stemmers can be run from command line using:
+Both programs come with command-line demos and can be launched 
+from command line:
 
 java -cp [classpath to jars] com.dawidweiss.stemmers.Lametyzator
 java -cp [classpath to jars] com.dawidweiss.stemmers.Stempelator
 
-AUTHOR
-======
 
-FSA traversal in Java was written by Dawid Weiss, Institute of Computing Science, 
-Poznan University of Technology, Poland
+AUTHORS
+=======
+
+Marcin Miłkowski
+Dawid Weiss (http://www.dawidweiss.com)
 
 
 QUESTIONS, COMMENTS
 ===================
 
-1. www.morfologik.blogspot.com
-
-2. http://www.cs.put.poznan.pl/dweiss, my e-mail address is there.
+www.morfologik.blogspot.com

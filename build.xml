@@ -2,7 +2,7 @@
 
     <defaultexcludes add="**/CVS"/>
 
-    <property name="build.name" value="stempelator" />
+    <property name="build.name" value="morfologik-stemming" />
     <property name="build.ver" value="HEAD"/>
 
     <property name="tmp.dir"   value="tmp" />
@@ -41,7 +41,8 @@
     
 	<target name="compile" depends="init">
 		<javac classpath="${classpath}"
-			destdir="${build.dir}" encoding="UTF-8">
+			destdir="${build.dir}" encoding="UTF-8"
+			source="1.4" target="1.4">
 			<classpath refid="compile.classpath" />
 			<include name="**/*.java" />
             <src location="src"/>
@@ -94,17 +95,30 @@
     
     
 	<target name="javadoc" depends="init">
-		<javadoc sourcepath="src" packagenames="com.dawidweiss.*" destdir="${tmp.dir}/javadoc">
+		<javadoc sourcepath="src" packagenames="morfologik.*" destdir="${tmp.dir}/javadoc">
 			<classpath refid="compile.classpath" />
 		</javadoc>
 	</target>
-	
-    
-    
+
+
+
 	<target name="jar" depends="clean, compile">
+		<pathconvert property="manifest.classpath" pathsep=" ">
+			<map from="${basedir}/lib/" to="" />
+			<path>
+		        <fileset dir="lib">
+		            <include name="**/*.jar"/>
+		            <exclude name="junit*.jar"/>
+		        </fileset>
+			</path>
+		</pathconvert>
 		<jar jarfile="${jarfile}">
 			<fileset dir="${build.dir}" />
             <zipfileset file="LICENSE.txt" fullpath="META-INF/LICENSE.txt" />
+			<manifest>
+				<attribute name="Main-Class" value="morfologik.Tools" />
+			    <attribute name="Class-Path" value="${manifest.classpath}" />
+			</manifest>
 		</jar>
 		<jar jarfile="${jarfile-nodict}">
 			<fileset dir="${build.dir}">
@@ -116,7 +130,7 @@
 
 
 
-	<target name="dist" depends="clean,jar,javadoc">
+	<target name="dist" depends="clean,test,jar,javadoc">
         <!-- Package source distribution -->
 		<fileset dir="." id="srcdistfiles">
             <exclude name="tmp/**"/>
@@ -132,8 +146,8 @@
 
     <target name="compile.stemmer">
         <description>
-Compiles a stemmer table for Stempel. Uses slightly modified Egothor
-code. 
+Compiles a stemmer table for Stempel. Uses slightly modified 
+Egothor code (www.egothor.org).
         </description>
         <fail unless="stemmer.src">
 Missing property 'stemmer.src'. Point at stemmer table file (input).
