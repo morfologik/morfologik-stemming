@@ -3,7 +3,7 @@
     <defaultexcludes add="**/CVS"/>
 
     <property name="build.name" value="morfologik-stemming" />
-    <property name="build.ver" value="HEAD"/>
+    <property name="build.ver" value="1.1"/>
 
     <property name="tmp.dir"   value="tmp" />
 	<property name="build.dir" value="${tmp.dir}/build"/>
@@ -128,11 +128,15 @@
 		<jar jarfile="${jarfile-nodict}">
 			<fileset dir="${build.dir}">
 				<exclude name="res/*.dict" />
+				<exclude name="res/*.info" />
+				<exclude name="morfologik/fsa/core/*.dict" />
+				<exclude name="morfologik/fsa/core/*.info" />
+				<exclude name="morfologik/stemmers/*.dict" />
+				<exclude name="morfologik/stemmers/*.info" />
 			</fileset>
             <zipfileset file="LICENSE.nodict.txt" fullpath="META-INF/LICENSE.txt" />
 			<manifest>
 				<attribute name="Main-Class" value="morfologik.Tools" />
-			    <attribute name="Class-Path" value="${manifest.classpath}" />
 			</manifest>
 		</jar>
 	</target>
