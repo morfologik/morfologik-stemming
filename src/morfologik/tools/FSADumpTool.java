@@ -41,11 +41,6 @@ public final class FSADumpTool extends BaseCommandLineTool {
     private String encoding;
 
     /**
-     * Charset decoder for {@link #encoding}.
-     */
-    private CharsetDecoder decoder;
-
-    /**
      * The array where all labels on a path from start to final node are collected.
      * The buffer automatically expands up to {@link MAX_BUFFER_SIZE} when an exception is thrown.
      */
@@ -82,9 +77,10 @@ public final class FSADumpTool extends BaseCommandLineTool {
             writer.println("Dictionary's charset is not supported on this JVM: " + encoding);
             return;
         }
-        this.decoder = Charset.forName(encoding).newDecoder();
-        this.decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-        this.decoder.onMalformedInput(CodingErrorAction.REPORT);
+
+        final CharsetDecoder decoder = Charset.forName(encoding).newDecoder();
+        decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+        decoder.onMalformedInput(CodingErrorAction.REPORT);
 
         writer.println("FSA properties");
         writer.println("--------------------");
@@ -109,7 +105,7 @@ public final class FSADumpTool extends BaseCommandLineTool {
             final Iterator i = fsa.getTraversalHelper().getAllSubsequences(fsa.getStartNode()); 
             while (i.hasNext()) {
                 final byte[] sequence = (byte[]) i.next();
-                writer.println(decoder.decode(ByteBuffer.wrap(sequence)));
+                writer.println(new String(sequence, encoding));
             }
         } else {
             dumpNode(fsa.getStartNode(), 0);
@@ -126,7 +122,7 @@ public final class FSADumpTool extends BaseCommandLineTool {
      * Called recursively traverses the automaton.
      */
     public void dumpNode(FSA.Node node, int depth)
-        throws CharacterCodingException
+        throws UnsupportedEncodingException
     {
         FSA.Arc arc = node.getFirstArc();
         do {
@@ -145,7 +141,7 @@ public final class FSADumpTool extends BaseCommandLineTool {
             word[depth] = arc.getLabel();
 
             if (arc.isFinal()) {
-                writer.println(decoder.decode(ByteBuffer.wrap(word, 0, depth + 1)));
+                writer.println(new String(word, 0, depth + 1, encoding));
             }
 
             if (!arc.isTerminal()) {
