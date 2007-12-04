@@ -1,20 +1,11 @@
 package morfologik.tools;
 
-import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import morfologik.util.StringUtils;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.MissingArgumentException;
-import org.apache.commons.cli.MissingOptionException;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.Parser;
-import org.apache.commons.cli.UnrecognizedOptionException;
+import org.apache.commons.cli.*;
 
 /**
  * Base class for command-line applications.
@@ -62,20 +53,6 @@ public abstract class BaseCommandLineTool {
         } catch (ParseException exp) {
             logger.log(Level.SEVERE, "Could not parse command line: " + exp.getMessage());
             printUsage();
-        }
-    }
-
-    /**
-     * Checks if the given encoding is supported on this VM. 
-     */
-    protected static void assertEncodingSupported(String encoding)
-        throws ConfigurationException
-    {
-        try {
-            new String("abc".getBytes(encoding), encoding);
-        } catch (UnsupportedEncodingException e) {
-            throw new ConfigurationException("Encoding not supported on this virtual machine: "
-                    + encoding);
         }
     }
 

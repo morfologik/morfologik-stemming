@@ -45,22 +45,22 @@ public final class DictionaryFeatures {
      * A separator character between fields (stem, lemma, form). The character
      * must be within byte range (FSA uses bytes internally).
      */
-    final byte separator;
+    public final byte separator;
 
     /** 
      * Encoding used for converting bytes to characters and vice versa.
      */
-    final String encoding;
+    public final String encoding;
 
     /** 
      * True if the dictionary was compiled with prefix compression. 
      */
-    final boolean usesPrefixes;
+    public final boolean usesPrefixes;
 
     /** 
      * True if the dictionary was compiled with infix compression. 
      */
-    final boolean usesInfixes;
+    public final boolean usesInfixes;
 
     /**
      * Creates an immutable instance of {@link DictionaryFeatures}. 

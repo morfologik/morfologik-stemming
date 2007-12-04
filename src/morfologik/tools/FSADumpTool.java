@@ -1,14 +1,14 @@
 package morfologik.tools;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.charset.*;
 import java.text.MessageFormat;
 import java.util.Iterator;
 
 import morfologik.fsa.core.FSA;
 import morfologik.fsa.core.FSAHelpers;
+import morfologik.fsa.dictionary.Dictionary;
 import morfologik.util.FileUtils;
 
 import org.apache.commons.cli.CommandLine;
@@ -34,11 +34,16 @@ public final class FSADumpTool extends BaseCommandLineTool {
      * Writer used to print messages and dictionary dump.
      */
     private PrintStream writer;
-    
+
     /**
-     * Encoding of the dictionary
+     * Encoding of the symbols inside the FSA.
      */
     private String encoding;
+
+    /**
+     * Charset decoder for {@link #encoding}.
+     */
+    private CharsetDecoder decoder;
 
     /**
      * The array where all labels on a path from start to final node are collected.
@@ -50,46 +55,61 @@ public final class FSADumpTool extends BaseCommandLineTool {
      * 
      */
     protected void go(CommandLine line) throws Exception {
-        final File fsaFile = (File) line.getOptionObject(
+        final File dictionaryFile = (File) line.getOptionObject(
                 CommandLineOptions.fsaDictionaryFileOption.getOpt());
-        FileUtils.assertExists(fsaFile, true, false);
-
-        final String encoding = line.getOptionValue(
-                CommandLineOptions.characterEncodingOption.getOpt());
-
-        assertEncodingSupported(encoding);
+        FileUtils.assertExists(dictionaryFile, true, false);
 
         final boolean useAPI = line.hasOption(
                 CommandLineOptions.useApiOption.getOpt());
         
-        dump(fsaFile, encoding, useAPI);
+        dump(dictionaryFile, useAPI);
     }
 
     /**
      * Dumps the content of a dictionary to a file.
      */
-    private void dump(File fsaFile, String encoding, boolean useAPI) 
+    private void dump(File dictionaryFile, boolean useAPI) 
         throws UnsupportedEncodingException, IOException
     {
         final long start = System.currentTimeMillis();
-        final FSA fsa = FSA.getInstance(fsaFile, encoding);
+        final Dictionary dictionary = Dictionary.read(dictionaryFile);
+        final FSA fsa = dictionary.fsa;
         
         this.writer = System.out;
-        this.encoding = encoding;
+        this.encoding = dictionary.features.encoding;
+        
+        if (!Charset.isSupported(encoding)) {
+            writer.println("Dictionary's charset is not supported on this JVM: " + encoding);
+            return;
+        }
+        this.decoder = Charset.forName(encoding).newDecoder();
+        this.decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+        this.decoder.onMalformedInput(CodingErrorAction.REPORT);
 
+        writer.println("FSA properties");
+        writer.println("--------------------");
         writer.println("FSA file version    : " + fsa.getVersion());
         writer.println("Compiled with flags : " + FSAHelpers.flagsToString(fsa.getFlags()));
         writer.println("Number of arcs      : " + fsa.getNumberOfArcs());
         writer.println("Number of nodes     : " + fsa.getNumberOfNodes());
         writer.println("Annotation separator: " + fsa.getAnnotationSeparator());
         writer.println("Filler character    : " + fsa.getFillerCharacter());
-        writer.println("--------------------");        
+        writer.println("");
+        writer.println("Dictionary metadata");
+        writer.println("--------------------");
+        writer.println("Encoding            : " + dictionary.features.encoding);
+        writer.println("Separator           : " + decoder.decode(ByteBuffer.wrap(new byte [] {dictionary.features.separator})));
+        writer.println("Uses prefixes       : " + dictionary.features.usesPrefixes);
+        writer.println("Uses infixes        : " + dictionary.features.usesInfixes);
+        writer.println("");
+        writer.println("FSA data");
+        writer.println("--------------------");
 
         if (useAPI) {
             final Iterator i = fsa.getTraversalHelper().getAllSubsequences(fsa.getStartNode()); 
             while (i.hasNext()) {
                 final byte[] sequence = (byte[]) i.next();
-                writer.println(new String(sequence, encoding));
+                writer.println(decoder.decode(ByteBuffer.wrap(sequence)));
             }
         } else {
             dumpNode(fsa.getStartNode(), 0);
@@ -106,7 +126,7 @@ public final class FSADumpTool extends BaseCommandLineTool {
      * Called recursively traverses the automaton.
      */
     public void dumpNode(FSA.Node node, int depth)
-        throws UnsupportedEncodingException
+        throws CharacterCodingException
     {
         FSA.Arc arc = node.getFirstArc();
         do {
@@ -125,7 +145,7 @@ public final class FSADumpTool extends BaseCommandLineTool {
             word[depth] = arc.getLabel();
 
             if (arc.isFinal()) {
-                writer.println(new String(word, 0, depth + 1, encoding));
+                writer.println(decoder.decode(ByteBuffer.wrap(word, 0, depth + 1)));
             }
 
             if (!arc.isTerminal()) {
@@ -141,7 +161,6 @@ public final class FSADumpTool extends BaseCommandLineTool {
      */
     protected void initializeOptions(Options options) {
         options.addOption(CommandLineOptions.fsaDictionaryFileOption);
-        options.addOption(CommandLineOptions.characterEncodingOption);
         options.addOption(CommandLineOptions.useApiOption);
     }
 

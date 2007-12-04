@@ -20,14 +20,6 @@ public final class CommandLineOptions {
             .isRequired(true)
             .create("d");
 
-    public final static Option characterEncodingOption =
-        OptionBuilder
-            .hasArg().withArgName("codepage")
-            .withDescription("Character encoding in the dictionary.")
-            .withLongOpt("encoding")
-            .isRequired(true)
-            .create("e");
-
     public final static Option useApiOption =
         OptionBuilder
             .withDescription("Use node traversal API instead of linear dump.")

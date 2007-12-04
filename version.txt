@@ -1,5 +1,7 @@
 1.1.1     Distribution script fixes. The final JAR does not contain test classes and resources. Size
           trimmed almost twice compared to release 1.1.
+          
+          Updated the dump tool to accept dictionary metadata files.
 
 1.1       Introduced an auxiliary "meta" information files about compressed dictionaries.
           Such information include delimeter symbol, encoding and infix/prefix/postfix
