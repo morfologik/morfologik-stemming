@@ -1,64 +1,66 @@
 <project name="Stempelator" default="build">
 
-    <defaultexcludes add="**/CVS"/>
+	<defaultexcludes add="**/CVS"/>
 
-    <property name="build.name" value="morfologik-stemming" />
-    <property name="build.ver" value="1.1"/>
+	<property name="build.name" value="morfologik-stemming" />
+	<property name="build.ver" value="1.1.1"/>
 
-    <property name="tmp.dir"   value="tmp" />
+	<property name="tmp.dir"   value="tmp" />
 	<property name="build.dir" value="${tmp.dir}/build"/>
+	<property name="build.test.dir" value="${tmp.dir}/test"/>
 	<property name="dist.dir" value="dist"/>
 
 
 	<property name="jarfile-nodict" value="${tmp.dir}/bin/${build.name}-nodict-${build.ver}.jar"/>
 	<property name="jarfile" value="${tmp.dir}/bin/${build.name}-${build.ver}.jar"/>
 
-	<property name="srczip"  value="${dist.dir}/${build.name}-${build.ver}-src.zip"/>
-	<property name="binzip"  value="${dist.dir}/${build.name}-${build.ver}.zip"/>
+	<property name="srczip"	 value="${dist.dir}/${build.name}-${build.ver}-src.zip"/>
+	<property name="binzip"	 value="${dist.dir}/${build.name}-${build.ver}.zip"/>
 
-    
-    <path id="compile.classpath">
-        <fileset dir="lib">
-            <include name="**/*.jar"/>
-        </fileset>
-    </path>
+	
+	<path id="compile.classpath">
+		<fileset dir="lib">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
 
-    <fileset dir="lib" id="runtime.dependencies">
-        <include name="**/*.jar"/>
-        <exclude name="junit*.jar"/>
-    </fileset>
+	<fileset dir="lib" id="runtime.dependencies">
+		<include name="**/*.jar"/>
+		<exclude name="junit*.jar"/>
+	</fileset>
 
 
 	<target name="init">
 		<tstamp/>
 		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${build.test.dir}" />
 		<mkdir dir="${dist.dir}"/>
 	</target>
+	
 
-    
-    
+	
 	<target name="clean">
 		<delete dir="${build.dir}" failonerror="false"/>
 		<delete dir="${dist.dir}" failonerror="false"/>
-        <delete dir="${tmp.dir}" failonerror="false"/>
+		<delete dir="${tmp.dir}" failonerror="false"/>
 	</target>
 	
-    
-    
+	
+	
 	<target name="compile" depends="init">
 		<javac classpath="${classpath}"
 			destdir="${build.dir}" encoding="UTF-8"
 			source="1.4" target="1.4">
 			<classpath refid="compile.classpath" />
 			<include name="**/*.java" />
-            <src location="src"/>
+			<src location="src"/>
 		</javac>
 
-        <!-- Copy additional resources to the build folder. -->
+		<!-- Copy additional resources to the build folder. -->
 		<copy todir="${build.dir}">
 			<fileset dir="src">
-                <exclude name="**/*.java" />
-            </fileset>
+				<exclude name="**/*.java" />
+			</fileset>
 		</copy>
 	</target>
 	
@@ -66,40 +68,42 @@
 	
 	<target name="compile.test" depends="init,compile">
 		<javac classpath="${classpath}"
-			destdir="${build.dir}" encoding="UTF-8">
+			destdir="${build.test.dir}" encoding="UTF-8">
 			<classpath refid="compile.classpath" />
-			<include name="**/*.java" />
-            <src location="src-test" />
+			<classpath location="${build.dir}" />
+
+			<src location="src-test" />
 		</javac>
 
-        <!-- Copy additional resources to the build folder. -->
-		<copy todir="${build.dir}">
+		<!-- Copy additional resources to the build folder. -->
+		<copy todir="${build.test.dir}">
 			<fileset dir="src-test">
-                <exclude name="**/*.java" />
-            </fileset>
+				<exclude name="**/*.java" />
+			</fileset>
 		</copy>
 	</target>
-    
-    
-    
-    <target name="test" depends="compile, compile.test">
-        <mkdir dir="${tmp.dir}/tests" />
-        <junit printsummary="yes" haltonfailure="yes">
-          <classpath refid="compile.classpath" />
-          <classpath location="${build.dir}" />
-        
-          <formatter type="plain"/>
-        
-          <batchtest todir="${tmp.dir}/tests">
-            <fileset dir="src-test">
-              <include name="**/*Test.java"/>
-            </fileset>
-          </batchtest>
-        </junit>
-    </target>
+	
+	
+	
+	<target name="test" depends="compile, compile.test">
+		<mkdir dir="${tmp.dir}/tests" />
+		<junit printsummary="yes" haltonfailure="yes">
+		  <classpath refid="compile.classpath" />
+		  <classpath location="${build.dir}" />
+		  <classpath location="${build.test.dir}" />
+		
+		  <formatter type="plain"/>
+		
+		  <batchtest todir="${tmp.dir}/tests">
+			<fileset dir="src-test">
+			  <include name="**/*Test.java"/>
+			</fileset>
+		  </batchtest>
+		</junit>
+	</target>
 
-    
-    
+	
+	
 	<target name="javadoc" depends="init">
 		<javadoc sourcepath="src" packagenames="morfologik.*" destdir="${tmp.dir}/javadoc">
 			<classpath refid="compile.classpath" />
@@ -114,27 +118,23 @@
 		<pathconvert property="manifest.classpath" pathsep=" ">
 			<map from="${basedir}/lib/" to="" />
 			<path>
-		        <fileset refid="runtime.dependencies" />
+				<fileset refid="runtime.dependencies" />
 			</path>
 		</pathconvert>
 		<jar jarfile="${jarfile}">
 			<fileset dir="${build.dir}" />
-            <zipfileset file="LICENSE.txt" fullpath="META-INF/LICENSE.txt" />
+			<zipfileset file="LICENSE.txt" fullpath="META-INF/LICENSE.txt" />
 			<manifest>
 				<attribute name="Main-Class" value="morfologik.Tools" />
-			    <attribute name="Class-Path" value="${manifest.classpath}" />
+				<attribute name="Class-Path" value="${manifest.classpath}" />
 			</manifest>
 		</jar>
 		<jar jarfile="${jarfile-nodict}">
 			<fileset dir="${build.dir}">
-				<exclude name="res/*.dict" />
-				<exclude name="res/*.info" />
-				<exclude name="morfologik/fsa/core/*.dict" />
-				<exclude name="morfologik/fsa/core/*.info" />
-				<exclude name="morfologik/stemmers/*.dict" />
-				<exclude name="morfologik/stemmers/*.info" />
+				<exclude name="**/*.dict" />
+				<exclude name="**/*.info" />
 			</fileset>
-            <zipfileset file="LICENSE.nodict.txt" fullpath="META-INF/LICENSE.txt" />
+			<zipfileset file="LICENSE.nodict.txt" fullpath="META-INF/LICENSE.txt" />
 			<manifest>
 				<attribute name="Main-Class" value="morfologik.Tools" />
 			</manifest>
@@ -157,12 +157,12 @@
 	
 
 	<target name="dist" depends="clean,test,build,javadoc">
-        <!-- Package source distribution -->
+		<!-- Package source distribution -->
 		<fileset dir="." id="srcdistfiles">
-            <exclude name="tmp/**"/>
+			<exclude name="tmp/**"/>
 			<exclude name="dist/**"/>
-            <exclude name=".settings/**"/>
-            <exclude name="${srczip}" />
+			<exclude name=".settings/**"/>
+			<exclude name="${srczip}" />
 		</fileset>
 
 		<zip destfile="${srczip}">
@@ -177,24 +177,24 @@
 
 
 
-    <target name="compile.stemmer">
-        <description>
+	<target name="compile.stemmer">
+		<description>
 Compiles a stemmer table for Stempel. Uses slightly modified 
 Egothor code (www.egothor.org).
-        </description>
-        <fail unless="stemmer.src">
+		</description>
+		<fail unless="stemmer.src">
 Missing property 'stemmer.src'. Point at stemmer table file (input).
-        </fail>
+		</fail>
 
 		<echo message="${build.dir}" />
 
-        <java failonerror="true" classname="org.egothor.stemmer.Compile" fork="true">
-            <classpath path="${build.dir}" />
-            <jvmarg value="-Xmx1000M" />
-            
-            <arg value="-0E2" /> <!-- Stemmer algorithm type -->
-            <arg file="${stemmer.src}" />
-        </java>
-    </target>
-    
+		<java failonerror="true" classname="org.egothor.stemmer.Compile" fork="true">
+			<classpath path="${build.dir}" />
+			<jvmarg value="-Xmx1000M" />
+			
+			<arg value="-0E2" /> <!-- Stemmer algorithm type -->
+			<arg file="${stemmer.src}" />
+		</java>
+	</target>
+	
 </project>
