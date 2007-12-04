@@ -82,6 +82,9 @@ public class StempelatorTest extends TestCase {
 
         ArrayAssert.assertEquals(new String[] { "żywotopisarstwo" }, s.stem("żywotopisarstwie"));
         ArrayAssert.assertEquals(new String[] { "abradować" }, s.stem("abradowałoby"));
+        
+        // Multi-root word.
+        ArrayAssert.assertEquals(new String[] { "mrocznia", "mroczny" }, s.stem("mrocznie"));
 
         // We can't test the result because it depends
         // on the size of Stempel's dictionary. So we just
