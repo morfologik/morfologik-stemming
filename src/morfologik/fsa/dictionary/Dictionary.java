@@ -127,7 +127,7 @@ public class Dictionary {
      * of the FSA dictionary file. The expected name is resolved by truncating
      * any suffix of <code>name</code> and appending {@link #FEATURES_SUFFIX}.
      */
-    private static String getExpectedFeaturesName(String name) {
+    public static String getExpectedFeaturesName(String name) {
         final int dotIndex = name.lastIndexOf('.');
         final String featuresName;
         if (dotIndex >= 0) {

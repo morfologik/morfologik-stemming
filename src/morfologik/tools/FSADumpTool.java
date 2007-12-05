@@ -67,20 +67,33 @@ public final class FSADumpTool extends BaseCommandLineTool {
         throws UnsupportedEncodingException, IOException
     {
         final long start = System.currentTimeMillis();
-        final Dictionary dictionary = Dictionary.read(dictionaryFile);
-        final FSA fsa = dictionary.fsa;
-        
-        this.writer = System.out;
-        this.encoding = dictionary.features.encoding;
-        
-        if (!Charset.isSupported(encoding)) {
-            writer.println("Dictionary's charset is not supported on this JVM: " + encoding);
+
+        final Dictionary dictionary;
+        final FSA fsa;
+
+        if (!dictionaryFile.canRead()) {
+            writer.println("Dictionary file does not exist: "
+                + dictionaryFile.getAbsolutePath());
             return;
         }
 
-        final CharsetDecoder decoder = Charset.forName(encoding).newDecoder();
-        decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-        decoder.onMalformedInput(CodingErrorAction.REPORT);
+        this.writer = System.out;
+
+        if (hasFeatures(dictionaryFile)) {
+            dictionary = Dictionary.read(dictionaryFile);
+            fsa = dictionary.fsa;
+            this.encoding = dictionary.features.encoding;
+            
+            if (!Charset.isSupported(encoding)) {
+                writer.println("Dictionary's charset is not supported on this JVM: " + encoding);
+                return;
+            }
+        } else {
+            encoding = null;
+            dictionary = null;
+            fsa = FSA.getInstance(dictionaryFile, "iso-8859-1");
+            writer.println("Warning: FSA automaton without metadata file. Raw bytes emitted.");
+        }
 
         writer.println("FSA properties");
         writer.println("--------------------");
@@ -91,21 +104,37 @@ public final class FSADumpTool extends BaseCommandLineTool {
         writer.println("Annotation separator: " + fsa.getAnnotationSeparator());
         writer.println("Filler character    : " + fsa.getFillerCharacter());
         writer.println("");
-        writer.println("Dictionary metadata");
-        writer.println("--------------------");
-        writer.println("Encoding            : " + dictionary.features.encoding);
-        writer.println("Separator           : " + decoder.decode(ByteBuffer.wrap(new byte [] {dictionary.features.separator})));
-        writer.println("Uses prefixes       : " + dictionary.features.usesPrefixes);
-        writer.println("Uses infixes        : " + dictionary.features.usesInfixes);
-        writer.println("");
+        
+        if (dictionary != null) {
+            final CharsetDecoder decoder = Charset.forName(encoding).newDecoder();
+            decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+            decoder.onMalformedInput(CodingErrorAction.REPORT);        
+            writer.println("Dictionary metadata");
+            writer.println("--------------------");
+            writer.println("Encoding            : " + dictionary.features.encoding);
+            writer.println("Separator           : " 
+                + decoder.decode(ByteBuffer.wrap(new byte [] {dictionary.features.separator})));
+            writer.println("Uses prefixes       : " + dictionary.features.usesPrefixes);
+            writer.println("Uses infixes        : " + dictionary.features.usesInfixes);
+            writer.println("");
+        }
+
         writer.println("FSA data");
         writer.println("--------------------");
 
         if (useAPI) {
-            final Iterator i = fsa.getTraversalHelper().getAllSubsequences(fsa.getStartNode()); 
-            while (i.hasNext()) {
-                final byte[] sequence = (byte[]) i.next();
-                writer.println(new String(sequence, encoding));
+            final Iterator i = fsa.getTraversalHelper().getAllSubsequences(fsa.getStartNode());
+            if (encoding != null) {
+                while (i.hasNext()) {
+                    final byte[] sequence = (byte[]) i.next();
+                    writer.println(new String(sequence, encoding));
+                }
+            } else {
+                while (i.hasNext()) {
+                    final byte[] sequence = (byte[]) i.next();
+                    writer.write(sequence);
+                    writer.println();
+                }
             }
         } else {
             dumpNode(fsa.getStartNode(), 0);
@@ -121,7 +150,7 @@ public final class FSADumpTool extends BaseCommandLineTool {
     /** 
      * Called recursively traverses the automaton.
      */
-    public void dumpNode(FSA.Node node, int depth)
+    private void dumpNode(FSA.Node node, final int depth)
         throws UnsupportedEncodingException
     {
         FSA.Arc arc = node.getFirstArc();
@@ -141,7 +170,12 @@ public final class FSADumpTool extends BaseCommandLineTool {
             word[depth] = arc.getLabel();
 
             if (arc.isFinal()) {
-                writer.println(new String(word, 0, depth + 1, encoding));
+                if (encoding != null) {
+                    writer.println(new String(word, 0, depth + 1, encoding));
+                } else {
+                    writer.write(word, 0, depth + 1);
+                    writer.println();
+                }
             }
 
             if (!arc.isTerminal()) {
@@ -152,6 +186,17 @@ public final class FSADumpTool extends BaseCommandLineTool {
         } while (arc != null);
     }
 
+    /**
+     * Check if there is a metadata file for the given FSA automaton.  
+     */
+    private static boolean hasFeatures(File fsaFile)
+    {
+        final File featuresFile = new File(fsaFile.getParent(), 
+            Dictionary.getExpectedFeaturesName(fsaFile.getName()));
+
+        return featuresFile.canRead();
+    }
+    
     /**
      * Command line options for the tool.
      */
