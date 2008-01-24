@@ -116,10 +116,12 @@
 		<mkdir dir="${tmp.dir}/bin" />
 
 		<pathconvert property="manifest.classpath" pathsep=" ">
-			<map from="${basedir}/lib/" to="" />
+			<!-- important: set path separator here according
+			to your OS, if you're using Ant >1.6.5! -->
+			<map from="${basedir}\lib\" to='' />
 			<path>
 				<fileset refid="runtime.dependencies" />
-			</path>
+			</path>		
 		</pathconvert>
 		<jar jarfile="${jarfile}">
 			<fileset dir="${build.dir}" />
