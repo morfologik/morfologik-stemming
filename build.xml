@@ -116,9 +116,7 @@
 		<mkdir dir="${tmp.dir}/bin" />
 
 		<pathconvert property="manifest.classpath" pathsep=" ">
-			<!-- important: set path separator here according
-			to your OS, if you're using Ant >1.6.5! -->
-			<map from="${basedir}\lib\" to='' />
+			<flattenmapper/>
 			<path>
 				<fileset refid="runtime.dependencies" />
 			</path>		
