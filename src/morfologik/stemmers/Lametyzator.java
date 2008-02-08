@@ -39,16 +39,20 @@ public class Lametyzator implements IStemmer {
      */
     public Lametyzator() throws IOException {
         final String dictionaryResource = System.getProperty(PROPERTY_NAME_LAMETYZATOR_DICTIONARY);
+
+        final String fsa;
         if (dictionaryResource != null && !"".equals(dictionaryResource)) {
-            this.fsaStemmer = new DictionaryStemmer(
-                    Dictionary.read(
-                            ResourceUtils.getResourceURL(dictionaryResource)));
+            fsa = dictionaryResource;
         } else {
-            this.fsaStemmer = new DictionaryStemmer(
-                    Dictionary.read(
-                            ResourceUtils.getResourceURL(
-                                    DEFAULT_DICTIONARY_PATH)));
+            fsa = DEFAULT_DICTIONARY_PATH;
         }
+
+        final String features = Dictionary.getExpectedFeaturesName(fsa);
+
+        this.fsaStemmer = new DictionaryStemmer(
+            Dictionary.read(
+                ResourceUtils.openInputStream(fsa),
+                ResourceUtils.openInputStream(features)));
     }
 
     /**

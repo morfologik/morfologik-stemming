@@ -1,3 +1,7 @@
+1.1.2     * Fixed a bug causing JAR file locking (by implementing a workaround).
+
+          Fixed the build script (manifest file was broken).
+
 1.1.1     Distribution script fixes. The final JAR does not contain test classes and resources. Size
           trimmed almost twice compared to release 1.1.
 

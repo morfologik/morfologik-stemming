@@ -9,6 +9,7 @@ import java.util.Properties;
 
 import morfologik.fsa.core.FSA;
 import morfologik.util.FileUtils;
+import morfologik.util.ResourceUtils;
 
 /**
  * <p>A dictionary combines {@link FSA} automaton and metadata
@@ -80,14 +81,16 @@ public class Dictionary {
      * <p>Attempts to load a dictionary based on the URL to the FSA file (the
      * expected suffix of the FSA file is <code>.dict</code>.
      * 
-     * <p>This method can be used to load resource-based dictionaries as well.
+     * <p>This method can be used to load resource-based dictionaries, but be aware
+     * of JAR resource-locking issues that arise from resource URLs. 
      */
     public static Dictionary read(URL fsaURL) throws IOException {
-        final URL featuresURL = new URL(getExpectedFeaturesName(fsaURL.toExternalForm()));
+        final String fsa = fsaURL.toExternalForm();
+        final String features = getExpectedFeaturesName(fsa);
 
         final InputStream featuresData;
         try {
-            featuresData = featuresURL.openStream();
+            featuresData = ResourceUtils.openInputStream(features);
         } catch (IOException e) {
             throw new IOException("Could not read dictionary features file: "
                     + e.getMessage());
@@ -95,9 +98,9 @@ public class Dictionary {
 
         final InputStream fsaData;
         try {
-            fsaData = fsaURL.openStream();
+            fsaData = ResourceUtils.openInputStream(fsa);
         } catch (IOException e) {
-            throw new IOException("Could not read FSA dictionry file: " 
+            throw new IOException("Could not read FSA dictionary file: " 
                     + e.getMessage());
         }
 

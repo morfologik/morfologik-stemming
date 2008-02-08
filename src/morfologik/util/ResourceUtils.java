@@ -1,10 +1,7 @@
 package morfologik.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.*;
+import java.net.*;
 
 /**
  * Resource management utilities.
@@ -21,51 +18,40 @@ public final class ResourceUtils {
     /**
      * Returns an input stream to the resource.
      * 
-     * @param resourcePath The path can be an URL, or a path
-     * leading to a resource looked up using class loader and
-     * system class loader.
+     * @param resource The path leading to the resource. Can be an URL, a path
+     * leading to a class resource or a {@link File}.
      * 
      * @return InputStream instance.
-     * @throws IOException If the resource could not be found
-     * or opened.
+     * @throws IOException If the resource could not be found or opened.
      */
-    public static InputStream openInputStream(String resourcePath) throws IOException {
-        return getResourceURL(resourcePath).openStream();
-    }
-
-    /**
-     * Returns an URL to the matching resource or throws an IOException if
-     * no resource matches the path.
-     */
-    public static URL getResourceURL(String resourcePath)
-        throws IOException
-    {
+    public static InputStream openInputStream(String resource) throws IOException {
         try {
-            // try the URL first.
-            final URL url = new URL(resourcePath);
+            // See if the resource is an URL first.
+            final URL url = new URL(resource);
             // success, load the resource.
-            return url;
+            return url.openStream();
         } catch (MalformedURLException e) {
             // No luck. Fallback to class loader paths.
         }
 
-        // try current thread's class loader first.
+        // Try current thread's class loader first.
         final ClassLoader ldr = Thread.currentThread().getContextClassLoader();
-        URL url = null;
-        if ( (url = ldr.getResource(resourcePath)) != null) { 
-            return url;
-        } else if ((url = ResourceUtils.class.getResource(resourcePath)) != null) {
-            return url;
-        } else if ((url = ClassLoader.getSystemResource(resourcePath)) != null) {
-            return url;
+        
+        InputStream is;
+        if ((is = ldr.getResourceAsStream(resource)) != null) { 
+            return is;
+        } else if ((is = ResourceUtils.class.getResourceAsStream(resource)) != null) {
+            return is;
+        } else if ((is = ClassLoader.getSystemResourceAsStream(resource)) != null) {
+            return is;
         } 
 
         // Try file path
-        final File f = new File(resourcePath);
+        final File f = new File(resource);
         if (f.exists() && f.isFile() && f.canRead()) {
-            return f.toURI().toURL();
-        } else {
-            throw new IOException("Could not locate resource: " + resourcePath);
+            return new FileInputStream(f);
         }
-    }    
+
+        throw new IOException("Could not locate resource: " + resource);
+    }
 }
