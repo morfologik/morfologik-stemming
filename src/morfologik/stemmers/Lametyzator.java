@@ -25,7 +25,7 @@ public class Lametyzator implements IStemmer {
     /**
      * Default dictionary path.
      */
-    private static final String DEFAULT_DICTIONARY_PATH = "/res/polish.08.05.2007.dict";
+    private static final String DEFAULT_DICTIONARY_PATH = "/res/polish.04.03.2009.dict";
 
     /**
      * Local instance of {@link DictionaryStemmer}.

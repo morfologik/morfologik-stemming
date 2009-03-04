@@ -2,6 +2,8 @@
           (happens when JVM is invoked from an JNI-attached thread). Thanks to
           Patrick Luby for report and detailed analysis.
 
+          Updated the built-in dictionary to the newest version available. 
+
 1.1.2     * Fixed a bug causing JAR file locking (by implementing a workaround).
 
           Fixed the build script (manifest file was broken).

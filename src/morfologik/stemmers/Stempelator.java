@@ -15,7 +15,7 @@ public final class Stempelator extends CascadedStemmer {
      * <p>Instantiate Stempel and {@link Lametyzator} with default
      * dictionaries.
      * 
-     * <p><b>Instatiation can be quite time-consuming. Cache
+     * <p><b>Instantiation can be quite time-consuming. Cache
      * instances of the stemmer and reuse them.</b> IStemmer
      * objects are thread-safe. 
      */
