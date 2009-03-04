@@ -36,9 +36,9 @@ public final class ResourceUtils {
 
         // Try current thread's class loader first.
         final ClassLoader ldr = Thread.currentThread().getContextClassLoader();
-        
+
         InputStream is;
-        if ((is = ldr.getResourceAsStream(resource)) != null) { 
+        if (ldr != null && (is = ldr.getResourceAsStream(resource)) != null) { 
             return is;
         } else if ((is = ResourceUtils.class.getResourceAsStream(resource)) != null) {
             return is;
