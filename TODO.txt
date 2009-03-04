@@ -1,0 +1,18 @@
+SUGGESTIONS FOR VERSION 1.2
+
+- Rename stemmer classes to match the project's name. I suggest making a single class
+  MorfologikStemmer and add a property that would determine whether fallback heuristic
+  is used for missing dictionary words.
+
+  public class MorfologikStemmer {
+    public void setUseDictionary(boolean flag);
+    public void setUseHeuristic(boolean flag);
+    ...
+  }
+
+- Add a set of utility classes for parsing morphological tags. This could be similar 
+  (or even compatible?) with Morfeusz-Java.
+
+- Suggest and implement a new stemming heuristic based on inflection frames.
+
+- Compile for java 1.5 and make it a requirement.
