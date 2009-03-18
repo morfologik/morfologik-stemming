@@ -130,7 +130,7 @@ public final class DictionaryStemmer implements IStemmer {
 
 			// Now, expand the prefix/ suffix 'compression' and
 			// store the base form.
-			forms.add(decompress(baseCompressed, 0, j, word));
+			forms.add(decompress(baseCompressed, j, word));
 
 			// if needed, store the tag as well.
 			if (returnForms) {
@@ -161,7 +161,7 @@ public final class DictionaryStemmer implements IStemmer {
     /**
      * Decode the base form of an inflected word.
      */
-    private String decompress(byte[] bytes, int start, int len, String inflected) {
+    private String decompress(byte[] bytes, int len, String inflected) {
 	final String encoding = this.dictionaryFeatures.encoding;
 	final boolean fsaPrefixes = this.dictionaryFeatures.usesPrefixes;
 	final boolean fsaInfixes = this.dictionaryFeatures.usesInfixes;
@@ -175,7 +175,7 @@ public final class DictionaryStemmer implements IStemmer {
 	    // Determine inflected string's length in bytes, in the same encoding.
 	    final byte [] infBytes = inflected.getBytes(encoding); 
 	    final int infLen = infBytes.length;
-	    final int code0 = bytes[start] - 'A';
+	    final int code0 = bytes[0] - 'A';
 
 	    // Increase buffer size, if needed.
 	    bb.clear();
@@ -187,31 +187,31 @@ public final class DictionaryStemmer implements IStemmer {
 		if (code0 >= 0) {
 		    if (code0 <= infLen) {
 			bb.put(infBytes, 0, infLen - code0);
-			bb.put(bytes, start + 1, len - 1);
+			bb.put(bytes, 1, len - 1);
 			return new String(bb.array(), 0, bb.position(), encoding);
 		    }
 		}
 	    } else if (fsaPrefixes && !fsaInfixes) {
 		if (len > 1 && code0 >= 0) {
-		    final int stripAtEnd = bytes[start + 1] - 'A';
+		    final int stripAtEnd = bytes[1] - 'A';
 		    if (stripAtEnd <= infLen && code0 <= infLen) {
 			bb.put(infBytes, code0, infLen - (stripAtEnd + code0));
-			bb.put(bytes, start + 2, len - 2);
+			bb.put(bytes, 2, len - 2);
 			return new String(bb.array(), 0, bb.position(), encoding);
 		    }
 		}
 	    } else if (fsaInfixes) { 
 		// Note: prefixes are silently assumed here
 		if (len > 2 && code0 >= 0) {
-		    final int stripAtBeginning = bytes[start + 1] - 'A';
-		    final int stripAtEnd = bytes[start + 2] - 'A';
+		    final int stripAtBeginning = bytes[1] - 'A' + code0;
+		    final int stripAtEnd = bytes[2] - 'A';
 		    if (code0 <= infLen 
-			    && code0 + stripAtBeginning <= infLen 
+			    && stripAtBeginning <= infLen 
 			    && stripAtEnd <= infLen)
 		    {
 			bb.put(infBytes, 0, code0);
-			bb.put(infBytes, code0 + stripAtBeginning, 
-				infLen - (stripAtEnd + code0 + stripAtBeginning));
+			bb.put(infBytes, stripAtBeginning, 
+				infLen - (stripAtEnd + stripAtBeginning));
 			bb.put(bytes, 3, len - 3);
 			return new String(bb.array(), 0, bb.position(), encoding);
 		    }
@@ -222,7 +222,7 @@ public final class DictionaryStemmer implements IStemmer {
 	     * This is a fallback in case some junk is detected above. Return the base
 	     * form only if this is the case.
 	     */
-	    return new String(bytes, start, len, encoding);
+	    return new String(bytes, 0, len, encoding);
 	} catch (UnsupportedEncodingException e) {
 	    throw new RuntimeException("Unexpected Exception: " + e.toString());
 	}
