@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import morfologik.fsa.dictionary.Dictionary;
+import morfologik.fsa.dictionary.DictionaryStemmer;
 import morfologik.stemmers.Lametyzator;
 import morfologik.stemmers.Stempelator;
 
@@ -124,6 +125,16 @@ public class LametyzatorTest extends TestCase {
         assertNoStemFor(s, "martygalski");
     }
 
+    /**
+     * 
+     */
+    public void testMultibyteEncodingUTF8() throws IOException {
+        final URL url = this.getClass().getResource("test-diacritics-utf8.dict");
+        final Lametyzator s = new Lametyzator(Dictionary.read(url));
+
+        ArrayAssert.assertEquals(new String[] { "merge", "001" }, s.stemAndForm("mergeam"));
+    }
+    
     /**
      * 
      */
