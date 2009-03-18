@@ -57,19 +57,19 @@ public final class DictionaryStemmer implements IStemmer {
      *             if FSA's root node cannot be acquired (dictionary is empty).
      */
     public DictionaryStemmer(Dictionary dictionary)
-	    throws UnsupportedEncodingException, IllegalArgumentException {
+    throws UnsupportedEncodingException, IllegalArgumentException {
 	this.dictionaryFeatures = dictionary.features;
 	this.root = dictionary.fsa.getStartNode();
 	this.matcher = dictionary.fsa.getTraversalHelper();
 
 	if (root == null) {
 	    throw new IllegalArgumentException(
-		    "Dictionary must have at least the root node.");
+	    "Dictionary must have at least the root node.");
 	}
 
 	if (dictionaryFeatures == null) {
 	    throw new IllegalArgumentException(
-		    "Dictionary features must not be null.");
+	    "Dictionary features must not be null.");
 	}
     }
 
@@ -183,37 +183,33 @@ public final class DictionaryStemmer implements IStemmer {
 		bb = ByteBuffer.allocate(infLen + len);
 	    }
 
-	    if (!fsaPrefixes && !fsaInfixes) {
-		if (code0 >= 0) {
+	    if (code0 >= 0) {
+		if (!fsaPrefixes && !fsaInfixes) {		
 		    if (code0 <= infLen) {
 			bb.put(infBytes, 0, infLen - code0);
 			bb.put(bytes, 1, len - 1);
 			return new String(bb.array(), 0, bb.position(), encoding);
+		    }		
+		} else if (fsaPrefixes && !fsaInfixes) {
+		    if (len > 1) {
+			final int stripAtEnd = bytes[1] - 'A' + code0;
+			if (stripAtEnd <= infLen) {
+			    bb.put(infBytes, code0, infLen - stripAtEnd);
+			    bb.put(bytes, 2, len - 2);
+			    return new String(bb.array(), 0, bb.position(), encoding);
+			}
 		    }
-		}
-	    } else if (fsaPrefixes && !fsaInfixes) {
-		if (len > 1 && code0 >= 0) {
-		    final int stripAtEnd = bytes[1] - 'A';
-		    if (stripAtEnd <= infLen && code0 <= infLen) {
-			bb.put(infBytes, code0, infLen - (stripAtEnd + code0));
-			bb.put(bytes, 2, len - 2);
-			return new String(bb.array(), 0, bb.position(), encoding);
-		    }
-		}
-	    } else if (fsaInfixes) { 
-		// Note: prefixes are silently assumed here
-		if (len > 2 && code0 >= 0) {
-		    final int stripAtBeginning = bytes[1] - 'A' + code0;
-		    final int stripAtEnd = bytes[2] - 'A';
-		    if (code0 <= infLen 
-			    && stripAtBeginning <= infLen 
-			    && stripAtEnd <= infLen)
-		    {
-			bb.put(infBytes, 0, code0);
-			bb.put(infBytes, stripAtBeginning, 
-				infLen - (stripAtEnd + stripAtBeginning));
-			bb.put(bytes, 3, len - 3);
-			return new String(bb.array(), 0, bb.position(), encoding);
+		} else if (fsaInfixes) { 
+		    // Note: prefixes are silently assumed here
+		    if (len > 2) {
+			final int stripAtBeginning = bytes[1] - 'A' + code0;
+			final int stripAtEnd = bytes[2] - 'A' + stripAtBeginning;
+			if (stripAtEnd <= infLen) {
+			    bb.put(infBytes, 0, code0);
+			    bb.put(infBytes, stripAtBeginning, infLen - stripAtEnd);
+			    bb.put(bytes, 3, len - 3);
+			    return new String(bb.array(), 0, bb.position(), encoding);
+			}
 		    }
 		}
 	    }
