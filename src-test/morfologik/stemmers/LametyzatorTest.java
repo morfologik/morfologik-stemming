@@ -133,8 +133,9 @@ public class LametyzatorTest extends TestCase {
         final Lametyzator s = new Lametyzator(Dictionary.read(url));
 
         ArrayAssert.assertEquals(new String[] { "merge", "001" }, s.stemAndForm("mergeam"));
+        ArrayAssert.assertEquals(new String[] { "merge", "002" }, s.stemAndForm("merseserăm"));
     }
-    
+
     /**
      * 
      */
