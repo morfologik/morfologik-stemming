@@ -78,7 +78,7 @@ public final class FSADumpTool extends BaseCommandLineTool {
         if (hasFeatures(dictionaryFile)) {
             dictionary = Dictionary.read(dictionaryFile);
             fsa = dictionary.fsa;
-            this.encoding = dictionary.features.encoding;
+            this.encoding = dictionary.metadata.encoding;
             
             if (!Charset.isSupported(encoding)) {
                 writer.println("Dictionary's charset is not supported on this JVM: " + encoding);
@@ -107,11 +107,11 @@ public final class FSADumpTool extends BaseCommandLineTool {
             decoder.onMalformedInput(CodingErrorAction.REPORT);        
             writer.println("Dictionary metadata");
             writer.println("--------------------");
-            writer.println("Encoding            : " + dictionary.features.encoding);
+            writer.println("Encoding            : " + dictionary.metadata.encoding);
             writer.println("Separator           : " 
-                + decoder.decode(ByteBuffer.wrap(new byte [] {dictionary.features.separator})));
-            writer.println("Uses prefixes       : " + dictionary.features.usesPrefixes);
-            writer.println("Uses infixes        : " + dictionary.features.usesInfixes);
+                + decoder.decode(ByteBuffer.wrap(new byte [] {dictionary.metadata.separator})));
+            writer.println("Uses prefixes       : " + dictionary.metadata.usesPrefixes);
+            writer.println("Uses infixes        : " + dictionary.metadata.usesInfixes);
             writer.println("");
         }
 
@@ -157,7 +157,7 @@ public final class FSADumpTool extends BaseCommandLineTool {
                             + " bytes exceeded. A loop in the automaton maybe?");
                 }
 
-                word = FSAHelpers.resizeByteBuffer(word, word.length + BUFFER_INCREMENT);
+                word = FSAHelpers.resizeArray(word, word.length + BUFFER_INCREMENT);
 
                 // Redo the operation.
                 word[depth] = arc.getLabel();

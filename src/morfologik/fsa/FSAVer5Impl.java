@@ -11,7 +11,7 @@ import java.io.InputStream;
  * for version 5 of the FSA automaton.
  *
  * <p>Version 5 indicates the dictionary was built with these flags:
- * {@link FSA#FSA_FLEXIBLE}, {@link FSA#FSA_STOPBIT} and {@link FSA#FSA_NEXTBIT}. 
+ * {@link FSAFlags#FLEXIBLE}, {@link FSAFlags#STOPBIT} and {@link FSAFlags#NEXTBIT}. 
  * The internal representation
  * of the FSA must therefore follow this description (please note this
  * format describes only a single transition (arc), not the entire dictionary file).
@@ -50,9 +50,7 @@ import java.io.InputStream;
  * indices over a byte array in case of Java). However, for the sake of clarity, this class
  * uses explicit Node/ Arc objects.
  */
-public final class FSAVer5Impl
-    extends FSA
-{
+public final class FSAVer5Impl extends FSA {
     /** 
      * Bitmask indicating that an arc is the last one of the node's list and the following one
      * belongs to another node.
@@ -317,16 +315,15 @@ public final class FSAVer5Impl
     }
 
 
-    /** 
-     * Returns an integer offset from bitpacked representation. 
+    /**
+     * Returns an integer offset from bit-packed representation.
      */
-    protected final int gotoFieldToOffset(final int start, final int n)
-    {
-      int r = 0;
-      for (int i = n - 1; i >= 0; --i) {
-        r <<= 8; 
-        r = r | (arcs[start + i] & 0xff);
-      }
-      return r;
+    protected final int gotoFieldToOffset(final int start, final int n) {
+	int r = 0;
+	for (int i = n - 1; i >= 0; --i) {
+	    r <<= 8;
+	    r = r | (arcs[start + i] & 0xff);
+	}
+	return r;
     }
 }

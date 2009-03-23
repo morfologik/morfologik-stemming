@@ -49,7 +49,7 @@ public class Lametyzator implements IStemmer {
         final String features = Dictionary.getExpectedFeaturesName(fsa);
 
         this.fsaStemmer = new DictionaryStemmer(
-            Dictionary.read(
+            Dictionary.readAndClose(
                 ResourceUtils.openInputStream(fsa),
                 ResourceUtils.openInputStream(features)));
     }

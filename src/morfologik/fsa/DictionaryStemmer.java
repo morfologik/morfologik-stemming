@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import morfologik.fsa.*;
 import morfologik.stemming.IStemmer;
 
 /**
@@ -56,7 +55,7 @@ public final class DictionaryStemmer implements IStemmer {
      */
     public DictionaryStemmer(Dictionary dictionary)
     throws UnsupportedEncodingException, IllegalArgumentException {
-	this.dictionaryFeatures = dictionary.features;
+	this.dictionaryFeatures = dictionary.metadata;
 	this.root = dictionary.fsa.getStartNode();
 	this.matcher = dictionary.fsa.getTraversalHelper();
 
@@ -67,7 +66,7 @@ public final class DictionaryStemmer implements IStemmer {
 
 	if (dictionaryFeatures == null) {
 	    throw new IllegalArgumentException(
-	    "Dictionary features must not be null.");
+	    "Dictionary metadata must not be null.");
 	}
     }
 
@@ -99,7 +98,7 @@ public final class DictionaryStemmer implements IStemmer {
 	    final FSAMatch match = matcher.matchSequence(word
 		    .getBytes(encoding), root);
 
-	    if (match.getMatchResult() == FSAMatch.PREMATURE_WORD_END_FOUND) {
+	    if (match.getMatchType() == FSAMatchType.PREMATURE_WORD_END_FOUND) {
 		// the entire sequence fit into the dictionary. Now a separator
 		// should be the next
 		// character.
@@ -112,11 +111,11 @@ public final class DictionaryStemmer implements IStemmer {
 		if (arc != null && !arc.isFinal()) {
 		    // there is such word in the dictionary. Return its base
 		    // forms.
-		    final ArrayList forms = new ArrayList(2);
-		    final Iterator i = matcher.getAllSubsequences(arc
-			    .getDestinationNode());
+		    final ArrayList<String> forms = new ArrayList<String>(2);
+		    final Iterator<byte[]> i = matcher.getAllSubsequences(
+			    arc.getDestinationNode());
 		    while (i.hasNext()) {
-			final byte[] baseCompressed = (byte[]) i.next();
+			final byte[] baseCompressed = i.next();
 
 			// look for the delimiter of the 'grammar' tag in
 			// the original Jan Daciuk's FSA format.
@@ -145,14 +144,15 @@ public final class DictionaryStemmer implements IStemmer {
 		    return (String[]) forms.toArray(new String[forms.size()]);
 		}
 	    } else {
-		// this case is somewhat confusing: we should have hit the
-		// separator first...
-		// I don't really know how to deal with it at the time being.
+		/*
+		 * this case is somewhat confusing: we should have hit the separator first...
+		 * I don't really know how to deal with it at the time being.
+		 */
 	    }
 
 	    return NO_STEM;
 	} catch (UnsupportedEncodingException e) {
-	    throw new RuntimeException("Unexpected Exception: " + e.toString());
+	    throw new RuntimeException(e);
 	}
     }
 
@@ -218,7 +218,7 @@ public final class DictionaryStemmer implements IStemmer {
 	     */
 	    return new String(bytes, 0, len, encoding);
 	} catch (UnsupportedEncodingException e) {
-	    throw new RuntimeException("Unexpected Exception: " + e.toString());
+	    throw new RuntimeException(e);
 	}
     }
 }

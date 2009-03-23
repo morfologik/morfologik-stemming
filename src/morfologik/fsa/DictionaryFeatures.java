@@ -13,29 +13,21 @@ import java.util.Properties;
 public final class DictionaryFeatures {
     /**
      * Attribute name for {@link #separator}.
-     * 
-     * @see #fromMap(Properties)
      */
     public final static String ATTR_NAME_SEPARATOR = "fsa.dict.separator";
 
     /**
      * Attribute name for {@link #encoding}.
-     * 
-     * @see #fromMap(Properties)
      */
     public final static String ATTR_NAME_ENCODING = "fsa.dict.encoding";
 
     /**
      * Attribute name for {@link #usesPrefixes}.
-     * 
-     * @see #fromMap(Properties)
      */
     public final static String ATTR_NAME_USES_PREFIXES = "fsa.dict.uses-prefixes";
 
     /**
      * Attribute name for {@link #usesInfixes}.
-     * 
-     * @see #fromMap(Properties)
      */
     public final static String ATTR_NAME_USES_INFIXES = "fsa.dict.uses-infixes";
 
@@ -65,7 +57,8 @@ public final class DictionaryFeatures {
      */
     public DictionaryFeatures(
             char separator, String encoding, boolean usesPrefixes,
-            boolean usesInfixes) {
+            boolean usesInfixes)
+    {
         this.encoding = encoding;
         this.usesPrefixes = usesPrefixes;
         this.usesInfixes = usesInfixes;
@@ -73,8 +66,8 @@ public final class DictionaryFeatures {
         try {
             final byte [] separatorBytes = new String(new char [] {separator}).getBytes(encoding);
             if (separatorBytes.length != 1) {
-                throw new RuntimeException("Separator character: " + separator
-                        + " must be a single byte after transformation with encoding " + encoding);
+                throw new RuntimeException("Separator character '" + separator
+                        + "' must be a single byte after transformation with encoding: " + encoding);
             }
             this.separator = separatorBytes[0];
         } catch (UnsupportedEncodingException e) {

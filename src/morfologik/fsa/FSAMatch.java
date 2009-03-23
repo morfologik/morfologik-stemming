@@ -1,40 +1,32 @@
 package morfologik.fsa;
 
 /**
- * A result returned from 
- * {@link FSATraversalHelper#matchSequence(byte[], morfologik.fsa.FSA.Node)}.
+ * A result returned from {@link FSATraversalHelper}.
  */
-public final class FSAMatch
-{
-    public static final int NO_MATCH = 0;
-    public static final int EXACT_MATCH = 1;
-    public static final int PREMATURE_PATH_END_FOUND = 2;
-    public static final int PREFIX_FOUND = 3;
-    public static final int PREMATURE_WORD_END_FOUND = 4;
+public final class FSAMatch {
+    private final FSAMatchType matchType;
+    private final int mismatchAtIndex;
+    private final FSA.Node mismatchAtNode;
 
-    private int matchResult;
-    private int mismatchAtIndex;
-    private FSA.Node mismatchAtNode;
-
-    protected FSAMatch(int result, int mismatchAtIndex, FSA.Node mismatchAtNode) {
-        this.matchResult = result;
-        this.mismatchAtIndex = mismatchAtIndex;
-        this.mismatchAtNode = mismatchAtNode;
+    FSAMatch(FSAMatchType type, int mismatchAtIndex, FSA.Node mismatchAtNode) {
+	this.matchType = type;
+	this.mismatchAtIndex = mismatchAtIndex;
+	this.mismatchAtNode = mismatchAtNode;
     }
 
-    protected FSAMatch(final int result) {
-        this.matchResult = result;
+    protected FSAMatch(FSAMatchType type) {
+	this(type, 0, null);
     }
 
-    public int getMatchResult() { 
-        return matchResult; 
+    public FSAMatchType getMatchType() {
+	return matchType;
     }
 
-    public int getMismatchIndex() { 
-        return mismatchAtIndex; 
+    public int getMismatchIndex() {
+	return mismatchAtIndex;
     }
 
     public FSA.Node getMismatchNode() {
-        return mismatchAtNode;
+	return mismatchAtNode;
     }
 }

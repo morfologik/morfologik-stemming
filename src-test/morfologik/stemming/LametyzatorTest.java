@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URL;
 
 import morfologik.fsa.Dictionary;
-import morfologik.fsa.DictionaryStemmer;
 import morfologik.stemming.Lametyzator;
 import morfologik.stemming.Stempelator;
 
