@@ -1,5 +1,5 @@
 
-package morfologik.fsa.core;
+package morfologik.fsa;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -49,8 +49,6 @@ import java.io.InputStream;
  * <p>The traversal of such FSA could be made extremely fast using pointers only (or integer
  * indices over a byte array in case of Java). However, for the sake of clarity, this class
  * uses explicit Node/ Arc objects.
- *
- * @author Dawid Weiss
  */
 public final class FSAVer5Impl
     extends FSA

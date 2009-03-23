@@ -1,5 +1,5 @@
 
-package morfologik.fsa.core;
+package morfologik.fsa;
 
 import java.util.Iterator;
 

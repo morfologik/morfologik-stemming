@@ -6,9 +6,7 @@ import java.nio.charset.*;
 import java.text.MessageFormat;
 import java.util.Iterator;
 
-import morfologik.fsa.core.FSA;
-import morfologik.fsa.core.FSAHelpers;
-import morfologik.fsa.dictionary.Dictionary;
+import morfologik.fsa.*;
 import morfologik.util.FileUtils;
 
 import org.apache.commons.cli.CommandLine;
@@ -16,8 +14,6 @@ import org.apache.commons.cli.Options;
 
 /**
  * This utility will dump the information and contents of a given {@link FSA} dictionary.
- * 
- * @author Dawid Weiss
  */
 public final class FSADumpTool extends BaseCommandLineTool {
     /**

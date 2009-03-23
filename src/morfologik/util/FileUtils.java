@@ -5,8 +5,6 @@ import java.io.IOException;
 
 /**
  * Utility functions.
- * 
- * @author Dawid Weiss
  */
 public final class FileUtils {
 
@@ -30,7 +28,7 @@ public final class FileUtils {
         
         if (requireFile) {
             if (!fsaFile.isFile() || !fsaFile.canRead()) {
-                throw new IOException("Not a readable file: "
+                throw new IOException("File cannot be read: "
                         + fsaFile.getAbsolutePath());
             }
         }

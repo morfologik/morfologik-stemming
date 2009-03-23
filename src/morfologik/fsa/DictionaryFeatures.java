@@ -1,4 +1,4 @@
-package morfologik.fsa.dictionary;
+package morfologik.fsa;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -9,8 +9,6 @@ import java.util.Properties;
  * Description of attributes, their types and default values.
  * 
  * @see Dictionary
- * 
- * @author Dawid Weiss
  */
 public final class DictionaryFeatures {
     /**

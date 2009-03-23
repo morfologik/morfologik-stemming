@@ -1,17 +1,16 @@
-package morfologik.stemmers;
+package morfologik.stemming;
 
 import java.io.IOException;
 import java.net.URL;
 
-import morfologik.stemmers.Stempelator;
+import morfologik.stemming.Stempel;
+import morfologik.stemming.Stempelator;
 
 import junit.framework.TestCase;
 import junitx.framework.ArrayAssert;
 
 /**
  * Tests {@link Stempelator} stemmer.
- * 
- * @author Dawid Weiss
  */
 public class StempelatorTest extends TestCase {
 

@@ -1,4 +1,4 @@
-package morfologik.fsa.dictionary;
+package morfologik.fsa;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
-import morfologik.fsa.core.FSA;
 import morfologik.util.FileUtils;
 import morfologik.util.ResourceUtils;
 
@@ -23,8 +22,6 @@ import morfologik.util.ResourceUtils;
  *   </ul>
  * Use static methods in this class to read dictionaries and
  * their metadata.
- * 
- * @author Dawid Weiss
  */
 public class Dictionary {
     /**

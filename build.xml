@@ -1,14 +1,11 @@
 <project name="Stempelator" default="build">
-	<defaultexcludes add="**/CVS"/>
-
 	<property name="build.name" value="morfologik-stemming" />
-	<property name="build.ver" value="1.1.4"/>
+	<property name="build.ver" value="1.2-dev"/>
 
 	<property name="tmp.dir"   value="tmp" />
 	<property name="build.dir" value="${tmp.dir}/build"/>
 	<property name="build.test.dir" value="${tmp.dir}/test"/>
 	<property name="dist.dir" value="dist"/>
-
 
 	<property name="jarfile-nodict" value="${tmp.dir}/bin/${build.name}-nodict-${build.ver}.jar"/>
 	<property name="jarfile" value="${tmp.dir}/bin/${build.name}-${build.ver}.jar"/>

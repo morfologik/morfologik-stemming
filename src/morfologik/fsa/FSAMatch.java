@@ -1,8 +1,8 @@
-package morfologik.fsa.core;
+package morfologik.fsa;
 
 /**
  * A result returned from 
- * {@link FSATraversalHelper#matchSequence(byte[], morfologik.fsa.core.FSA.Node)}.
+ * {@link FSATraversalHelper#matchSequence(byte[], morfologik.fsa.FSA.Node)}.
  */
 public final class FSAMatch
 {

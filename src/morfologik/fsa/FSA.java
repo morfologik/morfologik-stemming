@@ -1,4 +1,4 @@
-package morfologik.fsa.core;
+package morfologik.fsa;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,8 +23,6 @@ import java.io.UnsupportedEncodingException;
  * <p>This is a Java port of the original <code>fsa</code> class, implemented by
  * Jan Daciuk in the FSA package. Major redesign has been done, however, to fit this
  * implementation to the specifics of Java language and its coding style.
- *
- * @author Dawid Weiss
  */
 public abstract class FSA
 {

@@ -7,8 +7,6 @@ import org.apache.commons.cli.OptionBuilder;
 
 /**
  * Common command line options (for consistency across tools).
- * 
- * @author Dawid Weiss
  */
 public final class CommandLineOptions {
     public final static Option fsaDictionaryFileOption = 

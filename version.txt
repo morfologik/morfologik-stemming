@@ -1,3 +1,13 @@
+
+1.2       * Package hierarchy reorganized.       
+
+--------
+
+          WARNING: incompatible API changes have been made in release 1.2.
+          WARNING: Java 1.5 or later is required from this version on.
+
+--------
+
 1.1.4     * Fixed a bug that caused UTF-8 dictionaries to be garbled. Now it should be relatively
           safe to use UTF-8 dictionaries (note: separators cannot be multibyte UTF-8 characters,
           yet this is probably a very rare case).

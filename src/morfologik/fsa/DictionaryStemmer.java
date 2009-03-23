@@ -1,14 +1,12 @@
-package morfologik.fsa.dictionary;
+package morfologik.fsa;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import morfologik.fsa.core.FSA;
-import morfologik.fsa.core.FSAMatch;
-import morfologik.fsa.core.FSATraversalHelper;
-import morfologik.stemmers.IStemmer;
+import morfologik.fsa.*;
+import morfologik.stemming.IStemmer;
 
 /**
  * <p>

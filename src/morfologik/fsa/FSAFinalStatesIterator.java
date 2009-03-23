@@ -1,18 +1,16 @@
-package morfologik.fsa.core;
+package morfologik.fsa;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import morfologik.fsa.core.FSA.Node;
+import morfologik.fsa.FSA.Node;
 
 
 /**
  * <p>An iterator that traverses all final states reachable
  * from a given {@link FSA.Node} and returns {@link String} objects 
  * corresponding to final states.
- * 
- * @author Dawid Weiss
  */
 public final class FSAFinalStatesIterator implements Iterator {
     /**

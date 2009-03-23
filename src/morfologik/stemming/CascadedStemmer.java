@@ -1,4 +1,4 @@
-package morfologik.stemmers;
+package morfologik.stemming;
 
 import java.io.IOException;
 
@@ -6,10 +6,8 @@ import java.io.IOException;
 /**
  * This stemmer uses a sequence of {@link IStemmer} instances for lookup. The first
  * one to return a result wins.
- * 
- * @author Dawid Weiss
  */
-public class CascadedStemmer implements morfologik.stemmers.IStemmer {
+public class CascadedStemmer implements morfologik.stemming.IStemmer {
     /** Stemmers used in the cascade. */
     private final IStemmer [] stemmers;
 

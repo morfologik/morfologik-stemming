@@ -1,14 +1,10 @@
-package morfologik.fsa.core;
+package morfologik.fsa;
 
-import morfologik.fsa.core.FSA;
-import morfologik.fsa.core.FSAFinalStatesIterator;
-import morfologik.fsa.core.FSATraversalHelper;
+import morfologik.fsa.*;
 import junit.framework.TestCase;
 
 /**
  * Tests {@link FSATraversalHelper}.
- * 
- * @author Dawid Weiss
  */
 public final class FSATraversalTest extends TestCase {
     private FSA dict;

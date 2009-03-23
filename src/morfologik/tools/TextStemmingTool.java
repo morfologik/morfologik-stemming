@@ -14,7 +14,7 @@ import java.io.Writer;
 import java.text.MessageFormat;
 import java.util.Locale;
 
-import morfologik.stemmers.IStemmer;
+import morfologik.stemming.IStemmer;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -33,8 +33,6 @@ import org.apache.commons.cli.Options;
  * values in each respective column.
  * 
  * <p>Columns are tab-delimited.
- *
- * @author Dawid Weiss
  */
 class TextStemmingTool extends BaseCommandLineTool {
     /**

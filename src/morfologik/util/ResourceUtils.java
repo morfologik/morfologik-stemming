@@ -5,8 +5,6 @@ import java.net.*;
 
 /**
  * Resource management utilities.
- * 
- * @author Dawid Weiss
  */
 public final class ResourceUtils {
     /**

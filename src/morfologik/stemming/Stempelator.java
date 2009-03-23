@@ -1,4 +1,4 @@
-package morfologik.stemmers;
+package morfologik.stemming;
 
 import java.io.IOException;
 
@@ -7,8 +7,6 @@ import java.io.IOException;
  * A hybrid stemmer for the Polish language (a combination of {@link Lametyzator},
  * a dictionary-based stemmer and <a href="http://www.getopt.org/stempel">Stempel</a>,
  * a heuristic stemmer).
- * 
- * @author Dawid Weiss
  */
 public final class Stempelator extends CascadedStemmer {
     /**

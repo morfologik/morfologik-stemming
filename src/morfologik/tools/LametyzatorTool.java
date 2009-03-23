@@ -2,13 +2,12 @@ package morfologik.tools;
 
 import java.io.IOException;
 
-import morfologik.stemmers.Lametyzator;
+import morfologik.stemming.Lametyzator;
 
 /**
  * Command-line utility for stemming text using {@link Lametyzator}.
  * 
  * @see TextStemmingTool
- * @author Dawid Weiss
  */
 public final class LametyzatorTool extends TextStemmingTool {
     /**

@@ -1,12 +1,12 @@
-package morfologik.stemmers;
+package morfologik.stemming;
 
 import java.io.IOException;
 import java.net.URL;
 
-import morfologik.fsa.dictionary.Dictionary;
-import morfologik.fsa.dictionary.DictionaryStemmer;
-import morfologik.stemmers.Lametyzator;
-import morfologik.stemmers.Stempelator;
+import morfologik.fsa.Dictionary;
+import morfologik.fsa.DictionaryStemmer;
+import morfologik.stemming.Lametyzator;
+import morfologik.stemming.Stempelator;
 
 import junit.framework.TestCase;
 import junitx.framework.ArrayAssert;

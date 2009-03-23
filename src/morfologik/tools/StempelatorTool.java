@@ -2,13 +2,12 @@ package morfologik.tools;
 
 import java.io.IOException;
 
-import morfologik.stemmers.Stempelator;
+import morfologik.stemming.Stempelator;
 
 /**
  * Command-line utility for stemming text using {@link Stempelator}.
  * 
  * @see TextStemmingTool
- * @author Dawid Weiss
  */
 public final class StempelatorTool extends TextStemmingTool {
     /**

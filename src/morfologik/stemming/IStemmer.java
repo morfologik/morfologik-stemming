@@ -1,4 +1,4 @@
-package morfologik.stemmers;
+package morfologik.stemming;
 
 /**
  * <p>A generic stemmer interface in Morfologik.

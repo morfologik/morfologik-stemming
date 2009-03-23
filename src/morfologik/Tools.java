@@ -12,8 +12,6 @@ import morfologik.tools.StempelatorTool;
  * A single class for launching command-line tools
  * (for placing in the <code>Main-Class</code> attribute
  * of the distribution JAR file).
- * 
- * @author Dawid Weiss
  */
 public final class Tools {
     /**

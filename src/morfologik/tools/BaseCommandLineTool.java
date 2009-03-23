@@ -3,8 +3,6 @@ package morfologik.tools;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import morfologik.util.StringUtils;
-
 import org.apache.commons.cli.*;
 
 /**
@@ -37,7 +35,7 @@ public abstract class BaseCommandLineTool {
             try {
                 go(line);
             } catch (ConfigurationException e) {
-                logger.severe(StringUtils.chainExceptionMessages(e));
+                logger.severe(e.getMessage());
             } catch (Throwable e) {
                 logger.log(Level.SEVERE, "Unhandled program error occurred.", e);
             }

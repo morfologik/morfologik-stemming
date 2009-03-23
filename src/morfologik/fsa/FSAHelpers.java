@@ -1,10 +1,8 @@
-package morfologik.fsa.core;
+package morfologik.fsa;
 
 /**
  * This class has several static utility methods for use 
  * with the FSA package.
- *
- * @author Dawid Weiss
  */
 public final class FSAHelpers
 {

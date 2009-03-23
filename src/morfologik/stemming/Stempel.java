@@ -1,4 +1,4 @@
-package morfologik.stemmers;
+package morfologik.stemming;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -14,10 +14,8 @@ import org.getopt.stempel.Stemmer;
 /**
  * A wrapper around <a href="http://www.getopt.org/stempel">Stempel</a> - a heuristic
  * stemmer by Andrzej Bialecki.
- * 
- * @author Dawid Weiss
  */
-public final class Stempel implements morfologik.stemmers.IStemmer {
+public final class Stempel implements morfologik.stemming.IStemmer {
     /**
      * Name of a system property pointing to a stempel dictionary (stemmer 
      * table). The property can be a URL (stringified) or a resource
