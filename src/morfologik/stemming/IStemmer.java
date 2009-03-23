@@ -1,7 +1,7 @@
 package morfologik.stemming;
 
 /**
- * A generic stemmer interface in Morfologik.
+ * A generic &quot;stemmer&quot; interface in Morfologik.
  */
 public interface IStemmer {
     /**

@@ -6,13 +6,14 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 
 /**
- * Common command line options (for consistency across tools).
+ * Options shared between tools.
  */
-public final class CommandLineOptions {
+@SuppressWarnings("static-access")
+final class SharedOptions {
     public final static Option fsaDictionaryFileOption = 
         OptionBuilder
             .hasArg().withArgName("file")
-            .withDescription("Path to FSA dictionary file.")
+            .withDescription("Path to the FSA dictionary.")
             .withLongOpt("dictionary")
             .withType(File.class)
             .isRequired(true)
@@ -62,7 +63,7 @@ public final class CommandLineOptions {
     /**
      * No instances. Use static fields.
      */
-    private CommandLineOptions() {
+    private SharedOptions() {
         // empty
     }
 }

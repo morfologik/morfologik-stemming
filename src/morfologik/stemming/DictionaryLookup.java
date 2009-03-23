@@ -1,27 +1,30 @@
 package morfologik.stemming;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import morfologik.fsa.*;
+import morfologik.util.ResourceUtils;
 
 /**
  * This class implements a dictionary lookup over an FSA dictionary. The
- * dictionary for this class should be prepared from a text file using 
- * Jan Daciuk's FSA package (see link below).
- *
- * <p>Please note that finite state automatons in Jan Daciuk's implementation use
+ * dictionary for this class should be prepared from a text file using Jan
+ * Daciuk's FSA package (see link below).
+ * 
+ * <p>
+ * <b>Important:</b> finite state automatons in Jan Daciuk's implementation use
  * <em>bytes</em> not unicode characters. Therefore objects of this class always
  * have to be constructed with an encoding used to convert Java strings to byte
  * arrays and the other way around. You <b>can</b> use UTF-8 encoding, as it
  * should not conflict with any control sequences and separator characters.
  * 
- * @see <a href="http://www.eti.pg.gda.pl/~jandac/fsa.html">FSA package Web
- *      site</a>
+ * @see <a href="http://www.eti.pg.gda.pl/~jandac/fsa.html">FSA package Web *
+ *      site< /a>
  */
-public final class DictionaryStemmer implements IStemmer {
+public final class DictionaryLookup implements IStemmer {
     /** An empty array used for 'no-matches' return. */
     private final static String[] NO_STEM = null;
 
@@ -32,7 +35,7 @@ public final class DictionaryStemmer implements IStemmer {
     private final FSA.Node root;
 
     /** Private internal reusable byte buffer for assembling strings. */
-    private ByteBuffer bb = ByteBuffer.allocate(/* magic default */ 40);
+    private ByteBuffer bb = ByteBuffer.allocate(/* magic default */40);
 
     /** Private internal reusable array for assembling word forms. */
     private final ArrayList<String> forms = new ArrayList<String>(2);
@@ -40,35 +43,63 @@ public final class DictionaryStemmer implements IStemmer {
     /**
      * Features of the compiled dictionary.
      * 
-     * @see DictionaryFeatures
+     * @see DictionaryMetadata
      */
-    private final DictionaryFeatures dictionaryFeatures;
+    private final DictionaryMetadata dictionaryFeatures;
 
     /**
      * <p>
      * Creates a new object of this class using the given FSA for word lookups
      * and encoding for converting characters to bytes.
      * 
-     * @throws UnsupportedEncodingException
-     *             if the given encoding is not found in the system.
      * @throws IllegalArgumentException
      *             if FSA's root node cannot be acquired (dictionary is empty).
      */
-    public DictionaryStemmer(Dictionary dictionary)
-    	throws UnsupportedEncodingException, IllegalArgumentException
-    {
+    public DictionaryLookup(Dictionary dictionary)
+	    throws IllegalArgumentException {
 	this.dictionaryFeatures = dictionary.metadata;
 	this.root = dictionary.fsa.getStartNode();
 	this.matcher = dictionary.fsa.getTraversalHelper();
 
 	if (root == null) {
 	    throw new IllegalArgumentException(
-	    "Dictionary must have at least the root node.");
+		    "Dictionary must have at least the root node.");
 	}
 
 	if (dictionaryFeatures == null) {
 	    throw new IllegalArgumentException(
-	    "Dictionary metadata must not be null.");
+		    "Dictionary metadata must not be null.");
+	}
+    }
+
+    /**
+     * Create a dictionary stemmer for a given ISO language code. The dictionary
+     * is read from classpath resources.
+     */
+    DictionaryLookup(String languageCode) {
+	this(readDictionaryResource(languageCode));
+    }
+
+    /**
+     * Read the default dictionary for a given language.
+     */
+    private static Dictionary readDictionaryResource(String languageCode) {
+	if (languageCode == null || "".equals(languageCode)) {
+	    throw new IllegalArgumentException(
+		    "Language code must not be empty.");
+	}
+
+	final String dictPath = "/morfologik/dictionaries/" + languageCode
+		+ ".dict";
+	final String metaPath = Dictionary.getExpectedFeaturesName(dictPath);
+
+	try {
+	    return Dictionary.readAndClose(ResourceUtils
+		    .openInputStream(dictPath), ResourceUtils
+		    .openInputStream(metaPath));
+	} catch (IOException e) {
+	    throw new RuntimeException("Default dictionary resource for language '"
+		    + languageCode + "not found.", e);
 	}
     }
 
@@ -97,25 +128,28 @@ public final class DictionaryStemmer implements IStemmer {
 
 	try {
 	    // try to find a partial match in the dictionary.
-	    final FSAMatch match = matcher.matchSequence(
-		    word.getBytes(encoding), root);
+	    final FSAMatch match = matcher.matchSequence(word
+		    .getBytes(encoding), root);
 
 	    if (match.getMatchType() == FSAMatchType.PREMATURE_WORD_END_FOUND) {
 		/*
 		 * The entire sequence fit into the dictionary. Now a separator
 		 * should be the next character.
 		 */
-		final FSA.Arc arc = match.getMismatchNode().getArcLabelledWith(separator);
+		final FSA.Arc arc = match.getMismatchNode().getArcLabelledWith(
+			separator);
 
 		/*
 		 * The situation when the arc points to a final node should
-		 * NEVER happen. After all, we want the word to have SOME base form.
+		 * NEVER happen. After all, we want the word to have SOME base
+		 * form.
 		 */
 		if (arc != null && !arc.isFinal()) {
-		    // There is such word in the dictionary. Return its base forms.
+		    // There is such word in the dictionary. Return its base
+		    // forms.
 		    forms.clear();
-		    final Iterator<byte[]> i = matcher.getAllSubsequences(
-			    arc.getDestinationNode());
+		    final Iterator<byte[]> i = matcher.getAllSubsequences(arc
+			    .getDestinationNode());
 		    while (i.hasNext()) {
 			final byte[] baseCompressed = i.next();
 
@@ -147,8 +181,9 @@ public final class DictionaryStemmer implements IStemmer {
 		}
 	    } else {
 		/*
-		 * this case is somewhat confusing: we should have hit the separator first...
-		 * I don't really know how to deal with it at the time being.
+		 * this case is somewhat confusing: we should have hit the
+		 * separator first... I don't really know how to deal with it at
+		 * the time being.
 		 */
 	    }
 
@@ -172,8 +207,9 @@ public final class DictionaryStemmer implements IStemmer {
 		return "";
 	    }
 
-	    // Determine inflected string's length in bytes, in the same encoding.
-	    final byte [] infBytes = inflected.getBytes(encoding); 
+	    // Determine inflected string's length in bytes, in the same
+	    // encoding.
+	    final byte[] infBytes = inflected.getBytes(encoding);
 	    final int infLen = infBytes.length;
 	    final int code0 = bytes[0] - 'A';
 
@@ -184,39 +220,44 @@ public final class DictionaryStemmer implements IStemmer {
 	    }
 
 	    if (code0 >= 0) {
-		if (!fsaPrefixes && !fsaInfixes) {		
+		if (!fsaPrefixes && !fsaInfixes) {
 		    if (code0 <= infLen) {
 			bb.put(infBytes, 0, infLen - code0);
 			bb.put(bytes, 1, len - 1);
-			return new String(bb.array(), 0, bb.position(), encoding);
-		    }		
+			return new String(bb.array(), 0, bb.position(),
+				encoding);
+		    }
 		} else if (fsaPrefixes && !fsaInfixes) {
 		    if (len > 1) {
 			final int stripAtEnd = bytes[1] - 'A' + code0;
 			if (stripAtEnd <= infLen) {
 			    bb.put(infBytes, code0, infLen - stripAtEnd);
 			    bb.put(bytes, 2, len - 2);
-			    return new String(bb.array(), 0, bb.position(), encoding);
+			    return new String(bb.array(), 0, bb.position(),
+				    encoding);
 			}
 		    }
-		} else if (fsaInfixes) { 
+		} else if (fsaInfixes) {
 		    // Note: prefixes are silently assumed here
 		    if (len > 2) {
 			final int stripAtBeginning = bytes[1] - 'A' + code0;
-			final int stripAtEnd = bytes[2] - 'A' + stripAtBeginning;
+			final int stripAtEnd = bytes[2] - 'A'
+				+ stripAtBeginning;
 			if (stripAtEnd <= infLen) {
 			    bb.put(infBytes, 0, code0);
-			    bb.put(infBytes, stripAtBeginning, infLen - stripAtEnd);
+			    bb.put(infBytes, stripAtBeginning, infLen
+				    - stripAtEnd);
 			    bb.put(bytes, 3, len - 3);
-			    return new String(bb.array(), 0, bb.position(), encoding);
+			    return new String(bb.array(), 0, bb.position(),
+				    encoding);
 			}
 		    }
 		}
 	    }
 
 	    /*
-	     * This is a fallback in case some junk is detected above. Return the base
-	     * form only if this is the case.
+	     * This is a fallback in case some junk is detected above. Return
+	     * the base form only if this is the case.
 	     */
 	    return new String(bytes, 0, len, encoding);
 	} catch (UnsupportedEncodingException e) {

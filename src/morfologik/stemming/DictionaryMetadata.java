@@ -2,15 +2,14 @@ package morfologik.stemming;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Description of attributes, their types and default values.
  * 
  * @see Dictionary
  */
-public final class DictionaryFeatures {
+public final class DictionaryMetadata {
     /**
      * Attribute name for {@link #separator}.
      */
@@ -30,7 +29,7 @@ public final class DictionaryFeatures {
      * Attribute name for {@link #usesInfixes}.
      */
     public final static String ATTR_NAME_USES_INFIXES = "fsa.dict.uses-infixes";
-
+    
     /** 
      * A separator character between fields (stem, lemma, form). The character
      * must be within byte range (FSA uses bytes internally).
@@ -53,16 +52,20 @@ public final class DictionaryFeatures {
     public final boolean usesInfixes;
 
     /**
-     * Creates an immutable instance of {@link DictionaryFeatures}. 
+     * Other meta data not included above.
      */
-    public DictionaryFeatures(
-            char separator, String encoding, boolean usesPrefixes,
-            boolean usesInfixes)
+    public final Map<String, String> metadata;
+    
+    /**
+     * Creates an immutable instance of {@link DictionaryMetadata}. 
+     */
+    public DictionaryMetadata(char separator, String encoding, 
+	    boolean usesPrefixes, boolean usesInfixes, Map<String, String> metadata)
     {
         this.encoding = encoding;
         this.usesPrefixes = usesPrefixes;
         this.usesInfixes = usesInfixes;
-        
+
         try {
             final byte [] separatorBytes = new String(new char [] {separator}).getBytes(encoding);
             if (separatorBytes.length != 1) {
@@ -73,13 +76,15 @@ public final class DictionaryFeatures {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Encoding not supported on this VM: " + encoding);
         }
+
+        this.metadata = Collections.unmodifiableMap(new HashMap<String, String>(metadata));
     }
 
     /**
      * Converts attributes in a {@link Map} to an instance of {@link Dictionary},
      * validating attribute values. 
      */
-    static DictionaryFeatures fromMap(Properties properties)
+    static DictionaryMetadata fromMap(Properties properties)
         throws IOException
     {
         final String separator = properties.getProperty(ATTR_NAME_SEPARATOR);
@@ -99,8 +104,11 @@ public final class DictionaryFeatures {
 
         final boolean usesInfixes = Boolean.valueOf(
                 properties.getProperty(ATTR_NAME_USES_INFIXES, "false")).booleanValue();
-        
-        return new DictionaryFeatures(
-                separator.charAt(0), encoding, usesPrefixes, usesInfixes);
+
+        final HashMap<String, String> metadata = new HashMap<String, String>();
+        properties.putAll(metadata);
+
+        return new DictionaryMetadata(
+                separator.charAt(0), encoding, usesPrefixes, usesInfixes, metadata);
     }
 }

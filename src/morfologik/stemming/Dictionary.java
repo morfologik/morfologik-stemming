@@ -12,9 +12,8 @@ import morfologik.util.FileUtils;
 import morfologik.util.ResourceUtils;
 
 /**
- * <p>
  * A dictionary combines {@link FSA} automaton and metadata describing the
- * internals of dictionary entries' coding ({@link DictionaryFeatures}.
+ * internals of dictionary entries' coding ({@link DictionaryMetadata}.
  * 
  * <p>
  * A dictionary consists of two files:
@@ -38,7 +37,7 @@ public final class Dictionary {
     /**
      * Metadata associated with the dictionary.
      */
-    public final DictionaryFeatures metadata;
+    public final DictionaryMetadata metadata;
 
     /**
      * It is strongly recommended to use static methods in this class for
@@ -51,9 +50,9 @@ public final class Dictionary {
      *            A map of attributes describing the compression format and
      *            other settings not contained in the FSA automaton. For an
      *            explanation of available attributes and their possible values,
-     *            see {@link DictionaryFeatures}.
+     *            see {@link DictionaryMetadata}.
      */
-    public Dictionary(FSA fsa, DictionaryFeatures metadata) {
+    public Dictionary(FSA fsa, DictionaryMetadata metadata) {
 	this.fsa = fsa;
 	this.metadata = metadata;
     }
@@ -99,8 +98,7 @@ public final class Dictionary {
 	    final Properties properties = new Properties();
 	    properties.load(featuresData);
 
-	    final DictionaryFeatures features = DictionaryFeatures
-		    .fromMap(properties);
+	    final DictionaryMetadata features = DictionaryMetadata.fromMap(properties);
 	    final FSA fsa = FSA.getInstance(fsaData, features.encoding);
 
 	    return new Dictionary(fsa, features);

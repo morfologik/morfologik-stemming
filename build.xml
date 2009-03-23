@@ -44,7 +44,8 @@
 
 
 	<target name="compile" depends="init">
-		<javac classpath="${classpath}" destdir="${build.dir}" encoding="UTF-8" source="1.4" target="1.4">
+		<javac classpath="${classpath}" destdir="${build.dir}" encoding="UTF-8" 
+				source="1.5" target="1.5">
 			<classpath refid="compile.classpath" />
 			<include name="**/*.java" />
 			<src location="src" />
@@ -108,28 +109,31 @@
 	<target name="jar" depends="clean, compile">
 		<mkdir dir="${tmp.dir}/bin" />
 
+		<property name="main.class" value="morfologik.tools.Launcher" />
+		
 		<pathconvert property="manifest.classpath" pathsep=" ">
 			<flattenmapper />
 			<path>
 				<fileset refid="runtime.dependencies" />
 			</path>
 		</pathconvert>
+
 		<jar jarfile="${jarfile}">
 			<fileset dir="${build.dir}" />
-			<zipfileset file="LICENSE.txt" fullpath="META-INF/LICENSE.txt" />
+			<zipfileset file="LICENSE" fullpath="META-INF/Morfologik.LICENSE" />
 			<manifest>
-				<attribute name="Main-Class" value="morfologik.Tools" />
+				<attribute name="Main-Class" value="${main.class}" />
 				<attribute name="Class-Path" value="${manifest.classpath}" />
 			</manifest>
 		</jar>
+
 		<jar jarfile="${jarfile-nodict}">
 			<fileset dir="${build.dir}">
-				<exclude name="**/*.dict" />
-				<exclude name="**/*.info" />
+				<exclude name="morfologik/dictionaries/**" />
 			</fileset>
-			<zipfileset file="LICENSE.nodict.txt" fullpath="META-INF/LICENSE.txt" />
+			<zipfileset file="LICENSE" fullpath="META-INF/Morfologik.LICENSE" />
 			<manifest>
-				<attribute name="Main-Class" value="morfologik.Tools" />
+				<attribute name="Main-Class" value="${main.class}" />
 			</manifest>
 		</jar>
 	</target>
