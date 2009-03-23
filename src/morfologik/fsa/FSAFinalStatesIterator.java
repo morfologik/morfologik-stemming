@@ -10,7 +10,7 @@ import morfologik.fsa.FSA.Node;
  * {@link FSA.Node} and returns {@link String} objects corresponding to final
  * states.
  */
-public final class FSAFinalStatesIterator implements Iterator<byte[]> {
+final class FSAFinalStatesIterator implements Iterator<byte[]> {
     /**
      * Default expected depth of the recursion stack (estimated longest sequence
      * in the automaton). Buffers expand by the same value if exceeded.
@@ -50,9 +50,6 @@ public final class FSAFinalStatesIterator implements Iterator<byte[]> {
     /**
      * @return Returns <code>byte[]</code> with the next final state in the
      *         automaton.
-     * @throws NoSuchElementException
-     *             If this method is called after {@link #hasNext()} returned
-     *             <code>false</code>.
      */
     public byte[] next() {
 	if (nextElement != null) {

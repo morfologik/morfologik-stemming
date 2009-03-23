@@ -2,47 +2,46 @@ package morfologik.stemming;
 
 import java.io.IOException;
 
-
 /**
- * This stemmer uses a sequence of {@link IStemmer} instances for lookup. The first
- * one to return a result wins.
+ * This stemmer uses a sequence of {@link IStemmer} instances for lookup. The
+ * first one to return a non-null result wins.
  */
-public class CascadedStemmer implements morfologik.stemming.IStemmer {
+public final class CascadedStemmer implements IStemmer {
     /** Stemmers used in the cascade. */
-    private final IStemmer [] stemmers;
+    private final IStemmer[] stemmers;
 
     /**
      * 
      */
-    public CascadedStemmer(IStemmer [] stemmers) throws IOException {
-        this.stemmers = stemmers;
+    public CascadedStemmer(IStemmer... stemmers) throws IOException {
+	this.stemmers = stemmers;
     }
 
     /**
      * @see IStemmer#stem(String)
      */
-    public String [] stem(String word) {
-        for (int i = 0; i < stemmers.length; i++) {
-            final String [] result = stemmers[i].stem(word);
-            if (result != null && result.length > 0) {
-                return result;
-            }
-        }
+    public String[] stem(String word) {
+	for (int i = 0; i < stemmers.length; i++) {
+	    final String[] result = stemmers[i].stem(word);
+	    if (result != null && result.length > 0) {
+		return result;
+	    }
+	}
 
-        return null;
+	return null;
     }
 
     /**
-     * @see IStemmer#stemAndForm(String) 
+     * @see IStemmer#stemAndForm(String)
      */
     public String[] stemAndForm(String word) {
-        for (int i = 0; i < stemmers.length; i++) {
-            final String [] result = stemmers[i].stemAndForm(word);
-            if (result != null && result.length > 0) {
-                return result;
-            }
-        }
+	for (int i = 0; i < stemmers.length; i++) {
+	    final String[] result = stemmers[i].stemAndForm(word);
+	    if (result != null && result.length > 0) {
+		return result;
+	    }
+	}
 
-        return null;
+	return null;
     }
 }

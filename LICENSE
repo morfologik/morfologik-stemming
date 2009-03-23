@@ -1,16 +1,4 @@
 
-This program contains data generated from alt-ispell-pl project:
-version 2005-01-26, http://www.kurnik.pl/dictionary
-
-Note that Stempel has an independent license (Apache-style).
-
-The rest of Lametyzator/Stempelator code is covered by a plain
-BSD license. Feel free to use, redistribute and modify as you wish.
-Explicit credit given to the authors (an URL back to the project, 
-for instance) will be helpful.
-
---
-
 Copyright (c) 2006 Dawid Weiss.
 Copyright (c) 2007 Morfologik project.
 All rights reserved.

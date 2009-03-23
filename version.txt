@@ -1,5 +1,10 @@
 
-1.2       * Package hierarchy reorganized.       
+1.2       Package hierarchy reorganized.       
+
+          Removed stempel (heuristic stemmer for Polish).
+
+          Code updated to Java 1.5. API changed slightly in many places (enums instead of constants,
+          generics used instead of iterators).
 
 --------
 

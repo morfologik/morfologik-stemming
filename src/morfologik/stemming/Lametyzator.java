@@ -3,8 +3,6 @@ package morfologik.stemming;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import morfologik.fsa.Dictionary;
-import morfologik.fsa.DictionaryStemmer;
 import morfologik.util.ResourceUtils;
 
 /**
@@ -12,7 +10,7 @@ import morfologik.util.ResourceUtils;
  * and their tags. This stemmer requires an FSA-compiled dictionary and
  * is a simple delegate to {@link DictionaryStemmer}.
  *
- * @see morfologik.fsa.DictionaryStemmer
+ * @see morfologik.stemming.DictionaryStemmer
  */
 public class Lametyzator implements IStemmer {
     /**

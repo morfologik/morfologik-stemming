@@ -1,4 +1,4 @@
-package morfologik.fsa;
+package morfologik.stemming;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
+import morfologik.fsa.FSA;
 import morfologik.util.FileUtils;
 import morfologik.util.ResourceUtils;
 

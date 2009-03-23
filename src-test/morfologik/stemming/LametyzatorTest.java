@@ -3,10 +3,6 @@ package morfologik.stemming;
 import java.io.IOException;
 import java.net.URL;
 
-import morfologik.fsa.Dictionary;
-import morfologik.stemming.Lametyzator;
-import morfologik.stemming.Stempelator;
-
 import junit.framework.TestCase;
 import junitx.framework.ArrayAssert;
 
@@ -43,7 +39,7 @@ public class LametyzatorTest extends TestCase {
         assertNotNull(url);
         System.setProperty(Lametyzator.PROPERTY_NAME_LAMETYZATOR_DICTIONARY, url.toExternalForm());
         try {
-            new Stempelator();
+            new Lametyzator();
         } catch (IOException e) {
             fail();
         }

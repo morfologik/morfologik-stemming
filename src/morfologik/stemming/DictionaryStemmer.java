@@ -1,20 +1,18 @@
-package morfologik.fsa;
+package morfologik.stemming;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import morfologik.stemming.IStemmer;
+import morfologik.fsa.*;
 
 /**
- * <p>
  * This class implements a dictionary lookup over an FSA dictionary. The
- * dictionary for this class should be created using Jan Daciuk's FSA package
- * (see link below).
- * 
- * <p>
- * Please note that finite state automatons in Jan Daciuk's implementation use
+ * dictionary for this class should be prepared from a text file using 
+ * Jan Daciuk's FSA package (see link below).
+ *
+ * <p>Please note that finite state automatons in Jan Daciuk's implementation use
  * <em>bytes</em> not unicode characters. Therefore objects of this class always
  * have to be constructed with an encoding used to convert Java strings to byte
  * arrays and the other way around. You <b>can</b> use UTF-8 encoding, as it
@@ -36,6 +34,9 @@ public final class DictionaryStemmer implements IStemmer {
     /** Private internal reusable byte buffer for assembling strings. */
     private ByteBuffer bb = ByteBuffer.allocate(/* magic default */ 40);
 
+    /** Private internal reusable array for assembling word forms. */
+    private final ArrayList<String> forms = new ArrayList<String>(2);
+
     /**
      * Features of the compiled dictionary.
      * 
@@ -54,7 +55,8 @@ public final class DictionaryStemmer implements IStemmer {
      *             if FSA's root node cannot be acquired (dictionary is empty).
      */
     public DictionaryStemmer(Dictionary dictionary)
-    throws UnsupportedEncodingException, IllegalArgumentException {
+    	throws UnsupportedEncodingException, IllegalArgumentException
+    {
 	this.dictionaryFeatures = dictionary.metadata;
 	this.root = dictionary.fsa.getStartNode();
 	this.matcher = dictionary.fsa.getTraversalHelper();
@@ -95,30 +97,30 @@ public final class DictionaryStemmer implements IStemmer {
 
 	try {
 	    // try to find a partial match in the dictionary.
-	    final FSAMatch match = matcher.matchSequence(word
-		    .getBytes(encoding), root);
+	    final FSAMatch match = matcher.matchSequence(
+		    word.getBytes(encoding), root);
 
 	    if (match.getMatchType() == FSAMatchType.PREMATURE_WORD_END_FOUND) {
-		// the entire sequence fit into the dictionary. Now a separator
-		// should be the next
-		// character.
-		final FSA.Arc arc = match.getMismatchNode().getArcLabelledWith(
-			separator);
+		/*
+		 * The entire sequence fit into the dictionary. Now a separator
+		 * should be the next character.
+		 */
+		final FSA.Arc arc = match.getMismatchNode().getArcLabelledWith(separator);
 
-		// The situation when the arc points to a final node should
-		// NEVER happen. After all, we want the word to have SOME base
-		// form.
+		/*
+		 * The situation when the arc points to a final node should
+		 * NEVER happen. After all, we want the word to have SOME base form.
+		 */
 		if (arc != null && !arc.isFinal()) {
-		    // there is such word in the dictionary. Return its base
-		    // forms.
-		    final ArrayList<String> forms = new ArrayList<String>(2);
+		    // There is such word in the dictionary. Return its base forms.
+		    forms.clear();
 		    final Iterator<byte[]> i = matcher.getAllSubsequences(
 			    arc.getDestinationNode());
 		    while (i.hasNext()) {
 			final byte[] baseCompressed = i.next();
 
-			// look for the delimiter of the 'grammar' tag in
-			// the original Jan Daciuk's FSA format.
+			// Look for the delimiter of the 'grammar' tag in
+			// Jan Daciuk's FSA format.
 			int j;
 			for (j = 0; j < baseCompressed.length; j++) {
 			    if (baseCompressed[j] == separator)

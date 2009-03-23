@@ -1,5 +1,7 @@
 package morfologik.fsa;
 
+import java.util.Iterator;
+
 import junit.framework.TestCase;
 
 /**
@@ -21,8 +23,7 @@ public final class FSATraversalTest extends TestCase {
      */
     public void testTraversalWithIterator() {
 	final FSATraversalHelper helper = dict.getTraversalHelper();
-	final FSAFinalStatesIterator i = helper.getAllSubsequences(dict
-		.getStartNode());
+	final Iterator<byte[]> i = helper.getAllSubsequences(dict.getStartNode());
 
 	int count = 0;
 	while (i.hasNext()) {

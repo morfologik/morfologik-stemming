@@ -6,7 +6,6 @@ import java.util.TreeMap;
 
 import morfologik.tools.FSADumpTool;
 import morfologik.tools.LametyzatorTool;
-import morfologik.tools.StempelatorTool;
 
 /**
  * A single class for launching command-line tools
@@ -42,11 +41,6 @@ public final class Tools {
                 new ToolInfo(
                         LametyzatorTool.class, 
                         "Process text files with Lametyzator stemmer."));
-
-        tools.put("stempelator",
-                new ToolInfo(
-                        StempelatorTool.class, 
-                        "Process text files with Stempelator stemmer."));
 
         return tools;
     }

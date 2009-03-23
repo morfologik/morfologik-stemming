@@ -5,7 +5,6 @@
 	<classpathentry kind="src" path="src-test"/>
 	<classpathentry kind="lib" path="lib/junit.jar"/>
 	<classpathentry kind="lib" path="lib/junit-addons-1.4.jar"/>
-	<classpathentry kind="lib" path="lib/stempel-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/commons-cli-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
 	<classpathentry kind="output" path="tmp/build"/>
 </classpath>

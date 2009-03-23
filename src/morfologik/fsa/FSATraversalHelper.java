@@ -22,7 +22,7 @@ public class FSATraversalHelper {
      * Returns an {@link Iterator} of all subsequences available from the given node to
      * all reachable final states.
      */
-    public FSAFinalStatesIterator getAllSubsequences(final FSA.Node node) {
+    public Iterator<byte[]> getAllSubsequences(final FSA.Node node) {
         if (node == null) {
             throw new IllegalArgumentException("Node cannot be null.");
         }
@@ -34,28 +34,8 @@ public class FSATraversalHelper {
 
     /**
      * Finds a matching path in the dictionary for a given sequence of labels.
-     * Several return values are possible:
-     * <ol>
-     * <li>{@link FSAMatchType#EXACT_MATCH} - The sequence ends exactly on the
-     * final node. A match has been found.
-     * 
-     * <li>{@link FSAMatchType#PREFIX_FOUND} - The sequence ends on an
-     * intermediate automaton node. The sequence is therefore a prefix of at
-     * least one other sequence stored in the dictionary. The result Match will
-     * contain an index of the first character in the input sequence not present
-     * in the dictionary and a pointer to the FSA.Node where mismatch occurred.
-     * 
-     * <li>{@link FSAMatchType#PREMATURE_PATH_END_FOUND} - Dictionary's path
-     * ends before the sequence. It means a prefix of the input sequence is
-     * stored in the dictionary. (i.e. an empty sequence is a prefix of all
-     * other sequences). The result Match will contain an index of the first
-     * character not present in the dictionary.
-     * 
-     * <li>{@link FSAMatchType#PREMATURE_WORD_END_FOUND} - The input sequence
-     * ends on an intermediate automaton node. This is a special case of
-     * {@link FSAMatchType#PREFIX_FOUND}. A Node where the mismatch (lack of
-     * input sequence's characters) occurred is returned in Match.
-     * </ol>
+     * Several scenarios are possible and are described in 
+     * {@link FSAMatchType}.
      */
     public FSAMatch matchSequence(byte [] sequence, FSA fsa) {
         return matchSequence(sequence, fsa.getStartNode());
@@ -91,14 +71,14 @@ public class FSATraversalHelper {
                     node = arc.getDestinationNode();
                 }
             } else {
-                // the label was not found. i.e. there possibly are prefixes
-                // of the word in the dictionary, but an exact match doesn't exist.
+                // The label was not found. i.e. there possibly are prefixes
+                // of the word in the dictionary, but an exact match does not exist.
                 // [an empty string is also considered a prefix!]
                 return new FSAMatch(PREFIX_FOUND, i, node);
             }
         }
 
-        // the word is a prefix of some other sequence(s) present in the dictionary.
+        // The word is a prefix of some other sequence(s) present in the dictionary.
         return new FSAMatch(PREMATURE_WORD_END_FOUND, 0, node);
     }
 

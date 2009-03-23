@@ -1,0 +1,28 @@
+
+CONTENTS
+--------
+
+This project provides:
+
+  - Finite state automaton traversal routines for Jan Daciuk's FSA package.
+
+  - A stemming engine for the Polish language built on top of FSA traversal.
+
+There are a few command-line tools you may find useful. Type:
+
+  java -jar morfologik-stemming-*.jar
+
+for an up-to-date list of all tools.
+
+
+AUTHORS
+=======
+
+Marcin Miłkowski
+Dawid Weiss (http://www.dawidweiss.com)
+
+
+QUESTIONS, COMMENTS
+===================
+
+www.morfologik.blogspot.com

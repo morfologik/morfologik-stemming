@@ -7,6 +7,7 @@ import java.text.MessageFormat;
 import java.util.Iterator;
 
 import morfologik.fsa.*;
+import morfologik.stemming.Dictionary;
 import morfologik.util.FileUtils;
 
 import org.apache.commons.cli.CommandLine;
@@ -119,16 +120,14 @@ public final class FSADumpTool extends BaseCommandLineTool {
         writer.println("--------------------");
 
         if (useAPI) {
-            final Iterator i = fsa.getTraversalHelper().getAllSubsequences(fsa.getStartNode());
+            final Iterator<byte[]> i = fsa.getTraversalHelper().getAllSubsequences(fsa.getStartNode());
             if (encoding != null) {
                 while (i.hasNext()) {
-                    final byte[] sequence = (byte[]) i.next();
-                    writer.println(new String(sequence, encoding));
+                    writer.println(new String(i.next(), encoding));
                 }
             } else {
                 while (i.hasNext()) {
-                    final byte[] sequence = (byte[]) i.next();
-                    writer.write(sequence);
+                    writer.write(i.next());
                     writer.println();
                 }
             }

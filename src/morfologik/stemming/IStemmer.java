@@ -1,11 +1,7 @@
 package morfologik.stemming;
 
 /**
- * <p>A generic stemmer interface in Morfologik.
- * 
- * @see Lametyzator
- * @see Stempel
- * @see Stempelator
+ * A generic stemmer interface in Morfologik.
  */
 public interface IStemmer {
     /**

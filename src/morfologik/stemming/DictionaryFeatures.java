@@ -1,4 +1,4 @@
-package morfologik.fsa;
+package morfologik.stemming;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
