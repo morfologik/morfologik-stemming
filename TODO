@@ -16,6 +16,12 @@ Stemming performance -> Rounds: 20, Time: 4.405, Time/round: 0.220, Sequences/se
 
 Reusable ByteBuffer 
 
-FSA traversal -> Rounds: 20, Time: 5.811, Time/round: 0.291, Sequences/sec.: 172087
+FSA traversal        -> Rounds: 20, Time: 5.811, Time/round: 0.291, Sequences/sec.: 172087
 Stemming performance -> Rounds: 20, Time: 4.405, Time/round: 0.220, Sequences/sec.: 227014
 
+Switching to int representation for arcs and nodes. This reduces code clarity, but boosts
+performance twice. Itt's worth it. Not many people will use FSA directly and if they do,
+they probably can live with int pointers.
+
+FSA traversal        -> Rounds: 20, Time: 2.530, Time/round: 0.127, Sequences/sec.: 395256
+Stemming performance -> Rounds: 20, Time: 2.625, Time/round: 0.131, Sequences/sec.: 380952

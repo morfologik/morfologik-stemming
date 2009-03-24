@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.*;
 import java.text.MessageFormat;
+import java.util.Arrays;
 
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSAHelpers;
@@ -145,7 +146,7 @@ public final class FSADumpTool extends Tool {
 		}
 	    }
 	} else {
-	    dumpNode(fsa.getStartNode(), 0);
+	    dumpNode(fsa, fsa.getRootNode(), 0);
 	}
 
 	writer.println("--------------------");
@@ -159,9 +160,9 @@ public final class FSADumpTool extends Tool {
     /**
      * Called recursively traverses the automaton.
      */
-    private void dumpNode(FSA.Node node, final int depth)
+    private void dumpNode(FSA fsa, int node, final int depth)
 	    throws UnsupportedEncodingException {
-	FSA.Arc arc = node.getFirstArc();
+	int arc = fsa.getFirstArc(node);
 	do {
 	    if (depth >= word.length) {
 		if (word.length + BUFFER_INCREMENT > MAX_BUFFER_SIZE) {
@@ -170,16 +171,15 @@ public final class FSADumpTool extends Tool {
 			    + " bytes exceeded. A loop in the automaton maybe?");
 		}
 
-		word = FSAHelpers.resizeArray(word, word.length
-			+ BUFFER_INCREMENT);
+		word = Arrays.copyOf(word, word.length + BUFFER_INCREMENT);
 
 		// Redo the operation.
-		word[depth] = arc.getLabel();
+		word[depth] = fsa.getArcLabel(arc);
 	    }
 
-	    word[depth] = arc.getLabel();
+	    word[depth] = fsa.getArcLabel(arc);
 
-	    if (arc.isFinal()) {
+	    if (fsa.isArcFinal(arc)) {
 		if (encoding != null) {
 		    writer.println(new String(word, 0, depth + 1, encoding));
 		} else {
@@ -188,12 +188,12 @@ public final class FSADumpTool extends Tool {
 		}
 	    }
 
-	    if (!arc.isTerminal()) {
-		dumpNode(arc.getDestinationNode(), depth + 1);
+	    if (fsa.isArcTerminal(arc)) {
+		dumpNode(fsa, fsa.getEndNode(arc), depth + 1);
 	    }
 
-	    arc = node.getNextArc(arc);
-	} while (arc != null);
+	    arc = fsa.getNextArc(node, arc);
+	} while (arc != 0);
     }
 
     /**

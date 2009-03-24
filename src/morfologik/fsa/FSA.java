@@ -32,68 +32,6 @@ public abstract class FSA implements Iterable<ByteBuffer> {
     public final static byte VERSION_5 = 5;
 
     /**
-     * A node in the automaton.
-     */
-    public interface Node {
-	/**
-	 * Returns the first outgoing arc of this node. Theoretically, this
-	 * method should ALWAYS return at least one arc. (final nodes have no
-	 * representation).
-	 */
-	public Arc getFirstArc();
-
-	/**
-	 * Returns a subsequent arc of this node, <code>null</code> is returned
-	 * when no more arcs are available.
-	 */
-	public Arc getNextArc(Arc arc);
-
-	/**
-	 * Returns an arc with a given label, if it exists in this node. The
-	 * default implementation in FSAAbstractNode simply traverses the list
-	 * of arcs from the first, to the last - implementations of Node may
-	 * implement a more efficient algorithm, if possible.
-	 */
-	public Arc getArcLabelledWith(byte label);
-    }
-
-    /**
-     * An arc (a labeled transition between two nodes) of the FSA.
-     */
-    public interface Arc {
-	/**
-	 * Returns the destination node, pointed to by this arc. Terminal nodes
-	 * throw a {@link RuntimeException} on this method.
-	 */
-	public Node getDestinationNode();
-
-	/**
-	 * Returns the label of this arc.
-	 */
-	public byte getLabel();
-
-	/**
-	 * @return Returns <code>true</code> if the destination node corresponds
-	 *         to an input sequence of this automaton.
-	 */
-	public boolean isFinal();
-
-	/**
-	 * @return Returns <code>true</code> if this arc is the last one of the
-	 *         owner node's arcs.
-	 */
-	public boolean isLast();
-
-	/**
-	 * @return Returns <code>true</code> if this arc does not have a
-	 *         terminating {@link FSA.Node}, a call to
-	 *         {@link #getDestinationNode()} should thrown an exception on
-	 *         this arc.
-	 */
-	public boolean isTerminal();
-    }
-
-    /**
      * Dictionary version (derived from the combination of flags).
      */
     protected byte version;
@@ -160,7 +98,7 @@ public abstract class FSA implements Iterable<ByteBuffer> {
     }
 
     /**
-     * Returns a version number of this FSA.
+     * Returns the version number of the binary representation of this FSA.
      * 
      * <p>
      * The version number is a derivation of combination of flags and is exactly
@@ -176,16 +114,15 @@ public abstract class FSA implements Iterable<ByteBuffer> {
      * dictionary has been built using {@link FSAFlags#FLEXIBLE} flag, one must
      * perform a bitwise AND:
      * <code>boolean isFlexible = ((dict.getFlags() &amp; FSA.FSA_FLEXIBLE ) != 0)</code>
-     * .
      */
     public final int getFlags() {
 	return FSAHelpers.getFlags(version);
     }
 
     /**
-     * @return Return the annotation separator character, converted to a
-     *         character according to the encoding scheme passed in in the
-     *         constructor of this class.
+     * Return the annotation separator character, converted to a character
+     * according to the encoding scheme passed in in the constructor of this
+     * class.
      */
     public final char getAnnotationSeparator() {
 	try {
@@ -204,9 +141,8 @@ public abstract class FSA implements Iterable<ByteBuffer> {
     }
 
     /**
-     * @return Return the filler character, converted to a character according
-     *         to the encoding scheme passed in in the constructor of this
-     *         class.
+     * Return the filler character, converted to a character according to the
+     * encoding scheme passed in in the constructor of this class.
      */
     public final char getFillerCharacter() {
 	try {
@@ -238,17 +174,11 @@ public abstract class FSA implements Iterable<ByteBuffer> {
     public abstract int getNumberOfNodes();
 
     /**
-     * Returns the start node of this automaton. May return null if the start
-     * node is also an end node.
-     */
-    public abstract FSA.Node getStartNode();
-
-    /**
-     * @return Returns an object which can be used to traverse a finite state
-     *         automaton.
+     * Returns an object which can be used to walk the edges of this finite
+     * state automaton and match arbitrary sequences against its states.
      */
     public FSATraversalHelper getTraversalHelper() {
-	return new FSATraversalHelper();
+	return new FSATraversalHelper(this);
     }
 
     /**
@@ -262,9 +192,10 @@ public abstract class FSA implements Iterable<ByteBuffer> {
      */
     public static FSA getInstance(File fsaFile, String dictionaryEncoding)
 	    throws IOException {
-	if (!fsaFile.exists())
+	if (!fsaFile.exists()) {
 	    throw new IOException("File does not exist: "
 		    + fsaFile.getAbsolutePath());
+	}
 
 	return getInstance(new FileInputStream(fsaFile), dictionaryEncoding);
     }
@@ -355,14 +286,76 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 
     /**
      * Returns an iterator over all binary sequences starting from the initial
-     * FSA state and ending in final nodes. The returned iterator is a {@link ByteBuffer}
-     * that changes on each call to {@link Iterator#next()}, so if the content should
-     * be preserved, it must be copied somewhere else.
-     *
-     * <p>It is guaranteed that the returned byte buffer is backed by a byte array and
-     * that the content of the byte buffer starts at the array's index 0. 
+     * FSA state and ending in final nodes. The returned iterator is a
+     * {@link ByteBuffer} that changes on each call to {@link Iterator#next()},
+     * so if the content should be preserved, it must be copied somewhere else.
+     * 
+     * <p>
+     * It is guaranteed that the returned byte buffer is backed by a byte array
+     * and that the content of the byte buffer starts at the array's index 0.
      */
     public Iterator<ByteBuffer> iterator() {
-        return getTraversalHelper().getAllSubsequences(getStartNode());
+	return getTraversalHelper().getAllSubsequences(getRootNode());
     }
+
+    /**
+     * Returns the identifier of the root node of this automaton. May return 0
+     * if the start node is also the end node.
+     * 
+     * @see #getTraversalHelper()
+     */
+    public abstract int getRootNode();
+
+    /**
+     * Returns the identifier of the first arc leaving <code>node</code> or 0 if
+     * the node has no outgoing arcs.
+     * 
+     * @see #getTraversalHelper()
+     */
+    public abstract int getFirstArc(int node);
+
+    /**
+     * Returns the identifier of an arc leaving <code>node</code> and labeled
+     * with <code>label</code>. An identifier equal to 0 means the node has no
+     * outgoing arc labeled <code>label</code>.
+     * 
+     * @see #getTraversalHelper()
+     */
+    public abstract int getArc(int node, byte label);
+
+    /**
+     * Returns the identifier of the next arc after <code>arc</code> and leaving
+     * <code>node</code>. Zero is returned if no more arcs are available for the
+     * node.
+     * 
+     * @see #getTraversalHelper()
+     */
+    public abstract int getNextArc(int node, int arc);
+
+    /**
+     * Return the end node pointed to by a given <code>arc</code>. Terminal arcs
+     * (those that point to a terminal state) have no end node representation
+     * and throw a runtime exception.
+     * 
+     * @see #getTraversalHelper()
+     */
+    public abstract int getEndNode(int arc);
+
+    /**
+     * Return the label associated with a given <code>arc</code>.
+     */
+    public abstract byte getArcLabel(int arc);
+
+    /**
+     * Returns <code>true</code> if the destination node at the end of this
+     * <code>arc</code> corresponds to an input sequence created when building
+     * this automaton.
+     */
+    public abstract boolean isArcFinal(int arc);
+
+    /**
+     * Returns <code>true</code> if this <code>arc</code> does not have a
+     * terminating node.
+     */
+    public abstract boolean isArcTerminal(int arc);
 }

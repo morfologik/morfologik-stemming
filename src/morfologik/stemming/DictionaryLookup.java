@@ -19,8 +19,7 @@ import morfologik.fsa.*;
  * arrays and the other way around. You <b>can</b> use UTF-8 encoding, as it
  * should not conflict with any control sequences and separator characters.
  * 
- * @see <a href="http://www.eti.pg.gda.pl/~jandac/fsa.html">FSA package Web *
- *      site< /a>
+ * @see <a href="http://www.eti.pg.gda.pl/~jandac/fsa.html">FSA package Web site</a>
  */
 public final class DictionaryLookup implements IStemmer {
     /** An empty array used for 'no-matches' return. */
@@ -30,7 +29,7 @@ public final class DictionaryLookup implements IStemmer {
     private final FSATraversalHelper matcher;
 
     /** FSA's root node. */
-    private final FSA.Node root;
+    private final int rootNode;
 
     /** Private internal reusable byte buffer for assembling strings. */
     private ByteBuffer bb = ByteBuffer.allocate(/* magic default */40);
@@ -45,6 +44,11 @@ public final class DictionaryLookup implements IStemmer {
      */
     private final DictionaryMetadata dictionaryFeatures;
 
+    /*
+     * 
+     */
+    private FSA fsa;
+
     /**
      * <p>
      * Creates a new object of this class using the given FSA for word lookups
@@ -56,10 +60,11 @@ public final class DictionaryLookup implements IStemmer {
     public DictionaryLookup(Dictionary dictionary)
 	    throws IllegalArgumentException {
 	this.dictionaryFeatures = dictionary.metadata;
-	this.root = dictionary.fsa.getStartNode();
+	this.rootNode = dictionary.fsa.getRootNode();
 	this.matcher = dictionary.fsa.getTraversalHelper();
+	this.fsa = dictionary.fsa;
 
-	if (root == null) {
+	if (rootNode == 0) {
 	    throw new IllegalArgumentException(
 		    "Dictionary must have at least the root node.");
 	}
@@ -95,27 +100,27 @@ public final class DictionaryLookup implements IStemmer {
 
 	try {
 	    // try to find a partial match in the dictionary.
-	    final FSAMatch match = matcher.matchSequence(word
-		    .getBytes(encoding), root);
+	    final FSAMatch match = matcher.matchSequence(
+		    word.getBytes(encoding), rootNode);
 
 	    if (match.getMatchType() == FSAMatchType.PREMATURE_WORD_END_FOUND) {
 		/*
 		 * The entire sequence fit into the dictionary. Now a separator
 		 * should be the next character.
 		 */
-		final FSA.Arc arc = match.getMismatchNode().getArcLabelledWith(
-			separator);
+		final int arc =
+		    fsa.getArc(match.getMismatchNode(), separator);
 
 		/*
 		 * The situation when the arc points to a final node should
 		 * NEVER happen. After all, we want the word to have SOME base
 		 * form.
 		 */
-		if (arc != null && !arc.isFinal()) {
+		if (arc != 0 && !fsa.isArcFinal(arc)) {
 		    // There is such word in the dictionary. Return its base forms.
 		    forms.clear();
 		    final Iterator<ByteBuffer> i = 
-			matcher.getAllSubsequences(arc.getDestinationNode());
+			matcher.getAllSubsequences(fsa.getEndNode(arc));
 
 		    while (i.hasNext()) {
 			final ByteBuffer bb = i.next();

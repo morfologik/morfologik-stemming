@@ -28,14 +28,16 @@ public enum FSAMatchType {
      * therefore a prefix of at least one other sequence stored in the
      * dictionary. The result {@link FSAMatch} object will contain an index of
      * the first character in the input sequence not present in the dictionary
-     * and a pointer to the {@link FSA.Node} where mismatch occurred.
+     * and a pointer to the {@link FSA}'s <code>node</code> where mismatch
+     * occurred.
      */
     PREFIX_FOUND,
 
     /**
      * The input sequence ends on an intermediate automaton node. This is a
      * special case of {@link #PREFIX_FOUND}. A node where the mismatch (missing
-     * input sequence's characters) occurred is returned in the {@link FSAMatch}.
+     * input sequence's characters) occurred is returned in the {@link FSAMatch}
+     * .
      */
     PREMATURE_WORD_END_FOUND;
 }

@@ -12,14 +12,14 @@ import org.junit.Test;
  * Tests {@link FSATraversalHelper}.
  */
 public final class FSATraversalTest {
-    private FSA dict;
+    private FSA fsa;
 
     /**
      * 
      */
     @Before
     public void setUp() throws Exception {
-	dict = FSA.getInstance(this.getClass().getResourceAsStream(
+	fsa = FSA.getInstance(this.getClass().getResourceAsStream(
 		"en_tst.dict"), "iso8859-2");
     }
 
@@ -28,8 +28,8 @@ public final class FSATraversalTest {
      */
     @Test
     public void testTraversalWithIterator() {
-	final FSATraversalHelper helper = dict.getTraversalHelper();
-	final Iterator<ByteBuffer> i = helper.getAllSubsequences(dict.getStartNode());
+	final FSATraversalHelper helper = fsa.getTraversalHelper();
+	final Iterator<ByteBuffer> i = helper.getAllSubsequences(fsa.getRootNode());
 
 	int count = 0;
 	while (i.hasNext()) {
@@ -44,27 +44,28 @@ public final class FSATraversalTest {
     /**
      * 
      */
+    @Test
     public void testTraversalWithRecursion() {
 	final int[] counter = new int[] { 0 };
-
+	
 	class Recursion {
-	    public void dumpNode(final FSA.Node node) {
-		FSA.Arc arc = node.getFirstArc();
+	    public void dumpNode(final int node) {
+		int arc = fsa.getFirstArc(node);
 		do {
-		    if (arc.isFinal()) {
+		    if (fsa.isArcFinal(arc)) {
 			counter[0]++;
 		    }
 
-		    if (!arc.isTerminal()) {
-			dumpNode(arc.getDestinationNode());
+		    if (!fsa.isArcTerminal(arc)) {
+			dumpNode(fsa.getEndNode(arc));
 		    }
 
-		    arc = node.getNextArc(arc);
-		} while (arc != null);
+		    arc = fsa.getNextArc(node, arc);
+		} while (arc != 0);
 	    }
 	}
 
-	new Recursion().dumpNode(dict.getStartNode());
+	new Recursion().dumpNode(fsa.getRootNode());
 
 	assertEquals(346773, counter[0]);
     }

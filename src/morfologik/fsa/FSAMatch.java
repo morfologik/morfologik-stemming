@@ -6,27 +6,40 @@ package morfologik.fsa;
 public final class FSAMatch {
     private final FSAMatchType matchType;
     private final int mismatchAtIndex;
-    private final FSA.Node mismatchAtNode;
+    private final int mismatchAtNode;
 
-    FSAMatch(FSAMatchType type, int mismatchAtIndex, FSA.Node mismatchAtNode) {
+    FSAMatch(FSAMatchType type, int mismatchAtIndex, int mismatchAtNode) {
 	this.matchType = type;
 	this.mismatchAtIndex = mismatchAtIndex;
 	this.mismatchAtNode = mismatchAtNode;
     }
 
     protected FSAMatch(FSAMatchType type) {
-	this(type, 0, null);
+	this(type, 0, 0);
     }
 
+    /**
+     * Return match type.
+     */
     public FSAMatchType getMatchType() {
 	return matchType;
     }
 
+    /** 
+     * Return the index at which a mismatch occurred.
+     * 
+     * @see FSAMatchType
+     */
     public int getMismatchIndex() {
 	return mismatchAtIndex;
     }
 
-    public FSA.Node getMismatchNode() {
+    /**
+     * Return the node at which mismatch occurred.
+     * 
+     * @see FSAMatchType
+     */
+    public int getMismatchNode() {
 	return mismatchAtNode;
     }
 }

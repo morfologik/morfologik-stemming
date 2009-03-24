@@ -1,10 +1,19 @@
 
-1.2       Package hierarchy reorganized.       
+1.2       Package hierarchy reorganized.
 
           Removed stempel (heuristic stemmer for Polish).
 
-          Code updated to Java 1.5. API changed slightly in many places (enums instead of constants,
-          generics used instead of iterators).
+          Code updated to Java 1.5. 
+
+          The API has changed in many places (enums instead of constants, 
+          generics, iterables, removed explicit Arc and Node classes and replaced
+          by int pointers).
+
+          FSA traversal in version 1.2 is implemented on top of primitive
+          data structures (int pointers) to keep memory usage minimal. The speed
+          boost gained from this is enormous and justifies less readable code. We
+          strongly advise to use the provided iterators and helper functions
+          for matching in the FSA or retrieving its contents.  
 
 --------
 

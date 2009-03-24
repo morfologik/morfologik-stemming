@@ -29,7 +29,8 @@ public final class FSAHelpers
             if (res.length() > 0) {
                 res.append(' ');
             }
-            res.append("(Some flags were not recognized: " + Integer.toBinaryString(flags) + ")");
+            res.append("(Some flags were not recognized: " 
+        	    + Integer.toBinaryString(flags) + ")");
         }
 
         return res.toString();
@@ -105,15 +106,5 @@ public final class FSAHelpers
         }
 
         return flags;
-    }
-
-    /**
-     * Expand or truncate a byte array and copy the contents from the previous
-     * array to the new one.
-     */
-    public static byte[] resizeArray(byte[] buffer, int newSize) {
-	final byte[] newBuffer = new byte[newSize];
-	System.arraycopy(buffer, 0, newBuffer, 0, Math.min(buffer.length, newBuffer.length));
-	return newBuffer;
     }
 }
