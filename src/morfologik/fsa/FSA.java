@@ -10,35 +10,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
 
 import morfologik.util.FileUtils;
 
 /**
- * FSA (Finite State Automaton) traversal implementation, abstract base class
- * for all versions of FSA.
- * 
- * <p>
  * This class implements Finite State Automaton traversal as described in Jan
  * Daciuk's <i>Incremental Construction of Finite-State Automata and
  * Transducers, and Their Use in the Natural Language Processing</i> (PhD
  * thesis, Technical University of Gdansk).
  * 
  * <p>
- * This is a Java port of the original <code>FSA</code> class, implemented by
- * Jan Daciuk in the FSA package. Major redesign has been done, however, to fit
- * this implementation to the specifics of Java language and its coding style.
+ * This is an abstract base class for all forms of binary storage present in Jan
+ * Daciuk's FSA package.
  */
-public abstract class FSA {
+public abstract class FSA implements Iterable<byte[]> {
     /**
      * Version number for version 5 of the automaton.
      */
     public final static byte VERSION_5 = 5;
 
     /**
-     * A node of the FSA.
-     * 
-     * The operations of this interface should be implemented by all
-     * version-specific implementations.
+     * A node in the automaton.
      */
     public interface Node {
 	/**
@@ -65,9 +58,6 @@ public abstract class FSA {
 
     /**
      * An arc (a labeled transition between two nodes) of the FSA.
-     * 
-     * The operations of this interface should be implemented by all
-     * version-specific implementations.
      */
     public interface Arc {
 	/**
@@ -294,9 +284,9 @@ public abstract class FSA {
 
 	final PushbackInputStream stream = new PushbackInputStream(fsaStream, 5);
 	final byte[] header = new byte[5];
-	for (int bytesRead = 0; bytesRead < header.length;)
-	{
-	    bytesRead += stream.read(header, bytesRead, header.length - bytesRead);	    
+	for (int bytesRead = 0; bytesRead < header.length;) {
+	    bytesRead += stream.read(header, bytesRead, header.length
+		    - bytesRead);
 	}
 
 	if (header[0] == '\\' && header[1] == 'f' && header[2] == 's'
@@ -308,8 +298,8 @@ public abstract class FSA {
 	    stream.unread(header);
 
 	    switch (version) {
-	    	case 0x05:
-	    	    return new FSAVer5Impl(stream, dictionaryEncoding);
+	    case 0x05:
+		return new FSAVer5Impl(stream, dictionaryEncoding);
 	    }
 
 	    // No supporting implementation found.
@@ -334,7 +324,8 @@ public abstract class FSA {
 	final byte[] magic = new byte[4];
 	in.readFully(magic);
 
-	if (magic[0] == '\\' && magic[1] == 'f' && magic[2] == 's' && magic[3] == 'a') {
+	if (magic[0] == '\\' && magic[1] == 'f' && magic[2] == 's'
+		&& magic[3] == 'a') {
 	    version = in.readByte();
 	    filler = in.readByte();
 	    annotationSeparator = in.readByte();
@@ -359,5 +350,13 @@ public abstract class FSA {
 	    baos.write(buffer, 0, bytesCount);
 	}
 	return baos.toByteArray();
+    }
+
+    /**
+     * Returns an iterator over all binary sequences starting from the initial
+     * FSA state and ending in final nodes.
+     */
+    public Iterator<byte[]> iterator() {
+        return getTraversalHelper().getAllSubsequences(getStartNode());
     }
 }

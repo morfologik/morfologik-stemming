@@ -2,28 +2,24 @@ package morfologik.stemming;
 
 import java.io.IOException;
 
-import junit.framework.TestCase;
-import junitx.framework.ArrayAssert;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /*
  * 
  */
-public class PolishStemmerTest extends TestCase {
+public class PolishStemmerTest {
 
     /* */
-    public PolishStemmerTest(String name) {
-        super(name);
-    }
-
-    /* */
+    @Test
     public void testPolishStemmer() throws IOException {
         PolishStemmer s = new PolishStemmer();
 
-        ArrayAssert.assertEquals(new String[] { "żywotopisarstwo" }, s.stem("żywotopisarstwie"));
-        ArrayAssert.assertEquals(new String[] { "abradować" }, s.stem("abradowałoby"));
+        assertArrayEquals(new String[] { "żywotopisarstwo" }, s.stem("żywotopisarstwie"));
+        assertArrayEquals(new String[] { "abradować" }, s.stem("abradowałoby"));
 
-        ArrayAssert.assertEquals(new String[] { "żywotopisarstwo", "subst:sg:loc:n" }, s.stemAndForm("żywotopisarstwie"));
-        ArrayAssert.assertEquals(new String[] { "bazia", "subst:pl:inst:f" }, s.stemAndForm("baziami"));
+        assertArrayEquals(new String[] { "żywotopisarstwo", "subst:sg:loc:n" }, s.stemAndForm("żywotopisarstwie"));
+        assertArrayEquals(new String[] { "bazia", "subst:pl:inst:f" }, s.stemAndForm("baziami"));
 
         // This word is not in the dictionary.
         assertNoStemFor(s, "martygalski");

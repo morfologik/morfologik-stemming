@@ -7,10 +7,10 @@ import morfologik.fsa.FSA.Node;
 
 /**
  * An iterator that traverses all final states reachable from a given
- * {@link FSA.Node} and returns {@link String} objects corresponding to final
+ * {@link FSA.Node} and returns {@link byte[]} sequences corresponding to final
  * states.
  */
-final class FSAFinalStatesIterator implements Iterator<byte[]> {
+public final class FSAFinalStatesIterator implements Iterator<byte[]> {
     /**
      * Default expected depth of the recursion stack (estimated longest sequence
      * in the automaton). Buffers expand by the same value if exceeded.

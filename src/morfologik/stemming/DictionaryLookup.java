@@ -1,13 +1,11 @@
 package morfologik.stemming;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import morfologik.fsa.*;
-import morfologik.util.ResourceUtils;
 
 /**
  * This class implements a dictionary lookup over an FSA dictionary. The
@@ -69,37 +67,6 @@ public final class DictionaryLookup implements IStemmer {
 	if (dictionaryFeatures == null) {
 	    throw new IllegalArgumentException(
 		    "Dictionary metadata must not be null.");
-	}
-    }
-
-    /**
-     * Create a dictionary stemmer for a given ISO language code. The dictionary
-     * is read from classpath resources.
-     */
-    DictionaryLookup(String languageCode) {
-	this(readDictionaryResource(languageCode));
-    }
-
-    /**
-     * Read the default dictionary for a given language.
-     */
-    private static Dictionary readDictionaryResource(String languageCode) {
-	if (languageCode == null || "".equals(languageCode)) {
-	    throw new IllegalArgumentException(
-		    "Language code must not be empty.");
-	}
-
-	final String dictPath = "/morfologik/dictionaries/" + languageCode
-		+ ".dict";
-	final String metaPath = Dictionary.getExpectedFeaturesName(dictPath);
-
-	try {
-	    return Dictionary.readAndClose(ResourceUtils
-		    .openInputStream(dictPath), ResourceUtils
-		    .openInputStream(metaPath));
-	} catch (IOException e) {
-	    throw new RuntimeException("Default dictionary resource for language '"
-		    + languageCode + "not found.", e);
 	}
     }
 

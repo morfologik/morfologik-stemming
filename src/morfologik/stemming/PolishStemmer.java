@@ -18,8 +18,9 @@ public final class PolishStemmer implements IStemmer {
      * a runtime exception if the dictionary is not available.
      */
     public PolishStemmer() {
-	final String langCode = "pl";
-	this.delegate = new DictionaryLookup(langCode);
+	final String languageCode = "pl";
+	this.delegate = new DictionaryLookup(
+		Dictionary.getForLanguage(languageCode));
     }
 
     /*

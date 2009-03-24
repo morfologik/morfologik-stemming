@@ -1,11 +1,8 @@
 package morfologik.stemming;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
-import java.util.Properties;
+import java.util.*;
 
 import morfologik.fsa.FSA;
 import morfologik.util.FileUtils;
@@ -38,6 +35,11 @@ public final class Dictionary {
      * Metadata associated with the dictionary.
      */
     public final DictionaryMetadata metadata;
+
+    /**
+     * Default loaded dictionaries.
+     */
+    public static final WeakHashMap<String, Dictionary> defaultDictionaries = new WeakHashMap<String, Dictionary>();
 
     /**
      * It is strongly recommended to use static methods in this class for
@@ -98,7 +100,8 @@ public final class Dictionary {
 	    final Properties properties = new Properties();
 	    properties.load(featuresData);
 
-	    final DictionaryMetadata features = DictionaryMetadata.fromMap(properties);
+	    final DictionaryMetadata features = DictionaryMetadata
+		    .fromMap(properties);
 	    final FSA fsa = FSA.getInstance(fsaData, features.encoding);
 
 	    return new Dictionary(fsa, features);
@@ -124,5 +127,44 @@ public final class Dictionary {
 	}
 
 	return featuresName;
+    }
+
+    /**
+     * Return a built-in dictionary for a given ISO language code. Dictionaries
+     * are cached internally for potential reuse.
+     * 
+     * @throws RuntimeException
+     *             Throws a {@link RuntimeException} if the dictionary is not
+     *             bundled with the library.
+     */
+    public static Dictionary getForLanguage(String languageCode) {
+	if (languageCode == null || "".equals(languageCode)) {
+	    throw new IllegalArgumentException(
+		    "Language code must not be empty.");
+	}
+
+	synchronized (defaultDictionaries) {
+	    Dictionary dict = defaultDictionaries.get(languageCode);
+	    if (dict != null)
+		return dict;
+
+	    try {
+		final String dictPath = "/morfologik/dictionaries/"
+			+ languageCode + ".dict";
+		final String metaPath = Dictionary
+			.getExpectedFeaturesName(dictPath);
+
+		dict = Dictionary.readAndClose(ResourceUtils
+			.openInputStream(dictPath), ResourceUtils
+			.openInputStream(metaPath));
+
+		defaultDictionaries.put(languageCode, dict);
+		return dict;
+	    } catch (IOException e) {
+		throw new RuntimeException(
+			"Default dictionary resource for language '"
+				+ languageCode + "not found.", e);
+	    }
+	}
     }
 }
