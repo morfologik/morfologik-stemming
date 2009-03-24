@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 
 import morfologik.util.FileUtils;
@@ -24,7 +25,7 @@ import morfologik.util.FileUtils;
  * This is an abstract base class for all forms of binary storage present in Jan
  * Daciuk's FSA package.
  */
-public abstract class FSA implements Iterable<byte[]> {
+public abstract class FSA implements Iterable<ByteBuffer> {
     /**
      * Version number for version 5 of the automaton.
      */
@@ -354,9 +355,14 @@ public abstract class FSA implements Iterable<byte[]> {
 
     /**
      * Returns an iterator over all binary sequences starting from the initial
-     * FSA state and ending in final nodes.
+     * FSA state and ending in final nodes. The returned iterator is a {@link ByteBuffer}
+     * that changes on each call to {@link Iterator#next()}, so if the content should
+     * be preserved, it must be copied somewhere else.
+     *
+     * <p>It is guaranteed that the returned byte buffer is backed by a byte array and
+     * that the content of the byte buffer starts at the array's index 0. 
      */
-    public Iterator<byte[]> iterator() {
+    public Iterator<ByteBuffer> iterator() {
         return getTraversalHelper().getAllSubsequences(getStartNode());
     }
 }

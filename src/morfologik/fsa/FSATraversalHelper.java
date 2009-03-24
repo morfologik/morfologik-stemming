@@ -1,6 +1,7 @@
 
 package morfologik.fsa;
 
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 import static morfologik.fsa.FSAMatchType.*;
 
@@ -22,7 +23,7 @@ public class FSATraversalHelper {
      * Returns an {@link Iterator} of all subsequences available from the given node to
      * all reachable final states.
      */
-    public Iterator<byte[]> getAllSubsequences(final FSA.Node node) {
+    public Iterator<ByteBuffer> getAllSubsequences(final FSA.Node node) {
         if (node == null) {
             throw new IllegalArgumentException("Node cannot be null.");
         }

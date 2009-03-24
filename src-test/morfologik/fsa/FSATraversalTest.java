@@ -1,18 +1,23 @@
 package morfologik.fsa;
 
+import static org.junit.Assert.assertEquals;
+
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Tests {@link FSATraversalHelper}.
  */
-public final class FSATraversalTest extends TestCase {
+public final class FSATraversalTest {
     private FSA dict;
 
     /**
      * 
      */
+    @Before
     public void setUp() throws Exception {
 	dict = FSA.getInstance(this.getClass().getResourceAsStream(
 		"en_tst.dict"), "iso8859-2");
@@ -21,13 +26,16 @@ public final class FSATraversalTest extends TestCase {
     /**
      * 
      */
+    @Test
     public void testTraversalWithIterator() {
 	final FSATraversalHelper helper = dict.getTraversalHelper();
-	final Iterator<byte[]> i = helper.getAllSubsequences(dict.getStartNode());
+	final Iterator<ByteBuffer> i = helper.getAllSubsequences(dict.getStartNode());
 
 	int count = 0;
 	while (i.hasNext()) {
-	    i.next();
+	    ByteBuffer bb = i.next();
+	    assertEquals(0, bb.arrayOffset());
+	    assertEquals(0, bb.position());
 	    count++;
 	}
 	assertEquals(346773, count);

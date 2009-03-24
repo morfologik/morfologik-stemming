@@ -100,16 +100,14 @@ public final class FSAVer5Impl extends FSA {
         /** 
          * Creates an arc, whose representation starts at <code>offset</code> in the arcs array.
          */
-        public Arc(final int offset)
-        {
+        public Arc(final int offset) {
             this.offset = offset;
         }
 
         /** 
          * Returns the destination node, pointed to by this arc.
          */
-        public FSA.Node getDestinationNode()
-        {
+        public FSA.Node getDestinationNode() {
             final int nodeOffset = getDestinationNodeOffset();
 
             if (0 == nodeOffset) {
@@ -122,8 +120,7 @@ public final class FSAVer5Impl extends FSA {
         }
 
         /** Returns the label of this arc. */
-        public byte getLabel()
-        {
+        public byte getLabel() {
             // first byte of arc's representation is its label.
             return arcs[offset];
         }
@@ -131,16 +128,14 @@ public final class FSAVer5Impl extends FSA {
         /** 
          * {@inheritDoc} 
          */
-        public boolean isLast()
-        {
+        public boolean isLast() {
             return (arcs[offset + gotoOffset] & BITMASK_LASTARC) != 0;
         }
 
         /**
          * {@inheritDoc} 
          */
-        public boolean isFinal() 
-        {
+        public boolean isFinal(){
             return (arcs[offset + gotoOffset] & BITMASK_FINALARC) != 0;
         }
 
@@ -152,8 +147,7 @@ public final class FSAVer5Impl extends FSA {
         }
 
         /** Returns the address of the node pointed to by this arc. */
-        private int getDestinationNodeOffset()
-        {
+        private final int getDestinationNodeOffset() {
             if ((arcs[offset + gotoOffset] & BITMASK_NEXTBIT) != 0) {
                 /* the destination node follows this arc in the array */
                 return offset + gotoOffset + 1;
@@ -179,24 +173,21 @@ public final class FSAVer5Impl extends FSA {
         /**
          * Creates a node at the given offset (first arc's).  
          */
-        public Node(final int offset)
-        {
+        public Node(final int offset) {
             this.offset = offset;
         }
 
         /**
          * {@inheritDoc} 
          */
-        public FSA.Arc getFirstArc()
-        {
+        public FSA.Arc getFirstArc() {
             return new Arc(offset);
         }
 
         /** 
          * {@inheritDoc} 
          */
-        public FSA.Arc getNextArc(FSA.Arc arc)
-        {
+        public FSA.Arc getNextArc(FSA.Arc arc) {
             final Arc myArc = (Arc) arc;
             if (myArc.isLast())
                 return null;
@@ -207,15 +198,13 @@ public final class FSAVer5Impl extends FSA {
         /** 
          * Returns an arc with a given label, if it exists in this node.
          */
-        public final FSA.Arc getArcLabelledWith(byte label)
-        {
-            FSA.Arc arc;
-            for (arc = getFirstArc(); arc != null; arc = getNextArc(arc)) {
+        public final FSA.Arc getArcLabelledWith(byte label) {
+            for (FSA.Arc arc = getFirstArc(); arc != null; arc = getNextArc(arc)) {
                 if (arc.getLabel() == label)
                     return arc;
             }
 
-            // arc labelled with "label" not found.
+            // An arc labeled with "label" not found.
             return null;
         }
     }
@@ -225,8 +214,7 @@ public final class FSAVer5Impl extends FSA {
      * Returns the number of arcs in this automaton. 
      * This method performs a full scan of all arcs in this automaton.
      */
-    public int getNumberOfArcs()
-    {
+    public int getNumberOfArcs() {
         final FSA.Node startNode = getStartNode();
 
         FSAVer5Impl.Arc arc = (FSAVer5Impl.Arc) startNode.getFirstArc();
@@ -253,8 +241,7 @@ public final class FSAVer5Impl extends FSA {
      * Returns the number of nodes in this automaton.
      * This method performs a full scan of all arcs in this automaton.
      */
-    public int getNumberOfNodes()
-    {
+    public int getNumberOfNodes() {
         int offset = gotoOffset;
         int nodes  = 0;
         while (offset < arcs.length) {
@@ -272,8 +259,7 @@ public final class FSAVer5Impl extends FSA {
      * Creates a new automaton reading it from a file in FSA format, version 5.
      */
     public FSAVer5Impl(InputStream fsaStream, String dictionaryEncoding)
-        throws IOException
-    {
+        throws IOException {
         super(fsaStream, dictionaryEncoding);
     }
 
@@ -283,8 +269,7 @@ public final class FSAVer5Impl extends FSA {
      * May return <code>null</code> if the start node 
      * is also an end node.
      */
-    public FSA.Node getStartNode()
-    {
+    public FSA.Node getStartNode() {
         return new Node(arcSize).getFirstArc().getDestinationNode();
     }
 
@@ -292,17 +277,17 @@ public final class FSAVer5Impl extends FSA {
     /** 
      * {@inheritDoc}
      */
-    protected void readHeader(DataInput in, long fileSize)
-        throws IOException
-    {
+    protected void readHeader(DataInput in, long fileSize) throws IOException {
         super.readHeader(in, fileSize);
 
         // Check if we support such version of the automata.
         if (version != FSA.VERSION_5) {
             throw new IOException("Cannot read FSA in version " + version
-               + " (built with flags: " + FSAHelpers.flagsToString(FSAHelpers.getFlags( version )) + ")."
+               + " (built with flags: " + FSAHelpers.flagsToString(
+        	       FSAHelpers.getFlags( version )) + ")."
                + " Class " + this.getClass().getName()
-               + " supports version " + FSA.VERSION_5 + " only (" + FSAHelpers.flagsToString(FSAHelpers.getFlags(FSA.VERSION_5)) + ").");
+               + " supports version " + FSA.VERSION_5 + " only (" 
+               + FSAHelpers.flagsToString(FSAHelpers.getFlags(FSA.VERSION_5)) + ").");
         }
 
         // Read transitions data.

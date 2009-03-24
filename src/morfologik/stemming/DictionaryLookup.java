@@ -112,31 +112,33 @@ public final class DictionaryLookup implements IStemmer {
 		 * form.
 		 */
 		if (arc != null && !arc.isFinal()) {
-		    // There is such word in the dictionary. Return its base
-		    // forms.
+		    // There is such word in the dictionary. Return its base forms.
 		    forms.clear();
-		    final Iterator<byte[]> i = matcher.getAllSubsequences(arc
-			    .getDestinationNode());
-		    while (i.hasNext()) {
-			final byte[] baseCompressed = i.next();
+		    final Iterator<ByteBuffer> i = 
+			matcher.getAllSubsequences(arc.getDestinationNode());
 
-			// Look for the delimiter of the 'grammar' tag in
-			// Jan Daciuk's FSA format.
-			int j;
-			for (j = 0; j < baseCompressed.length; j++) {
-			    if (baseCompressed[j] == separator)
+		    while (i.hasNext()) {
+			final ByteBuffer bb = i.next();
+			final byte [] ba = bb.array();
+			final int bbSize = bb.remaining();
+
+			/*
+			 * Find the separator byte splitting word form and tag.
+			 */
+			int j = 0;
+			for (; j < bbSize; j++) {
+			    if (ba[j] == separator)
 				break;
 			}
 
 			// Now, expand the prefix/ suffix 'compression' and
 			// store the base form.
-			forms.add(decompress(baseCompressed, j, word));
+			forms.add(decompress(ba, j, word));
 
 			// if needed, store the tag as well.
 			if (returnForms) {
 			    j = j + 1;
-			    forms.add(new String(baseCompressed, j,
-				    baseCompressed.length - j, encoding));
+			    forms.add(new String(ba, j, bbSize - j, encoding));
 			}
 		    }
 

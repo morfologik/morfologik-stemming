@@ -4,9 +4,9 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.*;
 import java.text.MessageFormat;
-import java.util.Iterator;
 
-import morfologik.fsa.*;
+import morfologik.fsa.FSA;
+import morfologik.fsa.FSAHelpers;
 import morfologik.stemming.Dictionary;
 import morfologik.util.FileUtils;
 
@@ -49,11 +49,13 @@ public final class FSADumpTool extends Tool {
      * 
      */
     protected void go(CommandLine line) throws Exception {
-	final File dictionaryFile = (File) line.getParsedOptionValue(
-		SharedOptions.fsaDictionaryFileOption.getOpt());
+	final File dictionaryFile = (File) line
+		.getParsedOptionValue(SharedOptions.fsaDictionaryFileOption
+			.getOpt());
 	FileUtils.assertExists(dictionaryFile, true, false);
 
-	final boolean useAPI = line.hasOption(SharedOptions.useApiOption.getOpt());
+	final boolean useAPI = line.hasOption(SharedOptions.useApiOption
+		.getOpt());
 
 	dump(dictionaryFile, useAPI);
     }
@@ -131,15 +133,14 @@ public final class FSADumpTool extends Tool {
 	writer.println("--------------------");
 
 	if (useAPI) {
-	    final Iterator<byte[]> i = fsa.getTraversalHelper()
-		    .getAllSubsequences(fsa.getStartNode());
 	    if (encoding != null) {
-		while (i.hasNext()) {
-		    writer.println(new String(i.next(), encoding));
+		for (ByteBuffer bb : fsa) {
+		    writer.println(new String(bb.array(), 0, bb.remaining(),
+			    encoding));
 		}
 	    } else {
-		while (i.hasNext()) {
-		    writer.write(i.next());
+		for (ByteBuffer bb : fsa) {
+		    writer.write(bb.array(), 0, bb.remaining());
 		    writer.println();
 		}
 	    }

@@ -1,5 +1,6 @@
 package morfologik.fsa;
 
+import java.nio.ByteBuffer;
 import java.util.*;
 
 import morfologik.fsa.FSA.Arc;
@@ -10,7 +11,7 @@ import morfologik.fsa.FSA.Node;
  * {@link FSA.Node} and returns {@link byte[]} sequences corresponding to final
  * states.
  */
-public final class FSAFinalStatesIterator implements Iterator<byte[]> {
+public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
     /**
      * Default expected depth of the recursion stack (estimated longest sequence
      * in the automaton). Buffers expand by the same value if exceeded.
@@ -18,13 +19,16 @@ public final class FSAFinalStatesIterator implements Iterator<byte[]> {
     private final static int EXPECTED_MAX_STATES = 15;
 
     /** An internal cache for the next element in the FSA */
-    private byte[] nextElement = null;
+    private ByteBuffer nextElement;
 
     /**
      * A buffer for the current sequence of bytes from the current node to the
      * root.
      */
     private byte[] buffer = new byte[EXPECTED_MAX_STATES];
+
+    /** Reusable byte buffer wrapper around {@link #buffer}. */
+    private ByteBuffer bufferWrapper = ByteBuffer.wrap(buffer);
 
     private final ArrayList<Node> nodes = new ArrayList<Node>(EXPECTED_MAX_STATES);
     private final ArrayList<Arc> arcs = new ArrayList<Arc>(EXPECTED_MAX_STATES);
@@ -48,16 +52,16 @@ public final class FSAFinalStatesIterator implements Iterator<byte[]> {
     }
 
     /**
-     * @return Returns <code>byte[]</code> with the next final state in the
-     *         automaton.
+     * @return Returns a {@link ByteBuffer} with the sequence corresponding
+     * to the next final state in the automaton.
      */
-    public byte[] next() {
+    public ByteBuffer next() {
 	if (nextElement != null) {
-	    final byte[] cache = nextElement;
+	    final ByteBuffer cache = nextElement;
 	    nextElement = null;
 	    return cache;
 	} else {
-	    final byte[] cache = advance();
+	    final ByteBuffer cache = advance();
 	    if (cache == null) {
 		throw new NoSuchElementException();
 	    }
@@ -68,7 +72,7 @@ public final class FSAFinalStatesIterator implements Iterator<byte[]> {
     /**
      * Advances to the next available final state.
      */
-    private final byte[] advance() {
+    private final ByteBuffer advance() {
 	if (arcs.isEmpty()) {
 	    return null;
 	}
@@ -79,7 +83,7 @@ public final class FSAFinalStatesIterator implements Iterator<byte[]> {
 	    final FSA.Node node = nodes.get(lastIndex);
 
 	    if (arc == null) {
-		// remove the current node from the queue
+		// Remove the current node from the queue.
 		arcs.remove(lastIndex);
 		nodes.remove(lastIndex);
 		continue;
@@ -89,23 +93,24 @@ public final class FSAFinalStatesIterator implements Iterator<byte[]> {
 	    // so that we keep the recursion depth level accurate.
 	    arcs.set(lastIndex, node.getNextArc(arc));
 
-	    // expand buffer if needed.
+	    // Expand buffer if needed.
 	    final int bufferLength = this.buffer.length;
 	    if (lastIndex >= bufferLength) {
-		this.buffer = FSAHelpers.resizeArray(buffer, bufferLength
-			+ EXPECTED_MAX_STATES);
+		this.buffer = FSAHelpers.resizeArray(
+			buffer, bufferLength + EXPECTED_MAX_STATES);
+		this.bufferWrapper = ByteBuffer.wrap(buffer);
 	    }
 	    buffer[lastIndex] = arc.getLabel();
 
 	    if (!arc.isTerminal()) {
-		// recursively descend into the arc's node.
+		// Recursively descend into the arc's node.
 		pushNode(arc.getDestinationNode());
 	    }
 
 	    if (arc.isFinal()) {
-		final byte[] tempBuffer = new byte[lastIndex + 1];
-		System.arraycopy(buffer, 0, tempBuffer, 0, tempBuffer.length);
-		return tempBuffer;
+		bufferWrapper.clear();
+		bufferWrapper.limit(lastIndex + 1);
+		return bufferWrapper;
 	    }
 	}
 

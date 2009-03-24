@@ -1,6 +1,7 @@
 package morfologik.stemming;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.Callable;
 
 import morfologik.util.PerformanceTimer;
@@ -23,7 +24,7 @@ public class PerformanceTest {
 	final PerformanceTimer t = PerformanceTimer.run(new Callable<Void>() {
 	    public Void call() throws Exception {
 		int i = sequences;
-		for (byte[] sequence : dict.fsa) {
+		for (ByteBuffer sequence : dict.fsa) {
 		    if (i-- < 0) break;
 		}
 		return null;
@@ -49,8 +50,9 @@ public class PerformanceTest {
 
 	final String [] testWords = new String [sequences];
 	int i = 0;
-	for (byte[] sequence : dict.fsa) {
-	    testWords[i++] = new String(sequence, dict.metadata.encoding);
+	for (ByteBuffer sequence : dict.fsa) {
+	    testWords[i++] = new String(sequence.array(), 
+		    0, sequence.remaining(), dict.metadata.encoding);
 	    if (i == testWords.length) break;
 	}
 

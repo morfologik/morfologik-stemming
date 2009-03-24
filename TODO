@@ -9,6 +9,13 @@ PLANS FOR VERSION 1.2
 
 Performance notes:
 
+Original (intermediate byte [] construction):
+
 FSA traversal        -> Rounds: 20, Time: 6.451, Time/round: 0.323, Sequences/sec.: 155014
+Stemming performance -> Rounds: 20, Time: 4.405, Time/round: 0.220, Sequences/sec.: 227014
+
+Reusable ByteBuffer 
+
+FSA traversal -> Rounds: 20, Time: 5.811, Time/round: 0.291, Sequences/sec.: 172087
 Stemming performance -> Rounds: 20, Time: 4.405, Time/round: 0.220, Sequences/sec.: 227014
 
