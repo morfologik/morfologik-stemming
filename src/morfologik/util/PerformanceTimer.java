@@ -71,7 +71,7 @@ public final class PerformanceTimer {
     /*
      * 
      */
-    public double elemsPerSecond(int sequences) {
+    public long elemsPerSecond(int sequences) {
 	return (long) (sequences / perRoundTime);
     }
 }

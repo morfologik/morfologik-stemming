@@ -1,10 +1,14 @@
 
 PLANS FOR VERSION 1.2
 
-- Add a performance test for FSA traversal using the API. Check what is the stemmer's bottleneck
-  (memory allocation?). 
-
 - Add a set of utility classes for parsing morphological tags. This could be similar 
   (or even compatible?) with Morfeusz-Java.
 
 - Suggest and implement a new stemming heuristic based on inflection frames.
+
+
+Performance notes:
+
+FSA traversal        -> Rounds: 20, Time: 6.451, Time/round: 0.323, Sequences/sec.: 155014
+Stemming performance -> Rounds: 20, Time: 4.405, Time/round: 0.220, Sequences/sec.: 227014
+
