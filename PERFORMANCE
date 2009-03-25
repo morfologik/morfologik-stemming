@@ -24,7 +24,27 @@ Stemming performance -> Rounds: 20, Time: 2.625, Time/round: 0.131, Sequences/se
 FSA traversal        -> Rounds: 20, Time: 2.561, Time/round: 0.128, Sequences/sec.: 390472
 Stemming performance -> Rounds: 20, Time: 7.463, Time/round: 0.373, Sequences/sec.: 133994
 
-# Zero memory allocation (constant pools).
+# Zero memory allocation (constant pools), test size doubled -- look at sequences/sec.
 
 FSA traversal        -> Rounds: 20, Time: 5.137, Time/round: 0.257, Sequences/sec.: 389332
 Stemming performance -> Rounds: 20, Time: 9.758, Time/round: 0.488, Sequences/sec.: 204960
+
+---------------------------------------------
+Machine:    Intel(R) Pentium(R) 4 CPU 3.00GHz
+JVM:        IBM 1.6, 32-bit
+---------------------------------------------
+
+# Zero memory allocation (constant pools). IBM is nearly twice as fast on FSA traversal!
+
+FSA traversal        -> Rounds: 20, Time: 2.561, Time/round: 0.128, Sequences/sec.: 780944
+Stemming performance -> Rounds: 20, Time: 7.713, Time/round: 0.386, Sequences/sec.: 259302
+
+---------------------------------------------
+Machine:    Intel(R) Pentium(R) 4 CPU 3.00GHz
+JVM:        jrockit-R27.5.0-jdk1.6.0_03
+---------------------------------------------
+
+# Zero memory allocation (constant pools). Yep, really impressive performance from JRockit.
+
+FSA traversal        -> Rounds: 20, Time: 2.108, Time/round: 0.105, Sequences/sec.: 948766
+Stemming performance -> Rounds: 20, Time: 7.261, Time/round: 0.363, Sequences/sec.: 275444
