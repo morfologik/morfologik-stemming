@@ -1,7 +1,10 @@
 package morfologik.fsa;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+import morfologik.util.Arrays;
 
 /**
  * An iterator that traverses all final states reachable from a given

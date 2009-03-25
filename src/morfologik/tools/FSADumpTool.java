@@ -4,11 +4,11 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.*;
 import java.text.MessageFormat;
-import java.util.Arrays;
 
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSAHelpers;
 import morfologik.stemming.Dictionary;
+import morfologik.util.Arrays;
 import morfologik.util.FileUtils;
 
 import org.apache.commons.cli.CommandLine;

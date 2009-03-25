@@ -3,9 +3,11 @@ package morfologik.stemming;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
 import morfologik.fsa.*;
+import morfologik.util.Arrays;
 import morfologik.util.BufferUtils;
 
 /**
@@ -172,8 +174,7 @@ public final class DictionaryLookup implements IStemmer {
 		    }
 
 		    if (formsCount >= forms.length) {
-			forms = Arrays
-				.copyOf(forms, forms.length + EXPAND_SIZE);
+			forms = Arrays.copyOf(forms, forms.length + EXPAND_SIZE);
 			for (int k = 0; k < forms.length; k++) {
 			    if (forms[k] == null)
 				forms[k] = new WordData(decoder);

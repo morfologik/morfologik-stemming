@@ -5,6 +5,3 @@ PLANS FOR VERSION 1.2
   (or even compatible?) with Morfeusz-Java.
 
 - Suggest and implement a new stemming heuristic based on inflection frames.
-
-- There are some 1.6 API calls. Should we backport them to support Java 1.5? I guess it
-  would be sensible, since there is a relatively small number of such calls. 
