@@ -18,7 +18,6 @@ import org.junit.Test;
  */
 public class PerformanceTest {
     @Test
-    @Ignore
     public void fsaTraversal() throws IOException {
 	final Dictionary dict = Dictionary.getForLanguage("pl");
 

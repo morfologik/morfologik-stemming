@@ -6,27 +6,3 @@ PLANS FOR VERSION 1.2
 
 - Suggest and implement a new stemming heuristic based on inflection frames.
 
-
-Performance notes:
-
-Original (intermediate byte [] construction):
-
-FSA traversal        -> Rounds: 20, Time: 6.451, Time/round: 0.323, Sequences/sec.: 155014
-Stemming performance -> Rounds: 20, Time: 4.405, Time/round: 0.220, Sequences/sec.: 227014
-
-Reusable ByteBuffer 
-
-FSA traversal        -> Rounds: 20, Time: 5.811, Time/round: 0.291, Sequences/sec.: 172087
-Stemming performance -> Rounds: 20, Time: 4.405, Time/round: 0.220, Sequences/sec.: 227014
-
-Switching to int representation for arcs and nodes. This reduces code clarity, but boosts
-performance twice. Itt's worth it. Not many people will use FSA directly and if they do,
-they probably can live with int pointers.
-
-FSA traversal        -> Rounds: 20, Time: 2.530, Time/round: 0.127, Sequences/sec.: 395256
-Stemming performance -> Rounds: 20, Time: 2.625, Time/round: 0.131, Sequences/sec.: 380952
-
-Changing stemming API to return reusable objects.
-
-FSA traversal        -> Rounds: 20, Time: 2.546, Time/round: 0.127, Sequences/sec.: 392772
-Stemming performance -> Rounds: 20, Time: 3.250, Time/round: 0.163, Sequences/sec.: 307692

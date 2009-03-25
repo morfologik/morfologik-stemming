@@ -1,0 +1,30 @@
+
+Performance notes
+=================
+
+---------------------------------------------
+Machine:    Intel(R) Pentium(R) 4 CPU 3.00GHz
+JVM:        SUN 1.6.02, 32-bit
+---------------------------------------------
+
+# [Note: the stemming tests had a bug which tested non-existent entries only.]
+
+# Original (intermediate byte [] construction):
+
+FSA traversal        -> Rounds: 20, Time: 6.451, Time/round: 0.323, Sequences/sec.: 155014
+Stemming performance -> Rounds: 20, Time: 4.405, Time/round: 0.220, Sequences/sec.: 227014
+
+# int-coded representation of nodes and arcs:
+
+FSA traversal        -> Rounds: 20, Time: 2.530, Time/round: 0.127, Sequences/sec.: 395256
+Stemming performance -> Rounds: 20, Time: 2.625, Time/round: 0.131, Sequences/sec.: 380952
+
+# [Note: the above with tests corrected]
+
+FSA traversal        -> Rounds: 20, Time: 2.561, Time/round: 0.128, Sequences/sec.: 390472
+Stemming performance -> Rounds: 20, Time: 7.463, Time/round: 0.373, Sequences/sec.: 133994
+
+# Zero memory allocation (constant pools).
+
+FSA traversal        -> Rounds: 20, Time: 5.137, Time/round: 0.257, Sequences/sec.: 389332
+Stemming performance -> Rounds: 20, Time: 9.758, Time/round: 0.488, Sequences/sec.: 204960
