@@ -48,3 +48,27 @@ JVM:        jrockit-R27.5.0-jdk1.6.0_03
 
 FSA traversal        -> Rounds: 20, Time: 2.108, Time/round: 0.105, Sequences/sec.: 948766
 Stemming performance -> Rounds: 20, Time: 7.261, Time/round: 0.363, Sequences/sec.: 275444
+
+---------------------------------------------
+Machine:    AMD Athlon(tm) 64 X2 Dual Core Processor 5200+, 
+JVM:        SUN 1.6.06, 64-bit
+---------------------------------------------
+
+FSA traversal        -> Rounds: 20, Time: 2.501, Time/round: 0.125, Sequences/sec.: 799680
+Stemming performance -> Rounds: 20, Time: 5.209, Time/round: 0.260, Sequences/sec.: 383950
+
+---------------------------------------------
+Machine:    AMD Athlon(tm) 64 X2 Dual Core Processor 5200+ 
+JVM:        IBM 1.6, 64-bit
+---------------------------------------------
+
+FSA traversal        -> Rounds: 20, Time: 1.622, Time/round: 0.081, Sequences/sec.: 1233045
+Stemming performance -> Rounds: 20, Time: 4.039, Time/round: 0.202, Sequences/sec.: 495172
+
+---------------------------------------------
+Machine:    AMD Athlon(tm) 64 X2 Dual Core Processor 5200+ 
+JVM:        jrockit-R27.5.0-jdk1.6.0_03
+---------------------------------------------
+
+FSA traversal        -> Rounds: 20, Time: 2.063, Time/round: 0.103, Sequences/sec.: 969461
+Stemming performance -> Rounds: 20, Time: 5.044, Time/round: 0.252, Sequences/sec.: 396510
