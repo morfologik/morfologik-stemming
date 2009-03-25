@@ -13,7 +13,7 @@
           data structures (int pointers) to keep memory usage minimal. The speed
           boost gained from this is enormous and justifies less readable code. We
           strongly advise to use the provided iterators and helper functions
-          for matching in the FSA or retrieving its contents.  
+          for matching state sequences in the FSA.        
 
 --------
 
