@@ -1,24 +1,20 @@
 package morfologik.stemming;
 
+import java.util.List;
+
 /**
  * A generic &quot;stemmer&quot; interface in Morfologik.
  */
 public interface IStemmer {
     /**
-     * Returns an array of potential base forms (stems) of the word, or <code>null</code>
-     * if the word is not found in the dictionary.
+     * Returns a list of {@link WordData} entries for a given word. The returned
+     * list is never <code>null</code>. Depending on the stemmer's
+     * implementation the {@link WordData} may carry the stem and additional
+     * information (tag) or just the stem.
+     * <p>
+     * The returned list and any object it contains are not usable after a
+     * subsequent call to this method. Any data that should be stored in between
+     * must be copied by the caller.
      */
-    public String[] stem(String word);
-
-    /**
-     * <p>Returns an array of pairs of the form:
-     * <pre>
-     * String stem1, String form1, String stem2, String stem2, ...
-     * </pre> 
-     * or <code>null</code> if the word is not found in the dictionary. 
-     *
-     * <p>The form tag is a simple string and depends on what was saved in the automaton
-     * (it may be nonsensical or even <code>null</code>).
-     */
-    public String[] stemAndForm(final String word);
+    public List<WordData> lookup(CharSequence word);
 }

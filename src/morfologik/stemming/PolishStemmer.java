@@ -1,5 +1,7 @@
 package morfologik.stemming;
 
+import java.util.List;
+
 
 /**
  * A dictionary-based stemmer for the Polish language. This stemmer requires an
@@ -26,14 +28,7 @@ public final class PolishStemmer implements IStemmer {
     /*
      * 
      */
-    public String[] stem(String word) {
-	return delegate.stem(word);
-    }
-
-    /*
-     * 
-     */
-    public String[] stemAndForm(String word) {
-	return delegate.stemAndForm(word);
+    public List<WordData> lookup(CharSequence word) {
+	return delegate.lookup(word);
     }
 }

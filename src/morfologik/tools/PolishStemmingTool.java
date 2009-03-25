@@ -1,21 +1,11 @@
 package morfologik.tools;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StreamTokenizer;
-import java.io.Writer;
+import java.io.*;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Locale;
 
-import morfologik.stemming.IStemmer;
-import morfologik.stemming.PolishStemmer;
+import morfologik.stemming.*;
 
 import org.apache.commons.cli.*;
 
@@ -102,17 +92,17 @@ class PolishStemmingTool extends Tool {
 		final String word = st.sval;
 
 		count++;
-		final String[] stems = stemmer.stemAndForm(word);
-		if (stems == null || stems.length == 0) {
+		final List<WordData> stems = stemmer.lookup(word);
+		if (stems.size() == 0) {
 		    output.write(word);
 		    output.write("\t-\t-\n");
 		} else {
-		    for (int i = 0; i < stems.length; i += 2) {
+		    for (WordData wd : stems) {
 			output.write(word);
 			output.write("\t");
-			output.write(stems[i] != null ? stems[i] : "-");
+			output.write(asString(wd.getStem()));
 			output.write("\t");
-			output.write(stems[i + 1] != null ? stems[i + 1] : "-");
+			output.write(asString(wd.getTag()));
 			output.write("\n");
 		    }
 		}
@@ -120,6 +110,12 @@ class PolishStemmingTool extends Tool {
 	}
 
 	return count;
+    }
+
+    private String asString(CharSequence stem) {
+	if (stem == null)
+	    return "-";
+	return stem.toString();
     }
 
     /**

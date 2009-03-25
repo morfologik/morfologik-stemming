@@ -45,10 +45,21 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
 	this.fsa = fsa;
 
 	if (fsa.getFirstArc(node) != 0) {
-	    pushNode(node);
+	    restartFrom(node);
 	}
     }
 
+    /**
+     * Restart walking from <code>node</code>.
+     */
+    public void restartFrom(int node) {
+	position = 0;
+	bufferWrapper.clear();
+	nextElement = null;
+
+	pushNode(node);
+    }
+    
     /** Returns <code>true</code> if there are still elements in this iterator. */
     public boolean hasNext() {
 	if (nextElement == null) {

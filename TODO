@@ -25,3 +25,8 @@ they probably can live with int pointers.
 
 FSA traversal        -> Rounds: 20, Time: 2.530, Time/round: 0.127, Sequences/sec.: 395256
 Stemming performance -> Rounds: 20, Time: 2.625, Time/round: 0.131, Sequences/sec.: 380952
+
+Changing stemming API to return reusable objects.
+
+FSA traversal        -> Rounds: 20, Time: 2.546, Time/round: 0.127, Sequences/sec.: 392772
+Stemming performance -> Rounds: 20, Time: 3.250, Time/round: 0.163, Sequences/sec.: 307692
