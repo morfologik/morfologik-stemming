@@ -47,10 +47,31 @@ public class DictionaryLookupTest {
 
     /* */
     @Test
+    public void testWordDataIterator() throws IOException {
+	final URL url = this.getClass().getResource("test-infix.dict");
+	final DictionaryLookup s = new DictionaryLookup(Dictionary.read(url));
+
+	final HashSet<String> entries = new HashSet<String>();
+	for (WordData wd : s) {
+	    entries.add(wd.getWord() + " " + wd.getStem() + " " + wd.getTag());
+	}
+
+	// Make sure a sample of the entries is present.
+	assertTrue(entries.contains("Rzekunia Rzekuń subst:sg:gen:m"));
+	assertTrue(entries.contains("Rzeczkowskie Rzeczkowski adj:sg:nom.acc.voc:n+adj:pl:acc.nom.voc:f.n"));
+	assertTrue(entries.contains("Rzecząpospolitą Rzeczpospolita subst:irreg"));
+	assertTrue(entries.contains("Rzeczypospolita Rzeczpospolita subst:irreg"));
+	assertTrue(entries.contains("Rzeczypospolitych Rzeczpospolita subst:irreg"));
+	assertTrue(entries.contains("Rzeczyckiej Rzeczycki adj:sg:gen.dat.loc:f"));
+    }
+
+    /* */
+    @Test
     public void testWordDataFields() throws IOException {
 	final IStemmer s = new PolishStemmer();
 
-	final List<WordData> response = s.lookup("liga");
+	final String word = "liga";
+	final List<WordData> response = s.lookup(word);
 	assertEquals(2, response.size());
 
 	final HashSet<String> stems = new HashSet<String>();
@@ -59,6 +80,7 @@ public class DictionaryLookupTest {
 	{
 	    stems.add(wd.getStem().toString());
 	    tags.add(wd.getTag().toString());
+	    assertSame(word, wd.getWord());
 	}
 	assertTrue(stems.contains("ligać"));
 	assertTrue(stems.contains("liga"));
@@ -66,16 +88,14 @@ public class DictionaryLookupTest {
 	assertTrue(tags.contains("verb:fin:sg:ter:imperf")); 
 
 	// Repeat to make sure we get the same values consistently.
-	for (WordData wd : response)
-	{
+	for (WordData wd : response) {
 	    stems.contains(wd.getStem().toString());
 	    tags.contains(wd.getTag().toString());
 	}
 
 	// Run the same consistency check for the returned buffers.
 	final ByteBuffer temp = ByteBuffer.allocate(100);
-	for (WordData wd : response)
-	{
+	for (WordData wd : response) {
 	    // Buffer should be copied.
 	    final ByteBuffer copy = wd.getStemBytes(null);
 	    final String stem = new String(
@@ -92,8 +112,7 @@ public class DictionaryLookupTest {
 	    assertEquals(0, copy.compareTo(temp));
 	}
 
-	for (WordData wd : response)
-	{
+	for (WordData wd : response) {
 	    // Buffer should be copied.
 	    final ByteBuffer copy = wd.getTagBytes(null);
 	    final String tag = new String(
@@ -109,6 +128,14 @@ public class DictionaryLookupTest {
 	    // The copy and the clone should be identical.
 	    assertEquals(0, copy.compareTo(temp));
 	}
+
+	for (WordData wd : response) {
+	    // Buffer should be copied.
+	    final ByteBuffer copy = wd.getWordBytes(null);
+	    assertNotNull(copy);
+	    assertEquals(0, copy.compareTo(
+		    ByteBuffer.wrap(word.getBytes("iso-8859-2"))));
+	}	
     }
 
     /* */

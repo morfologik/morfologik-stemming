@@ -3,8 +3,7 @@ package morfologik.stemming;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import morfologik.fsa.*;
 import morfologik.util.Arrays;
@@ -24,7 +23,7 @@ import morfologik.util.BufferUtils;
  * 
  * @see <a href="http://www.eti.pg.gda.pl/~jandac/fsa.html">FSA package Web site</a>
  */
-public final class DictionaryLookup implements IStemmer {
+public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
     /** A Finite State Automaton used for look ups. */
     private final FSATraversalHelper matcher;
 
@@ -49,7 +48,7 @@ public final class DictionaryLookup implements IStemmer {
      * 
      * @see DictionaryMetadata
      */
-    private final DictionaryMetadata dictionaryFeatures;
+    private final DictionaryMetadata dictionaryMetadata;
 
     /**
      * Charset encoder for the FSA.
@@ -84,6 +83,11 @@ public final class DictionaryLookup implements IStemmer {
     private final FSAMatch matchResult = new FSAMatch();
 
     /**
+     * The {@link Dictionary} this lookup is using.
+     */
+    private final Dictionary dictionary;
+
+    /**
      * <p>
      * Creates a new object of this class using the given FSA for word lookups
      * and encoding for converting characters to bytes.
@@ -93,7 +97,8 @@ public final class DictionaryLookup implements IStemmer {
      */
     public DictionaryLookup(Dictionary dictionary) throws IllegalArgumentException
     {
-	this.dictionaryFeatures = dictionary.metadata;
+	this.dictionary = dictionary;
+	this.dictionaryMetadata = dictionary.metadata;
 	this.rootNode = dictionary.fsa.getRootNode();
 	this.matcher = dictionary.fsa.getTraversalHelper();
 	this.finalStatesIterator = matcher.getFinalStatesIterator();
@@ -104,13 +109,13 @@ public final class DictionaryLookup implements IStemmer {
 		    "Dictionary must have at least the root node.");
 	}
 
-	if (dictionaryFeatures == null) {
+	if (dictionaryMetadata == null) {
 	    throw new IllegalArgumentException(
 		    "Dictionary metadata must not be null.");
 	}
 
 	try {
-	    Charset charset = Charset.forName(dictionaryFeatures.encoding);
+	    Charset charset = Charset.forName(dictionaryMetadata.encoding);
 	    encoder = charset.newEncoder();
 	    decoder = charset.newDecoder().onMalformedInput(
 		    CodingErrorAction.REPORT).onUnmappableCharacter(
@@ -118,7 +123,7 @@ public final class DictionaryLookup implements IStemmer {
 	} catch (UnsupportedCharsetException e) {
 	    throw new RuntimeException(
 		    "FSA's encoding charset is not supported: "
-			    + dictionaryFeatures.encoding);
+			    + dictionaryMetadata.encoding);
 	}
     }
 
@@ -128,7 +133,7 @@ public final class DictionaryLookup implements IStemmer {
      * to the dictionary's specification) and an optional tag data.
      */
     public List<WordData> lookup(CharSequence word) {
-	final byte separator = dictionaryFeatures.separator;
+	final byte separator = dictionaryMetadata.separator;
 
 	// Encode word characters into bytes in the same encoding as the FSA's.
 	charBuffer.clear();
@@ -136,7 +141,7 @@ public final class DictionaryLookup implements IStemmer {
 	for (int i = 0; i < word.length(); i++)
 	    charBuffer.put(word.charAt(i));
 	charBuffer.flip();
-	byteBuffer = encode(charBuffer, byteBuffer);
+	byteBuffer = charsToBytes(charBuffer, byteBuffer);
 
 	// Try to find a partial match in the dictionary.
 	final FSAMatch match = matcher.matchSequence(
@@ -179,6 +184,9 @@ public final class DictionaryLookup implements IStemmer {
 		    final WordData wordData = forms[formsCount++];
 		    wordData.reset();
 
+		    wordData.wordBuffer = byteBuffer;
+		    wordData.wordCharSequence = word;
+
 		    /*
 		     * Find the separator byte's position splitting word form and tag.
 		     */
@@ -193,7 +201,7 @@ public final class DictionaryLookup implements IStemmer {
 		     */
 		    wordData.stemBuffer.clear();
 		    wordData.stemBuffer = decode(wordData.stemBuffer, ba, sepPos,
-			    byteBuffer, dictionaryFeatures);
+			    byteBuffer, dictionaryMetadata);
 		    wordData.stemBuffer.flip();
 
 		    // Skip separator character.
@@ -308,7 +316,7 @@ public final class DictionaryLookup implements IStemmer {
      * Encode a character sequence into a byte buffer, optionally expanding
      * buffer.
      */
-    private ByteBuffer encode(CharBuffer chars, ByteBuffer bytes) {
+    private ByteBuffer charsToBytes(CharBuffer chars, ByteBuffer bytes) {
 	bytes.clear();
 	final int maxCapacity = (int) (chars.remaining() * encoder.maxBytesPerChar());
 	if (bytes.capacity() <= maxCapacity) {
@@ -321,5 +329,130 @@ public final class DictionaryLookup implements IStemmer {
 	chars.reset();
 
 	return bytes;
+    }
+
+    /**
+     * Decode the byte buffer, optionally expanding the char buffer.
+     */
+    private CharBuffer bytesToChars(ByteBuffer bytes, CharBuffer chars) {
+	chars.clear();
+	final int maxCapacity = (int) (bytes.remaining() * decoder.maxCharsPerByte());
+	if (chars.capacity() <= maxCapacity) {
+	    chars = CharBuffer.allocate(maxCapacity);
+	}
+
+	bytes.mark();
+	decoder.decode(bytes, chars, true);
+	chars.flip();
+	bytes.reset();
+
+	return chars;
+    }
+    
+    /**
+     * Return an iterator over all {@link WordData} entries available in
+     * the embedded {@link Dictionary}.
+     */
+    public Iterator<WordData> iterator() {
+	return new WordDataIterator();
+    }
+
+    /**
+     * @return Return the {@link Dictionary} used by this object.
+     */
+    public Dictionary getDictionary() {
+	return dictionary;
+    }
+
+    /**
+     * An iterator over {@link WordData} entries.
+     */
+    private class WordDataIterator implements Iterator<WordData> {
+	private final Iterator<ByteBuffer> entriesIter = fsa.iterator();
+	private final WordData entry = new WordData(decoder);
+	private final byte separator = dictionaryMetadata.separator;
+	private ByteBuffer inflectedBuffer = ByteBuffer.allocate(0);
+	private CharBuffer inflectedCharBuffer = CharBuffer.allocate(0);
+	private ByteBuffer temp = ByteBuffer.allocate(0);
+
+	public boolean hasNext() {
+	    return entriesIter.hasNext();
+	}
+
+	public WordData next() {
+	    final ByteBuffer entryBuffer = entriesIter.next();
+	    entry.reset();
+	    
+	    /*
+	     * Entries are typically: inflected<SEP>codedBase<SEP>tag
+	     * so try to find this split.
+	     */
+	    byte [] ba = entryBuffer.array();
+	    int bbSize = entryBuffer.remaining();
+
+	    int sepPos;
+	    for (sepPos = 0; sepPos < bbSize; sepPos++) {
+		if (ba[sepPos] == separator)
+		    break;
+	    }
+
+	    if (sepPos == bbSize) {
+		throw new RuntimeException("Invalid dictionary " +
+				"entry format (missing separator).");
+	    }
+
+	    inflectedBuffer.clear();
+	    inflectedBuffer = BufferUtils.ensureCapacity(inflectedBuffer, sepPos);
+	    inflectedBuffer.put(ba, 0, sepPos);
+	    inflectedBuffer.flip();
+
+	    inflectedCharBuffer = bytesToChars(inflectedBuffer, inflectedCharBuffer);
+	    entry.wordBuffer = inflectedBuffer;
+	    entry.wordCharSequence = inflectedCharBuffer;
+
+	    temp.clear();
+	    temp = BufferUtils.ensureCapacity(temp, bbSize - sepPos);
+	    sepPos++;
+	    temp.put(ba, sepPos, bbSize - sepPos);
+	    temp.flip();
+
+	    ba = temp.array();
+	    bbSize = temp.remaining();
+
+	    /*
+	     * Find the next separator byte's position splitting word form and tag.
+	     */
+	    sepPos = 0;
+	    for (; sepPos < bbSize; sepPos++) {
+		if (ba[sepPos] == separator)
+		    break;
+	    }
+
+	    /*
+	     * Decode the stem into stem buffer.
+	     */
+	    entry.stemBuffer.clear();
+	    entry.stemBuffer = decode(
+		    entry.stemBuffer, ba, sepPos, inflectedBuffer, dictionaryMetadata);
+	    entry.stemBuffer.flip();
+
+	    // Skip separator character.
+	    sepPos++;
+
+	    /*
+	     * Decode the tag data.
+	     */
+	    entry.tagBuffer = BufferUtils.ensureCapacity(
+		    entry.tagBuffer, bbSize - sepPos);
+	    entry.tagBuffer.clear();
+	    entry.tagBuffer.put(ba, sepPos, bbSize - sepPos);
+	    entry.tagBuffer.flip();
+	    
+	    return entry;
+	}
+
+	public void remove() {
+	    throw new UnsupportedOperationException();
+	}	
     }
 }

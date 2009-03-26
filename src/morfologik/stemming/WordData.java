@@ -35,6 +35,11 @@ public final class WordData {
     private final CharsetDecoder decoder;
 
     /**
+     * Inflected word form data.
+     */
+    CharSequence wordCharSequence;
+
+    /**
      * Character sequence after converting {@link #stemBuffer} using
      * {@link #decoder}.
      */
@@ -45,6 +50,9 @@ public final class WordData {
      * {@link #decoder}.
      */
     private CharBuffer tagCharSequence;
+
+    /** Byte buffer holding the inflected word form data. */
+    ByteBuffer wordBuffer;
 
     /** Byte buffer holding stem data. */
     ByteBuffer stemBuffer;
@@ -121,6 +129,26 @@ public final class WordData {
     }
 
     /**
+     * Copy the inflected word's binary data (no charset decoding) to a custom
+     * byte buffer. If the buffer is null or not large enough to hold the
+     * result, a new buffer is allocated.
+     * 
+     * @param target
+     *            Target byte buffer to copy the word buffer to or
+     *            <code>null</code> if a new buffer should be allocated.
+     * 
+     * @return Returns <code>target</code> or the new reallocated buffer.
+     */
+    public ByteBuffer getWordBytes(ByteBuffer target) {
+	target = BufferUtils.ensureCapacity(target, wordBuffer.remaining());
+	wordBuffer.mark();
+	target.put(wordBuffer);
+	wordBuffer.reset();
+	target.flip();
+	return target;
+    }
+
+    /**
      * @return Return tag data decoded to a character sequence or
      *         <code>null</code> if no associated tag data exists.
      */
@@ -136,6 +164,14 @@ public final class WordData {
     public CharSequence getStem() {
 	stemCharSequence = decode(stemBuffer, stemCharSequence);
 	return stemCharSequence.remaining() == 0 ? null : stemCharSequence;
+    }
+
+    /**
+     * @return Return inflected word form data. Usually the parameter
+     * passed to {@link DictionaryLookup#lookup(CharSequence)}.
+     */
+    public CharSequence getWord() {
+	return wordCharSequence;
     }
 
     /*
@@ -158,6 +194,8 @@ public final class WordData {
      * Reset internal structures for storing another word's data.
      */
     void reset() {
+	this.wordCharSequence = null;
+	this.wordBuffer = null;
 	this.stemCharSequence.clear();
 	this.tagCharSequence.clear();
 	this.stemBuffer.clear();
