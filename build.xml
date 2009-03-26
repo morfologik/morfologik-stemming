@@ -38,7 +38,9 @@
 	<target name="clean">
 		<delete dir="${build.dir}" failonerror="false" />
 		<delete dir="${dist.dir}" failonerror="false" />
-		<delete dir="${tmp.dir}" failonerror="false" />
+		<delete dir="${tmp.dir}" failonerror="false">
+		        <exclude name="eclipse/**" />
+		    </delete>
 	</target>
 
 
