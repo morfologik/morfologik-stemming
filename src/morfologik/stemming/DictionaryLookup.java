@@ -144,8 +144,8 @@ public final class DictionaryLookup implements IStemmer {
 
 	if (match.getMatchType() == FSAMatchType.PREMATURE_WORD_END_FOUND) {
 	    /*
-	     * The entire sequence fit into the dictionary. Now a separator
-	     * should be the next character.
+	     * The entire sequence exists in the dictionary. A separator
+	     * should be the next symbol.
 	     */
 	    final int arc = fsa.getArc(match.getMismatchNode(), separator);
 
@@ -164,15 +164,6 @@ public final class DictionaryLookup implements IStemmer {
 		    final byte[] ba = bb.array();
 		    final int bbSize = bb.remaining();
 
-		    /*
-		     * Find the separator byte splitting word form and tag.
-		     */
-		    int j;
-		    for (j = 0; j < bbSize; j++) {
-			if (ba[j] == separator)
-			    break;
-		    }
-
 		    if (formsCount >= forms.length) {
 			forms = Arrays.copyOf(forms, forms.length + EXPAND_SIZE);
 			for (int k = 0; k < forms.length; k++) {
@@ -189,23 +180,32 @@ public final class DictionaryLookup implements IStemmer {
 		    wordData.reset();
 
 		    /*
+		     * Find the separator byte's position splitting word form and tag.
+		     */
+		    int sepPos;
+		    for (sepPos = 0; sepPos < bbSize; sepPos++) {
+			if (ba[sepPos] == separator)
+			    break;
+		    }
+
+		    /*
 		     * Decode the stem into stem buffer.
 		     */
 		    wordData.stemBuffer.clear();
-		    wordData.stemBuffer = decode(wordData.stemBuffer, ba, j,
+		    wordData.stemBuffer = decode(wordData.stemBuffer, ba, sepPos,
 			    byteBuffer, dictionaryFeatures);
 		    wordData.stemBuffer.flip();
 
 		    // Skip separator character.
-		    j++;
+		    sepPos++;
 
 		    /*
 		     * Decode the tag data.
 		     */
 		    wordData.tagBuffer = BufferUtils.ensureCapacity(
-			    wordData.tagBuffer, bbSize - j);
+			    wordData.tagBuffer, bbSize - sepPos);
 		    wordData.tagBuffer.clear();
-		    wordData.tagBuffer.put(ba, j, bbSize - j);
+		    wordData.tagBuffer.put(ba, sepPos, bbSize - sepPos);
 		    wordData.tagBuffer.flip();
 		}
 
@@ -233,8 +233,11 @@ public final class DictionaryLookup implements IStemmer {
      *            enough to store the result. The buffer is not flipped opon
      *            return.
      * 
-     * @param inflected
+     * @param inflectedBuffer
      *            Inflected form's bytes (decoded properly).
+     *            
+     * @param len
+     * 		  Length of the encode base form.
      * 
      * @return Returns either <code>bb</code> or a new buffer whose capacity is
      *         large enough to store the output of the decoded data.
@@ -278,7 +281,7 @@ public final class DictionaryLookup implements IStemmer {
 		    }
 		}
 	    } else if (fsaInfixes) {
-		// Note: prefixes are silently assumed here
+		// Note: Prefixes are silently assumed here.
 		if (len > 2) {
 		    final int stripAtBeginning = bytes[1] - 'A' + code0;
 		    final int stripAtEnd = bytes[2] - 'A' + stripAtBeginning;

@@ -19,12 +19,12 @@ final class SharedOptions {
             .isRequired(true)
             .create("d");
 
-    public final static Option useApiOption =
+    public final static Option dataOnly =
         OptionBuilder
-            .withDescription("Use node traversal API instead of linear dump.")
-            .withLongOpt("use-api")
+            .withDescription("Dump only raw FSA data.")
+            .withLongOpt("raw-data")
             .isRequired(false)
-            .create("a");
+            .create("r");
 
     public final static Option inputEncodingOption = 
         OptionBuilder

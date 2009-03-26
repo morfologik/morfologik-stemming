@@ -93,7 +93,10 @@ public final class WordData {
      */
     public ByteBuffer getStemBytes(ByteBuffer target) {
 	target = BufferUtils.ensureCapacity(target, stemBuffer.remaining());
+	stemBuffer.mark();
 	target.put(stemBuffer);
+	stemBuffer.reset();
+	target.flip();
 	return target;
     }
 
@@ -110,7 +113,10 @@ public final class WordData {
      */
     public ByteBuffer getTagBytes(ByteBuffer target) {
 	target = BufferUtils.ensureCapacity(target, tagBuffer.remaining());
+	tagBuffer.mark();
 	target.put(tagBuffer);
+	tagBuffer.reset();
+	target.flip();
 	return target;
     }
 

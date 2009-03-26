@@ -13,7 +13,9 @@
           data structures (int pointers) to keep memory usage minimal. The speed
           boost gained from this is enormous and justifies less readable code. We
           strongly advise to use the provided iterators and helper functions
-          for matching state sequences in the FSA.        
+          for matching state sequences in the FSA.
+
+          Tools updated. Dumping existing FSAs is much, much faster now.        
 
 --------
 

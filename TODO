@@ -5,3 +5,7 @@ PLANS FOR VERSION 1.2
   (or even compatible?) with Morfeusz-Java.
 
 - Suggest and implement a new stemming heuristic based on inflection frames.
+
+- Check and verify tools.
+
+- Add the possibility to dump decoded (expanded) dictionaries.
