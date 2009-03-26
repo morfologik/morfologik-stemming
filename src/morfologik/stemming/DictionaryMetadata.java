@@ -106,7 +106,9 @@ public final class DictionaryMetadata {
                 properties.getProperty(ATTR_NAME_USES_INFIXES, "false")).booleanValue();
 
         final HashMap<String, String> metadata = new HashMap<String, String>();
-        properties.putAll(metadata);
+        for (Map.Entry<Object, Object> e : properties.entrySet()) {
+            metadata.put(e.getKey().toString(), e.getValue().toString());
+        }
 
         return new DictionaryMetadata(
                 separator.charAt(0), encoding, usesPrefixes, usesInfixes, metadata);
