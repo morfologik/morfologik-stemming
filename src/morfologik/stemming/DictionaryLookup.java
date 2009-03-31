@@ -436,8 +436,10 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 		    entry.stemBuffer, ba, sepPos, inflectedBuffer, dictionaryMetadata);
 	    entry.stemBuffer.flip();
 
-	    // Skip separator character.
-	    sepPos++;
+	    // Skip separator character, if present.
+	    if (sepPos + 1 <= bbSize) {
+		sepPos++;
+	    }
 
 	    /*
 	     * Decode the tag data.

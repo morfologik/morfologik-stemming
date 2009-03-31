@@ -1,0 +1,8 @@
+token1+
+token2++
+token3+++
+token4+token2
+token5+token2+
+token6+token2++
+token7+token2+token3+
+token8+token2+token3++

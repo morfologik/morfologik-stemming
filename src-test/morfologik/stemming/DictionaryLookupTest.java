@@ -166,6 +166,31 @@ public class DictionaryLookupTest {
     }
 
     /* */
+    @Test
+    public void testInputWithSeparators() throws IOException {
+	final URL url = this.getClass().getResource("test-separators.dict");
+	final DictionaryLookup s = new DictionaryLookup(Dictionary.read(url));
+
+	/*
+	 * Attemp to reconstruct input sequences using WordData iterator.
+	 */
+	ArrayList<String> sequences = new ArrayList<String>();
+	for (WordData wd : s) {
+	    sequences.add("" + wd.getWord() + " " + wd.getStem() + " " + wd.getTag()); 
+	}
+	Collections.sort(sequences);
+
+	assertEquals("token1 null null", sequences.get(0));
+	assertEquals("token2 null null", sequences.get(1));
+	assertEquals("token3 null +", sequences.get(2));
+	assertEquals("token4 token2 null", sequences.get(3));
+	assertEquals("token5 token2 null", sequences.get(4));
+	assertEquals("token6 token2 +", sequences.get(5));
+	assertEquals("token7 token2 token3+", sequences.get(6));
+	assertEquals("token8 token2 token3++", sequences.get(7));
+    }
+
+    /* */
     public static String[] stem(IStemmer s, String word) {
 	ArrayList<String> result = new ArrayList<String>();
 	for (WordData wd : s.lookup(word)) {
