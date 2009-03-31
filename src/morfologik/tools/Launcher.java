@@ -27,7 +27,7 @@ public final class Launcher {
     private static TreeMap<String, ToolInfo> tools;
     static {
 	tools = new TreeMap<String, ToolInfo>();
-	tools.put("dump",   new ToolInfo(FSADumpTool.class, "Dump an FSA dictionary."));	tools.put("plstem", new ToolInfo(PolishStemmingTool.class, "Apply Polish stemming to the input."));
+	tools.put("dump",   new ToolInfo(DumpTool.class, "Dump an FSA dictionary."));	tools.put("plstem", new ToolInfo(PolishStemmingTool.class, "Apply Polish stemming to the input."));
     }
 
     /**

@@ -19,6 +19,13 @@ final class SharedOptions {
             .isRequired(true)
             .create("d");
 
+    public final static Option decode =
+        OptionBuilder
+            .withDescription("Decode prefix/ infix/ suffix forms (if available).")
+            .withLongOpt("decode")
+            .isRequired(false)
+            .create("x");
+
     public final static Option dataOnly =
         OptionBuilder
             .withDescription("Dump only raw FSA data.")
