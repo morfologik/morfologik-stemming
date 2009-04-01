@@ -213,6 +213,7 @@ public final class WordData {
 	}
 
 	bytes.mark();
+	decoder.reset();
 	decoder.decode(bytes, chars, true);
 	chars.flip();
 	bytes.reset();

@@ -200,7 +200,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 		     * Decode the stem into stem buffer.
 		     */
 		    wordData.stemBuffer.clear();
-		    wordData.stemBuffer = decode(wordData.stemBuffer, ba, sepPos,
+		    wordData.stemBuffer = decodeStem(wordData.stemBuffer, ba, sepPos,
 			    byteBuffer, dictionaryMetadata);
 		    wordData.stemBuffer.flip();
 
@@ -238,19 +238,22 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
      * @param bb
      *            The byte buffer to save the result to. A new buffer may be
      *            allocated if the capacity of <code>bb</code> is not large
-     *            enough to store the result. The buffer is not flipped opon
+     *            enough to store the result. The buffer is not flipped upon
      *            return.
      * 
      * @param inflectedBuffer
      *            Inflected form's bytes (decoded properly).
-     *            
+     *           
+     * @param bytes
+     * 		  Bytes of the encoded base form, starting at 0 index.
+     * 
      * @param len
      * 		  Length of the encode base form.
      * 
      * @return Returns either <code>bb</code> or a new buffer whose capacity is
      *         large enough to store the output of the decoded data.
      */
-    static ByteBuffer decode(ByteBuffer bb, byte[] bytes, int len,
+    public static ByteBuffer decodeStem(ByteBuffer bb, byte[] bytes, int len,
 	    ByteBuffer inflectedBuffer, DictionaryMetadata metadata) {
 	bb.clear();
 
@@ -324,6 +327,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 	}
 
 	chars.mark();
+	encoder.reset();
 	encoder.encode(chars, bytes, true);
 	bytes.flip();
 	chars.reset();
@@ -332,29 +336,11 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
     }
 
     /**
-     * Decode the byte buffer, optionally expanding the char buffer.
-     */
-    private CharBuffer bytesToChars(ByteBuffer bytes, CharBuffer chars) {
-	chars.clear();
-	final int maxCapacity = (int) (bytes.remaining() * decoder.maxCharsPerByte());
-	if (chars.capacity() <= maxCapacity) {
-	    chars = CharBuffer.allocate(maxCapacity);
-	}
-
-	bytes.mark();
-	decoder.decode(bytes, chars, true);
-	chars.flip();
-	bytes.reset();
-
-	return chars;
-    }
-    
-    /**
      * Return an iterator over all {@link WordData} entries available in
      * the embedded {@link Dictionary}.
      */
     public Iterator<WordData> iterator() {
-	return new WordDataIterator();
+	return new DictionaryIterator(dictionary, decoder, true);
     }
 
     /**
@@ -362,99 +348,5 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
      */
     public Dictionary getDictionary() {
 	return dictionary;
-    }
-
-    /**
-     * An iterator over {@link WordData} entries.
-     */
-    private class WordDataIterator implements Iterator<WordData> {
-	private final Iterator<ByteBuffer> entriesIter = fsa.iterator();
-	private final WordData entry = new WordData(decoder);
-	private final byte separator = dictionaryMetadata.separator;
-	private ByteBuffer inflectedBuffer = ByteBuffer.allocate(0);
-	private CharBuffer inflectedCharBuffer = CharBuffer.allocate(0);
-	private ByteBuffer temp = ByteBuffer.allocate(0);
-
-	public boolean hasNext() {
-	    return entriesIter.hasNext();
-	}
-
-	public WordData next() {
-	    final ByteBuffer entryBuffer = entriesIter.next();
-	    entry.reset();
-	    
-	    /*
-	     * Entries are typically: inflected<SEP>codedBase<SEP>tag
-	     * so try to find this split.
-	     */
-	    byte [] ba = entryBuffer.array();
-	    int bbSize = entryBuffer.remaining();
-
-	    int sepPos;
-	    for (sepPos = 0; sepPos < bbSize; sepPos++) {
-		if (ba[sepPos] == separator)
-		    break;
-	    }
-
-	    if (sepPos == bbSize) {
-		throw new RuntimeException("Invalid dictionary " +
-				"entry format (missing separator).");
-	    }
-
-	    inflectedBuffer.clear();
-	    inflectedBuffer = BufferUtils.ensureCapacity(inflectedBuffer, sepPos);
-	    inflectedBuffer.put(ba, 0, sepPos);
-	    inflectedBuffer.flip();
-
-	    inflectedCharBuffer = bytesToChars(inflectedBuffer, inflectedCharBuffer);
-	    entry.wordBuffer = inflectedBuffer;
-	    entry.wordCharSequence = inflectedCharBuffer;
-
-	    temp.clear();
-	    temp = BufferUtils.ensureCapacity(temp, bbSize - sepPos);
-	    sepPos++;
-	    temp.put(ba, sepPos, bbSize - sepPos);
-	    temp.flip();
-
-	    ba = temp.array();
-	    bbSize = temp.remaining();
-
-	    /*
-	     * Find the next separator byte's position splitting word form and tag.
-	     */
-	    sepPos = 0;
-	    for (; sepPos < bbSize; sepPos++) {
-		if (ba[sepPos] == separator)
-		    break;
-	    }
-
-	    /*
-	     * Decode the stem into stem buffer.
-	     */
-	    entry.stemBuffer.clear();
-	    entry.stemBuffer = decode(
-		    entry.stemBuffer, ba, sepPos, inflectedBuffer, dictionaryMetadata);
-	    entry.stemBuffer.flip();
-
-	    // Skip separator character, if present.
-	    if (sepPos + 1 <= bbSize) {
-		sepPos++;
-	    }
-
-	    /*
-	     * Decode the tag data.
-	     */
-	    entry.tagBuffer = BufferUtils.ensureCapacity(
-		    entry.tagBuffer, bbSize - sepPos);
-	    entry.tagBuffer.clear();
-	    entry.tagBuffer.put(ba, sepPos, bbSize - sepPos);
-	    entry.tagBuffer.flip();
-	    
-	    return entry;
-	}
-
-	public void remove() {
-	    throw new UnsupportedOperationException();
-	}	
     }
 }
