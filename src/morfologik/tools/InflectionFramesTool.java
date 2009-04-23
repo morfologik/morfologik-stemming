@@ -14,14 +14,14 @@ import org.junit.Test;
 /**
  * Calculate inflection frames from the Polish dictionary. 
  */
-public class InflectionFrames {
+public class InflectionFramesTool {
     public static void main(String[] args) throws IOException {
-	new InflectionFrames().inflectionFrames();
+	new InflectionFramesTool().inflectionFrames();
     }
 
     /* */
     @Test
-    @SuppressWarnings("unused")
+    @SuppressWarnings({ "unused", "unchecked" })
     public void inflectionFrames() throws IOException {
 	final Dictionary pl = Dictionary.getForLanguage("pl");
 	final DictionaryLookup dict = new DictionaryLookup(pl);
@@ -30,7 +30,7 @@ public class InflectionFrames {
 		.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
 		.onUnmappableCharacter(CodingErrorAction.REPORT);
 
-	final HashMap<String, ArrayList<String>> forms = new HashMap<String, ArrayList<String>>();
+	final HashMap<String, ArrayList<String>> forms = new HashMap();
 
 	ByteBuffer stemBuffer = ByteBuffer.allocate(0);
 	ByteBuffer inflBuffer = ByteBuffer.allocate(0);
@@ -73,7 +73,7 @@ public class InflectionFrames {
 
 	// Sort the forms so that we get a unique key. Then iteratively add them
 	// to another hash (by form this time).
-	final HashMap<String, ArrayList<String>> frames = new HashMap<String, ArrayList<String>>();
+	final HashMap<String, ArrayList<String>> frames = new HashMap();
 
 	StringBuilder key = new StringBuilder();
 	for (Map.Entry<String, ArrayList<String>> e : forms.entrySet()) {
