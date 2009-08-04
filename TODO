@@ -1,5 +1,5 @@
 
-PLANS FOR VERSION 1.2
+PLANS FOR VERSION 1.3
 
 - Add a set of utility classes for parsing morphological tags. This could be similar 
   (or even compatible?) with Morfeusz-Java.
