@@ -67,6 +67,46 @@ public class DictionaryLookupTest {
 
     /* */
     @Test
+    public void testWordDataCloning() throws IOException {
+	final URL url = this.getClass().getResource("test-infix.dict");
+	final DictionaryLookup s = new DictionaryLookup(Dictionary.read(url));
+
+	ArrayList<WordData> words = new ArrayList<WordData>();
+	for (WordData wd : s) {
+	    WordData clone = wd.clone();
+	    words.add(clone);
+	}
+
+	// Reiterate and verify that we have the same entries.
+	final DictionaryLookup s2 = new DictionaryLookup(Dictionary.read(url));
+	int i = 0;
+	for (WordData wd : s2) {
+	    WordData clone = words.get(i++);
+	    assertEqualSequences(clone.getStem(), wd.getStem());
+	    assertEqualSequences(clone.getTag(), wd.getTag());
+	    assertEqualSequences(clone.getWord(), wd.getWord());
+	    assertEqualSequences(clone.wordCharSequence, wd.wordCharSequence);
+	}
+
+	// Check collections contract.
+	final HashSet<WordData> entries = new HashSet<WordData>();
+	try
+	{
+	    entries.add(words.get(0));
+	    fail();
+	} 
+	catch (RuntimeException e)
+	{
+	    // Expected.
+	}
+    }
+
+    private void assertEqualSequences(CharSequence s1, CharSequence s2) {
+	assertEquals(s1.toString(), s2.toString());
+    }
+
+    /* */
+    @Test
     public void testWordDataFields() throws IOException {
 	final IStemmer s = new PolishStemmer();
 

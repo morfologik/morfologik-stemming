@@ -16,7 +16,7 @@ import morfologik.util.BufferUtils;
  * <li>Objects of this class are <i>volatile</i> (their content changes on
  * subsequent calls to {@link DictionaryLookup} class. If you need a copy of the
  * stem or tag data for a given word, you have to create a custom buffer
- * yourself and copy the associated data. Alternatively, create Strings (they
+ * yourself and copy the associated data, perform {@link #clone()} or create strings (they
  * are immutable) using {@link #getStem()} and then
  * {@link CharSequence#toString()}.</li>
  * <li>Objects of this class must not be used in any Java collections. In fact
@@ -24,7 +24,7 @@ import morfologik.util.BufferUtils;
  * prevent accidental damage.</li>
  * </ul>
  */
-public final class WordData {
+public final class WordData implements Cloneable {
     /**
      * Error information if somebody puts us in a Java collection.
      */
@@ -188,6 +188,28 @@ public final class WordData {
     @Override
     public int hashCode() {
 	throw new UnsupportedOperationException(COLLECTIONS_ERROR_MESSAGE);
+    }
+
+    /**
+     * Declare a covariant of {@link Object#clone()} that returns a deep copy
+     * of this object. The content of all internal buffers is copied. 
+     */
+    @Override
+    protected WordData clone() {
+	final WordData clone = new WordData(this.decoder);
+	clone.wordCharSequence = cloneCharSequence(wordCharSequence);
+	clone.wordBuffer = getWordBytes(null);
+	clone.stemBuffer = getStemBytes(null);
+	clone.tagBuffer = getTagBytes(null);
+        return clone;
+    }
+
+    /**
+     * Clone char sequences only if not immutable. 
+     */
+    private CharSequence cloneCharSequence(CharSequence chs) {
+	if (chs instanceof String) return chs;
+	return chs.toString();
     }
 
     /**
