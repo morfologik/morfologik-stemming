@@ -177,4 +177,12 @@ class PolishStemmingTool extends Tool {
 	}
 	return encoding;
     }
+    
+    /**
+     * Command line entry point.
+     */
+    public static void main(String[] args) throws Exception {
+	final PolishStemmingTool tool = new PolishStemmingTool();
+	tool.go(args);
+    }    
 }

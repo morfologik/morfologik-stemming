@@ -232,7 +232,7 @@ public final class DumpTool extends Tool {
     }
 
     /**
-     * Program's entry point.
+     * Command line entry point.
      */
     public static void main(String[] args) throws Exception {
 	final DumpTool fsaDump = new DumpTool();

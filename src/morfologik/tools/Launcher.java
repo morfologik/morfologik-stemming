@@ -11,7 +11,7 @@ public final class Launcher {
     /**
      * Tool description.
      */
-    private final static class ToolInfo {
+    final static class ToolInfo {
 	public final Class<? extends Tool> clazz;
 	public final String info;
 
@@ -19,15 +19,24 @@ public final class Launcher {
 	    this.clazz = clazz;
 	    this.info = info;
 	}
+
+	public void invoke(String[] subArgs) throws Exception {
+    	    final Method m = clazz.getMethod("main",
+    		    new Class[] { String[].class });
+    	    m.invoke(null, new Object[] { subArgs });
+	}
     }
 
     /**
      * Known tools.
      */
-    private static TreeMap<String, ToolInfo> tools;
+    static TreeMap<String, ToolInfo> tools;
     static {
 	tools = new TreeMap<String, ToolInfo>();
-	tools.put("dump",   new ToolInfo(DumpTool.class, "Dump an FSA dictionary."));	tools.put("plstem", new ToolInfo(PolishStemmingTool.class, "Apply Polish stemming to the input."));
+	tools.put("dump", new ToolInfo(DumpTool.class,
+		"Dump an FSA dictionary."));
+	tools.put("plstem", new ToolInfo(PolishStemmingTool.class,
+		"Apply Polish stemming to the input."));
     }
 
     /**
@@ -52,9 +61,7 @@ public final class Launcher {
 	    System.arraycopy(args, 1, subArgs, 0, subArgs.length);
 
 	    final ToolInfo toolInfo = (ToolInfo) tools.get(toolName);
-	    final Method m = toolInfo.clazz.getMethod("main",
-		    new Class[] { String[].class });
-	    m.invoke(null, new Object[] { subArgs });
+	    toolInfo.invoke(subArgs);
 	}
     }
 }
