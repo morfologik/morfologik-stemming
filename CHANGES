@@ -1,4 +1,11 @@
 
+1.2.2     License switch to plain BSD (removed the patent clause which did not make much sense 
+          anyway).
+
+          The build ZIP now includes licenses for individual JARs (prevents confusion). 
+
+1.2.1     Fixed tool launching routines.
+
 1.2       Package hierarchy reorganized.
 
           Removed stempel (heuristic stemmer for Polish).
