@@ -1,4 +1,9 @@
 
+1.2.3 (trunk)
+
+          Added support for version 5 automata built with NUMBERS flag (an extra field
+          stored for each node).
+
 1.2.2     License switch to plain BSD (removed the patent clause which did not make much sense 
           anyway).
 

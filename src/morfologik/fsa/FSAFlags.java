@@ -9,7 +9,13 @@ public enum FSAFlags {
     NEXTBIT(1 << 2),
     TAILS(1 << 3),
     WEIGHTED(1 << 4),
-    LARGE_DICTIONARIES(1 << 5);
+    LARGE_DICTIONARIES(1 << 5),
+    
+    /*
+     * This is outside of byte range (does not occur in FSA flags), but we keep
+     * them as a flag for consistency. 
+     */
+    NUMBERS(1 << 8);
     
     /**
      * Bit mask for the corresponding flag.

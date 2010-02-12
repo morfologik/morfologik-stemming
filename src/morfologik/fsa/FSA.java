@@ -115,7 +115,7 @@ public abstract class FSA implements Iterable<ByteBuffer> {
      * perform a bitwise AND:
      * <code>boolean isFlexible = ((dict.getFlags() &amp; FSA.FSA_FLEXIBLE ) != 0)</code>
      */
-    public final int getFlags() {
+    public int getFlags() {
 	return FSAHelpers.getFlags(version);
     }
 

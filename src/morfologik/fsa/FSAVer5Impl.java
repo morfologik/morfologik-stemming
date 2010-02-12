@@ -14,6 +14,18 @@ import java.io.*;
  * single transition (arc), not the entire dictionary file).
  * 
  * <pre>
+ * ---- this header only if automaton was compiled with NUMBERS option.
+ * Byte
+ *        +-+-+-+-+-+-+-+-+\
+ *      0 | | | | | | | | | \  LSB
+ *        +-+-+-+-+-+-+-+-+  +
+ *      1 | | | | | | | | |  |      number of strings recognized
+ *        +-+-+-+-+-+-+-+-+  +----- by the automaton starting
+ *        : : : : : : : : :  |      from this node.
+ *        +-+-+-+-+-+-+-+-+  +
+ *  ctl-1 | | | | | | | | | /  MSB
+ *        +-+-+-+-+-+-+-+-+/
+ * ---- 
  * Byte
  *       +-+-+-+-+-+-+-+-+\
  *     0 | | | | | | | | | +------ label
@@ -82,6 +94,21 @@ public final class FSAVer5Impl extends FSA {
     protected byte[] arcs;
 
     /**
+     * The length of the node prefix field if the automaton was
+     * compiled with <code>NUMBERS</code> option. 
+     */
+    protected int ctl;
+
+    /**
+     * Creates a new automaton reading it from a file in FSA format, version 5.
+     */
+    public FSAVer5Impl(InputStream fsaStream, String dictionaryEncoding)
+	    throws IOException {
+	super(fsaStream, dictionaryEncoding);
+    }
+
+
+    /**
      * Returns the number of arcs in this automaton. This method performs a full
      * scan of all arcs in this automaton.
      */
@@ -90,20 +117,25 @@ public final class FSAVer5Impl extends FSA {
 
 	int arcOffset = getFirstArc(startNode);
 	int arcsNumber = 0;
+	byte flags;
 	while (arcOffset < arcs.length) {
 	    arcsNumber++;
 
-	    // go to next arc.
-	    if ((arcs[arcOffset + gotoOffset] & BITMASK_NEXTBIT) != 0) {
-		/* the next arc is right after this one. */
-		arcOffset = arcOffset + gotoOffset + 1;
+	    // Follow to the next arc.
+	    flags = arcs[arcOffset + gotoOffset];
+	    if ((flags & BITMASK_NEXTBIT) != 0) {
+		/* The next arc is right after this one (no address). */
+		arcOffset += gotoOffset + 1;
 	    } else {
-		/*
-		 * the destination node address has to be extracted from the
-		 * arc's goto field.
-		 */
-		arcOffset = arcOffset + gotoOffset + gotoLength;
+		/* The next arc is after the address. */
+		arcOffset += gotoOffset + gotoLength;
 	    }
+
+	    if ((flags & BITMASK_LASTARC) != 0) {
+		/* This is the last arc of the current node, 
+		 * skip the next node's data. */
+		arcOffset += ctl;
+	    }	    
 	}
 
 	return arcsNumber;
@@ -114,24 +146,35 @@ public final class FSAVer5Impl extends FSA {
      * full scan of all arcs in this automaton.
      */
     public int getNumberOfNodes() {
-	int offset = gotoOffset;
-	int nodes = 0;
-	while (offset < arcs.length) {
-	    // This arc marks an end of the list of node's arrays.
-	    if ((arcs[offset] & BITMASK_LASTARC) != 0)
+	final int startNode = getRootNode();
+
+	int nodes = 1;
+	int arcOffset = getFirstArc(startNode);
+	int arcsNumber = 0;
+
+	byte flags;
+	while (arcOffset < arcs.length) {
+	    arcsNumber++;
+
+	    // Follow to the next arc.
+	    flags = arcs[arcOffset + gotoOffset];
+	    if ((flags & BITMASK_NEXTBIT) != 0) {
+		/* The next arc is right after this one (no address). */
+		arcOffset += gotoOffset + 1;
+	    } else {
+		/* The next arc is after the address. */
+		arcOffset += gotoOffset + gotoLength;
+	    }
+
+	    if ((flags & BITMASK_LASTARC) != 0) {
+		/* This is the last arc of the current node, 
+		 * skip the next node's data. */
+		arcOffset += ctl;
 		nodes++;
-	    offset += arcSize;
+	    }	    
 	}
 
 	return nodes;
-    }
-
-    /**
-     * Creates a new automaton reading it from a file in FSA format, version 5.
-     */
-    public FSAVer5Impl(InputStream fsaStream, String dictionaryEncoding)
-	    throws IOException {
-	super(fsaStream, dictionaryEncoding);
     }
 
     /**
@@ -139,7 +182,7 @@ public final class FSAVer5Impl extends FSA {
      * the start node is also an end node.
      */
     public int getRootNode() {
-	return getEndNode(getFirstArc(arcSize));
+	return getEndNode(getFirstArc(ctl + arcSize));
     }
 
     /**
@@ -164,8 +207,14 @@ public final class FSAVer5Impl extends FSA {
 			    .getFlags(FSA.VERSION_5)) + ").");
 	}
 
-	// Read transitions data.
-	gotoLength = (byte) (gotoLength & 0x0f);
+	/* 
+	 * Determine if the automaton was compiled with NUMBERS. If so, modify
+	 * ctl and goto fields accordingly.
+	 */
+	if ((super.gotoLength & 0xf0) != 0) {
+	    this.ctl = super.gotoLength >>> 4;
+	    super.gotoLength = (byte) (super.gotoLength & 0x0f);
+	}
 	arcSize = gotoLength + 1;
 
 	final int numberOfArcs = (int) fileSize - /* header size */8;
@@ -177,7 +226,7 @@ public final class FSAVer5Impl extends FSA {
      * 
      */
     public final int getFirstArc(int node) {
-	return node;
+	return ctl + node;
     }
 
     /*
@@ -233,6 +282,17 @@ public final class FSAVer5Impl extends FSA {
      */
     public boolean isArcTerminal(int arc) {
 	return (0 == getDestinationNodeOffset(arc));
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * For this automaton version, an additional {@link FSAFlags#NUMBERS} flag
+     * may be set to indicate the automaton contains extra fields for each node.
+     */
+    @Override
+    public int getFlags() {
+	return super.getFlags() | (this.ctl != 0 ? FSAFlags.NUMBERS.bits : 0);
     }
 
     /*
