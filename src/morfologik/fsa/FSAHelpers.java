@@ -93,8 +93,9 @@ public final class FSAHelpers
                 flags = FLEXIBLE.bits; break;
             case 2:     
                 flags = FLEXIBLE.bits |                NEXTBIT.bits; break;
-            case 4:     
+            case 4:
                 flags = FLEXIBLE.bits | STOPBIT.bits; break;
+            case FSA.VERSION_CFSA:
             case FSA.VERSION_5:
                 flags = FLEXIBLE.bits | STOPBIT.bits | NEXTBIT.bits; break;
             case 6:     

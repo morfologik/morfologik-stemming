@@ -90,8 +90,8 @@ public final class DumpTool extends Tool {
 	printExtra("FSA file version    : " + fsa.getVersion());
 	printExtra("Compiled with flags : "
 		+ FSAHelpers.flagsToString(fsa.getFlags()));
-	printExtra("Number of arcs      : " + fsa.getNumberOfArcs());
-	printExtra("Number of nodes     : " + fsa.getNumberOfNodes());
+	printExtra("Number of arcs      : " + fsa.getArcsCount());
+	printExtra("Number of nodes     : " + fsa.getNodeCount());
 	printExtra("Annotation separator: " + fsa.getAnnotationSeparator());
 	printExtra("Filler character    : " + fsa.getFillerCharacter());
 	printExtra("");

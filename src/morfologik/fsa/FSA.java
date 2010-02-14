@@ -2,7 +2,6 @@ package morfologik.fsa;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,9 +26,14 @@ import morfologik.util.FileUtils;
  */
 public abstract class FSA implements Iterable<ByteBuffer> {
     /**
-     * Version number for version 5 of the automaton.
+     * Version number for fsa automata in version 5.
      */
     public final static byte VERSION_5 = 5;
+
+    /**
+     * Version number for {@link CFSA} variant of {@link VERSION_5} automata.
+     */
+    public final static byte VERSION_CFSA = (byte) 0xc5; // _c_ompact _5_ :)
 
     /**
      * Dictionary version (derived from the combination of flags).
@@ -53,13 +57,23 @@ public abstract class FSA implements Iterable<ByteBuffer> {
      * in a FSA. For instance an inflected form of a word may be separated from
      * the base form.
      */
-    private byte annotationSeparator;
+    protected byte annotationSeparator;
 
     /**
      * The encoding (codepage) in which the dictionary has been compiled;
      * byte-to-character conversion scheme.
      */
     private String dictionaryEncoding;
+
+    /**
+     * Cached node count.
+     */
+    protected int nodeCount = -1;
+    
+    /**
+     * Cached arc count.
+     */
+    protected int arcsCount = -1;
 
     /**
      * Creates a new automaton reading the FSA automaton from an input stream.
@@ -164,14 +178,32 @@ public abstract class FSA implements Iterable<ByteBuffer> {
      * representation of the automaton, this method may take a long time to
      * finish.</b>
      */
-    public abstract int getNumberOfArcs();
+    public final int getArcsCount() {
+	if (arcsCount < 0) {
+	    doCount();
+	    assert arcsCount >= 0;
+	}
+	return arcsCount;
+    }
 
     /**
      * Returns the number of nodes in this automaton. <b>Depending on the
      * representation of the automaton, this method may take a long time to
      * finish.</b>
      */
-    public abstract int getNumberOfNodes();
+    public final int getNodeCount() {
+	if (nodeCount < 0) {
+	    doCount();
+	    assert nodeCount >= 0;
+	}
+	return nodeCount;
+    }
+    
+    /**
+     * Perform node and arc counting for caching, saving the results
+     * into {@link #arcsCount} and {@link #nodeCount}.
+     */
+    protected abstract void doCount();
 
     /**
      * Returns an object which can be used to walk the edges of this finite
@@ -221,8 +253,8 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 		    - bytesRead);
 	}
 
-	if (header[0] == '\\' && header[1] == 'f' && header[2] == 's'
-		&& header[3] == 'a') {
+	if (header[0] == '\\' && header[1] == 'f' 
+	 && header[2] == 's' && header[3] == 'a') {
 	    // Read FSA version
 	    final byte version = header[4];
 
@@ -230,8 +262,10 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 	    stream.unread(header);
 
 	    switch (version) {
-	    case 0x05:
-		return new FSAVer5Impl(stream, dictionaryEncoding);
+	    case VERSION_5:
+		return new FSA5(stream, dictionaryEncoding);
+	    case VERSION_CFSA:
+		return new CFSA(stream, dictionaryEncoding);
 	    }
 
 	    // No supporting implementation found.
@@ -252,7 +286,7 @@ public abstract class FSA implements Iterable<ByteBuffer> {
      *             If the stream is not a dictionary, or if the version is not
      *             supported.
      */
-    protected void readHeader(DataInput in, long fileSize) throws IOException {
+    protected void readHeader(DataInputStream in, long fileSize) throws IOException {
 	final byte[] magic = new byte[4];
 	in.readFully(magic);
 
@@ -274,7 +308,7 @@ public abstract class FSA implements Iterable<ByteBuffer> {
      * @param stream
      * @return Returns an array of read bytes.
      */
-    protected byte[] readFully(InputStream stream) throws IOException {
+    protected static byte[] readFully(InputStream stream) throws IOException {
 	final ByteArrayOutputStream baos = new ByteArrayOutputStream(1024 * 16);
 	final byte[] buffer = new byte[1024 * 8];
 	int bytesCount;

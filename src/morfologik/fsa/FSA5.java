@@ -56,24 +56,24 @@ import java.io.*;
  * gtl+1                           (gtl = gotoLength)
  * </pre>
  */
-public final class FSAVer5Impl extends FSA {
+public final class FSA5 extends FSA {
     /**
-     * Bitmask indicating that an arc is the last one of the node's list and the
-     * following one belongs to another node.
-     */
-    private static final int BITMASK_LASTARC = 1 << 1;
-
-    /**
-     * Bitmask indicating that an arc corresponds to the last character of a
+     * Bit indicating that an arc corresponds to the last character of a
      * sequence available when building the automaton.
      */
-    private static final int BITMASK_FINALARC = 1 << 0;
+    protected static final int BIT_FINAL_ARC = 1 << 0;
 
     /**
-     * Bitmask indicating that the next node follows this arc in the compressed
-     * automaton structure.
+     * Bit indicating that an arc is the last one of the node's list and the
+     * following one belongs to another node.
      */
-    private static final int BITMASK_NEXTBIT = 1 << 2;
+    protected static final int BIT_LAST_ARC = 1 << 1;
+
+    /**
+     * Bit indicating that the target node of this arc follows it in the compressed
+     * automaton structure (no goto field).
+     */
+    protected static final int BIT_TARGET_NEXT = 1 << 2;
 
     /**
      * Size of a single arc (in bytes).
@@ -81,10 +81,10 @@ public final class FSAVer5Impl extends FSA {
     protected int arcSize;
 
     /**
-     * An offset in the arc structure, where the address field begins. For this
-     * version of the automaton, this is a constant value.
+     * An offset in the arc structure, where the address and flags field begins. In
+     * version 5 of FSA automata, this value is constant (1, skip label).
      */
-    protected final static int gotoOffset = 1;
+    protected final static int ADDRESS_OFFSET = 1;
 
     /**
      * An array of bytes with the internal representation of the automaton.
@@ -102,79 +102,38 @@ public final class FSAVer5Impl extends FSA {
     /**
      * Creates a new automaton reading it from a file in FSA format, version 5.
      */
-    public FSAVer5Impl(InputStream fsaStream, String dictionaryEncoding)
+    public FSA5(InputStream fsaStream, String dictionaryEncoding)
 	    throws IOException {
 	super(fsaStream, dictionaryEncoding);
     }
 
-
     /**
-     * Returns the number of arcs in this automaton. This method performs a full
-     * scan of all arcs in this automaton.
+     * Perform node/ arcs counting.
      */
-    public int getNumberOfArcs() {
-	final int startNode = getRootNode();
+    protected void doCount() {
+	int nodeCount = 1;
+	int arcsCount = 1;
 
-	int arcOffset = getFirstArc(startNode);
-	int arcsNumber = 0;
-	byte flags;
-	while (arcOffset < arcs.length) {
-	    arcsNumber++;
-
-	    // Follow to the next arc.
-	    flags = arcs[arcOffset + gotoOffset];
-	    if ((flags & BITMASK_NEXTBIT) != 0) {
-		/* The next arc is right after this one (no address). */
-		arcOffset += gotoOffset + 1;
-	    } else {
-		/* The next arc is after the address. */
-		arcOffset += gotoOffset + gotoLength;
+	int offset = getFirstArc(skipArc(ctl));
+	while (offset < arcs.length) {
+	    boolean atNode = isArcLast(offset);
+	    offset = skipArc(offset);
+	    if (atNode && offset < arcs.length) {
+		nodeCount++;
+		offset = getFirstArc(offset);
 	    }
-
-	    if ((flags & BITMASK_LASTARC) != 0) {
-		/* This is the last arc of the current node, 
-		 * skip the next node's data. */
-		arcOffset += ctl;
-	    }	    
+	    arcsCount++;
 	}
 
-	return arcsNumber;
+	this.nodeCount = nodeCount;
+	this.arcsCount = arcsCount;
     }
 
     /**
-     * Returns the number of nodes in this automaton. This method performs a
-     * full scan of all arcs in this automaton.
+     * Read the arc's layout and skip as many bytes, as needed.
      */
-    public int getNumberOfNodes() {
-	final int startNode = getRootNode();
-
-	int nodes = 1;
-	int arcOffset = getFirstArc(startNode);
-	int arcsNumber = 0;
-
-	byte flags;
-	while (arcOffset < arcs.length) {
-	    arcsNumber++;
-
-	    // Follow to the next arc.
-	    flags = arcs[arcOffset + gotoOffset];
-	    if ((flags & BITMASK_NEXTBIT) != 0) {
-		/* The next arc is right after this one (no address). */
-		arcOffset += gotoOffset + 1;
-	    } else {
-		/* The next arc is after the address. */
-		arcOffset += gotoOffset + gotoLength;
-	    }
-
-	    if ((flags & BITMASK_LASTARC) != 0) {
-		/* This is the last arc of the current node, 
-		 * skip the next node's data. */
-		arcOffset += ctl;
-		nodes++;
-	    }	    
-	}
-
-	return nodes;
+    private int skipArc(int offset) {
+	return offset + (isNextSet(offset) ? 1 + 1 : 1 + gotoLength);
     }
 
     /**
@@ -182,13 +141,14 @@ public final class FSAVer5Impl extends FSA {
      * the start node is also an end node.
      */
     public int getRootNode() {
-	return getEndNode(getFirstArc(ctl + arcSize));
+	return getEndNode(getFirstArc(skipArc(ctl)));
     }
 
     /**
      * {@inheritDoc}
      */
-    protected void readHeader(DataInput in, long fileSize) throws IOException {
+    @Override
+    protected void readHeader(DataInputStream in, long fileSize) throws IOException {
 	super.readHeader(in, fileSize);
 
 	// Check if we support such version of the automata.
@@ -236,7 +196,7 @@ public final class FSAVer5Impl extends FSA {
 	if (isArcLast(arc))
 	    return 0;
 	else
-	    return arc + arcSize;
+	    return skipArc(arc);
     }
 
     /*
@@ -274,7 +234,7 @@ public final class FSAVer5Impl extends FSA {
      * 
      */
     public boolean isArcFinal(int arc) {
-        return (arcs[arc + gotoOffset] & BITMASK_FINALARC) != 0;
+        return (arcs[arc + ADDRESS_OFFSET] & BIT_FINAL_ARC) != 0;
     }
 
     /*
@@ -295,11 +255,20 @@ public final class FSAVer5Impl extends FSA {
 	return super.getFlags() | (this.ctl != 0 ? FSAFlags.NUMBERS.bits : 0);
     }
 
-    /*
+    /**
+     * Returns <code>true</code> if this arc has <code>NEXT</code> bit set. 
      * 
+     * @see #BIT_LAST_ARC
      */
-    private boolean isArcLast(int arc) {
-        return (arcs[arc + gotoOffset] & BITMASK_LASTARC) != 0;
+    public boolean isArcLast(int arc) {
+        return (arcs[arc + ADDRESS_OFFSET] & BIT_LAST_ARC) != 0;
+    }
+
+    /**
+     * @see #BIT_TARGET_NEXT
+     */
+    public boolean isNextSet(int arc) {
+	return (arcs[arc + ADDRESS_OFFSET] & BIT_TARGET_NEXT) != 0;
     }
 
     /**
@@ -307,9 +276,8 @@ public final class FSAVer5Impl extends FSA {
      */
     private final int gotoFieldToOffset(final int start, final int n) {
         int r = 0;
-        for (int i = n - 1; i >= 0; --i) {
-            r <<= 8;
-            r = r | (arcs[start + i] & 0xff);
+        for (int i = n ; --i >= 0;) {
+            r = r << 8 | (arcs[start + i] & 0xff);
         }
         return r;
     }
@@ -317,16 +285,16 @@ public final class FSAVer5Impl extends FSA {
     /** 
      * Returns the address of the node pointed to by this arc. 
      */
-    private final int getDestinationNodeOffset(int arc) {
-	if ((arcs[arc + gotoOffset] & BITMASK_NEXTBIT) != 0) {
+    protected final int getDestinationNodeOffset(int arc) {
+	if (isNextSet(arc)) {
 	    /* the destination node follows this arc in the array */
-	    return arc + gotoOffset + 1;
+	    return skipArc(arc);
 	} else {
 	    /*
 	     * the destination node address has to be extracted from the arc's
 	     * goto field.
 	     */
-	    return gotoFieldToOffset(arc + gotoOffset, gotoLength) >>> 3;
+	    return gotoFieldToOffset(arc + ADDRESS_OFFSET, gotoLength) >>> 3;
 	}
     }
 }

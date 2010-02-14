@@ -1,8 +1,18 @@
 
-1.2.3 (trunk)
+1.3.0 (trunk)
+
+          Added initial code for CFSA (compressed FSA). Reduces automata size about 10%. 
+
+          Changes in the public API. Implementation classes renamed 
+          (FSAVer5Impl into FSA5). Minor tweaks and tunes to the API (protected fields and
+          access to sub-classes).
 
           Added support for version 5 automata built with NUMBERS flag (an extra field
           stored for each node).
+
+          ################################################################
+          Incompatible API changes have been made in release 1.3.0.
+          ################################################################
 
 1.2.2     License switch to plain BSD (removed the patent clause which did not make much sense 
           anyway).
@@ -30,8 +40,8 @@
           Tools updated. Dumping existing FSAs is much, much faster now.        
 
           ################################################################
-          WARNING: Incompatible API changes have been made in release 1.2.
-          WARNING: Java 1.5 or later is required from this version on.
+          Incompatible API changes have been made in release 1.2.
+          Java 1.5 or later is required from this version on.
           ################################################################
 
 1.1.4     * Fixed a bug that caused UTF-8 dictionaries to be garbled. Now it should be relatively

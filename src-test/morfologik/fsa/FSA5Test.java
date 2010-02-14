@@ -12,9 +12,9 @@ import java.util.Iterator;
 import org.junit.Test;
 
 /**
- * Additional tests for {@link FSAVer5Impl}.
+ * Additional tests for {@link FSA5}.
  */
-public final class FSAVer5Test {
+public final class FSA5Test {
     public ArrayList<String> expected = new ArrayList<String>(
 	    Arrays.asList("a", "aba", "ac", "b", "ba", "c"));
     public ArrayList<String> actual = new ArrayList<String>();
@@ -41,12 +41,12 @@ public final class FSAVer5Test {
 	final FSA fsa1 = FSA.getInstance(this.getClass().getResourceAsStream(
 		"abc.fsa"), "UTF-8");
 	final FSA fsa2 = FSA.getInstance(this.getClass().getResourceAsStream(
-	"abc-numbers.fsa"), "UTF-8");
-	assertEquals(fsa1.getNumberOfArcs(), fsa2.getNumberOfArcs());
-	assertEquals(fsa1.getNumberOfNodes(), fsa2.getNumberOfNodes());
+		"abc-numbers.fsa"), "UTF-8");
+	assertEquals(fsa1.getArcsCount(), fsa2.getArcsCount());
+	assertEquals(fsa1.getNodeCount(), fsa2.getNodeCount());
 
-	assertEquals(4, fsa2.getNumberOfNodes());
-	assertEquals(6, fsa2.getNumberOfArcs());
+	assertEquals(4, fsa2.getNodeCount());
+	assertEquals(8, fsa2.getArcsCount());
     }
 
     private void verifyContent(FSA fsa) throws IOException {
