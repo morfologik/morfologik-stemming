@@ -1,9 +1,8 @@
-#Wed Mar 18 11:19:27 CET 2009
-org.eclipse.jdt.ui.exception.name=e
-formatter_settings_version=11
+#Mon Feb 15 22:47:56 CET 2010
 eclipse.preferences.version=1
-org.eclipse.jdt.ui.text.custom_code_templates=<?xml version\="1.0" encoding\="UTF-8"?><templates/>
-formatter_profile=org.eclipse.jdt.ui.default.sun_profile
+formatter_profile=_Morfologik
+formatter_settings_version=11
+org.eclipse.jdt.ui.exception.name=e
+org.eclipse.jdt.ui.gettersetter.use.is=true
 org.eclipse.jdt.ui.keywordthis=false
 org.eclipse.jdt.ui.overrideannotation=true
-org.eclipse.jdt.ui.gettersetter.use.is=true

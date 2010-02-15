@@ -11,15 +11,16 @@ import org.junit.Test;
  *
  */
 public class LauncherTest {
-    /* */
-    @Test
-    public void testTools() throws Exception {
-	for (Map.Entry<String, ToolInfo> e : Launcher.tools.entrySet()) {
-	    try {
-		e.getValue().invoke(new String [] {});
-	    } catch (Throwable t) {
-		Assert.fail("Unable to launch " + e.getKey() + ": " + t.getMessage());
-	    }
+	/* */
+	@Test
+	public void testTools() throws Exception {
+		for (Map.Entry<String, ToolInfo> e : Launcher.tools.entrySet()) {
+			try {
+				e.getValue().invoke(new String[] {});
+			} catch (Throwable t) {
+				Assert.fail("Unable to launch " + e.getKey() + ": "
+				        + t.getMessage());
+			}
+		}
 	}
-    }
 }
