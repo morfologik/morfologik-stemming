@@ -13,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.util.Iterator;
 
 import morfologik.util.FileUtils;
+import morfologik.util.IntHolder;
 
 /**
  * This class implements Finite State Automaton traversal as described in Jan
@@ -26,7 +27,7 @@ import morfologik.util.FileUtils;
  */
 public abstract class FSA implements Iterable<ByteBuffer> {
 	/**
-	 * Version number for fsa automata in version 5.
+	 * Version number for automata in version 5.
 	 */
 	public final static byte VERSION_5 = 5;
 
@@ -38,29 +39,29 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 	/**
 	 * Dictionary version (derived from the combination of flags).
 	 */
-	protected byte version;
+	private byte version;
 
 	/**
 	 * The meaning of this field is not clear (check the FSA documentation).
 	 */
-	protected byte filler;
+	public byte filler;
 
 	/**
 	 * Size of transition's destination node "address". This field may also have
 	 * different interpretation, or may not be used at all. It depends on the
-	 * combination of flags used for building FSA.
+	 * combination of flags used for building the FSA.
 	 */
-	public byte gotoLength;
+	protected byte gotoLength;
 
 	/**
 	 * Annotation separator is a special character used for separating "tokens"
 	 * in a FSA. For instance an inflected form of a word may be separated from
 	 * the base form.
 	 */
-	protected byte annotationSeparator;
+	public byte annotationSeparator;
 
 	/**
-	 * The encoding (codepage) in which the dictionary has been compiled;
+	 * The encoding (code page) in which the dictionary was compiled. Determines
 	 * byte-to-character conversion scheme.
 	 */
 	private String dictionaryEncoding;
@@ -68,12 +69,12 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 	/**
 	 * Cached node count.
 	 */
-	protected int nodeCount = -1;
+	private int nodeCount = -1;
 
 	/**
 	 * Cached arc count.
 	 */
-	protected int arcsCount = -1;
+	private int arcsCount = -1;
 
 	/**
 	 * Creates a new automaton reading the FSA automaton from an input stream.
@@ -98,8 +99,7 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 		this.dictionaryEncoding = dictionaryEncoding;
 
 		/*
-		 * This implementation requires the length of stream to be known in
-		 * advance. Preload the dictionary entirely.
+		 * TODO: remove this in favor of incremental stream reading.
 		 */
 		final byte[] fsa = readFully(fsaStream);
 		DataInputStream input = null;
@@ -137,6 +137,8 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 	 * Return the annotation separator character, converted to a character
 	 * according to the encoding scheme passed in in the constructor of this
 	 * class.
+	 * 
+	 * @see #annotationSeparator
 	 */
 	public final char getAnnotationSeparator() {
 		try {
@@ -157,6 +159,8 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 	/**
 	 * Return the filler character, converted to a character according to the
 	 * encoding scheme passed in in the constructor of this class.
+	 * 
+	 * @see #filler
 	 */
 	public final char getFillerCharacter() {
 		try {
@@ -180,8 +184,7 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 	 */
 	public final int getArcsCount() {
 		if (arcsCount < 0) {
-			doCount();
-			assert arcsCount >= 0;
+			getNodeCount();
 		}
 		return arcsCount;
 	}
@@ -193,17 +196,22 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 	 */
 	public final int getNodeCount() {
 		if (nodeCount < 0) {
-			doCount();
-			assert nodeCount >= 0;
+			IntHolder arcs = new IntHolder();
+			IntHolder nodes = new IntHolder();
+			doCount(arcs, nodes);
+			this.arcsCount = arcs.value;
+			this.nodeCount = nodes.value;
+
+			assert nodeCount >= 0 && arcsCount >= 0;
 		}
 		return nodeCount;
 	}
 
 	/**
-	 * Perform node and arc counting for caching, saving the results into
-	 * {@link #arcsCount} and {@link #nodeCount}.
+	 * Perform node and arc counting for caching, saving the results into the
+	 * provided holders.
 	 */
-	protected abstract void doCount();
+	protected abstract void doCount(IntHolder arcs, IntHolder nodes);
 
 	/**
 	 * Returns an object which can be used to walk the edges of this finite
@@ -365,7 +373,7 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 	 * 
 	 * @see #getTraversalHelper()
 	 */
-	public abstract int getNextArc(int node, int arc);
+	public abstract int getNextArc(int arc);
 
 	/**
 	 * Return the end node pointed to by a given <code>arc</code>. Terminal arcs

@@ -70,8 +70,7 @@ public final class FSA5Test {
 
 	private void walkNode(byte[] buffer, int depth, FSA5 fsa, int node,
 	        int cnt, List<String> result) throws IOException {
-		for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(
-		        node, arc)) {
+		for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
 			buffer[depth] = fsa.getArcLabel(arc);
 
 			if (fsa.isArcFinal(arc) || fsa.isArcTerminal(arc)) {

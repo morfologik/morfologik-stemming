@@ -61,7 +61,7 @@ public final class FSATraversalTest {
 						dumpNode(fsa.getEndNode(arc));
 					}
 
-					arc = fsa.getNextArc(node, arc);
+					arc = fsa.getNextArc(arc);
 				} while (arc != 0);
 			}
 		}

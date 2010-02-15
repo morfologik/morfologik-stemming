@@ -2,6 +2,8 @@ package morfologik.fsa;
 
 import java.io.*;
 
+import morfologik.util.IntHolder;
+
 /**
  * CFSA (Compact Finite State Automaton) traversal implementation. This is a
  * slightly reorganized version of {@link FSA5} offering smaller automata size
@@ -171,7 +173,7 @@ public final class CFSA extends FSA {
 	/*
      * 
      */
-	public final int getNextArc(int node, int arc) {
+	public final int getNextArc(int arc) {
 		if (isArcLast(arc))
 			return 0;
 		else
@@ -182,7 +184,7 @@ public final class CFSA extends FSA {
      * 
      */
 	public int getArc(int node, byte label) {
-		for (int arc = getFirstArc(node); arc != 0; arc = getNextArc(node, arc)) {
+		for (int arc = getFirstArc(node); arc != 0; arc = getNextArc(arc)) {
 			if (getArcLabel(arc) == label)
 				return arc;
 		}
@@ -289,7 +291,7 @@ public final class CFSA extends FSA {
 	/**
 	 * Perform node/ arcs counting.
 	 */
-	protected void doCount() {
+	protected void doCount(IntHolder arcsh, IntHolder nodesh) {
 		int nodeCount = 1;
 		int arcsCount = 1;
 
@@ -304,8 +306,8 @@ public final class CFSA extends FSA {
 			arcsCount++;
 		}
 
-		this.nodeCount = nodeCount;
-		this.arcsCount = arcsCount;
+		arcsh.value = arcsCount;
+		nodesh.value = nodeCount;
 	}
 
 	/**
@@ -317,11 +319,11 @@ public final class CFSA extends FSA {
 		super.readHeader(in, fileSize);
 
 		// Check if we support such version of the automata.
-		if (version != FSA.VERSION_CFSA) {
+		if (getVersion() != FSA.VERSION_CFSA) {
 			throw new IOException("Cannot read FSA in version "
-			        + version
+			        + getVersion()
 			        + " (built with flags: "
-			        + FSAHelpers.flagsToString(FSAHelpers.getFlags(version))
+			        + FSAHelpers.flagsToString(FSAHelpers.getFlags(getVersion()))
 			        + ")."
 			        + " Class "
 			        + this.getClass().getName()

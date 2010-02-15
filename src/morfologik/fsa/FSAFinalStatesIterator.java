@@ -32,9 +32,6 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
 	/** Reusable byte buffer wrapper around {@link #buffer}. */
 	private ByteBuffer bufferWrapper = ByteBuffer.wrap(buffer);
 
-	/** A node stack for DFS when processing the automaton. */
-	private int[] nodes = new int[EXPECTED_MAX_STATES];
-
 	/** An arc stack for DFS when processing the automaton. */
 	private int[] arcs = new int[EXPECTED_MAX_STATES];
 
@@ -101,7 +98,6 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
 		while (position > 0) {
 			final int lastIndex = position - 1;
 			final int arc = arcs[lastIndex];
-			final int node = nodes[lastIndex];
 
 			if (arc == 0) {
 				// Remove the current node from the queue.
@@ -111,7 +107,7 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
 
 			// Go to the next arc, but leave it on the stack
 			// so that we keep the recursion depth level accurate.
-			arcs[lastIndex] = fsa.getNextArc(node, arc);
+			arcs[lastIndex] = fsa.getNextArc(arc);
 
 			// Expand buffer if needed.
 			final int bufferLength = this.buffer.length;
@@ -150,11 +146,9 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
 	private void pushNode(int node) {
 		// Expand buffers if needed.
 		if (position == arcs.length) {
-			nodes = Arrays.copyOf(nodes, nodes.length + EXPECTED_MAX_STATES);
 			arcs = Arrays.copyOf(arcs, arcs.length + EXPECTED_MAX_STATES);
 		}
 
-		nodes[position] = node;
 		arcs[position] = fsa.getFirstArc(node);
 		position++;
 	}

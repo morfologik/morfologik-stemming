@@ -2,6 +2,8 @@ package morfologik.fsa;
 
 import java.io.*;
 
+import morfologik.util.IntHolder;
+
 /**
  * FSA (Finite State Automaton) dictionary traversal implementation for version
  * 5 of the FSA automaton.
@@ -105,7 +107,7 @@ public final class FSA5 extends FSA {
 	/**
 	 * Perform node/ arcs counting.
 	 */
-	protected void doCount() {
+	protected void doCount(IntHolder arcsh, IntHolder nodesh) {
 		int nodeCount = 1;
 		int arcsCount = 1;
 
@@ -120,8 +122,8 @@ public final class FSA5 extends FSA {
 			arcsCount++;
 		}
 
-		this.nodeCount = nodeCount;
-		this.arcsCount = arcsCount;
+		nodesh.value = nodeCount;
+		arcsh.value = arcsCount;
 	}
 
 	/**
@@ -148,11 +150,11 @@ public final class FSA5 extends FSA {
 		super.readHeader(in, fileSize);
 
 		// Check if we support such version of the automata.
-		if (version != FSA.VERSION_5) {
+		if (getVersion() != FSA.VERSION_5) {
 			throw new IOException("Cannot read FSA in version "
-			        + version
+			        + getVersion()
 			        + " (built with flags: "
-			        + FSAHelpers.flagsToString(FSAHelpers.getFlags(version))
+			        + FSAHelpers.flagsToString(FSAHelpers.getFlags(getVersion()))
 			        + ")."
 			        + " Class "
 			        + this.getClass().getName()
@@ -187,7 +189,7 @@ public final class FSA5 extends FSA {
 	/*
      * 
      */
-	public final int getNextArc(int node, int arc) {
+	public final int getNextArc(int arc) {
 		if (isArcLast(arc))
 			return 0;
 		else
@@ -198,7 +200,7 @@ public final class FSA5 extends FSA {
      * 
      */
 	public int getArc(int node, byte label) {
-		for (int arc = getFirstArc(node); arc != 0; arc = getNextArc(node, arc)) {
+		for (int arc = getFirstArc(node); arc != 0; arc = getNextArc(arc)) {
 			if (getArcLabel(arc) == label)
 				return arc;
 		}
