@@ -31,7 +31,7 @@ public abstract class FSA implements Iterable<ByteBuffer> {
     public final static byte VERSION_5 = 5;
 
     /**
-     * Version number for {@link CFSA} variant of {@link VERSION_5} automata.
+     * Version number for {@link CFSA} variant of {@link #VERSION_5} automata.
      */
     public final static byte VERSION_CFSA = (byte) 0xc5; // _c_ompact _5_ :)
 
