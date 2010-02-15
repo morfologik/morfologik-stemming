@@ -1,5 +1,6 @@
 package morfologik.fsa;
 
+import static morfologik.fsa.FSAFlags.NEXTBIT;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -47,6 +49,46 @@ public final class FSA5Test {
 
 	assertEquals(4, fsa2.getNodeCount());
 	assertEquals(8, fsa2.getArcsCount());
+    }
+
+    @Test
+    public void testNumbers() throws IOException {
+	final FSA5 fsa = (FSA5) FSA.getInstance(this.getClass().getResourceAsStream(
+		"abc-numbers.fsa"), "UTF-8");
+
+	assertTrue(fsa.hasFlag(NEXTBIT));
+
+	// Get all numbers for nodes.
+	byte [] buffer = new byte [128];
+	final ArrayList<String> result = new ArrayList<String>();
+	walkNode(buffer, 0, fsa, fsa.getRootNode(), 0, result);
+
+	Collections.sort(result);
+	assertEquals(Arrays.asList(
+		"0 c", 
+		"1 b",
+		"2 ba",
+		"3 a",
+		"4 ac",
+		"5 aba"), result);
+    }
+
+    private void walkNode(byte[] buffer, int depth, FSA5 fsa, int node, int cnt, List<String> result) throws IOException {
+	for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(node, arc)) {
+	    buffer[depth] = fsa.getArcLabel(arc);
+
+	    if (fsa.isArcFinal(arc) || fsa.isArcTerminal(arc)) {
+		result.add(cnt + " " + new String(buffer, 0, depth + 1, "UTF-8"));
+	    }
+
+	    if (fsa.isArcFinal(arc))
+		cnt++;
+
+	    if (!fsa.isArcTerminal(arc)) {
+		walkNode(buffer, depth + 1, fsa, fsa.getEndNode(arc), cnt, result);
+		cnt += FSA5.decodeFromBytes(fsa.arcs, fsa.getEndNode(arc), fsa.nodeDataLength);
+	    }
+	}
     }
 
     private void verifyContent(FSA fsa) throws IOException {

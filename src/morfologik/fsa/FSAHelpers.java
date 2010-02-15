@@ -1,6 +1,11 @@
 package morfologik.fsa;
 
-import static morfologik.fsa.FSAFlags.*;
+import static morfologik.fsa.FSAFlags.FLEXIBLE;
+import static morfologik.fsa.FSAFlags.LARGE_DICTIONARIES;
+import static morfologik.fsa.FSAFlags.NEXTBIT;
+import static morfologik.fsa.FSAFlags.STOPBIT;
+import static morfologik.fsa.FSAFlags.TAILS;
+import static morfologik.fsa.FSAFlags.WEIGHTED;
 
 /**
  * This class has several static utility methods for use 
@@ -75,8 +80,7 @@ public final class FSAHelpers
 
         return version;
     }
-
-
+    
     /**
      * Returns flags as an integer for a given version number.
      * 

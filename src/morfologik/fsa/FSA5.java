@@ -76,11 +76,6 @@ public final class FSA5 extends FSA {
     protected static final int BIT_TARGET_NEXT = 1 << 2;
 
     /**
-     * Size of a single arc (in bytes).
-     */
-    protected int arcSize;
-
-    /**
      * An offset in the arc structure, where the address and flags field begins. In
      * version 5 of FSA automata, this value is constant (1, skip label).
      */
@@ -97,7 +92,7 @@ public final class FSA5 extends FSA {
      * The length of the node prefix field if the automaton was
      * compiled with <code>NUMBERS</code> option. 
      */
-    protected int ctl;
+    public int nodeDataLength;
 
     /**
      * Creates a new automaton reading it from a file in FSA format, version 5.
@@ -114,7 +109,7 @@ public final class FSA5 extends FSA {
 	int nodeCount = 1;
 	int arcsCount = 1;
 
-	int offset = getFirstArc(skipArc(ctl));
+	int offset = getFirstArc(skipArc(nodeDataLength));
 	while (offset < arcs.length) {
 	    boolean atNode = isArcLast(offset);
 	    offset = skipArc(offset);
@@ -141,7 +136,7 @@ public final class FSA5 extends FSA {
      * the start node is also an end node.
      */
     public int getRootNode() {
-	return getEndNode(getFirstArc(skipArc(ctl)));
+	return getEndNode(getFirstArc(skipArc(nodeDataLength)));
     }
 
     /**
@@ -172,10 +167,9 @@ public final class FSA5 extends FSA {
 	 * ctl and goto fields accordingly.
 	 */
 	if ((super.gotoLength & 0xf0) != 0) {
-	    this.ctl = super.gotoLength >>> 4;
+	    this.nodeDataLength = super.gotoLength >>> 4;
 	    super.gotoLength = (byte) (super.gotoLength & 0x0f);
 	}
-	arcSize = gotoLength + 1;
 
 	final int numberOfArcs = (int) fileSize - /* header size */8;
 	arcs = new byte[numberOfArcs];
@@ -186,7 +180,7 @@ public final class FSA5 extends FSA {
      * 
      */
     public final int getFirstArc(int node) {
-	return ctl + node;
+	return nodeDataLength + node;
     }
 
     /*
@@ -252,7 +246,7 @@ public final class FSA5 extends FSA {
      */
     @Override
     public int getFlags() {
-	return super.getFlags() | (this.ctl != 0 ? FSAFlags.NUMBERS.bits : 0);
+	return super.getFlags() | (this.nodeDataLength != 0 ? FSAFlags.NUMBERS.bits : 0);
     }
 
     /**
@@ -272,9 +266,9 @@ public final class FSA5 extends FSA {
     }
 
     /**
-     * Returns an integer offset from bit-packed representation.
+     * Returns an integer encoded in byte-packed representation.
      */
-    private final int gotoFieldToOffset(final int start, final int n) {
+    public static final int decodeFromBytes(final byte [] arcs, final int start, final int n) {
         int r = 0;
         for (int i = n ; --i >= 0;) {
             r = r << 8 | (arcs[start + i] & 0xff);
@@ -294,7 +288,7 @@ public final class FSA5 extends FSA {
 	     * the destination node address has to be extracted from the arc's
 	     * goto field.
 	     */
-	    return gotoFieldToOffset(arc + ADDRESS_OFFSET, gotoLength) >>> 3;
+	    return decodeFromBytes(arcs, arc + ADDRESS_OFFSET, gotoLength) >>> 3;
 	}
     }
 }

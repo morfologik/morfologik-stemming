@@ -50,7 +50,7 @@ public abstract class FSA implements Iterable<ByteBuffer> {
      * different interpretation, or may not be used at all. It depends on the
      * combination of flags used for building FSA.
      */
-    protected byte gotoLength;
+    public byte gotoLength;
 
     /**
      * Annotation separator is a special character used for separating "tokens"
@@ -392,4 +392,11 @@ public abstract class FSA implements Iterable<ByteBuffer> {
      * terminating node.
      */
     public abstract boolean isArcTerminal(int arc);
+
+    /**
+     * Check if this automaton has a given flag.
+     */
+    public final boolean hasFlag(FSAFlags flag) {
+	return (getFlags() & flag.bits) != 0;
+    }
 }

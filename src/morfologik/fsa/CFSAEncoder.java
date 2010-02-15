@@ -77,14 +77,14 @@ public final class CFSAEncoder {
 	 * Serialize the current node's state to an output stream.
 	 */
 	public void serialize(OutputStream os) throws IOException {
-	    if (fsa.ctl > 0) {
-		os.write(fsa.arcs, address, fsa.ctl);
+	    if (fsa.nodeDataLength > 0) {
+		os.write(fsa.arcs, address, fsa.nodeDataLength);
 	    }
 	}
 
 	/* */
 	public int size() {
-	    return fsa.ctl;
+	    return fsa.nodeDataLength;
 	}
     }
 
@@ -176,21 +176,21 @@ public final class CFSAEncoder {
 	// Add root node (sink) first.
 	nodes.add(n = new Node(arcOffset));
 	indexByAddress.put(arcOffset, n);
-	arcOffset += fsa.ctl;
+	arcOffset += fsa.nodeDataLength;
 
 	// Add a single arc pointing to the sink.
 	nodes.add(n = new Arc(arcOffset));
 	indexByAddress.put(arcOffset, n);
-	arcOffset += fsa.arcSize;
+	arcOffset += (1 + fsa.gotoLength);
 
-	if (fsa.ctl > 0) {
+	if (fsa.nodeDataLength > 0) {
 	    /*
 	     * There is a node after the first state, even though it is not
 	     * consistently marked in the original FSA (sink node has no flags).
 	     */
 	    nodes.add(n = new Node(arcOffset));
 	    indexByAddress.put(arcOffset, n);
-	    arcOffset += fsa.ctl;
+	    arcOffset += fsa.nodeDataLength;
 	}
 
 	byte flags;
@@ -208,7 +208,7 @@ public final class CFSAEncoder {
 	    }
 
 	    if ((flags & FSA5.BIT_LAST_ARC) != 0) {
-		if (arcOffset + fsa.ctl < fsa.arcs.length) {
+		if (arcOffset + fsa.nodeDataLength < fsa.arcs.length) {
 		    nodes.add(n = new Node(arcOffset));
 		    indexByAddress.put(arcOffset, n);
 		}
@@ -217,7 +217,7 @@ public final class CFSAEncoder {
 		 * This is the last arc of the current node, skip the next
 		 * node's data.
 		 */
-		arcOffset += fsa.ctl;
+		arcOffset += fsa.nodeDataLength;
 	    }
 	}
 
@@ -309,7 +309,7 @@ public final class CFSAEncoder {
 	os.write(/* version */ FSA.VERSION_CFSA);
 	os.write(/* filler */ fsa.filler);
 	os.write(/* annot */ fsa.annotationSeparator);
-	os.write(/* ctl/gtl */ (fsa.ctl << 4) | fsa.gotoLength);
+	os.write(/* ctl/gtl */ (fsa.nodeDataLength << 4) | fsa.gotoLength);
 
 	/*
 	 * Emit label mapping for arc.
