@@ -253,7 +253,7 @@ public final class CFSA extends FSA {
     }
     
     /**
-     * @see #BIT_COMPRESSED_LABEL 
+     * Returns <code>true</code> if the label is compressed inside flags byte. 
      */
     public boolean isLabelCompressed(int arc) {
 	assert isNextSet(arc) : "Only applicable to arcs with NEXT bit.";
