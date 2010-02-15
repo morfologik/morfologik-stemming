@@ -4,6 +4,7 @@ import static morfologik.fsa.FSA5.ADDRESS_OFFSET;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -246,7 +247,7 @@ public final class CFSAEncoder {
 	/**
 	 * Attempt to fit labels into the flags field in arcs with NEXT bit set.
 	 */
-	public void doLabelMapping() {
+	protected void doLabelMapping() {
 		class IndexValue {
 			int index;
 			int value;
@@ -290,7 +291,7 @@ public final class CFSAEncoder {
 	 * @return Returns the total length of automaton's arcs and nodes at the
 	 *         moment.
 	 */
-	public int updateOffsets() {
+	protected int updateOffsets() {
 		int offset = 0;
 		for (StreamElement n : nodes) {
 			n.offset = offset;
@@ -302,7 +303,7 @@ public final class CFSAEncoder {
 	/**
 	 * Serialize the current representation of the automaton.
 	 */
-	public void serialize(OutputStream os) throws IOException {
+	protected void serialize(OutputStream os) throws IOException {
 		/*
 		 * Emit the header.
 		 */
@@ -323,5 +324,18 @@ public final class CFSAEncoder {
 		for (StreamElement n : nodes) {
 			n.serialize(os);
 		}
+	}
+
+	/**
+	 * Convert FSA to CFSA.
+	 */
+	public static void convert(InputStream fsa, OutputStream cfsa)
+	        throws IOException {
+		final String ignored = "iso8859-1";
+		final CFSAEncoder encoder = new CFSAEncoder(FSA.getInstance(fsa,
+		        ignored));
+		encoder.doLabelMapping();
+		encoder.updateOffsets();
+		encoder.serialize(cfsa);
 	}
 }
