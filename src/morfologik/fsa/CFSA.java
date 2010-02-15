@@ -114,38 +114,38 @@ public final class CFSA extends FSA {
 	 * Bitmask indicating that an arc corresponds to the last character of a
 	 * sequence available when building the automaton.
 	 */
-	protected static final int BIT_FINAL_ARC = 1 << 0;
+	public static final int BIT_FINAL_ARC = 1 << 0;
 
 	/**
 	 * Bitmask indicating that an arc is the last one of the node's list and the
 	 * following one belongs to another node.
 	 */
-	protected static final int BIT_LAST_ARC = 1 << 1;
+	public static final int BIT_LAST_ARC = 1 << 1;
 
 	/**
 	 * Bitmask indicating that the target node of this arc follows it in the
 	 * compressed automaton structure (no goto field).
 	 */
-	protected static final int BIT_TARGET_NEXT = 1 << 2;
+	public static final int BIT_TARGET_NEXT = 1 << 2;
 
 	/**
 	 * An array of bytes with the internal representation of the automaton.
 	 * Please see the documentation of this class for more information on how
 	 * this structure is organized.
 	 */
-	protected byte[] arcs;
+	public byte[] arcs;
 
 	/**
 	 * The length of the node prefix field if the automaton was compiled with
 	 * <code>NUMBERS</code> option.
 	 */
-	protected int ctl;
+	public int nodeDataLength;
 
 	/**
 	 * Label mapping for arcs of type (1) (see class documentation). The array
 	 * is indexed by mapped label's value and contains the original label.
 	 */
-	private byte[] labelMapping;
+	public byte[] labelMapping;
 
 	/**
 	 * Creates a new automaton reading it from a file in FSA format, version 5.
@@ -160,14 +160,14 @@ public final class CFSA extends FSA {
 	 * the start node is also an end node.
 	 */
 	public int getRootNode() {
-		return getEndNode(getFirstArc(skipArc(ctl)));
+		return getEndNode(getFirstArc(skipArc(nodeDataLength)));
 	}
 
 	/*
      * 
      */
 	public final int getFirstArc(int node) {
-		return ctl + node;
+		return nodeDataLength + node;
 	}
 
 	/*
@@ -237,7 +237,7 @@ public final class CFSA extends FSA {
 	 */
 	@Override
 	public int getFlags() {
-		return super.getFlags() | (this.ctl != 0 ? FSAFlags.NUMBERS.bits : 0);
+		return super.getFlags() | (this.nodeDataLength != 0 ? FSAFlags.NUMBERS.bits : 0);
 	}
 
 	/**
@@ -295,7 +295,7 @@ public final class CFSA extends FSA {
 		int nodeCount = 1;
 		int arcsCount = 1;
 
-		int offset = getFirstArc(skipArc(ctl));
+		int offset = getFirstArc(skipArc(nodeDataLength));
 		while (offset < arcs.length) {
 			boolean atNode = isArcLast(offset);
 			offset = skipArc(offset);
@@ -339,7 +339,7 @@ public final class CFSA extends FSA {
 		 * ctl and goto fields accordingly.
 		 */
 		if ((super.gotoLength & 0xf0) != 0) {
-			this.ctl = super.gotoLength >>> 4;
+			this.nodeDataLength = super.gotoLength >>> 4;
 			super.gotoLength = (byte) (super.gotoLength & 0x0f);
 		}
 
