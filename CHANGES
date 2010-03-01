@@ -1,11 +1,13 @@
 
 1.3.0 (trunk)
+          Cleaned up FSA/Dictionary separation. FSAs don't store encoding any more (because
+          it does not make sense for them to do so). The FSA is a purely abstract class
+          pushing functionality to sub-classes. Input stream reading cleaned up.
 
           Added initial code for CFSA (compressed FSA). Reduces automata size about 10%. 
 
           Changes in the public API. Implementation classes renamed 
-          (FSAVer5Impl into FSA5). Minor tweaks and tunes to the API (protected fields and
-          access to sub-classes).
+          (FSAVer5Impl into FSA5). Major tweaks and tunes to the API.
 
           Added support for version 5 automata built with NUMBERS flag (an extra field
           stored for each node).

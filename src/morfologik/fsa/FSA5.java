@@ -1,12 +1,14 @@
 package morfologik.fsa;
 
-import java.io.*;
+import static morfologik.fsa.FSAFlags.*;
+import static morfologik.util.FileUtils.readFully;
 
-import morfologik.util.IntHolder;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 /**
- * FSA (Finite State Automaton) dictionary traversal implementation for version
- * 5 of the FSA automaton.
+ * FSA binary format implementation for version 5.
  * 
  * <p>
  * Version 5 indicates the dictionary was built with these flags:
@@ -16,7 +18,7 @@ import morfologik.util.IntHolder;
  * single transition (arc), not the entire dictionary file).
  * 
  * <pre>
- * ---- this header only if automaton was compiled with NUMBERS option.
+ * ---- this node header present only if automaton was compiled with NUMBERS option.
  * Byte
  *        +-+-+-+-+-+-+-+-+\
  *      0 | | | | | | | | | \  LSB
@@ -27,7 +29,9 @@ import morfologik.util.IntHolder;
  *        +-+-+-+-+-+-+-+-+  +
  *  ctl-1 | | | | | | | | | /  MSB
  *        +-+-+-+-+-+-+-+-+/
- * ---- 
+ *        
+ * ---- remaining part of the node
+ * 
  * Byte
  *       +-+-+-+-+-+-+-+-+\
  *     0 | | | | | | | | | +------ label
@@ -60,6 +64,11 @@ import morfologik.util.IntHolder;
  */
 public final class FSA5 extends FSA {
 	/**
+	 * Automaton version as in the file header.
+	 */
+	public static final byte VERSION = 5;
+	
+	/**
 	 * Bit indicating that an arc corresponds to the last character of a
 	 * sequence available when building the automaton.
 	 */
@@ -88,49 +97,69 @@ public final class FSA5 extends FSA {
 	 * Please see the documentation of this class for more information on how
 	 * this structure is organized.
 	 */
-	public byte[] arcs;
+	public final byte[] arcs;
 
 	/**
-	 * The length of the node prefix field if the automaton was compiled with
-	 * <code>NUMBERS</code> option.
+	 * The length of the node header structure (if the automaton was compiled with
+	 * <code>NUMBERS</code> option). Otherwise zero.
 	 */
-	public int nodeDataLength;
+	public final int nodeDataLength;
 
 	/**
-	 * Creates a new automaton reading it from a file in FSA format, version 5.
+	 * Flags for this automaton version.
 	 */
-	public FSA5(InputStream fsaStream, String dictionaryEncoding)
-	        throws IOException {
-		super(fsaStream, dictionaryEncoding);
-	}
+    private final Set<FSAFlags> flags;
+
+    /**
+     * Number of bytes each address takes in full, expanded form (goto length).
+     */
+	public final int gtl;
+
+	/** Filler character. */
+	public final byte filler;
+	
+	/** Annotation character. */
+	public final byte annotation;
 
 	/**
-	 * Perform node/ arcs counting.
+	 * Read and wrap a binary automaton in FSA version 5.
 	 */
-	protected void doCount(IntHolder arcsh, IntHolder nodesh) {
-		int nodeCount = 1;
-		int arcsCount = 1;
-
-		int offset = getFirstArc(skipArc(nodeDataLength));
-		while (offset < arcs.length) {
-			boolean atNode = isArcLast(offset);
-			offset = skipArc(offset);
-			if (atNode && offset < arcs.length) {
-				nodeCount++;
-				offset = getFirstArc(offset);
-			}
-			arcsCount++;
+	public FSA5(InputStream fsaStream) throws IOException {
+		// Read the header first.
+		final FSAHeader header = FSAHeader.read(fsaStream);
+		
+		// Ensure we have version 5.
+		if (header.version != VERSION) {
+			throw new IOException("This class can read FSA version 5 only: " + header.version);
 		}
+		
+		/*
+		 * Determine if the automaton was compiled with NUMBERS. If so, modify
+		 * ctl and goto fields accordingly.
+		 */
+		flags = EnumSet.of(FLEXIBLE, STOPBIT, NEXTBIT);
+		if ((header.gtl & 0xf0) != 0) {
+			this.nodeDataLength = (header.gtl >>> 4) & 0x0f;
+			this.gtl = header.gtl & 0x0f;
+			flags.add(NUMBERS);
+		} else {
+			this.nodeDataLength = 0;
+			this.gtl = header.gtl & 0x0f;
+		}
+		
+		this.filler = header.filler;
+		this.annotation = header.annotation;
 
-		nodesh.value = nodeCount;
-		arcsh.value = arcsCount;
+		arcs = readFully(fsaStream);		
 	}
 
 	/**
 	 * Read the arc's layout and skip as many bytes, as needed.
 	 */
 	private int skipArc(int offset) {
-		return offset + (isNextSet(offset) ? 1 + 1 : 1 + gotoLength);
+		return offset + (isNextSet(offset) 
+				? 1 + 1 /* label + flags */ 
+				: 1 + gtl /* label + flags/address */);
 	}
 
 	/**
@@ -142,52 +171,14 @@ public final class FSA5 extends FSA {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void readHeader(DataInputStream in, long fileSize)
-	        throws IOException {
-		super.readHeader(in, fileSize);
-
-		// Check if we support such version of the automata.
-		if (getVersion() != FSA.VERSION_5) {
-			throw new IOException("Cannot read FSA in version "
-			        + getVersion()
-			        + " (built with flags: "
-			        + FSAHelpers.flagsToString(FSAHelpers.getFlags(getVersion()))
-			        + ")."
-			        + " Class "
-			        + this.getClass().getName()
-			        + " supports version "
-			        + FSA.VERSION_5
-			        + " only ("
-			        + FSAHelpers.flagsToString(FSAHelpers
-			                .getFlags(FSA.VERSION_5)) + ").");
-		}
-
-		/*
-		 * Determine if the automaton was compiled with NUMBERS. If so, modify
-		 * ctl and goto fields accordingly.
-		 */
-		if ((super.gotoLength & 0xf0) != 0) {
-			this.nodeDataLength = super.gotoLength >>> 4;
-			super.gotoLength = (byte) (super.gotoLength & 0x0f);
-		}
-
-		final int numberOfArcs = (int) fileSize - /* header size */8;
-		arcs = new byte[numberOfArcs];
-		in.readFully(arcs);
-	}
-
-	/*
-     * 
+     * {@inheritDoc} 
      */
 	public final int getFirstArc(int node) {
 		return nodeDataLength + node;
 	}
 
-	/*
-     * 
+	/**
+     * {@inheritDoc} 
      */
 	public final int getNextArc(int arc) {
 		if (isArcLast(arc))
@@ -196,8 +187,8 @@ public final class FSA5 extends FSA {
 			return skipArc(arc);
 	}
 
-	/*
-     * 
+	/**
+     * {@inheritDoc} 
      */
 	public int getArc(int node, byte label) {
 		for (int arc = getFirstArc(node); arc != 0; arc = getNextArc(arc)) {
@@ -209,8 +200,8 @@ public final class FSA5 extends FSA {
 		return 0;
 	}
 
-	/*
-     * 
+	/**
+     * {@inheritDoc} 
      */
 	public int getEndNode(int arc) {
 		final int nodeOffset = getDestinationNodeOffset(arc);
@@ -220,22 +211,22 @@ public final class FSA5 extends FSA {
 		return nodeOffset;
 	}
 
-	/*
-     * 
+	/**
+     * {@inheritDoc} 
      */
 	public byte getArcLabel(int arc) {
 		return arcs[arc];
 	}
 
-	/*
-     * 
+	/**
+     * {@inheritDoc} 
      */
 	public boolean isArcFinal(int arc) {
 		return (arcs[arc + ADDRESS_OFFSET] & BIT_FINAL_ARC) != 0;
 	}
 
-	/*
-     * 
+	/**
+     * {@inheritDoc} 
      */
 	public boolean isArcTerminal(int arc) {
 		return (0 == getDestinationNodeOffset(arc));
@@ -244,13 +235,11 @@ public final class FSA5 extends FSA {
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * For this automaton version, an additional {@link FSAFlags#NUMBERS} flag
-	 * may be set to indicate the automaton contains extra fields for each node.
+	 * <p>For this automaton version, an additional {@link FSAFlags#NUMBERS} flag
+	 * may be set to indicate the automaton contains extra fields for each node.</p>
 	 */
-	@Override
-	public int getFlags() {
-		return super.getFlags()
-		        | (this.nodeDataLength != 0 ? FSAFlags.NUMBERS.bits : 0);
+	public Set<FSAFlags> getFlags() {
+	    return Collections.unmodifiableSet(flags);
 	}
 
 	/**
@@ -270,10 +259,11 @@ public final class FSA5 extends FSA {
 	}
 
 	/**
-	 * Returns an integer encoded in byte-packed representation.
+	 * Returns an n-byte integer encoded in byte-packed representation.
 	 */
-	public static final int decodeFromBytes(final byte[] arcs, final int start,
-	        final int n) {
+	static final int decodeFromBytes(
+			final byte[] arcs, final int start, final int n)
+	{
 		int r = 0;
 		for (int i = n; --i >= 0;) {
 			r = r << 8 | (arcs[start + i] & 0xff);
@@ -286,14 +276,14 @@ public final class FSA5 extends FSA {
 	 */
 	protected final int getDestinationNodeOffset(int arc) {
 		if (isNextSet(arc)) {
-			/* the destination node follows this arc in the array */
+			/* The destination node follows this arc in the array. */
 			return skipArc(arc);
 		} else {
 			/*
-			 * the destination node address has to be extracted from the arc's
+			 * The destination node address has to be extracted from the arc's
 			 * goto field.
 			 */
-			return decodeFromBytes(arcs, arc + ADDRESS_OFFSET, gotoLength) >>> 3;
+			return decodeFromBytes(arcs, arc + ADDRESS_OFFSET, gtl) >>> 3;
 		}
 	}
 }

@@ -36,6 +36,8 @@ public final class Launcher {
 		        "Dump an FSA dictionary."));
 		tools.put("plstem", new ToolInfo(PolishStemmingTool.class,
 		        "Apply Polish stemming to the input."));
+		tools.put("fsa2cfsa", new ToolInfo(FSA2CFSA.class,
+        		"Convert FSA5 to CFSA."));
 	}
 
 	/**

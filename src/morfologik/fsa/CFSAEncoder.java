@@ -134,7 +134,7 @@ public final class CFSAEncoder {
 				int combined = (target.offset << 3) | flags;
 				os.write(combined & 0xff);
 				os.write(label);
-				for (int i = 1; i < fsa.gotoLength; i++) {
+				for (int i = 1; i < fsa.gtl; i++) {
 					combined >>>= 8;
 					os.write(combined & 0xff);
 				}
@@ -182,7 +182,7 @@ public final class CFSAEncoder {
 		// Add a single arc pointing to the sink.
 		nodes.add(n = new Arc(arcOffset));
 		indexByAddress.put(arcOffset, n);
-		arcOffset += (1 + fsa.gotoLength);
+		arcOffset += (1 + fsa.gtl);
 
 		if (fsa.nodeDataLength > 0) {
 			/*
@@ -205,7 +205,7 @@ public final class CFSAEncoder {
 				arcOffset += ADDRESS_OFFSET + 1;
 			} else {
 				/* The next arc is after the address. */
-				arcOffset += ADDRESS_OFFSET + fsa.gotoLength;
+				arcOffset += ADDRESS_OFFSET + fsa.gtl;
 			}
 
 			if ((flags & FSA5.BIT_LAST_ARC) != 0) {
@@ -308,10 +308,10 @@ public final class CFSAEncoder {
 		 * Emit the header.
 		 */
 		os.write(new byte[] { '\\', 'f', 's', 'a' });
-		os.write(/* version */FSA.VERSION_CFSA);
-		os.write(/* filler */fsa.filler);
-		os.write(/* annot */fsa.annotationSeparator);
-		os.write(/* ctl/gtl */(fsa.nodeDataLength << 4) | fsa.gotoLength);
+		os.write(/* version */ CFSA.VERSION);
+		os.write(/* filler */  fsa.filler);
+		os.write(/* annot */   fsa.annotation);
+		os.write(/* ctl/gtl */(fsa.nodeDataLength << 4) | fsa.gtl);
 
 		/*
 		 * Emit label mapping for arc.
@@ -327,13 +327,11 @@ public final class CFSAEncoder {
 	}
 
 	/**
-	 * Convert FSA to CFSA.
+	 * Convert FSA in version 5 to CFSA.
 	 */
-	public static void convert(InputStream fsa, OutputStream cfsa)
+	public static void convert(InputStream fsa5, OutputStream cfsa)
 	        throws IOException {
-		final String ignored = "iso8859-1";
-		final CFSAEncoder encoder = new CFSAEncoder(FSA.getInstance(fsa,
-		        ignored));
+		final CFSAEncoder encoder = new CFSAEncoder(new FSA5(fsa5));
 		encoder.doLabelMapping();
 		encoder.updateOffsets();
 		encoder.serialize(cfsa);

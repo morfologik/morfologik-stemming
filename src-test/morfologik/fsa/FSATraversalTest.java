@@ -19,8 +19,8 @@ public final class FSATraversalTest {
      */
 	@Before
 	public void setUp() throws Exception {
-		fsa = FSA.getInstance(this.getClass()
-		        .getResourceAsStream("en_tst.dict"), "iso8859-2");
+		fsa = FSA.getInstance(
+				this.getClass().getResourceAsStream("en_tst.dict"));
 	}
 
 	/**

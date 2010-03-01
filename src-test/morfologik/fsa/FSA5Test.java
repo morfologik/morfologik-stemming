@@ -23,40 +23,41 @@ public final class FSA5Test {
 
 	@Test
 	public void testVersion5() throws IOException {
-		final FSA fsa = FSA.getInstance(this.getClass().getResourceAsStream(
-		        "abc.fsa"), "UTF-8");
-
+		final FSA fsa = FSA.getInstance(this.getClass().getResourceAsStream("abc.fsa"));
+		assertFalse(fsa.getFlags().contains(FSAFlags.NUMBERS));
 		verifyContent(fsa);
-		assertTrue(FSAHelpers.flagsToString(fsa.getFlags()).indexOf("NUMBERS") < 0);
 	}
 
 	@Test
 	public void testVersion5WithNumbers() throws IOException {
-		final FSA fsa = FSA.getInstance(this.getClass().getResourceAsStream(
-		        "abc-numbers.fsa"), "UTF-8");
+		final FSA fsa = FSA.getInstance(this.getClass().getResourceAsStream("abc-numbers.fsa"));
 		verifyContent(fsa);
-		assertTrue(FSAHelpers.flagsToString(fsa.getFlags()).indexOf("NUMBERS") >= 0);
+		assertTrue(fsa.getFlags().contains(FSAFlags.NUMBERS));
 	}
 
 	@Test
 	public void testArcsAndNodes() throws IOException {
 		final FSA fsa1 = FSA.getInstance(this.getClass().getResourceAsStream(
-		        "abc.fsa"), "UTF-8");
+		        "abc.fsa"));
 		final FSA fsa2 = FSA.getInstance(this.getClass().getResourceAsStream(
-		        "abc-numbers.fsa"), "UTF-8");
-		assertEquals(fsa1.getArcsCount(), fsa2.getArcsCount());
-		assertEquals(fsa1.getNodeCount(), fsa2.getNodeCount());
+		        "abc-numbers.fsa"));
 
-		assertEquals(4, fsa2.getNodeCount());
-		assertEquals(8, fsa2.getArcsCount());
+		FSAInfo info1 = new FSAInfo(fsa1);
+		FSAInfo info2 = new FSAInfo(fsa2);
+
+		assertEquals(info1.arcsCount, info2.arcsCount);
+		assertEquals(info1.nodeCount, info2.nodeCount);
+
+		assertEquals(4, info2.nodeCount);
+		assertEquals(6, info2.arcsCount);
 	}
 
 	@Test
 	public void testNumbers() throws IOException {
-		final FSA5 fsa = (FSA5) FSA.getInstance(this.getClass()
-		        .getResourceAsStream("abc-numbers.fsa"), "UTF-8");
+		final FSA5 fsa = (FSA5) FSA.getInstance(
+				this.getClass().getResourceAsStream("abc-numbers.fsa"));
 
-		assertTrue(fsa.hasFlag(NEXTBIT));
+		assertTrue(fsa.getFlags().contains(NEXTBIT));
 
 		// Get all numbers for nodes.
 		byte[] buffer = new byte[128];
@@ -91,9 +92,8 @@ public final class FSA5Test {
 	}
 
 	private void verifyContent(FSA fsa) throws IOException {
-		final FSATraversalHelper helper = fsa.getTraversalHelper();
-		final Iterator<ByteBuffer> i = helper.getAllSubsequences(fsa
-		        .getRootNode());
+		final FSATraversalHelper helper = new FSATraversalHelper(fsa);
+		final Iterator<ByteBuffer> i = helper.getAllSubsequences(fsa.getRootNode());
 
 		actual.clear();
 		int count = 0;

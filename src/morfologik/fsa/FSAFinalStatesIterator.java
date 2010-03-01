@@ -35,7 +35,7 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
 	/** An arc stack for DFS when processing the automaton. */
 	private int[] arcs = new int[EXPECTED_MAX_STATES];
 
-	/** Current processing depth in {@link #nodes} and {@link #arcs}. */
+	/** Current processing depth in {@link #arcs}. */
 	private int position;
 
 	/**

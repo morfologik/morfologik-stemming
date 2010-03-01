@@ -102,7 +102,7 @@ public final class Dictionary {
 
 			final DictionaryMetadata features = DictionaryMetadata
 			        .fromMap(properties);
-			final FSA fsa = FSA.getInstance(fsaData, features.encoding);
+			final FSA fsa = FSA.getInstance(fsaData);
 
 			return new Dictionary(fsa, features);
 		} finally {

@@ -47,7 +47,7 @@
 
 	<target name="compile" depends="init">
 		<javac classpath="${classpath}" destdir="${build.dir}" encoding="UTF-8" 
-				source="1.5" target="1.5">
+				source="1.5" target="1.5" includeantruntime="no">
 			<classpath refid="compile.classpath" />
 			<include name="**/*.java" />
 			<src location="src" />
@@ -64,7 +64,8 @@
 
 
 	<target name="compile.test" depends="init,compile">
-		<javac classpath="${classpath}" destdir="${build.test.dir}" encoding="UTF-8">
+		<javac classpath="${classpath}" destdir="${build.test.dir}" encoding="UTF-8" 
+		    includeantruntime="no">
 			<classpath refid="compile.classpath" />
 			<classpath location="${build.dir}" />
 

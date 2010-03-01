@@ -30,8 +30,7 @@ public class CFSATest {
 	}
 
 	private void checkIdentity(String resource) throws IOException {
-		final FSA fsa = FSA.getInstance(this.getClass().getResourceAsStream(
-		        resource), "UTF-8");
+		final FSA fsa = FSA.getInstance(this.getClass().getResourceAsStream(resource));
 
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -41,7 +40,7 @@ public class CFSATest {
 		encoder.serialize(baos);
 
 		final byte[] input = baos.toByteArray();
-		FSA cfsa = FSA.getInstance(new ByteArrayInputStream(input), "UTF-8");
+		FSA cfsa = FSA.getInstance(new ByteArrayInputStream(input));
 
 		assertTrue(cfsa instanceof CFSA);
 		assertIdentical(fsa, cfsa);
@@ -51,14 +50,15 @@ public class CFSATest {
 	 * Assert the automatons encode an identical set of paths to terminal
 	 * states.
 	 */
-	private void assertIdentical(FSA fsa, FSA fsa2) throws IOException {
-		FSAFinalStatesIterator fsi1 = fsa.getTraversalHelper()
-		        .getFinalStatesIterator();
-		FSAFinalStatesIterator fsi2 = fsa2.getTraversalHelper()
-		        .getFinalStatesIterator();
+	private void assertIdentical(FSA fsa1, FSA fsa2) throws IOException {
+		FSAInfo info1 = new FSAInfo(fsa1);
+		FSAInfo info2 = new FSAInfo(fsa2);
 
-		assertEquals(fsa.getNodeCount(), fsa2.getNodeCount());
-		assertEquals(fsa.getArcsCount(), fsa2.getArcsCount());
+		assertEquals(info1.nodeCount, info2.nodeCount);
+		assertEquals(info1.arcsCount, info2.arcsCount);
+
+		FSAFinalStatesIterator fsi1 = fsa1.getTraversalHelper().getFinalStatesIterator();
+		FSAFinalStatesIterator fsi2 = fsa2.getTraversalHelper().getFinalStatesIterator();
 
 		while (true) {
 			assertEquals(fsi1.hasNext(), fsi2.hasNext());

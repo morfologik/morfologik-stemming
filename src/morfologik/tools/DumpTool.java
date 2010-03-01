@@ -6,8 +6,7 @@ import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Map;
 
-import morfologik.fsa.FSA;
-import morfologik.fsa.FSAHelpers;
+import morfologik.fsa.*;
 import morfologik.stemming.*;
 import morfologik.util.FileUtils;
 
@@ -81,20 +80,42 @@ public final class DumpTool extends Tool {
 			}
 		} else {
 			dictionary = null;
-			fsa = FSA.getInstance(dictionaryFile, "iso-8859-1");
+			fsa = FSA.getInstance(new FileInputStream(dictionaryFile));
 			printWarning("Warning: FSA automaton without metadata file.");
 		}
 
 		printExtra("FSA properties");
 		printExtra("--------------------");
-		printExtra("FSA file version    : " + fsa.getVersion());
-		printExtra("Compiled with flags : "
-		        + FSAHelpers.flagsToString(fsa.getFlags()));
-		printExtra("Number of arcs      : " + fsa.getArcsCount());
-		printExtra("Number of nodes     : " + fsa.getNodeCount());
-		printExtra("Annotation separator: " + fsa.getAnnotationSeparator());
-		printExtra("Filler character    : " + fsa.getFillerCharacter());
-		printExtra("");
+		printExtra("FSA implementation  : " + fsa.getClass().getName());
+		printExtra("Compiled with flags : " + fsa.getFlags().toString());
+
+		if (!dataOnly) {
+    		final FSAInfo info = new FSAInfo(fsa);
+    		printExtra("Number of arcs      : " + info.arcsCount);
+    		printExtra("Number of nodes     : " + info.nodeCount);
+    		printExtra("Number of final st. : " + info.finalStatesCount);
+    		printExtra("");
+		}
+
+		// Separator for dumping.
+		char separator = ' ';
+
+		if (fsa instanceof FSA5) {
+			printExtra("FSA5 properties");
+			printExtra("--------------------");
+			printFSA5((FSA5) fsa);
+			if (dictionary != null) {
+				separator = byteAsChar(((FSA5) fsa).annotation, dictionary.metadata.encoding);
+			}
+			printExtra("");
+		}
+
+		if (fsa instanceof CFSA) {
+			printExtra("CFSA properties");
+			printExtra("--------------------");
+			printCFSA((CFSA) fsa);
+			printExtra("");
+		}
 
 		if (dictionary != null) {
 			printExtra("Dictionary metadata");
@@ -134,7 +155,6 @@ public final class DumpTool extends Tool {
 			final StringBuilder builder = new StringBuilder();
 			final OutputStreamWriter osw = new OutputStreamWriter(writer,
 			        dictionary.metadata.encoding);
-			final char separator = dictionary.fsa.getAnnotationSeparator();
 
 			CharSequence t;
 			for (WordData wd : dl) {
@@ -181,6 +201,65 @@ public final class DumpTool extends Tool {
 
 		writer.flush();
 	}
+
+	/**
+	 * Convert a byte to a character using the given encoding.
+	 */
+	private char byteAsChar(byte v, String encoding) {
+		try {
+			final String chr = new String(new byte[] { v }, encoding);
+			if (chr.length() != 1) {
+				throw new RuntimeException(
+				        "Unexpected annotation character length (should be 1): "
+				                + chr.length());
+			}
+			return chr.charAt(0);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+    }
+
+	/**
+	 * Print {@link CFSA}-specific stuff.
+	 */
+	private void printCFSA(CFSA fsa) throws IOException {
+		printExtra("GTL                 : " + fsa.gtl);
+		printExtra("Node extra data     : " + fsa.nodeDataLength);
+		printExtra("Label mapping       : " + bytesAsChars(fsa.labelMapping));
+    }
+
+	/**
+	 * 
+	 */
+	private String bytesAsChars(byte[] bytes) {
+		char [] chars = new char [bytes.length];
+		
+		for (int i = 0; i < bytes.length; i++)
+			chars[i] = byteAsChar(bytes[i]);
+
+	    return new String(chars);
+    }
+
+	/**
+	 * Print {@link FSA5}-specific stuff.
+	 */
+	private void printFSA5(FSA5 fsa) throws IOException {
+		printExtra("GTL                 : " + fsa.gtl);
+		printExtra("Node extra data     : " + fsa.nodeDataLength);
+		printExtra("Annotation separator: " + byteAsChar(fsa.annotation));
+		printExtra("Filler character    : " + byteAsChar(fsa.filler));
+    }
+
+	/**
+	 * Convert a byte to a character, no charset decoding, simple ASCII range mapping.
+	 */
+	private char byteAsChar(byte v) {
+		char chr = (char) (v & 0xff);
+		if (chr < 127)
+			return chr;
+		else
+			return '?';
+    }
 
 	/*
      * 
