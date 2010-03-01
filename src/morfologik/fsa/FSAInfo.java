@@ -1,69 +1,105 @@
 package morfologik.fsa;
 
 import java.util.BitSet;
+import java.util.HashMap;
 
 /**
  * Compute additional information about an FSA: number of arcs, nodes, etc.
  */
 public final class FSAInfo {
 	/**
-	 * Computes the number of states, nodes and final states by recursively
-	 * traversing the FSA.
+	 * Computes the exact number of states and nodes by recursively traversing
+	 * the FSA.
 	 */
-	private static class Walker
-	{
+	private static class NodeVisitor {
 		final BitSet visitedArcs = new BitSet();
 		final BitSet visitedNodes = new BitSet();
 
 		int nodes;
 		int arcs;
-		int finals;
+		int totalArcs;
 
 		private final FSA fsa;
 
-		Walker(FSA fsa) {
+		NodeVisitor(FSA fsa) {
 			this.fsa = fsa;
 		}
 
-		public void visitNode(int node) {
-			for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc))
-			{
-				// Care for arc path merging.
+		public void visitNode(final int node) {
+			if (visitedNodes.get(node)) {
+				return;
+			}
+			visitedNodes.set(node);
+
+			nodes++;
+			for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa
+			        .getNextArc(arc)) {
 				if (!visitedArcs.get(arc)) {
 					arcs++;
 				}
+				totalArcs++;
 				visitedArcs.set(arc);
 
-				if (fsa.isArcFinal(arc))
-					finals++;
-
-				if (!fsa.isArcTerminal(arc))
-				{
-					final int firstArc = fsa.getEndNode(arc);
-
-					if (!visitedNodes.get(firstArc)) {
-						nodes++;
-					}
-					visitedNodes.set(firstArc);
+				if (!fsa.isArcTerminal(arc)) {
 					visitNode(fsa.getEndNode(arc));
 				}
 			}
-        }
+		}
+	}
+
+	/**
+	 * Computes the exact number of final states.
+	 */
+	private static class FinalStateVisitor {
+		final HashMap<Integer, Integer> visitedNodes 
+			= new HashMap<Integer, Integer>();
+
+		private final FSA fsa;
+
+		FinalStateVisitor(FSA fsa) {
+			this.fsa = fsa;
+		}
+
+		public int visitNode(int node) {
+			Integer cached = visitedNodes.get(node);
+			if (cached != null)
+				return cached;
+
+			int fromHere = 0;
+			for (int arc = fsa.getFirstArc(node); 
+				arc != 0; arc = fsa.getNextArc(arc))
+			{
+				if (fsa.isArcFinal(arc))
+					fromHere++;
+
+				if (!fsa.isArcTerminal(arc)) {
+					fromHere += visitNode(fsa.getEndNode(arc));
+				}
+			}
+			visitedNodes.put(node, fromHere);
+			return fromHere;
+		}
 	}
 
 	/**
 	 * Number of nodes in the automaton.
 	 */
 	public final int nodeCount;
-	
+
 	/**
-	 * Number of arcs in the automaton, excluding an arcs from the zero node (initial)
-	 * and an arc from the start node to the root node.
+	 * Number of arcs in the automaton, excluding an arcs from the zero node
+	 * (initial) and an arc from the start node to the root node.
 	 */
 	public final int arcsCount;
 
 	/**
-	 * Number of nodes with final flag (input sequences).
+	 * Total number of arcs, counting arcs that physically overlap due to
+	 * merging. 
+	 */
+	public final int arcsCountTotal;
+
+	/**
+	 * Number of final states (number of input sequences stored in the automaton).
 	 */
 	public final int finalStatesCount;
 
@@ -71,15 +107,17 @@ public final class FSAInfo {
 	 * 
 	 */
 	public FSAInfo(FSA fsa) {
-		Walker w = new Walker(fsa);
+		final NodeVisitor w = new NodeVisitor(fsa);
 		int root = fsa.getRootNode();
-		if (root > 0)
-		{
+		if (root > 0) {
 			w.visitNode(root);
 		}
 
-		this.nodeCount = w.nodes;
-		this.arcsCount = w.arcs;
-		this.finalStatesCount = w.finals;
+		this.nodeCount = 1 + w.nodes;
+		this.arcsCount = 1 + w.arcs;
+		this.arcsCountTotal = 1 + w.totalArcs;
+
+		final FinalStateVisitor fsv = new FinalStateVisitor(fsa);
+		this.finalStatesCount = fsv.visitNode(fsa.getRootNode()); 
 	}
 }

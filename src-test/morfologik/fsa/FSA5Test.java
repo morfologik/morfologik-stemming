@@ -1,7 +1,9 @@
 package morfologik.fsa;
 
 import static morfologik.fsa.FSAFlags.NEXTBIT;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -10,6 +12,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import morfologik.stemming.Dictionary;
 
 import org.junit.Test;
 
@@ -49,7 +53,17 @@ public final class FSA5Test {
 		assertEquals(info1.nodeCount, info2.nodeCount);
 
 		assertEquals(4, info2.nodeCount);
-		assertEquals(6, info2.arcsCount);
+		assertEquals(7, info2.arcsCount);
+	}
+	
+	@Test
+	public void testArcsAndNodesLarge() throws IOException {
+		final FSA fsa3 = Dictionary.getForLanguage("pl").fsa;
+		FSAInfo info3 = new FSAInfo(fsa3);
+
+		assertEquals(297009, info3.nodeCount);
+		assertEquals(665415, info3.arcsCount);
+		assertEquals(3564930, info3.finalStatesCount);
 	}
 
 	@Test

@@ -91,7 +91,8 @@ public final class DumpTool extends Tool {
 
 		if (!dataOnly) {
     		final FSAInfo info = new FSAInfo(fsa);
-    		printExtra("Number of arcs      : " + info.arcsCount);
+    		printExtra("Number of arcs      : " 
+    				+ info.arcsCount + "/" + info.arcsCountTotal);
     		printExtra("Number of nodes     : " + info.nodeCount);
     		printExtra("Number of final st. : " + info.finalStatesCount);
     		printExtra("");
