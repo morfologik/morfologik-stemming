@@ -18,9 +18,10 @@ public final class FSA2CFSA extends Tool {
 		String [] args = line.getArgs();
 		if (args.length != 2)
 		{
-			throw new MissingArgumentException("Args: in.fsa out.cfsa");
+			printUsage();
+			return;
 		}
-		
+
 		FileInputStream fsa5 = new FileInputStream(args[0]);
 		FileOutputStream cfsa = new FileOutputStream(args[1]);
 		try
@@ -34,6 +35,13 @@ public final class FSA2CFSA extends Tool {
 		}
 	}
 
+	@Override
+	protected void printUsage() {
+		final HelpFormatter formatter = new HelpFormatter();
+		formatter.printHelp(this.getClass().getName()
+				+ " in.fsa out.cfsa", options, true);
+	}
+	
 	@Override
     protected void initializeOptions(Options options) {
 		// None.
