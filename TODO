@@ -1,11 +1,4 @@
 
-PLANS FOR VERSION 1.3
-
-- Remove in-memory buffering (via DataInput); simply use InputStream/OutputStream.
-
-- Refactor CFSAEncoder into FSA5 node/arc representation and re-encoder. Take into account
-possible gtl expansions if offsets change.
-
 PLANS FOR VERSION 1.4
 
 - Add a set of utility classes for parsing morphological tags. This could be similar 
