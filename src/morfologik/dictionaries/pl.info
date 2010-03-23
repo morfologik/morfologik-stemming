@@ -4,7 +4,7 @@
 
 fsa.dict.author=morfologik.blogspot.com
 fsa.dict.created=04.03.2009
-fsa.dict.license=LGPL (http://www.sjp.pl/slownik/en/)
+fsa.dict.license=GPL, LGPL, MPL or Creative Commons ShareAlike license (pick any suitable). http://www.sjp.pl/slownik/en/
 
 fsa.dict.separator=+
 fsa.dict.encoding=iso-8859-2
