@@ -182,9 +182,18 @@ public class DictionaryLookupTest {
 
 		assertArrayEquals(new String[] { "merge", "001" }, stem(s, "mergeam"));
 		assertArrayEquals(new String[] { "merge", "002" },
-		        stem(s, "merseserăm"));
+		        stem(s, "merseserăm"));		
 	}
+	
+	@Test
+	public void testMultibyteEncodingUTF8_no2() throws IOException {
+		final URL url = this.getClass()
+		        .getResource("multib.dict");
+		final IStemmer s = new DictionaryLookup(Dictionary.read(url));
 
+		assertArrayEquals(new String[] { "passager", "J f s", "passager", "N f s" }, stem(s, "passagère"));				
+	}
+	
 	/* */
 	@Test
 	public void testSynthesis() throws IOException {
