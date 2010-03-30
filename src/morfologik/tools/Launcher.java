@@ -1,6 +1,7 @@
 package morfologik.tools;
 
 import java.lang.reflect.Method;
+import java.util.Iterator;
 import java.util.TreeMap;
 
 /**
@@ -37,7 +38,22 @@ public final class Launcher {
 		tools.put("plstem", new ToolInfo(PolishStemmingTool.class,
 		        "Apply Polish stemming to the input."));
 		tools.put("fsa2cfsa", new ToolInfo(FSA2CFSA.class,
-        		"Convert FSA5 to CFSA."));
+		        "Convert FSA5 to CFSA."));
+
+		// Prune unavailable tools.
+		for (Iterator<ToolInfo> i = tools.values().iterator(); i.hasNext();) {
+			ToolInfo ti = i.next();
+			boolean available = true;
+			try {
+				available = ti.clazz.newInstance().isAvailable();
+			} catch (Throwable e) {
+				available = false;
+			}
+
+			if (!available) {
+				i.remove();
+			}
+		}
 	}
 
 	/**

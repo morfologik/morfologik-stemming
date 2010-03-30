@@ -23,18 +23,6 @@ import org.apache.commons.cli.*;
  */
 class PolishStemmingTool extends Tool {
 	/**
-	 * The stemmer to use.
-	 */
-	private final IStemmer stemmer;
-
-	/**
-     * 
-     */
-	public PolishStemmingTool() {
-		this.stemmer = new PolishStemmer();
-	}
-
-	/**
      * 
      */
 	protected void go(CommandLine line) throws Exception {
@@ -81,6 +69,7 @@ class PolishStemmingTool extends Tool {
 	 * @return Returns the number of processed words.
 	 */
 	protected long process(Reader input, Writer output) throws IOException {
+		final IStemmer stemmer = new PolishStemmer();
 		final StreamTokenizer st = new StreamTokenizer(input);
 		st.eolIsSignificant(false);
 		st.wordChars('+', '+');
@@ -176,6 +165,20 @@ class PolishStemmingTool extends Tool {
 			encoding = line.getOptionValue(opt);
 		}
 		return encoding;
+	}
+
+	/*
+	 * Check if the dictionary is available.
+	 */
+	@Override
+	protected boolean isAvailable() {
+		boolean available = true;
+		try {
+			new PolishStemmer();
+		} catch (Throwable t) {
+			available = false;
+		}
+		return available;
 	}
 
 	/**

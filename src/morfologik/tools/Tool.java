@@ -74,4 +74,11 @@ abstract class Tool {
 	 * Override and initialize options.
 	 */
 	protected abstract void initializeOptions(Options options);
+
+	/**
+	 * Is the tool available? <code>true</code> by default.
+	 */
+	protected boolean isAvailable() {
+		return true;
+	}
 }
