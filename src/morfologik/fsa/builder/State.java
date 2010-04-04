@@ -6,7 +6,7 @@ import java.util.IdentityHashMap;
 /**
  * DFSA state.
  */
-final class State {
+public final class State {
 	/** An empty set of labels. */
 	private final static char[] NO_LABELS = new char[0];
 
@@ -17,26 +17,19 @@ final class State {
 	 * Labels of outgoing transitions. Indexed identically to {@link #states}.
 	 * Labels must be sorted lexicographically.
 	 */
-	char[] labels = NO_LABELS;
+	public char[] labels = NO_LABELS;
 
 	/**
 	 * States reachable from outgoing transitions. Indexed identically to
 	 * {@link #labels}.
 	 */
-	State[] states = NO_STATES;
+	public State[] states = NO_STATES;
 
 	/**
-	 * <code>true</code> if this state correponds to the end of at least one
+	 * <code>true</code> if this state corresponds to the end of at least one
 	 * input sequence.
 	 */
 	boolean is_final;
-
-	/**
-	 * State visitor for traversals.
-	 */
-	public static interface Visitor {
-		public void accept(State s);
-	}
 
 	/**
 	 * Create a new outgoing transition labeled <code>label</code> and return
@@ -157,21 +150,21 @@ final class State {
 	/**
 	 * Visit all sub-states in post-order.
 	 */
-	public void postOrder(Visitor v) {
+	public void postOrder(Visitor<? super State> v) {
 		postOrder(v, new IdentityHashMap<State, State>());
 	}
 
 	/**
 	 * Visit all sub-states in pre-order.
 	 */
-	public void preOrder(Visitor v) {
+	public void preOrder(Visitor<? super State> v) {
 		preOrder(v, new IdentityHashMap<State, State>());
 	}
 
 	/**
 	 * Internal recursive postorder traversal.
 	 */
-	private void postOrder(Visitor v, IdentityHashMap<State, State> visited) {
+	private void postOrder(Visitor<? super State> v, IdentityHashMap<State, State> visited) {
 		if (visited.containsKey(this))
 			return;
 
@@ -185,7 +178,7 @@ final class State {
 	/**
 	 * Internal recursive preorder traversal.
 	 */
-	private void preOrder(Visitor v, IdentityHashMap<State, State> visited) {
+	private void preOrder(Visitor<? super State> v, IdentityHashMap<State, State> visited) {
 		if (visited.containsKey(this))
 			return;
 

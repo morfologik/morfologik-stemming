@@ -32,7 +32,7 @@ public class StateUtils {
 		b.append("  rankdir = LR;\n");
 
 		final IdentityHashMap<State, Integer> codes = new IdentityHashMap<State, Integer>();
-		root.preOrder(new State.Visitor() {
+		root.preOrder(new Visitor<State>() {
 			public void accept(State s) {
 				if (!codes.containsKey(s))
 					codes.put(s, codes.size());
@@ -43,7 +43,7 @@ public class StateUtils {
 		b.append("  initial -> ").append(codes.get(root)).append("\n\n");
 
 		// States and transitions.
-		root.preOrder(new State.Visitor() {
+		root.preOrder(new Visitor<State>() {
 			public void accept(State s) {
 				b.append("  ").append(codes.get(s));
 				if (s.isFinal())
@@ -104,7 +104,7 @@ public class StateUtils {
 	 */
 	public static AutomatonInfo getInfo(State s) {
 		final AutomatonInfo info = new AutomatonInfo();
-		s.preOrder(new State.Visitor() {
+		s.preOrder(new Visitor<State>() {
 			public void accept(State s) {
 				info.states++;
 				info.transitions += s.labels.length;
