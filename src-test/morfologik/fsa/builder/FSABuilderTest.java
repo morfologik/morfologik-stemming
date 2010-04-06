@@ -173,7 +173,7 @@ public class FSABuilderTest {
 	 */
 	private void checkMinimal(State s) {
 		final HashSet<String> stateLanguages = new HashSet<String>();
-		s.postOrder(new State.Visitor() {
+		s.postOrder(new Visitor<State>() {
 			public void accept(State s) {
 				Object [] rl = StateUtils.rightLanguage(s).toArray();
 				Arrays.sort(rl);
