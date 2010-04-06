@@ -163,11 +163,10 @@ public final class FSA5 extends FSA {
 	}
 
 	/**
-	 * Returns the start node of this automaton. May return <code>0</code> if
-	 * the start node is also an end node.
+	 * Returns the start node of this automaton.
 	 */
 	public int getRootNode() {
-		return getEndNode(getFirstArc(skipArc(nodeDataLength)));
+		return getDestinationNodeOffset(getFirstArc(skipArc(nodeDataLength)));
 	}
 
 	/**
@@ -205,9 +204,7 @@ public final class FSA5 extends FSA {
      */
 	public int getEndNode(int arc) {
 		final int nodeOffset = getDestinationNodeOffset(arc);
-		if (0 == nodeOffset) {
-			throw new RuntimeException("This is a terminal arc [" + arc + "]");
-		}
+		assert nodeOffset != 0 : "No target node for terminal arcs.";
 		return nodeOffset;
 	}
 

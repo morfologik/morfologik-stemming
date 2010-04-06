@@ -23,19 +23,18 @@ import org.junit.Test;
 public final class FSA5Test {
 	public ArrayList<String> expected = new ArrayList<String>(Arrays.asList(
 	        "a", "aba", "ac", "b", "ba", "c"));
-	public ArrayList<String> actual = new ArrayList<String>();
 
 	@Test
 	public void testVersion5() throws IOException {
 		final FSA fsa = FSA.getInstance(this.getClass().getResourceAsStream("abc.fsa"));
 		assertFalse(fsa.getFlags().contains(FSAFlags.NUMBERS));
-		verifyContent(fsa);
+		verifyContent(expected, fsa);
 	}
 
 	@Test
 	public void testVersion5WithNumbers() throws IOException {
 		final FSA fsa = FSA.getInstance(this.getClass().getResourceAsStream("abc-numbers.fsa"));
-		verifyContent(fsa);
+		verifyContent(expected, fsa);
 		assertTrue(fsa.getFlags().contains(FSAFlags.NUMBERS));
 	}
 
@@ -105,11 +104,11 @@ public final class FSA5Test {
 		}
 	}
 
-	private void verifyContent(FSA fsa) throws IOException {
+	private static void verifyContent(List<String> expected, FSA fsa) throws IOException {
 		final FSATraversalHelper helper = new FSATraversalHelper(fsa);
 		final Iterator<ByteBuffer> i = helper.getAllSubsequences(fsa.getRootNode());
+		final ArrayList<String> actual = new ArrayList<String>();
 
-		actual.clear();
 		int count = 0;
 		while (i.hasNext()) {
 			ByteBuffer bb = i.next();

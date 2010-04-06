@@ -1,6 +1,7 @@
 package morfologik.fsa;
 
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.Iterator;
 import static morfologik.fsa.FSAMatchType.*;
 
@@ -32,7 +33,7 @@ public final class FSATraversalHelper {
 	 */
 	public Iterator<ByteBuffer> getAllSubsequences(final int node) {
 		if (node == 0) {
-			throw new IllegalArgumentException("Node cannot be zero.");
+			return Collections.<ByteBuffer>emptyList().iterator();
 		}
 
 		// Create a custom iterator in the FSA

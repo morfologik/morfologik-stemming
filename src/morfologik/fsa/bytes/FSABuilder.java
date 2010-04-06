@@ -107,6 +107,18 @@ public class FSABuilder {
     }
 
 	/**
+     * Build a minimal, deterministic automaton from an iterable list of byte sequences.
+     */
+    public static State build(Iterable<byte[]> input) {
+    	final FSABuilder builder = new FSABuilder(); 
+
+    	for (byte [] chs : input)
+    		builder.add(chs, chs.length);
+
+    	return builder.complete();
+    }
+
+	/**
      * Copy <code>current</code> into an internal buffer.
      */
     private boolean setPrevious(byte [] current, int length) {

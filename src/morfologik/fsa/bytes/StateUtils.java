@@ -46,8 +46,14 @@ public class StateUtils {
 					b.append(codes.get(s));
 					b.append(" -> ");
 					b.append(codes.get(sub));
-					b.append(" [label=\"0x");
-					b.append(Integer.toHexString(s.labels[i++] & 0xFF));
+					b.append(" [label=\"");
+					if (Character.isLetterOrDigit(s.labels[i]))
+						b.append((char) s.labels[i]);
+					else {
+						b.append("0x");
+						b.append(Integer.toHexString(s.labels[i] & 0xFF));
+					}
+					i++;
 					b.append("\"]\n");
 				}
 			}

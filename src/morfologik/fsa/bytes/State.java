@@ -206,7 +206,7 @@ public final class State implements Traversable<State> {
 		visited.put(this, this);
 		v.accept(this);
 		for (State target : states) {
-			target.postOrder(v, visited);
+			target.preOrder(v, visited);
 		}
 	}
 }

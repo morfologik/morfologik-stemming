@@ -21,8 +21,17 @@ public class FSABuilderTest {
 	@BeforeClass
 	public static void prepareByteInput() {
 		input = generateRandom(25000, new MinMax(1, 20), new MinMax(0, 255));
-
 		input2 = generateRandom(25000, new MinMax(1, 20), new MinMax(0, 3));
+	}
+
+	/**
+	 * 
+	 */
+	@Test
+	public void testEmptyInput() {
+		byte[][] input = {};
+		State s = FSABuilder.build(input);
+		checkCorrect(input, s);
 	}
 
 	/**
@@ -74,7 +83,7 @@ public class FSABuilderTest {
 	/**
 	 * Check if the DFSA is correct with respect to the given input.
 	 */
-	protected void checkCorrect(byte[][] input, State s) {
+	protected static void checkCorrect(byte[][] input, State s) {
 		// (1) All input sequences are in the right language.
 		HashSet<ByteBuffer> rl = new HashSet<ByteBuffer>();
 		for (byte[] sequence : StateUtils.rightLanguage(s)) {
@@ -100,10 +109,11 @@ public class FSABuilderTest {
 	 * Check if the DFSA reachable from a given state is minimal. This means no
 	 * two states have the same right language.
 	 */
-	protected void checkMinimal(State s) {
+	protected static void checkMinimal(State s) {
 		final HashSet<String> stateLanguages = new HashSet<String>();
 		s.postOrder(new Visitor<State>() {
 			private StringBuilder b = new StringBuilder();
+
 			public void accept(State s) {
 				List<byte[]> rightLanguage = StateUtils.rightLanguage(s);
 				Collections.sort(rightLanguage, FSABuilder.LEXICAL_ORDERING);
