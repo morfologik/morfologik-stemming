@@ -10,10 +10,17 @@ import morfologik.fsa.FSA5;
 import morfologik.fsa.Visitor;
 
 /**
- * Serializes in-memory <code>byte</code>-labeled automata to FSA5 format.
+ * Serializes in-memory <code>byte</code>-labeled automata to FSA5 format. The
+ * automaton after serialization may not be minimal because FSA5 keeps
+ * acceptance (final) flag on transitions and {@link FSABuilder} keeps this
+ * information inside {@link State}s. The difference in practice is about 10% of
+ * the overall size; if super-compact format is required, use the original
+ * <code>fsa</code> package. Having distinct acceptor {@link State}s is useful
+ * in other applications.
  */
 public final class FSA5Serializer {
 	private final static int MAX_ARC_SIZE = 1 + 5;
+	private final static int SIZEOF_FLAGS = 1;
 
 	/**
 	 * @see FSA5#filler
@@ -101,16 +108,12 @@ public final class FSA5Serializer {
 		return os;
 	}
 
-	final int SIZEOF_LABEL = 1;
-	final int SIZEOF_FLAGS = 1;
-
 	/**
 	 * Update arc offsets assuming the given goto length.
 	 */
 	private boolean emitArcs(OutputStream os, ArrayList<State> linearized,
 	        final int gtl, final IdentityHashMap<State, IntHolder> offsets)
-	        throws IOException 
-    {
+	        throws IOException {
 		final ByteBuffer bb = ByteBuffer.allocate(MAX_ARC_SIZE);
 
 		int offset = 0;
@@ -149,7 +152,8 @@ public final class FSA5Serializer {
 				if (i == lastTransition) {
 					combined |= FSA5.BIT_LAST_ARC;
 
-					if (j + 1 < maxStates && target == linearized.get(j + 1) && targetOffset != 0) {
+					if (j + 1 < maxStates && target == linearized.get(j + 1)
+					        && targetOffset != 0) {
 						combined |= FSA5.BIT_TARGET_NEXT;
 						arcBytes = SIZEOF_FLAGS;
 						targetOffset = 0;
@@ -181,9 +185,9 @@ public final class FSA5Serializer {
 	}
 
 	/**
-	 * A terminal state does not have any outgoing transitions. 
+	 * A terminal state does not have any outgoing transitions.
 	 */
 	private boolean isTerminal(State state) {
-	    return state.hasChildren();
-    }
+		return state.hasChildren();
+	}
 }

@@ -12,6 +12,7 @@ import java.util.HashSet;
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSA5;
 import morfologik.fsa.FSA5Test;
+import morfologik.fsa.FSAUtils;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -116,7 +117,7 @@ public class FSA5SerializerTest {
 		        new ByteArrayOutputStream()).toByteArray();
 
 		FSA5 fsa2 = (FSA5) FSA.getInstance(new ByteArrayInputStream(fsaData));
-		
+
 		System.out.println("FSA: " + ((FSA5) fsa).arcs.length + ", JFSA: "
 				+ fsa2.arcs.length);
 

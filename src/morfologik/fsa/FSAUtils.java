@@ -30,8 +30,6 @@ public final class FSAUtils {
 		b.append("  ").append(s);
 		b.append(" [shape=circle,label=\"\"];\n");
 
-		System.out.println("visiting: " + s);
-		
 		for (int arc = fsa.getFirstArc(s); arc != 0; arc = fsa.getNextArc(arc)) {
 			b.append("  ");
 			b.append(s);
