@@ -12,7 +12,6 @@ import java.util.HashSet;
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSA5;
 import morfologik.fsa.FSA5Test;
-import morfologik.fsa.FSAUtils;
 
 import org.junit.Assert;
 import org.junit.Test;
