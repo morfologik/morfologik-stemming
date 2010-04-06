@@ -240,7 +240,7 @@ public final class FSA5 extends FSA {
 	}
 
 	/**
-	 * Returns <code>true</code> if this arc has <code>NEXT</code> bit set.
+	 * Returns <code>true</code> if this arc has <code>LAST</code> bit set.
 	 * 
 	 * @see #BIT_LAST_ARC
 	 */
