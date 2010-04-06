@@ -114,7 +114,10 @@ public final class FSA5Serializer {
 		final ByteBuffer bb = ByteBuffer.allocate(MAX_ARC_SIZE);
 
 		int offset = 0;
-		for (State s : linearized) {
+		int maxStates = linearized.size();
+		for (int j = 0; j < maxStates; j++) {
+			final State s = linearized.get(j);
+
 			if (os == null) {
 				offsets.get(s).value = offset;
 			} else {
@@ -124,30 +127,38 @@ public final class FSA5Serializer {
 			final byte[] labels = s.labels;
 			final State[] states = s.states;
 
-			final int max = labels.length - 1;
-			for (int i = 0; i <= max; i++) {
-				bb.put(labels[i]);
-
-				int flags = 0;
+			final int maxTransition = labels.length - 1;
+			final int lastTransition = 0;
+			for (int i = maxTransition; i >= 0; i--) {
 				final State target = states[i];
 
-				if (target.isFinal()) {
-					flags |= FSA5.BIT_FINAL_ARC;
-				}
-
-				final int targetOffset;
+				int targetOffset;
 				if (isTerminal(target)) {
 					targetOffset = offsets.get(target).value;
 				} else {
 					targetOffset = 0;
 				}
 
-				if (i == max) {
-					flags |= FSA5.BIT_LAST_ARC;
+				int combined = 0;
+				int arcBytes = gtl;
+
+				if (target.isFinal()) {
+					combined |= FSA5.BIT_FINAL_ARC;
 				}
 
-				int combined = (targetOffset << 3) | flags;
-				for (int b = 0; b < gtl; b++) {
+				if (i == lastTransition) {
+					combined |= FSA5.BIT_LAST_ARC;
+
+					if (j + 1 < maxStates && target == linearized.get(j + 1) && targetOffset != 0) {
+						combined |= FSA5.BIT_TARGET_NEXT;
+						arcBytes = SIZEOF_FLAGS;
+						targetOffset = 0;
+					}
+				}
+
+				combined |= (targetOffset << 3);
+				bb.put(labels[i]);
+				for (int b = 0; b < arcBytes; b++) {
 					bb.put((byte) combined);
 					combined >>>= 8;
 				}
