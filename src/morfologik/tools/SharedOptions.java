@@ -42,7 +42,19 @@ final class SharedOptions {
 	                "Output file. If missing, standard output is used.")
 	        .withLongOpt("output").withType(File.class).isRequired(false)
 	        .create("o");
+	
+	public final static Option standardEncoding = OptionBuilder
+	        .withDescription("Encode suffix forms in a standard way")
+	        .withLongOpt("suffix").isRequired(false).create("suf");
 
+	public final static Option prefixEncoding = OptionBuilder.withDescription(
+	        "Encode suffix forms in a prefix way").withLongOpt("prefix")
+	        .isRequired(false).create("pre");
+
+	public final static Option infixEncoding = OptionBuilder.withDescription(
+	        "Encode suffix forms in an infix way").withLongOpt("infix")
+	        .isRequired(false).create("inf");
+	
 	/**
 	 * No instances. Use static fields.
 	 */

@@ -39,7 +39,10 @@ public final class Launcher {
 		        "Apply Polish stemming to the input."));
 		tools.put("fsa2cfsa", new ToolInfo(FSA2CFSA.class,
 		        "Convert FSA5 to CFSA."));
+		tools.put("tab2morph", new ToolInfo(MorphEncodingTool.class,
+        "Convert tabbed dictionary to fsa encoding format."));
 
+		
 		// Prune unavailable tools.
 		for (Iterator<ToolInfo> i = tools.values().iterator(); i.hasNext();) {
 			ToolInfo ti = i.next();
