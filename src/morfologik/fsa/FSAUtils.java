@@ -51,17 +51,8 @@ public final class FSAUtils {
 				b.append(Integer.toHexString(label & 0xFF));
 			}
 			b.append("\"]\n");
-
-			System.out.println(
-					d + " " +
-					(char) label + "->" 
-					+ (!fsa.isArcTerminal(arc) ? fsa.getEndNode(arc) : 0)
-					+ " " 
-					+ (fsa.isArcFinal(arc) ? "F" : "")
-					+ (fsa.isArcTerminal(arc) ? "T" : ""));
 		}
 
-		System.out.println("--");
 		for (int arc = fsa.getFirstArc(s); arc != 0; arc = fsa.getNextArc(arc)) {
 			if (!fsa.isArcTerminal(arc)) {
 				int endNode = fsa.getEndNode(arc);

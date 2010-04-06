@@ -2,6 +2,7 @@ package morfologik.fsa.bytes;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 
@@ -12,6 +13,8 @@ import morfologik.fsa.Visitor;
  * Serializes in-memory <code>byte</code>-labeled automata to FSA5 format.
  */
 public final class FSA5Serializer {
+	private final static int MAX_ARC_SIZE = 1 + 5;
+
 	/**
 	 * @see FSA5#filler
 	 */
@@ -67,11 +70,20 @@ public final class FSA5Serializer {
 		});
 
 		// Calculate minimal goto length.
-		int gtl = 0;
-		do {
+		int gtl = 1;
+		while (true) {
+			// First pass: calculate offsets of states.
+			if (!emitArcs(null, linearized, gtl, offsets)) {
+				gtl++;
+				continue;
+			}
+
+			// Second pass: check if goto overflows anywhere.
+			if (emitArcs(null, linearized, gtl, offsets))
+				break;
+
 			gtl++;
-			updateOffsets(linearized, gtl, offsets);
-		} while (!gotoValid(linearized, gtl, offsets));
+		}
 
 		/*
 		 * Emit the header.
@@ -85,7 +97,7 @@ public final class FSA5Serializer {
 		/*
 		 * Emit the automaton.
 		 */
-		emitArcs(os, linearized, gtl, offsets);
+		assert emitArcs(os, linearized, gtl, offsets);
 		return os;
 	}
 
@@ -95,16 +107,26 @@ public final class FSA5Serializer {
 	/**
 	 * Update arc offsets assuming the given goto length.
 	 */
-	private void emitArcs(OutputStream os, ArrayList<State> linearized,
+	private boolean emitArcs(OutputStream os, ArrayList<State> linearized,
 	        final int gtl, final IdentityHashMap<State, IntHolder> offsets)
-	        throws IOException {
+	        throws IOException 
+    {
+		final ByteBuffer bb = ByteBuffer.allocate(MAX_ARC_SIZE);
+
+		int offset = 0;
 		for (State s : linearized) {
+			if (os == null) {
+				offsets.get(s).value = offset;
+			} else {
+				assert offsets.get(s).value == offset;
+			}
+
 			final byte[] labels = s.labels;
 			final State[] states = s.states;
 
 			final int max = labels.length - 1;
 			for (int i = 0; i <= max; i++) {
-				os.write(labels[i]);
+				bb.put(labels[i]);
 
 				int flags = 0;
 				final State target = states[i];
@@ -126,38 +148,25 @@ public final class FSA5Serializer {
 
 				int combined = (targetOffset << 3) | flags;
 				for (int b = 0; b < gtl; b++) {
-					os.write(combined & 0xff);
+					bb.put((byte) combined);
 					combined >>>= 8;
 				}
-				assert combined == 0 : "Non-empty arc data.";
-			}
-		}
-	}
 
-	/**
-	 * Update arc offsets assuming the given goto length.
-	 */
-	private void updateOffsets(ArrayList<State> linearized, final int gtl,
-	        final IdentityHashMap<State, IntHolder> offsets) {
-		int offset = 0;
-		for (State s : linearized) {
-			offsets.get(s).value = offset;
-
-			final byte[] labels = s.labels;
-			final State[] states = s.states;
-
-			for (int i = 0; i < labels.length; i++) {
-				if (isTerminal(states[i])) {
-					// An arc to terminal state does not have a goto offset.
-					offset += SIZEOF_LABEL;
-					offset += gtl;
-				} else {
-					// An explicit arc somewhere else.
-					offset += SIZEOF_LABEL;
-					offset += gtl;
+				if (combined != 0) {
+					// gtl too small. interrupt eagerly.
+					return false;
 				}
+
+				bb.flip();
+				offset += bb.remaining();
+				if (os != null) {
+					os.write(bb.array(), bb.position(), bb.remaining());
+				}
+				bb.clear();
 			}
 		}
+
+		return true;
 	}
 
 	/**
@@ -166,28 +175,4 @@ public final class FSA5Serializer {
 	private boolean isTerminal(State state) {
 	    return state.hasChildren();
     }
-
-	/**
-	 * Check if the given goto length is large enough to store all jump offsets.
-	 */
-	private boolean gotoValid(ArrayList<State> linearized, final int gtl,
-	        IdentityHashMap<State, IntHolder> offsets) {
-
-		final int maxOffset = (1 << (5 + 8 * (gtl - 1))) - 1;
-		for (State s : linearized) {
-			final byte[] labels = s.labels;
-			final State[] states = s.states;
-
-			for (int i = 0; i < labels.length; i++) {
-				final State target = states[i];
-				if (!target.isFinal()) {
-					int targetOffset = offsets.get(target).value;
-					if (targetOffset >= maxOffset)
-						return false;
-				}
-			}
-		}
-
-		return true;
-	}
 }
