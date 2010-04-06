@@ -1,12 +1,16 @@
-package morfologik.fsa.builder;
+package morfologik.fsa.characters;
 
 import java.util.Arrays;
 import java.util.IdentityHashMap;
 
+import morfologik.fsa.Traversable;
+import morfologik.fsa.Visitor;
+
 /**
- * DFSA state.
+ * DFSA state with <code>char</code> labels on transitions.
  */
-public final class State {
+public final class State implements Traversable<State> {
+
 	/** An empty set of labels. */
 	private final static char[] NO_LABELS = new char[0];
 
@@ -17,73 +21,19 @@ public final class State {
 	 * Labels of outgoing transitions. Indexed identically to {@link #states}.
 	 * Labels must be sorted lexicographically.
 	 */
-	public char[] labels = NO_LABELS;
+	char[] labels = NO_LABELS;
 
 	/**
 	 * States reachable from outgoing transitions. Indexed identically to
 	 * {@link #labels}.
 	 */
-	public State[] states = NO_STATES;
+	State[] states = NO_STATES;
 
 	/**
 	 * <code>true</code> if this state corresponds to the end of at least one
 	 * input sequence.
 	 */
 	boolean is_final;
-
-	/**
-	 * Create a new outgoing transition labeled <code>label</code> and return
-	 * the newly created target state for this transition.
-	 */
-	State newState(char label) {
-		assert Arrays.binarySearch(labels, label) < 0 : "State already has transition labeled: "
-				+ label;
-
-		labels = Arrays.copyOf(labels, labels.length + 1);
-		states = Arrays.copyOf(states, states.length + 1);
-
-		labels[labels.length - 1] = label;
-		return states[states.length - 1] = new State();
-	}
-
-	/**
-	 * Return <code>true</code> if this state has any children (outgoing
-	 * transitions).
-	 */
-	public boolean hasChildren() {
-		return labels.length > 0;
-	}
-
-	/**
-	 * Return the most recent transitions's target state.
-	 */
-	State lastChild() {
-		assert hasChildren() : "No outgoing transitions.";
-		return states[states.length - 1];
-	}
-
-	/**
-	 * Return the associated state if the most recent transition
-	 * is labeled with <code>label</code>.
-	 */
-	State lastChild(char label) {
-		final int index = labels.length - 1;
-		State s = null;
-		if (index >= 0 && labels[index] == label) {
-			s = states[index];
-		}
-		assert s == getState(label);
-		return s;
-	}
-
-	/**
-	 * Replace the last added outgoing transition's target state with the given
-	 * state.
-	 */
-	void replaceLastChild(State state) {
-		assert hasChildren() : "No outgoing transitions.";
-		states[states.length - 1] = state;
-	}
 
 	/**
 	 * Returns the target state of a transition leaving this state and labeled
@@ -100,6 +50,23 @@ public final class State {
 	}
 
 	/**
+	 * Returns an array of outgoing transition labels. The array is sorted in 
+	 * lexicographic order and indexes correspond to states returned from 
+	 * {@link #getStates()}.
+	 */
+	public char [] getTransitionLabels() {
+		return this.labels;
+	}
+
+	/**
+	 * Returns an array of outgoing transitions from this state. The returned
+	 * array must not be changed.
+	 */
+	public State[] getStates() {
+		return this.states;
+	}
+	
+	/**
 	 * Two states are equal if:
 	 * <ul>
 	 * <li>they have an identical number of outgoing transitions, labeled with
@@ -113,8 +80,16 @@ public final class State {
 		final State other = (State) obj;
 		return is_final == other.is_final
 				&& Arrays.equals(this.labels, other.labels)
-				&& referenceEquals(this.states, other.states);
+				&& morfologik.util.Arrays.referenceEquals(this.states, other.states);
 	}
+
+	/**
+     * Return <code>true</code> if this state has any children (outgoing
+     * transitions).
+     */
+    public boolean hasChildren() {
+    	return labels.length > 0;
+    }
 
 	/**
 	 * Is this state a final state in the automaton?
@@ -162,6 +137,52 @@ public final class State {
 	}
 
 	/**
+     * Create a new outgoing transition labeled <code>label</code> and return
+     * the newly created target state for this transition.
+     */
+    State newState(char label) {
+    	assert Arrays.binarySearch(labels, label) < 0 : "State already has transition labeled: "
+    			+ label;
+    
+    	labels = morfologik.util.Arrays.copyOf(labels, labels.length + 1);
+    	states = morfologik.util.Arrays.copyOf(states, states.length + 1);
+    
+    	labels[labels.length - 1] = label;
+    	return states[states.length - 1] = new State();
+    }
+
+	/**
+     * Return the most recent transitions's target state.
+     */
+    State lastChild() {
+    	assert hasChildren() : "No outgoing transitions.";
+    	return states[states.length - 1];
+    }
+
+	/**
+     * Return the associated state if the most recent transition
+     * is labeled with <code>label</code>.
+     */
+    State lastChild(char label) {
+    	final int index = labels.length - 1;
+    	State s = null;
+    	if (index >= 0 && labels[index] == label) {
+    		s = states[index];
+    	}
+    	assert s == getState(label);
+    	return s;
+    }
+
+	/**
+     * Replace the last added outgoing transition's target state with the given
+     * state.
+     */
+    void replaceLastChild(State state) {
+    	assert hasChildren() : "No outgoing transitions.";
+    	states[states.length - 1] = state;
+    }
+
+	/**
 	 * Internal recursive postorder traversal.
 	 */
 	private void postOrder(Visitor<? super State> v, IdentityHashMap<State, State> visited) {
@@ -187,19 +208,5 @@ public final class State {
 		for (State target : states) {
 			target.postOrder(v, visited);
 		}
-	}
-
-	/**
-	 * Compare two lists of {@link State} references for equality.
-	 */
-	private static boolean referenceEquals(State[] a1, State[] a2) {
-		if (a1.length != a2.length)
-			return false;
-	
-		for (int i = 0; i < a1.length; i++)
-			if (a1[i] != a2[i])
-				return false;
-	
-		return true;
 	}
 }

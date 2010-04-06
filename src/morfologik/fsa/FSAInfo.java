@@ -120,4 +120,23 @@ public final class FSAInfo {
 		final FinalStateVisitor fsv = new FinalStateVisitor(fsa);
 		this.finalStatesCount = fsv.visitNode(fsa.getRootNode()); 
 	}
+	
+	/*
+	 * 
+	 */
+	public FSAInfo(int nodeCount, int arcsCount, int arcsCountTotal, int finalStatesCount) {
+		this.nodeCount = nodeCount;
+		this.arcsCount = arcsCount;
+		this.arcsCountTotal = arcsCountTotal;
+		this.finalStatesCount = finalStatesCount;
+	}
+
+	/*
+	 * 
+	 */
+	@Override
+	public String toString() {
+	    return "Nodes: " + nodeCount + ", arcs: " + arcsCount + ", arcs total: "
+	    	+ arcsCountTotal + ", final states: " + finalStatesCount;
+	}
 }

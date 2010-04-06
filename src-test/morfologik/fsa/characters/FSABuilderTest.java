@@ -1,32 +1,21 @@
-package morfologik.fsa.builder;
+package morfologik.fsa.characters;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Random;
 
+import morfologik.fsa.Visitor;
+import morfologik.fsa.characters.FSABuilder;
+import morfologik.fsa.characters.State;
+import morfologik.fsa.characters.StateUtils;
+import morfologik.util.MinMax;
+
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class FSABuilderTest {
-
-	private final static class MinMax
-	{
-	    public final int min;
-	    public final int max;
-	    
-	    MinMax(int min, int max)
-	    {
-	        this.min = Math.min(min, max);
-	        this.max = Math.max(min, max);
-	    }
-
-	    public int range()
-	    {
-	        return max - min;
-	    }
-	}
 
 	private static String [] input;
 	private static String [] input2;
@@ -153,7 +142,7 @@ public class FSABuilderTest {
 	/**
 	 * Check if the DFSA is correct with respect to the given input.
 	 */
-	private void checkCorrect(Collection<String> input, State s) {
+	protected void checkCorrect(Collection<String> input, State s) {
 		// (1) All input sequences are in the right language.
 		HashSet<String> rl = new HashSet<String>(StateUtils.rightLanguage(s));
 		HashSet<String> uniqueInput = new HashSet<String>(input);
@@ -171,7 +160,7 @@ public class FSABuilderTest {
 	 * Check if the DFSA reachable from a given state is minimal. This means
 	 * no two states have the same right language.
 	 */
-	private void checkMinimal(State s) {
+	protected void checkMinimal(State s) {
 		final HashSet<String> stateLanguages = new HashSet<String>();
 		s.postOrder(new Visitor<State>() {
 			public void accept(State s) {

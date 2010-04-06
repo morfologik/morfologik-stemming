@@ -1,8 +1,11 @@
-package morfologik.fsa.builder;
+package morfologik.fsa.characters;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
+
+import morfologik.fsa.FSAInfo;
+import morfologik.fsa.Visitor;
 
 /**
  * Utilities that apply to {@link State}s. Extracted to a separate class for
@@ -10,22 +13,9 @@ import java.util.List;
  */
 public class StateUtils {
 	/**
-	 * Automaton statistics.
-	 */
-	public static class AutomatonInfo
-	{
-		public int states;
-		public int transitions;
-		
-		@Override
-		public String toString() {
-			return "States: " + states + ", transitions: " + transitions;
-		}
-	}
-
-	/**
-	 * Returns the right-language reachable from a given state as an input for
-	 * graphviz package (<code>dot</code> language).
+	 * Returns the right-language reachable from a given graph node, formatted
+	 * as an input for the graphviz package (expressed in the <code>dot</code>
+	 * language).
 	 */
 	public static String toDot(State root) {
 		final StringBuilder b = new StringBuilder("digraph Automaton {\n");
@@ -83,14 +73,15 @@ public class StateUtils {
 	/**
 	 * Recursive descend and collection of the right language.
 	 */
-	private static void descend(State state, StringBuilder b, ArrayList<String> rl) {
+	private static void descend(State state, StringBuilder b,
+	        ArrayList<String> rl) {
 		if (state.isFinal()) {
 			rl.add(b.toString());
 		}
 
 		if (state.hasChildren()) {
-			final State [] states = state.states;
-			final char [] labels = state.labels;
+			final State[] states = state.states;
+			final char[] labels = state.labels;
 			for (int i = 0; i < labels.length; i++) {
 				b.append(labels[i]);
 				descend(states[i], b, rl);
@@ -102,14 +93,17 @@ public class StateUtils {
 	/**
 	 * Calculate automaton statistics.
 	 */
-	public static AutomatonInfo getInfo(State s) {
-		final AutomatonInfo info = new AutomatonInfo();
+	public static FSAInfo getInfo(State s) {
+		final int [] counters = new int [] {
+				0, 0, 0
+		};
 		s.preOrder(new Visitor<State>() {
 			public void accept(State s) {
-				info.states++;
-				info.transitions += s.labels.length;
+				counters[0]++; // states
+				counters[1] += s.labels.length; // transitions
+				if (s.isFinal()) counters[2]++; // final states
 			}
 		});
-		return info;
+		return new FSAInfo(counters[0], counters[1], counters[0], counters[2]);
 	}
 }

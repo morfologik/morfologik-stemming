@@ -17,6 +17,13 @@ public final class Arrays {
 		return copy;
 	}
 
+	public static char[] copyOf(char[] original, int newLength) {
+		char[] copy = new char[newLength];
+		System.arraycopy(original, 0, copy, 0, Math.min(original.length,
+		        newLength));
+		return copy;
+	}
+
 	public static int[] copyOf(int[] original, int newLength) {
 		int[] copy = new int[newLength];
 		System.arraycopy(original, 0, copy, 0, Math.min(original.length,
@@ -38,5 +45,34 @@ public final class Arrays {
 		System.arraycopy(original, 0, copy, 0, Math.min(original.length,
 		        newLength));
 		return copy;
+	}
+
+	/**
+	 * Compare two lists of objects for reference-equality.
+	 */
+	public static boolean referenceEquals(Object[] a1, Object[] a2) {
+		if (a1.length != a2.length)
+			return false;
+	
+		for (int i = 0; i < a1.length; i++)
+			if (a1[i] != a2[i])
+				return false;
+	
+		return true;
+	}
+	
+	/**
+	 * Convert an array of strings to bytes. JDK1.5-equivalent of {@link Arrays#copyOf(byte[], int)}
+	 * and then {@link java.util.Arrays#toString(byte[])}.
+	 */
+	public static String toString(byte [] bytes, int length)
+	{
+		if (bytes.length != length)
+		{
+			final byte [] sub = new byte [length];
+			System.arraycopy(bytes, 0, sub, 0, length);
+			bytes = sub;
+		}
+		return java.util.Arrays.toString(bytes);
 	}
 }

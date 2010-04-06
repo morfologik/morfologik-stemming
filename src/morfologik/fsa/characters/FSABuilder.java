@@ -1,4 +1,4 @@
-package morfologik.fsa.builder;
+package morfologik.fsa.characters;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -7,7 +7,6 @@ import java.util.HashMap;
  * Automaton builder that uses <code>char</code>s to label transitions. 
  */
 public class FSABuilder {
-
 	/**
 	 * Lexicographic order of input sequences.
 	 */
