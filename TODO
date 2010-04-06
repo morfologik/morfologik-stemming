@@ -1,6 +1,14 @@
 
 PLANS FOR VERSION 1.4
 
+- Add a command-line tool for building FSA5 automata from input files (similar to fsa_build).
+
+- Perhaps try to add minimization with accepting flag on transitions (so that the resulting
+automaton is identical in size with Janek's).
+
+- Modify automaton structure to allow binary search on highly fanning nodes. Measure perf.
+gain. 
+
 - Add a set of utility classes for parsing morphological tags. This could be similar 
   (or even compatible?) with Morfeusz-Java.
 
