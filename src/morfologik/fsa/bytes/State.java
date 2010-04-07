@@ -103,9 +103,11 @@ public final class State implements Traversable<State> {
 	public int hashCode() {
 		int hash = 0;
 
-		hash ^= hash * 31 + this.labels.length;
+		for (boolean b : this.final_transitions)
+			hash = hash * 17 + (b ? 1 : 0);
+
 		for (byte c : this.labels)
-			hash ^= hash * 31 + (c & 0xFF);
+			hash = hash * 31 + (c & 0xFF);
 
 		/*
 		 * Compare the right-language of this state using reference-identity of
@@ -114,7 +116,7 @@ public final class State implements Traversable<State> {
 		 * are already interned.
 		 */
 		for (State s : this.states) {
-			hash ^= hash * 31 + s.hashCode();
+			hash ^= System.identityHashCode(s);
 		}
 
 		return hash;
