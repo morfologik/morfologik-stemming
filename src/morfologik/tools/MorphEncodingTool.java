@@ -14,22 +14,24 @@ import org.apache.commons.cli.*;
 class MorphEncodingTool extends Tool {
 	
 	boolean prefixes = false;
-	boolean infixes = false;
+	boolean infixes = false;	
+	final static String ISOENCODING = "ISO-8859-1";
+	
 	/**
      * @author Marcin Milkowski
      */
 	protected void go(CommandLine line) throws Exception {
 		// Determine input/ output encoding.
-
-		// Determine input and output streams.
-		final BufferedReader input = initializeInput(line, "iso-8859-1");
-		final Writer output = initializeOutput(line, "iso-8859-1");
-
+		
 		infixes = line.hasOption(SharedOptions.infixEncoding.getOpt());
 		
 		if (!infixes) {
 			prefixes = line.hasOption(SharedOptions.prefixEncoding.getOpt());
 		}
+						
+		// Determine input and output streams.
+		final BufferedReader input = initializeInput(line, ISOENCODING);
+		final Writer output = initializeOutput(line, ISOENCODING);
 		
 		try {
 			process(input, output);
@@ -46,25 +48,37 @@ class MorphEncodingTool extends Tool {
 	 * Process input stream, writing to output stream.
 	 *  
 	 */
-	protected void process(BufferedReader input, Writer output) throws IOException {
+	protected void process(BufferedReader input, Writer output)
+	        throws IOException {
 		long lnumber = 0;
 		try {
-			String line = null; // not declared within while loop			
+			String line = null; // not declared within while loop
 			while ((line = input.readLine()) != null) {
 				lnumber++;
 				String[] words = line.split("\t");
 				if (words.length < 3) {
-					throw new IllegalArgumentException("The input file has less than 3 fields in line: " + lnumber);
+					throw new IllegalArgumentException(
+					        "The input file has less than 3 fields in line: "
+					                + lnumber);
 				}
 				if (infixes) {
-					output.write(FSAMorphCoder.infixEncode(words[0], words[1], words[2]));
-					
+					output.write(FSAMorphCoder.infixEncode(words[0]
+					        .getBytes(ISOENCODING), words[1]
+					        .getBytes(ISOENCODING), words[2]
+					        .getBytes(ISOENCODING), ISOENCODING));
+
 				} else if (prefixes) {
-					output.write(FSAMorphCoder.prefixEncode(words[0], words[1], words[2]));
+					output.write(FSAMorphCoder.prefixEncode(words[0]
+					        .getBytes(ISOENCODING), words[1]
+					        .getBytes(ISOENCODING), words[2]
+					        .getBytes(ISOENCODING), ISOENCODING));
 				} else {
-					output.write(FSAMorphCoder.standardEncode(words[0], words[1], words[2]));
+					output.write(FSAMorphCoder.standardEncode(words[0]
+					        .getBytes(ISOENCODING), words[1]
+					        .getBytes(ISOENCODING), words[2]
+					        .getBytes(ISOENCODING), ISOENCODING));
 				}
-				
+
 				output.write("\n");
 			}
 		} finally {
