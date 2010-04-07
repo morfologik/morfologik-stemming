@@ -2,6 +2,12 @@ package morfologik.fsa.morph;
 
 import static org.junit.Assert.assertEquals;
 
+import java.nio.charset.*;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+
+
+
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -68,6 +74,6 @@ public class FSAMorphCoderTest {
 	@Test
 	public void testAsByteWideString() {
 		assertEquals("passagÃ¨re", FSAMorphCoder.asByteWideString("passagère"));
-		assertEquals(FSAMorphCoder.asNormalString("passagère"), FSAMorphCoder.asByteWideString("passagère"));
+		assertEquals("passagère", FSAMorphCoder.asNormalString(FSAMorphCoder.asByteWideString("passagère")));		
 	}
 }
