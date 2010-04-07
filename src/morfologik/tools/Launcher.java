@@ -33,6 +33,8 @@ public final class Launcher {
 	static TreeMap<String, ToolInfo> tools;
 	static {
 		tools = new TreeMap<String, ToolInfo>();
+		tools.put("fsa_build", new ToolInfo(Text2FSA5.class,
+		        "Create an FSA5 automaton from plain text files."));
 		tools.put("dump", new ToolInfo(DumpTool.class,
 		        "Dump an FSA dictionary."));
 		tools.put("plstem", new ToolInfo(PolishStemmingTool.class,
@@ -40,9 +42,8 @@ public final class Launcher {
 		tools.put("fsa2cfsa", new ToolInfo(FSA2CFSA.class,
 		        "Convert FSA5 to CFSA."));
 		tools.put("tab2morph", new ToolInfo(MorphEncodingTool.class,
-        "Convert tabbed dictionary to fsa encoding format."));
+		        "Convert tabbed dictionary to fsa encoding format."));
 
-		
 		// Prune unavailable tools.
 		for (Iterator<ToolInfo> i = tools.values().iterator(); i.hasNext();) {
 			ToolInfo ti = i.next();

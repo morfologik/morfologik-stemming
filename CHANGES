@@ -1,5 +1,8 @@
 
 1.3.0 (trunk)
+          Added FSA5 construction in Java (on byte sequences). Added preliminary support for
+          character sequences. Added a command line tool for FSA5 construction from unsorted data. 
+
           Added runtime checking for tools availability so that unavailable
           tools don't show up in the list.
 

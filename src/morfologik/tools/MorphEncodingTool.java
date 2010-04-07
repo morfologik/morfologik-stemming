@@ -86,7 +86,7 @@ class MorphEncodingTool extends Tool {
 	/**
      * 
      */
-	private Writer initializeOutput(CommandLine line, String outputEncoding)
+	private static Writer initializeOutput(CommandLine line, String outputEncoding)
 	        throws IOException, ParseException {
 		final Writer output;
 		final String opt = SharedOptions.outputFileOption.getOpt();
@@ -105,7 +105,7 @@ class MorphEncodingTool extends Tool {
 	/**
      * 
      */
-	private BufferedReader initializeInput(CommandLine line, String inputEncoding)
+	private static BufferedReader initializeInput(CommandLine line, String inputEncoding)
 	        throws IOException, ParseException {
 		final BufferedReader input;
 		final String opt = SharedOptions.inputFileOption.getOpt();
@@ -123,7 +123,6 @@ class MorphEncodingTool extends Tool {
 		return input;
 	}
 
-	
 	/**
 	 * Command line entry point.
 	 */

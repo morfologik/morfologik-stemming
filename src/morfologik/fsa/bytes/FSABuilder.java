@@ -27,7 +27,7 @@ public class FSABuilder {
 	/**
 	 * Comparator comparing full byte arrays.
 	 */
-	protected static final Comparator<byte[]> LEXICAL_ORDERING = new Comparator<byte[]>() {
+	public static final Comparator<byte[]> LEXICAL_ORDERING = new Comparator<byte[]>() {
 		public int compare(byte[] o1, byte[] o2) {
 		    return FSABuilder.compare(o1, o1.length, o2, o2.length);
 		}
