@@ -17,6 +17,13 @@ public final class Arrays {
 		return copy;
 	}
 
+	public static boolean[] copyOf(boolean[] original, int newLength) {
+		boolean[] copy = new boolean[newLength];
+		System.arraycopy(original, 0, copy, 0, Math.min(original.length,
+		        newLength));
+		return copy;
+	}
+
 	public static char[] copyOf(char[] original, int newLength) {
 		char[] copy = new char[newLength];
 		System.arraycopy(original, 0, copy, 0, Math.min(original.length,

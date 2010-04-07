@@ -153,10 +153,9 @@ public class FSABuilder {
 	 * (inclusive) to state <code>state</code>.
 	 */
 	private void addSuffix(State state, byte[] current, int length, int fromIndex) {
-		final int len = length;
-		for (int i = fromIndex; i < len; i++) {
-			state = state.newState(current[i]);
+		final int lastIndex = length - 1;
+		for (int i = fromIndex; i <= lastIndex; i++) {
+			state = state.newState(current[i], i == lastIndex);
 		}
-		state.is_final = true;
 	}
 }

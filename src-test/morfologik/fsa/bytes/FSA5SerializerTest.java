@@ -9,9 +9,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
-import morfologik.fsa.FSA;
-import morfologik.fsa.FSA5;
-import morfologik.fsa.FSA5Test;
+import morfologik.fsa.*;
+import morfologik.util.BufferUtils;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,17 +39,61 @@ public class FSA5SerializerTest {
 		checkCorrect(input, fsa);
 	}
 
+	/*
+	 * 
+	 */
+	@Test
+	public void testNotMinimal() throws IOException {
+		byte[][] input = new byte[][] { 
+				{ 'a', 'b', 'a' },
+		        { 'b' }, 
+		        { 'b', 'a' }, 
+		        };
+
+		Arrays.sort(input, FSABuilder.LEXICAL_ORDERING);
+		State s = FSABuilder.build(input);
+
+		final byte[] fsaData = new FSA5Serializer().serialize(s,
+		        new ByteArrayOutputStream()).toByteArray();
+
+		FSA5 fsa = (FSA5) FSA.getInstance(new ByteArrayInputStream(fsaData));
+		checkCorrect(input, fsa);
+
+		// Dump the created automata.
+		// System.out.println(FSAUtils.toDot(fsa, fsa.getRootNode()));
+		// System.out.println(StateUtils.toDot(s));
+	}
+
 	/**
 	 * 
 	 */
 	@Test
 	public void testFSA5Bug0() throws IOException {
-		byte[][] input = new byte[][] { 
-				"3-D+A+JJ".getBytes("ISO8859-1"),
-				"3-D+A+NN".getBytes("ISO8859-1"),
-				"4-F+A+NN".getBytes("ISO8859-1"),
-				"z+A+NN".getBytes("ISO8859-1"),
-				};
+		checkCorrect(new String [] {
+				"3-D+A+JJ",
+				"3-D+A+NN",
+				"4-F+A+NN",
+				"z+A+NN",
+		});
+	}
+
+	/**
+	 * 
+	 */
+	@Test
+	public void testFSA5Bug1() throws IOException {
+		checkCorrect(new String [] {
+				"+NP",
+				"n+N",
+				"n+NP",
+		});
+	}
+	
+	private void checkCorrect(String [] strings) throws IOException {
+		byte [][] input = new byte [strings.length][];
+		for (int i = 0; i < strings.length; i++) {
+			input[i] = strings[i].getBytes("ISO8859-1");
+		}
 
 		Arrays.sort(input, FSABuilder.LEXICAL_ORDERING);
 		State s = FSABuilder.build(input);
@@ -61,6 +104,7 @@ public class FSA5SerializerTest {
 		FSA5 fsa = (FSA5) FSA.getInstance(new ByteArrayInputStream(fsaData));
 		checkCorrect(input, fsa);
 	}
+
 
 	/**
 	 * 
@@ -89,6 +133,22 @@ public class FSA5SerializerTest {
 	 * 
 	 */
 	@Test
+	public void test_minimal() throws IOException {
+		testBuiltIn(FSA.getInstance(FSA5Test.class.getResourceAsStream("minimal.fsa")));
+	}
+
+	/**
+	 * 
+	 */
+	@Test
+	public void test_minimal2() throws IOException {
+		testBuiltIn(FSA.getInstance(FSA5Test.class.getResourceAsStream("minimal2.fsa")));
+	}
+
+	/**
+	 * 
+	 */
+	@Test
 	public void test_en_tst() throws IOException {
 		testBuiltIn(FSA.getInstance(FSA5Test.class.getResourceAsStream("en_tst.dict")));
 	}
@@ -108,7 +168,7 @@ public class FSA5SerializerTest {
 
 		final byte[][] in = sequences.toArray(new byte[sequences.size()][]);
 		State root = FSABuilder.build(in);
-
+		
 		// Check if the DFSA is correct first.
 		FSABuilderTest.checkCorrect(in, root);
 
@@ -117,8 +177,8 @@ public class FSA5SerializerTest {
 
 		FSA5 fsa2 = (FSA5) FSA.getInstance(new ByteArrayInputStream(fsaData));
 
-		System.out.println("FSA: " + ((FSA5) fsa).arcs.length + ", JFSA: "
-				+ fsa2.arcs.length);
+		// Dump comparison.
+		// System.out.println(" FSA: " + new FSAInfo(fsa) + "\nJFSA: " + new FSAInfo(fsa2));
 
 		checkCorrect(in, fsa2);
     }
@@ -141,7 +201,8 @@ public class FSA5SerializerTest {
 		}
 
 		for (ByteBuffer sequence : uniqueInput) {
-			Assert.assertTrue("Not present in the right language: " + sequence,
+			Assert.assertTrue("Not present in the right language: " + 
+					BufferUtils.toString(sequence),
 			        rl.remove(sequence));
 		}
 

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 import morfologik.fsa.Visitor;
+import morfologik.util.BufferUtils;
 import morfologik.util.MinMax;
 
 import org.junit.Assert;
@@ -96,7 +97,8 @@ public class FSABuilderTest {
 		}
 
 		for (ByteBuffer sequence : uniqueInput) {
-			Assert.assertTrue("Not present in the right language: " + sequence,
+			Assert.assertTrue("Not present in the right language: " + 
+					BufferUtils.toString(sequence),
 			        rl.remove(sequence));
 		}
 

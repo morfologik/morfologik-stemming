@@ -17,6 +17,9 @@ public final class State implements Traversable<State> {
 	/** An empty set of states. */
 	private final static State[] NO_STATES = new State[0];
 
+	/** An empty list of final flags. */
+	private final static boolean[] NO_FINALS = new boolean[0];
+
 	/**
 	 * Labels of outgoing transitions. Indexed identically to {@link #states}.
 	 * Labels must be sorted lexicographically.
@@ -30,10 +33,11 @@ public final class State implements Traversable<State> {
 	State[] states = NO_STATES;
 
 	/**
-	 * <code>true</code> if this state corresponds to the end of at least one
-	 * input sequence.
+	 * Transitions leaving his node that mark the end of an input sequence. Storing final state
+	 * flag as part of the transition makes automata slightly more compact. 
+	 * Indexed identically to {@link #labels}.
 	 */
-	boolean is_final;
+	boolean[] final_transitions = NO_FINALS;
 
 	/**
 	 * Returns the target state of a transition leaving this state and labeled
@@ -42,7 +46,6 @@ public final class State implements Traversable<State> {
 	 */
 	public State getState(byte label) {
 		final int index = Arrays.binarySearch(labels, label);
-		if (index >= 0) assert index + 1 == labels.length;
 		if (index >= 0) {
 			return states[index];
 		} else
@@ -70,7 +73,8 @@ public final class State implements Traversable<State> {
 	 * Two states are equal if:
 	 * <ul>
 	 * <li>they have an identical number of outgoing transitions, labeled with
-	 * the same labels</li>
+	 * the same labels,</li>
+	 * <li>transitions have identical final flags,</li>
 	 * <li>corresponding outgoing transitions lead to the same states (to states
 	 * with an identical right-language).
 	 * </ul>
@@ -78,9 +82,10 @@ public final class State implements Traversable<State> {
 	@Override
 	public boolean equals(Object obj) {
 		final State other = (State) obj;
-		return is_final == other.is_final
-				&& Arrays.equals(this.labels, other.labels)
-				&& morfologik.util.Arrays.referenceEquals(this.states, other.states);
+		return 
+			Arrays.equals(this.labels, other.labels)
+			&& Arrays.equals(this.final_transitions, other.final_transitions)
+			&& morfologik.util.Arrays.referenceEquals(this.states, other.states);
 	}
 
 	/**
@@ -92,18 +97,11 @@ public final class State implements Traversable<State> {
     }
 
 	/**
-	 * Is this state a final state in the automaton?
-	 */
-	public boolean isFinal() {
-		return is_final;
-	}
-
-	/**
 	 * Compute the hash code of the <i>current</i> status of this state.
 	 */
 	@Override
 	public int hashCode() {
-		int hash = is_final ? 1 : 0;
+		int hash = 0;
 
 		hash ^= hash * 31 + this.labels.length;
 		for (byte c : this.labels)
@@ -140,15 +138,19 @@ public final class State implements Traversable<State> {
      * Create a new outgoing transition labeled <code>label</code> and return
      * the newly created target state for this transition.
      */
-    State newState(byte label) {
+    State newState(byte label, boolean finalTransition) {
     	assert Arrays.binarySearch(labels, label) < 0 : 
     		"State already has transition labeled: " + label;
-    
-    	labels = morfologik.util.Arrays.copyOf(labels, labels.length + 1);
-    	states = morfologik.util.Arrays.copyOf(states, states.length + 1);
-    
-    	labels[labels.length - 1] = label;
-    	return states[states.length - 1] = new State();
+
+    	final int newLength = labels.length + 1;
+    	labels = morfologik.util.Arrays.copyOf(labels, newLength);
+    	states = morfologik.util.Arrays.copyOf(states, newLength);
+    	final_transitions = morfologik.util.Arrays.copyOf(final_transitions, newLength);
+
+    	final int index = labels.length - 1; 
+    	labels[index] = label;
+    	final_transitions[index] = finalTransition;
+    	return states[index] = new State();
     }
 
 	/**

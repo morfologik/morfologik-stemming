@@ -48,7 +48,14 @@ public final class FSAUtils {
 				b.append("0x");
 				b.append(Integer.toHexString(label & 0xFF));
 			}
-			b.append("\"]\n");
+			b.append("\"");
+			if (fsa.isArcFinal(arc)) b.append(" arrowhead=\"tee\"");
+			if (fsa instanceof FSA5) {
+				if (((FSA5) fsa).isNextSet(arc)) {
+					b.append(" color=\"blue\"");
+				}
+			}
+			b.append("]\n");
 		}
 
 		for (int arc = fsa.getFirstArc(s); arc != 0; arc = fsa.getNextArc(arc)) {

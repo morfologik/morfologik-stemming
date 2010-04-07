@@ -59,6 +59,8 @@ public final class FSA5Serializer {
 		State sink = new State();
 		sink.labels = new byte[] { 0 };
 		sink.states = new State[] { sink };
+		sink.final_transitions = new boolean [] {false};
+
 		linearized.add(sink); // Sink is not part of the automaton.
 		offsets.put(sink, new IntHolder());
 
@@ -66,6 +68,7 @@ public final class FSA5Serializer {
 		State meta = new State();
 		meta.labels = new byte[] { '^' };
 		meta.states = new State[] { s };
+		meta.final_transitions = new boolean [] {false};
 		s = meta;
 
 		// Prepare space for arc offsets and linearize all the states.
@@ -131,6 +134,7 @@ public final class FSA5Serializer {
 
 			final byte[] labels = s.labels;
 			final State[] states = s.states;
+			final boolean[] final_transitions = s.final_transitions;
 
 			final int maxTransition = labels.length - 1;
 			final int lastTransition = 0;
@@ -147,7 +151,7 @@ public final class FSA5Serializer {
 				int combined = 0;
 				int arcBytes = gtl;
 
-				if (target.isFinal()) {
+				if (final_transitions[i]) {
 					combined |= FSA5.BIT_FINAL_ARC;
 				}
 
