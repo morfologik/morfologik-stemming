@@ -88,6 +88,8 @@
 			<classpath refid="compile.classpath" />
 			<classpath location="${build.dir}" />
 			<classpath location="${build.test.dir}" />
+			
+            <jvmarg value="-ea" /> 
 
 			<formatter type="plain" />
 
