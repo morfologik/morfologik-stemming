@@ -9,13 +9,13 @@ package morfologik.fsa.morph;
  * <li>infix</li>
  * </ul>
  */
-public class FsaMorphCoder {
+public class FSAMorphCoder {
 
 	static final char SEPARATOR = '+';
 	static final int MAX_PREFIX_LEN = 3;
 	static final int MAX_INFIX_LEN = 3;	
 	
-	private FsaMorphCoder() {
+	private FSAMorphCoder() {
 	// only static stuff
 	};
 	
@@ -28,9 +28,8 @@ public class FsaMorphCoder {
 	}	
 
 	/** 
-	 * This method converts the WordForm, wordLemma and tag to the form:<br/>
-	 * wordForm+Kending+tags
-	 * </br>
+	 * This method converts the WordForm, wordLemma and tag to the form:
+	 * <pre>wordForm+Kending+tags</pre>
 	 * where '+' is a separator, K is a character that specifies how 
 	 * many characters should be deleted from the end of the inflected 
 	 * form to produce the lexeme by concatenating the stripped string 

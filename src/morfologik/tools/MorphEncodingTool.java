@@ -57,12 +57,12 @@ class MorphEncodingTool extends Tool {
 					throw new IllegalArgumentException("The input file has less than 3 fields in line: " + lnumber);
 				}
 				if (infixes) {
-					output.write(FsaMorphCoder.infixEncode(words[0], words[1], words[2]));
+					output.write(FSAMorphCoder.infixEncode(words[0], words[1], words[2]));
 					
 				} else if (prefixes) {
-					output.write(FsaMorphCoder.prefixEncode(words[0], words[1], words[2]));
+					output.write(FSAMorphCoder.prefixEncode(words[0], words[1], words[2]));
 				} else {
-					output.write(FsaMorphCoder.standardEncode(words[0], words[1], words[2]));
+					output.write(FSAMorphCoder.standardEncode(words[0], words[1], words[2]));
 				}
 				
 				output.write("\n");
