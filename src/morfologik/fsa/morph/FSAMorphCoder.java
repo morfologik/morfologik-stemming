@@ -1,5 +1,10 @@
 package morfologik.fsa.morph;
 
+import java.nio.charset.*;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+
+
 /**
  * A class that converts tabular data to fsa morphological
  * format. Three formats are supported:
@@ -8,6 +13,12 @@ package morfologik.fsa.morph;
  * <li>prefix</li>
  * <li>infix</li>
  * </ul>
+ * 
+ * Note: if you are using UTF-8 encoding for the dictionary, please make
+ * sure that you don't pass UTF-8 strings to the functions directly. Read the
+ * text as ISO-8859-1, and then pass the resulting strings to the methods. 
+ * Alternatively, you can use the .*utf8 variants of all encoding methods.
+ * 
  */
 public class FSAMorphCoder {
 
@@ -28,7 +39,7 @@ public class FSAMorphCoder {
 	}	
 
 	/** 
-	 * This method converts the WordForm, wordLemma and tag to the form:
+	 * This method converts the wordForm, wordLemma and tag to the form:
 	 * <pre>wordForm+Kending+tags</pre>
 	 * where '+' is a separator, K is a character that specifies how 
 	 * many characters should be deleted from the end of the inflected 
@@ -211,5 +222,122 @@ public class FSAMorphCoder {
 		sb.append(SEPARATOR);
 		sb.append(wordTag);
 		return sb.toString();
+	}
+	
+	/**
+	 * Converts a UTF-8 string to a byte-wide encoding, used for
+	 * FSA encoding functions. Note: in case of incorrect conversion,
+	 * the string is returned as is.
+	 * @param str
+	 * 			String to be converted.
+	 * @return
+	 * 			Byte-wide string. Expect to see unreadable characters in Java.
+	 */
+	public static String asByteWideString(final String str) {
+		// Create the encoder and decoder for ISO-8859-1 		
+		CharsetDecoder decoder = Charset.forName("ISO-8859-1").newDecoder(); 
+		CharsetEncoder encoder = Charset.forName("UTF-8").newEncoder(); 
+		try { 
+			ByteBuffer bbuf = encoder.encode(CharBuffer.wrap(str)); 
+			CharBuffer cbuf = decoder.decode(bbuf); 			
+			return cbuf.toString();
+		} catch (CharacterCodingException e) 
+		{ 
+
+		}
+		return str;
+	}
+
+	/**
+	 * Converts a UTF-8 string encoded in byte-wide encoding, used for
+	 * FSA encoding functions. Note: in case of incorrect conversion,
+	 * the string is returned as is.
+	 * @param str
+	 * 			Byte-wide string to be converted.
+	 * @return
+	 * 			Normal Java String.
+	 */
+	public static String asNormalString(final String str) {
+		CharsetEncoder encoder = Charset.forName("ISO-8859-1").newEncoder();
+		CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder();
+		try { 
+			ByteBuffer bbuf = encoder.encode(CharBuffer.wrap(str)); 
+			CharBuffer cbuf = decoder.decode(bbuf); 			
+			return cbuf.toString();
+		} catch (CharacterCodingException e) 
+		{ 
+
+		}
+		return str;
+	}
+	
+
+	/** 
+	 * A UTF-8 variant of {@link #standardEncode(wordForm, wordLemma, tag)}
+	 * This method converts the wordForm, wordLemma and tag to the form:
+	 * <pre>wordForm+Kending+tags</pre>
+	 * where '+' is a separator, K is a character that specifies how 
+	 * many characters should be deleted from the end of the inflected 
+	 * form to produce the lexeme by concatenating the stripped string 
+	 * with the ending.
+	 * 
+	 */
+	public static final String standardEncodeUTF8(final String wordForm, 
+			final String wordLemma, final String wordTag) {
+		return asNormalString(standardEncode(asByteWideString(wordForm), 
+				asByteWideString(wordLemma),
+				asByteWideString(wordTag)));				
+	}
+	
+	/**
+	 * A UTF-8 variant of {@link #prefixEncode(wordForm, wordLemma, tag)}
+	 * This method converts wordform, wordLemma and the tag 
+	 * to the form: <p>
+ 	 * <pre>inflected_form+LKending+tags</pre>
+ 	 * <p>
+ 	 * where '+' is a separator,
+     * L is the number of characters to be deleted from the beginning of the word
+     * ("A" means none, "B" means one, "C" - 2, etc.),
+     * K is a character that specifies how many characters
+     * should be deleted from the end of the inflected form to produce the lexeme
+     * by concatenating the stripped string with the ending ("A" means none,
+     * "B' - 1, "C" - 2, and so on).
+	 * @param wordForm - inflected word form
+	 * @param wordLemma - canonical form
+	 * @param wordTag - tag
+	 * @return the encoded string
+	 */
+	public static final String prefixEncodeUTF8(final String wordForm,
+			final String wordLemma, final String wordTag) {
+		return asNormalString(prefixEncode(asByteWideString(wordForm), 
+				asByteWideString(wordLemma),
+				asByteWideString(wordTag)));
+	}
+
+	/**
+	 *  This method converts wordform, wordLemma and the tag 
+	 * to the form: <p>
+ 	 * <pre>inflected_form+MLKending+tags</pre>
+ 	 * <p>
+ 	 *  where '+' is a separator, M is the position of characters to be deleted
+     *   towards the beginning of the inflected form ("A" means from the beginning,
+     *   "B" from the second character, "C" - from the third one, and so on),
+     *   L is the number of characters to be deleted from the position specified by M
+     *   ("A" means none, "B" means one, "C" - 2, etc.),
+     *   K is a character that specifies how many characters
+     *   should be deleted from the end of the inflected form to produce the lexeme
+     *   by concatenating the stripped string with the ending ("A" means none,
+     *   "B' - 1, "C" - 2, and so on).
+     *   
+	 * @param wordForm - inflected word form
+	 * @param wordLemma - canonical form
+	 * @param wordTag - tag
+	 * @return the encoded string
+	 */
+	public static final String infixEncodeUTF8(final String wordForm,
+			final String wordLemma, final String wordTag) {
+		return asNormalString(infixEncode(asByteWideString(wordForm), 
+				asByteWideString(wordLemma),
+				asByteWideString(wordTag)));
 	}
 }

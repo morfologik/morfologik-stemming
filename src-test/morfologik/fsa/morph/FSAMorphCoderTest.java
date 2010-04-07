@@ -51,7 +51,7 @@ public class FSAMorphCoderTest {
 		assertEquals("ccal+ABA+test", FSAMorphCoder.infixEncode("ccal", "cal", "test"));
 	}
 
-	@Test @Ignore
+	@Test
 	public void testUTF8Boundary() {
 		/*
 		 * TODO: for byte-labeled automata you should take into account the encoding
@@ -60,6 +60,14 @@ public class FSAMorphCoderTest {
 		 * accept byte[] on input? Alternatively, convert to UTF8 internally and calculate
 		 * offsets there? 
 		 */
-		assertEquals("passagère+Eer+tag", FSAMorphCoder.standardEncode("passagère", "passager", "tag"));
+		assertEquals("passagère+Eer+tag", FSAMorphCoder.standardEncodeUTF8("passagère", "passager", "tag"));
+		assertEquals("passagère+AAEer+tag", FSAMorphCoder.infixEncodeUTF8("passagère", "passager", "tag"));
+		assertEquals("passagère+AEer+tag", FSAMorphCoder.prefixEncodeUTF8("passagère", "passager", "tag"));
+	}
+	
+	@Test
+	public void testAsByteWideString() {
+		assertEquals("passagÃ¨re", FSAMorphCoder.asByteWideString("passagère"));
+		assertEquals(FSAMorphCoder.asNormalString("passagère"), FSAMorphCoder.asByteWideString("passagère"));
 	}
 }
