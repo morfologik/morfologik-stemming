@@ -1,7 +1,8 @@
 package morfologik.fsa.morph;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 /*
@@ -50,7 +51,7 @@ public class FSAMorphCoderTest {
 		assertEquals("ccal+ABA+test", FSAMorphCoder.infixEncode("ccal", "cal", "test"));
 	}
 
-	@Test
+	@Test @Ignore
 	public void testUTF8Boundary() {
 		/*
 		 * TODO: for byte-labeled automata you should take into account the encoding
