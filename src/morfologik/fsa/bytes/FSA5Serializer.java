@@ -104,7 +104,9 @@ public final class FSA5Serializer {
 		/*
 		 * Emit the automaton.
 		 */
-		assert emitArcs(os, linearized, gtl, offsets);
+		boolean gtlUnchanged = emitArcs(os, linearized, gtl, offsets);
+		assert gtlUnchanged : "gtl changed in the final pass.";
+
 		return os;
 	}
 
