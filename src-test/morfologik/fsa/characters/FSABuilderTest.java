@@ -117,7 +117,7 @@ public class FSABuilderTest {
 	/**
 	 * Generate a sorted list of random sequences.
 	 */
-	private static String[] generateRandom(int count, MinMax length, MinMax alphabet) {
+	static String[] generateRandom(int count, MinMax length, MinMax alphabet) {
 		final String[] input = new String[count];
 		final Random rnd = new Random(0x11223344);
 		for (int i = 0; i < count; i++) {

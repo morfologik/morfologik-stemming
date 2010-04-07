@@ -42,11 +42,7 @@ public final class State implements Traversable<State> {
 	 */
 	public State getState(char label) {
 		final int index = Arrays.binarySearch(labels, label);
-		if (index >= 0) assert index + 1 == labels.length;
-		if (index >= 0) {
-			return states[index];
-		} else
-			return null;
+		return index >= 0 ? states[index] : null; 
 	}
 
 	/**

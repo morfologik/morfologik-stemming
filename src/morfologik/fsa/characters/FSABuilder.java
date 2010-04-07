@@ -10,7 +10,7 @@ public class FSABuilder {
 	/**
 	 * Lexicographic order of input sequences.
 	 */
-	private final static Comparator<CharSequence> order = new Comparator<CharSequence>() {
+	public final static Comparator<CharSequence> LEXICOGRAPHIC_ORDER = new Comparator<CharSequence>() {
 		public int compare(CharSequence s1, CharSequence s2) {
 			final int lens1 = s1.length();
 			final int lens2 = s2.length();
@@ -49,7 +49,7 @@ public class FSABuilder {
 	public void add(CharSequence current) {
 		assert register != null : "Automaton already built.";
 		assert current.length() > 0 : "Input sequences must not be empty.";
-		assert previous == null || order.compare(previous, current) <= 0 : 
+		assert previous == null || LEXICOGRAPHIC_ORDER.compare(previous, current) <= 0 : 
 			"Input must be sorted: " + previous + " >= " + current;
 		assert setPrevious(current);
 
