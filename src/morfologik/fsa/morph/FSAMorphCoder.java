@@ -345,6 +345,8 @@ public class FSAMorphCoder {
 	}
 
 	/**
+	 * A UTF-8 variant of {@link #infixEncode(byte[], byte[], byte[])}.
+	 * 
 	 * This method converts wordform, wordLemma and the tag to the form:
 	 * <p>
 	 * 
