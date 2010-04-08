@@ -13,13 +13,13 @@ import org.apache.commons.cli.*;
  */
 class MorphEncodingTool extends Tool {
 	
-	boolean prefixes = false;
-	boolean infixes = false;		
+	private boolean prefixes = false;
+	private boolean infixes = false;		
 	
 	/**
      * @author Marcin Milkowski
      */
-	protected void go(CommandLine line) throws Exception {
+	protected void go(final CommandLine line) throws Exception {
 		// Determine input/ output encoding.
 		
 		infixes = line.hasOption(SharedOptions.infixEncoding.getOpt());
@@ -54,7 +54,7 @@ class MorphEncodingTool extends Tool {
 	 * 			than three fields, one of byte arrays is null. If the
 	 * 			line contains more than three fields, they are ignored. 
 	 */
-	static byte[][] splitFields(final byte[] line, final int pos) {
+	private static byte[][] splitFields(final byte[] line, final int pos) {
 		byte[][] outputArray = new byte[3][];
 		int i = 0;
 		int prevPos = 0;
@@ -75,7 +75,7 @@ class MorphEncodingTool extends Tool {
 	 * Process input stream, writing to output stream.
 	 *  
 	 */
-	protected void process(DataInputStream input, DataOutputStream output)
+	protected void process(final DataInputStream input, final DataOutputStream output)
 	        throws IOException {
 		long lnumber = 0;
 		try {
@@ -84,11 +84,8 @@ class MorphEncodingTool extends Tool {
 											// 64K chars
 			int dataByte = -1; // not declared within while loop
 			byte[][] words;
-			while ((dataByte = input.read()) != -1) {
-
-				if (dataByte != (byte) '\n') {					
-					buf[bufPos++] = (byte) dataByte;
-				} else if (dataByte != -1) {
+			while ((dataByte = input.read()) != -1) {				
+				if (dataByte == (byte) '\n') {
 					lnumber++;
 					buf[bufPos++] = 9;
 					words = splitFields(buf, bufPos);
@@ -111,8 +108,10 @@ class MorphEncodingTool extends Tool {
 					}
 					output.writeBytes("\n");
 					bufPos = 0;
+				} else {					
+					buf[bufPos++] = (byte) dataByte;
 				}
-			}
+			}			
 		} finally {
 			input.close();
 		}
