@@ -14,8 +14,7 @@ import org.apache.commons.cli.*;
 class MorphEncodingTool extends Tool {
 	
 	boolean prefixes = false;
-	boolean infixes = false;	
-	final static String ISOENCODING = "ISO-8859-1";
+	boolean infixes = false;		
 	
 	/**
      * @author Marcin Milkowski
@@ -30,8 +29,8 @@ class MorphEncodingTool extends Tool {
 		}
 						
 		// Determine input and output streams.
-		final BufferedReader input = initializeInput(line, ISOENCODING);
-		final Writer output = initializeOutput(line, ISOENCODING);
+		final DataInputStream input = initializeInput(line);
+		final DataOutputStream output = initializeOutput(line);
 		
 		try {
 			process(input, output);
@@ -45,47 +44,80 @@ class MorphEncodingTool extends Tool {
 	}
 
 	/**
+	 * Split fields
+	 * @param line 
+	 * 			byte input buffer
+	 * @param pos
+	 * 			current offset in the file
+	 * @return
+	 * 			an array of three byte arrays; if there are less
+	 * 			than three fields, one of byte arrays is null. If the
+	 * 			line contains more than three fields, they are ignored. 
+	 */
+	static byte[][] splitFields(final byte[] line, final int pos) {
+		byte[][] outputArray = new byte[3][];
+		int i = 0;
+		int prevPos = 0;
+		int arrayInd = 0;
+		while (i < pos) {			
+			if (line[i] == (byte)'\t') { //tab
+				outputArray[arrayInd] = new byte[i - prevPos];
+				System.arraycopy(line, prevPos, outputArray[arrayInd], 0, i - prevPos);
+				prevPos = i + 1;
+				arrayInd++;
+			}
+			i++;
+		}
+		return outputArray;
+	}
+	
+	/**
 	 * Process input stream, writing to output stream.
 	 *  
 	 */
-	protected void process(BufferedReader input, Writer output)
+	protected void process(DataInputStream input, DataOutputStream output)
 	        throws IOException {
 		long lnumber = 0;
 		try {
-			String line = null; // not declared within while loop
-			while ((line = input.readLine()) != null) {
-				lnumber++;
-				String[] words = line.split("\t");
-				if (words.length < 3) {
-					throw new IllegalArgumentException(
-					        "The input file has less than 3 fields in line: "
-					                + lnumber);
-				}
-				if (infixes) {
-					output.write(FSAMorphCoder.infixEncode(words[0]
-					        .getBytes(ISOENCODING), words[1]
-					        .getBytes(ISOENCODING), words[2]
-					        .getBytes(ISOENCODING), ISOENCODING));
+			int bufPos = 0;
+			byte[] buf = new byte[0xfffff]; // assumed that line is shorter than
+											// 64K chars
+			int dataByte = -1; // not declared within while loop
+			byte[][] words;
+			while ((dataByte = input.read()) != -1) {
 
-				} else if (prefixes) {
-					output.write(FSAMorphCoder.prefixEncode(words[0]
-					        .getBytes(ISOENCODING), words[1]
-					        .getBytes(ISOENCODING), words[2]
-					        .getBytes(ISOENCODING), ISOENCODING));
-				} else {
-					output.write(FSAMorphCoder.standardEncode(words[0]
-					        .getBytes(ISOENCODING), words[1]
-					        .getBytes(ISOENCODING), words[2]
-					        .getBytes(ISOENCODING), ISOENCODING));
+				if (dataByte != (byte) '\n') {					
+					buf[bufPos++] = (byte) dataByte;
+				} else if (dataByte != -1) {
+					lnumber++;
+					buf[bufPos++] = 9;
+					words = splitFields(buf, bufPos);
+					for (byte[] wArray : words) {
+						if (wArray == null) {
+							throw new IllegalArgumentException(
+							        "The input file has less than 3 fields in line: "
+							                + lnumber);
+						}
+					}
+					if (infixes) {
+						output.write(FSAMorphCoder.infixEncode(words[0],
+						        words[1], words[2]));
+					} else if (prefixes) {
+						output.write(FSAMorphCoder.prefixEncode(words[0],
+						        words[1], words[2]));
+					} else {
+						output.write(FSAMorphCoder.standardEncode(words[0],
+						        words[1], words[2]));
+					}
+					output.writeBytes("\n");
+					bufPos = 0;
 				}
-
-				output.write("\n");
 			}
 		} finally {
 			input.close();
 		}
 	}
-	
+
 	/**
 	 * Command line options for the tool.
 	 */
@@ -100,18 +132,21 @@ class MorphEncodingTool extends Tool {
 	/**
      * 
      */
-	private static Writer initializeOutput(CommandLine line, String outputEncoding)
+	private static DataOutputStream initializeOutput(CommandLine line)
 	        throws IOException, ParseException {
-		final Writer output;
+		final DataOutputStream output;		
 		final String opt = SharedOptions.outputFileOption.getOpt();
 		if (line.hasOption(opt)) {
 			// Use output file.
-			output = new OutputStreamWriter(
-			        new BufferedOutputStream(new FileOutputStream((File) line
-			                .getParsedOptionValue(opt))), outputEncoding);
+			output = new DataOutputStream(
+					new BufferedOutputStream(
+					new FileOutputStream((File) line
+			                .getParsedOptionValue(opt))));
 		} else {
 			// Use standard output.
-			output = new OutputStreamWriter(System.out, outputEncoding);
+			output = new DataOutputStream(
+					new BufferedOutputStream(
+					System.out));
 		}
 		return output;
 	}
@@ -119,20 +154,21 @@ class MorphEncodingTool extends Tool {
 	/**
      * 
      */
-	private static BufferedReader initializeInput(CommandLine line, String inputEncoding)
+	private static DataInputStream initializeInput(CommandLine line)
 	        throws IOException, ParseException {
-		final BufferedReader input;
+		final DataInputStream input;
 		final String opt = SharedOptions.inputFileOption.getOpt();
-
 		if (line.hasOption(opt)) {
 			// Use input file.
-			input = new BufferedReader( 
-				new InputStreamReader(
-			        new BufferedInputStream(new FileInputStream((File) line
-			                .getParsedOptionValue(opt))), inputEncoding));
+			input = new DataInputStream ( 
+					new BufferedInputStream(
+					new FileInputStream((File) line
+			                .getParsedOptionValue(opt))));
 		} else {
 			// Use standard input.
-			input = new BufferedReader(new InputStreamReader(System.in, inputEncoding));
+			input = new DataInputStream(
+					new BufferedInputStream(
+					System.in));
 		}
 		return input;
 	}
