@@ -99,15 +99,12 @@ public final class DumpTool extends Tool {
 		}
 
 		// Separator for dumping.
-		char separator = ' ';
+		char separator = '\t';
 
 		if (fsa instanceof FSA5) {
 			printExtra("FSA5 properties");
 			printExtra("--------------------");
-			printFSA5((FSA5) fsa);
-			if (dictionary != null) {
-				separator = byteAsChar(((FSA5) fsa).annotation, dictionary.metadata.encoding);
-			}
+			printFSA5((FSA5) fsa);			
 			printExtra("");
 		}
 
