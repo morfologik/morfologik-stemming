@@ -112,7 +112,7 @@ public final class State implements Traversable<State> {
 		 * are already interned.
 		 */
 		for (State s : this.states) {
-			hash ^= hash * 31 + s.hashCode();
+			hash ^= System.identityHashCode(s);
 		}
 
 		return hash;
