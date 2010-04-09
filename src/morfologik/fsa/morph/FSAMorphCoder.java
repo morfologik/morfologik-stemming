@@ -72,11 +72,8 @@ public final class FSAMorphCoder {
 	        final byte[] wordLemma, final byte[] wordTag) {
 		final int l1 = wordForm.length;
 		final int prefix = commonPrefix(wordForm, wordLemma);
-		int len = wordLemma.length;
-		int pos = 0;
-		if (prefix != 0) {
-			len -= prefix;
-		}
+		final int len = wordLemma.length - prefix;
+		int pos = 0;		
 		// 3 = 2 separators and K character
 		int arrayLen = l1 + len + 3;		
 		if (wordTag != null) { //wordTag may be empty for stemming
