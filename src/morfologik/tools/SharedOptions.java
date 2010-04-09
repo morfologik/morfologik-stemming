@@ -52,8 +52,13 @@ final class SharedOptions {
 	        .isRequired(false).create("pre");
 
 	public final static Option infixEncoding = OptionBuilder.withDescription(
-	        "Encode suffix forms in an infix way").withLongOpt("infix")
+	        "Encode suffix forms in an infix way").withLongOpt("infix")	        
 	        .isRequired(false).create("inf");
+
+	public final static Option noWarnIfTwoFields = OptionBuilder.withDescription(
+    "Suppress warning for lines with only two fields (for stemming dictionaries)").withLongOpt("nowarn")
+    .isRequired(false).create("nw");
+
 	
 	/**
 	 * No instances. Use static fields.

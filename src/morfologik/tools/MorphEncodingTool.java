@@ -14,13 +14,16 @@ import org.apache.commons.cli.*;
 class MorphEncodingTool extends Tool {
 	
 	private boolean prefixes = false;
-	private boolean infixes = false;		
+	private boolean infixes = false;
+	
+	private boolean noWarn = false;
 	
 	/**
      * @author Marcin Milkowski
      */
 	protected void go(final CommandLine line) throws Exception {
-		// Determine input/ output encoding.
+		
+		noWarn = line.hasOption(SharedOptions.noWarnIfTwoFields.getOpt());
 		
 		infixes = line.hasOption(SharedOptions.infixEncoding.getOpt());
 		
@@ -88,13 +91,17 @@ class MorphEncodingTool extends Tool {
 				if (dataByte == (byte) '\n') {
 					lnumber++;
 					buf[bufPos++] = 9;
-					words = splitFields(buf, bufPos);
-					for (byte[] wArray : words) {
-						if (wArray == null) {
+					words = splitFields(buf, bufPos);					
+					for (int i = 0; i < words.length; i++) {
+						if (i < 1 && words[i] == null) {
 							throw new IllegalArgumentException(
-							        "The input file has less than 3 fields in line: "
+							        "The input file has less than 2 fields in line: "
 							                + lnumber);
+						} 
+						if (words[i] == null && !noWarn) {	
+							System.err.println("Line number: " + lnumber + " has less than three fields.");
 						}
+						
 					}
 					if (infixes) {
 						output.write(FSAMorphCoder.infixEncode(words[0],
@@ -106,10 +113,12 @@ class MorphEncodingTool extends Tool {
 						output.write(FSAMorphCoder.standardEncode(words[0],
 						        words[1], words[2]));
 					}
-					output.writeBytes("\n");
+					output.writeByte(0xa); //Unix line ends
 					bufPos = 0;
-				} else {					
-					buf[bufPos++] = (byte) dataByte;
+				} else {
+					if (dataByte != (byte) '\r') { 
+						buf[bufPos++] = (byte) dataByte;
+					}
 				}
 			}			
 		} finally {
@@ -126,6 +135,7 @@ class MorphEncodingTool extends Tool {
 		options.addOption(SharedOptions.standardEncoding);
 		options.addOption(SharedOptions.prefixEncoding);
 		options.addOption(SharedOptions.infixEncoding);		
+		options.addOption(SharedOptions.noWarnIfTwoFields);
 	}
 
 	/**

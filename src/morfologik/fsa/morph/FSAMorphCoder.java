@@ -75,10 +75,14 @@ public final class FSAMorphCoder {
 		int len = wordLemma.length;
 		int pos = 0;
 		if (prefix != 0) {
-			len = len - prefix;
+			len -= prefix;
 		}
-		final byte[] bytes = new byte[wordForm.length + len + wordTag.length
-		        + 3]; // 2 separators and K character
+		// 3 = 2 separators and K character
+		int arrayLen = l1 + len + 3;		
+		if (wordTag != null) { //wordTag may be empty for stemming
+			arrayLen += wordTag.length;
+		}		
+		final byte[] bytes = new byte[arrayLen]; 
 		pos += copyTo(bytes, pos, wordForm);
 		pos += copyTo(bytes, pos, SEPARATOR);
 		if (prefix == 0) {
@@ -89,7 +93,9 @@ public final class FSAMorphCoder {
 			pos += copyTo(bytes, pos, substring(wordLemma, prefix));
 		}
 		pos += copyTo(bytes, pos, SEPARATOR);
-		pos += copyTo(bytes, pos, wordTag);
+		if (wordTag != null) {
+			pos += copyTo(bytes, pos, wordTag);
+		}
 		return bytes;
 	}
 
@@ -120,8 +126,13 @@ public final class FSAMorphCoder {
 	        final byte[] wordLemma, final byte[] wordTag) {
 		final int l1 = wordForm.length;
 		final int prefix = commonPrefix(wordForm, wordLemma);
-		final byte[] bytes = new byte[wordForm.length + wordLemma.length
-		        + wordTag.length + 4]; // 2 separators + LK characters
+		
+		// 4 = 2 separators + LK characters
+		int arrayLen = l1 + wordLemma.length + 4;
+		if (wordTag != null) {
+			arrayLen += wordTag.length;
+		}
+		final byte[] bytes = new byte[arrayLen]; 
 		int pos = 0;
 		pos += copyTo(bytes, pos, wordForm);
 		pos += copyTo(bytes, pos, SEPARATOR);
@@ -152,7 +163,9 @@ public final class FSAMorphCoder {
 			pos += copyTo(bytes, pos, substring(wordLemma, prefix));
 		}
 		pos += copyTo(bytes, pos, SEPARATOR);
-		pos += copyTo(bytes, pos, wordTag);
+		if (wordTag != null) {
+			pos += copyTo(bytes, pos, wordTag);
+		}
 		final byte[] finalArray = new byte[pos];
 		System.arraycopy(bytes, 0, finalArray, 0, pos);
 		return finalArray;
@@ -191,8 +204,13 @@ public final class FSAMorphCoder {
 		int prefix1 = 0;
 		final int prefix = commonPrefix(wordForm, wordLemma);
 		final int max = Math.min(l1, MAX_INFIX_LEN);
-		final byte[] bytes = new byte[wordForm.length + wordLemma.length
-		        + wordTag.length + 5]; // 2 separators + MLK characters
+
+		// 5 = 2 separators + MLK characters		
+		int arrayLen = l1 + wordLemma.length + 5;
+		if (wordTag != null) {
+			arrayLen += wordTag.length;
+		}
+		final byte[] bytes = new byte[arrayLen];
 		int pos = 0;
 		pos += copyTo(bytes, pos, wordForm);
 		pos += copyTo(bytes, pos, SEPARATOR);
@@ -275,7 +293,9 @@ public final class FSAMorphCoder {
 
 		}
 		pos += copyTo(bytes, pos, SEPARATOR);
-		pos += copyTo(bytes, pos, wordTag);
+		if (wordTag != null) {
+			pos += copyTo(bytes, pos, wordTag);
+		}
 		final byte[] finalArray = new byte[pos];
 		System.arraycopy(bytes, 0, finalArray, 0, pos);
 		return finalArray;
