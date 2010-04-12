@@ -1,9 +1,6 @@
 package morfologik.fsa.morph;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.*;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 
 /**
  * A class that converts tabular data to fsa morphological format. Three formats
@@ -13,20 +10,16 @@ import java.nio.CharBuffer;
  * <li>prefix</li>
  * <li>infix</li>
  * </ul>
- * 
- *
- * 
  */
 public final class FSAMorphCoder {
-
-	private static final byte SEPARATOR = (byte)'+';
+	private static final byte SEPARATOR = '+';
 	private static final int MAX_PREFIX_LEN = 3;
 	private static final int MAX_INFIX_LEN = 3;
 	private static final String UTF8 = "UTF-8";	
 
 	private FSAMorphCoder() {
 		// only static stuff
-	};
+	}
 
 	public static int commonPrefix(final byte[] s1, final byte[] s2) {
 		final int maxLen = Math.min(s1.length, s2.length);
@@ -38,7 +31,7 @@ public final class FSAMorphCoder {
 		return maxLen;
 	}
 
-	private static byte[] substring(final byte[] bytes, final int start) {
+	private static byte[] subsequence(final byte[] bytes, final int start) {
 		final byte[] newArray = new byte[bytes.length - start];
 		System.arraycopy(bytes, start, newArray, 0, bytes.length - start);
 		return newArray;
@@ -87,7 +80,7 @@ public final class FSAMorphCoder {
 			pos += copyTo(bytes, pos, wordLemma);
 		} else {
 			pos += copyTo(bytes, pos, (byte) ((l1 - prefix + 65) & 0xff));
-			pos += copyTo(bytes, pos, substring(wordLemma, prefix));
+			pos += copyTo(bytes, pos, subsequence(wordLemma, prefix));
 		}
 		pos += copyTo(bytes, pos, SEPARATOR);
 		if (wordTag != null) {
@@ -138,7 +131,7 @@ public final class FSAMorphCoder {
 			int prefix1 = 0;
 			final int max = Math.min(wordForm.length, MAX_PREFIX_LEN);
 			for (int i = 1; i <= max; i++) {
-				prefix1 = commonPrefix(substring(wordForm, i), wordLemma);
+				prefix1 = commonPrefix(subsequence(wordForm, i), wordLemma);
 				if (prefix1 > 2) {
 					prefixFound = i;
 					break;
@@ -152,12 +145,12 @@ public final class FSAMorphCoder {
 				pos += copyTo(bytes, pos, (byte) ((prefixFound + 65) & 0xff));
 				pos += copyTo(bytes, pos,
 				        (byte) ((l1 - prefixFound - prefix1 + 65) & 0xff));
-				pos += copyTo(bytes, pos, substring(wordLemma, prefix1));
+				pos += copyTo(bytes, pos, subsequence(wordLemma, prefix1));
 			}
 		} else {
 			pos += copyTo(bytes, pos, (byte) 'A');
 			pos += copyTo(bytes, pos, (byte) ((l1 - prefix + 65) & 0xff));
-			pos += copyTo(bytes, pos, substring(wordLemma, prefix));
+			pos += copyTo(bytes, pos, subsequence(wordLemma, prefix));
 		}
 		pos += copyTo(bytes, pos, SEPARATOR);
 		if (wordTag != null) {
@@ -170,8 +163,6 @@ public final class FSAMorphCoder {
 
 	/**
 	 * This method converts wordform, wordLemma and the tag to the form:
-	 * <p>
-	 * 
 	 * <pre>
 	 * inflected_form + MLKending + tags
 	 * </pre>
@@ -214,7 +205,7 @@ public final class FSAMorphCoder {
 		if (prefix == 0) {
 			// we may have a prefix
 			for (int i = 1; i <= max; i++) {
-				prefix1 = commonPrefix(substring(wordForm, i), wordLemma);
+				prefix1 = commonPrefix(subsequence(wordForm, i), wordLemma);
 				if (prefix1 > 2) {
 					prefixFound = i;
 					break;
@@ -230,12 +221,12 @@ public final class FSAMorphCoder {
 				pos += copyTo(bytes, pos, (byte) ((prefixFound + 65) & 0xff));
 				pos += copyTo(bytes, pos,
 				        (byte) ((l1 - prefixFound - prefix1 + 65) & 0xff));
-				pos += copyTo(bytes, pos, substring(wordLemma, prefix1));
+				pos += copyTo(bytes, pos, subsequence(wordLemma, prefix1));
 			}
 		} else { // prefix found but we have to check the infix
 
 			for (int i = 1; i <= max; i++) {
-				prefix1 = commonPrefix(substring(wordForm, i), wordLemma);
+				prefix1 = commonPrefix(subsequence(wordForm, i), wordLemma);
 				if (prefix1 > 2) {
 					prefixFound = i;
 					break;
@@ -245,8 +236,8 @@ public final class FSAMorphCoder {
 			int infixFound = 0;
 			final int max2 = Math.min(l1 - prefix, MAX_INFIX_LEN);
 			for (int i = 1; i <= max2; i++) {
-				prefix2 = commonPrefix(substring(wordForm, prefix + i),
-				        substring(wordLemma, prefix));
+				prefix2 = commonPrefix(subsequence(wordForm, prefix + i),
+				        subsequence(wordLemma, prefix));
 				if (prefix2 > 2) {
 					infixFound = i;
 					break;
@@ -260,14 +251,14 @@ public final class FSAMorphCoder {
 					        (byte) ((prefixFound + 65) & 0xff));
 					pos += copyTo(bytes, pos, (byte) ((l1 - prefixFound
 					        - prefix1 + 65) & 0xff));
-					pos += copyTo(bytes, pos, substring(wordLemma, prefix1));
+					pos += copyTo(bytes, pos, subsequence(wordLemma, prefix1));
 				} else {
 					// infixFound == 0 && prefixFound == 0
 					pos += copyTo(bytes, pos, (byte) 'A');
 					pos += copyTo(bytes, pos, (byte) 'A');
 					pos += copyTo(bytes, pos,
 					        (byte) ((l1 - prefix + 65) & 0xff));
-					pos += copyTo(bytes, pos, substring(wordLemma, prefix));
+					pos += copyTo(bytes, pos, subsequence(wordLemma, prefix));
 				}
 			} else if (infixFound > 0 && prefix2 > 0) {
 				// we have an infix, , and if there seems to be a prefix,
@@ -277,7 +268,7 @@ public final class FSAMorphCoder {
 				pos += copyTo(bytes, pos, (byte) ((l1 - prefix - prefix2
 				        - infixFound + 65) & 0xff));
 				pos += copyTo(bytes, pos,
-				        substring(wordLemma, prefix + prefix2));
+				        subsequence(wordLemma, prefix + prefix2));
 			} else {
 				// we have an infix, and if there seems to be a prefix,
 				// the infix is longer
@@ -285,7 +276,7 @@ public final class FSAMorphCoder {
 				pos += copyTo(bytes, pos, (byte) 'A');
 				pos += copyTo(bytes, pos, (byte) 'A');
 				pos += copyTo(bytes, pos, (byte) ((l1 - prefix + 65) & 0xff));
-				pos += copyTo(bytes, pos, substring(wordLemma, prefix));
+				pos += copyTo(bytes, pos, subsequence(wordLemma, prefix));
 			}
 
 		}
@@ -306,19 +297,15 @@ public final class FSAMorphCoder {
 	 * @return Java String. If decoding is unsuccessful, the string is empty.
 	 */
 	protected static String asString(final byte[] str, final String encoding) {
-		final CharsetDecoder decoder = Charset.forName(encoding).newDecoder();
 		try {
-			final ByteBuffer bbuf = ByteBuffer.wrap(str);
-			final CharBuffer cbuf = decoder.decode(bbuf);
-			return cbuf.toString();
-		} catch (CharacterCodingException e) {
-
-		}
-		return "";
+	        return new String(str, encoding);
+        } catch (UnsupportedEncodingException e) {
+	        return "";
+        }
 	}
 
 	/**
-	 * A UTF-8 variant of {@link #standardEncode(wordForm, wordLemma, tag)} This
+	 * A UTF-8 variant of {@link #standardEncode(byte[], byte[], byte[])} This
 	 * method converts the wordForm, wordLemma and tag to the form:
 	 * 
 	 * <pre>
@@ -330,7 +317,6 @@ public final class FSAMorphCoder {
 	 * produce the lexeme by concatenating the stripped string with the ending.
 	 * 
 	 * @throws UnsupportedEncodingException
-	 * 
 	 */
 	public static String standardEncodeUTF8(final String wordForm,
 	        final String wordLemma, final String wordTag)
@@ -340,10 +326,8 @@ public final class FSAMorphCoder {
 	}
 
 	/**
-	 * A UTF-8 variant of {@link #prefixEncode(wordForm, wordLemma, tag)} This
+	 * A UTF-8 variant of {@link #prefixEncode(byte[], byte[], byte[])} This
 	 * method converts wordform, wordLemma and the tag to the form:
-	 * <p>
-	 * 
 	 * <pre>
 	 * inflected_form + LKending + tags
 	 * </pre>
@@ -375,8 +359,6 @@ public final class FSAMorphCoder {
 	 * A UTF-8 variant of {@link #infixEncode(byte[], byte[], byte[])}.
 	 * 
 	 * This method converts wordform, wordLemma and the tag to the form:
-	 * <p>
-	 * 
 	 * <pre>
 	 * inflected_form + MLKending + tags
 	 * </pre>
