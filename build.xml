@@ -111,7 +111,7 @@
 
 
 
-	<target name="jar" depends="clean, compile">
+	<target name="jar" depends="clean, compile, licenses">
 		<mkdir dir="${tmp.dir}/bin" />
 
 		<property name="main.class" value="morfologik.tools.Launcher" />
@@ -125,7 +125,7 @@
 
 		<jar jarfile="${jarfile}">
 			<fileset dir="${build.dir}" />
-			<zipfileset file="LICENSE" fullpath="META-INF/Morfologik.LICENSE" />
+			<zipfileset file="${tmp.dir}/licenses/morfologik-stemming.LICENSE" fullpath="META-INF/Morfologik.LICENSE" />
 			<manifest>
 				<attribute name="Main-Class" value="${main.class}" />
 				<attribute name="Class-Path" value="${manifest.classpath}" />
@@ -136,7 +136,7 @@
 			<fileset dir="${build.dir}">
 				<exclude name="morfologik/dictionaries/**" />
 			</fileset>
-			<zipfileset file="LICENSE" fullpath="META-INF/Morfologik.LICENSE" />
+			<zipfileset file="${tmp.dir}/licenses/morfologik-stemming-nodict.LICENSE" fullpath="META-INF/Morfologik.LICENSE" />
 			<manifest>
 				<attribute name="Main-Class" value="${main.class}" />
 				<attribute name="Class-Path" value="${manifest.classpath}" />
