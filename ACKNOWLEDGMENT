@@ -1,3 +1,5 @@
 Polish stemming data comes from Polish ispell/myspell dictionary hosted at 
-http://sjp.pl/ and licensed under any of the following licenses (pick the 
-one suitable for you): GPL, LGPL, MPL and Creative Commons ShareAlike licenses. 
+http://sjp.pl/. It was corrected and enriched with part-of-speech tags in 
+Morfologik project. The resulting data set is licensed licenced on the terms 
+of LGPL and Creative Commons ShareAlike (pick the suitable license). 
+See http://morfologik.blogspot.com

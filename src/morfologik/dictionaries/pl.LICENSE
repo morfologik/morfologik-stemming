@@ -1,3 +1,8 @@
-Polish dictionary is licensed under any of the following licenses (pick the one suitable
-for you): GPL, LGPL, MPL and Creative Commons ShareAlike licenses. 
-Details: http://www.sjp.pl/slownik/en/
+LICENCE
+
+The dictionary comes from Morfologik project. Morfologik uses data from 
+Polish ispell/myspell dictionary hosted at http://www.sjp.pl/slownik/en/ and 
+is licenced on the terms of (inter alia) LGPL and Creative Commons 
+ShareAlike. The part-of-speech tags were added in Morfologik project and
+are not found in the data from sjp.pl. The tagset is similar to IPI PAN
+tagset.
