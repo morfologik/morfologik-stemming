@@ -23,6 +23,10 @@ final class SharedOptions {
 	        "Dump only raw FSA data.").withLongOpt("raw-data")
 	        .isRequired(false).create("r");
 
+	public final static Option dot = OptionBuilder.withDescription(
+	        "Dump the automaton as graphviz DOT file.").withLongOpt("dot")
+	        .isRequired(false).create();
+
 	public final static Option inputEncodingOption = OptionBuilder.hasArg()
 	        .withArgName("codepage").withDescription("Input stream encoding.")
 	        .withLongOpt("input-encoding").isRequired(false).create("ie");

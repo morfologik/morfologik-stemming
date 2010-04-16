@@ -47,7 +47,8 @@
 
 	<target name="compile" depends="init">
 		<javac classpath="${classpath}" destdir="${build.dir}" encoding="UTF-8" 
-				source="1.5" target="1.5" includeantruntime="no">
+				source="1.5" target="1.5" includeantruntime="no"
+		        debug="true">
 			<classpath refid="compile.classpath" />
 			<include name="**/*.java" />
 			<src location="src" />

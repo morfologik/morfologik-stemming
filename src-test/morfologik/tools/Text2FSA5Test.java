@@ -27,7 +27,7 @@ public class Text2FSA5Test {
 		w.println("ab");
 		w.close();
 		
-		Text2FSA5.main(new String [] {
+		FSABuild.main(new String [] {
 				"--input", input.getAbsolutePath(),
 				"--output", output.getAbsolutePath()
 		});

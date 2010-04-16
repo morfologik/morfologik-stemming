@@ -18,11 +18,11 @@ import org.apache.commons.cli.Options;
  * dictionary. It can dump dictionaries in the raw form (as fed to the
  * <code>fsa_build</code> program) or decoding compressed stem forms.
  */
-public final class DumpTool extends Tool {
+public final class FSADump extends Tool {
 	/**
 	 * Writer used to print messages and dictionary dump.
 	 */
-	private OutputStream writer;
+	private OutputStream os;
 
 	/**
 	 * Print raw data only, no headers.
@@ -30,9 +30,14 @@ public final class DumpTool extends Tool {
 	private boolean dataOnly;
 
 	/**
-	 * Decode encoded forms if present in the dictionary.
+	 * Decode from prefix/infix/suffix encodings. 
 	 */
 	private boolean decode;
+
+	/**
+	 * Dump graphviz DOT file instead of automaton sequences.
+	 */
+	private boolean dot;
 
 	/**
 	 * Command line entry point after parsing arguments.
@@ -44,16 +49,17 @@ public final class DumpTool extends Tool {
 
 		dataOnly = line.hasOption(SharedOptions.dataOnly.getOpt());
 		decode = line.hasOption(SharedOptions.decode.getOpt());
+		dot = line.hasOption(SharedOptions.dot.getLongOpt());
 
 		FileUtils.assertExists(dictionaryFile, true, false);
 
-		dump(dictionaryFile, dataOnly);
+		dump(dictionaryFile);
 	}
 
 	/**
 	 * Dumps the content of a dictionary to a file.
 	 */
-	private void dump(File dictionaryFile, boolean dataOnly)
+	private void dump(File dictionaryFile)
 	        throws UnsupportedEncodingException, IOException {
 		final long start = System.currentTimeMillis();
 
@@ -66,7 +72,7 @@ public final class DumpTool extends Tool {
 			return;
 		}
 
-		this.writer = new BufferedOutputStream(System.out, 1024 * 32);
+		this.os = new BufferedOutputStream(System.out, 1024 * 32);
 
 		if (hasMetadata(dictionaryFile)) {
 			dictionary = Dictionary.read(dictionaryFile);
@@ -151,7 +157,7 @@ public final class DumpTool extends Tool {
 
 			final DictionaryLookup dl = new DictionaryLookup(dictionary);
 			final StringBuilder builder = new StringBuilder();
-			final OutputStreamWriter osw = new OutputStreamWriter(writer,
+			final OutputStreamWriter osw = new OutputStreamWriter(os,
 			        dictionary.metadata.encoding);
 
 			CharSequence t;
@@ -177,13 +183,19 @@ public final class DumpTool extends Tool {
 			}
 			osw.flush();
 		} else {
-			printExtra("FSA data (raw bytes in the encoding above)");
-			printExtra("------------------------------------------");
-
-			for (ByteBuffer bb : fsa) {
-				writer.write(bb.array(), 0, bb.remaining());
-				writer.write(0x0a);
-				sequences++;
+			if (dot) {
+				Writer w = new OutputStreamWriter(os);
+				FSAUtils.toDot(w, fsa, fsa.getRootNode());
+				w.flush();
+			} else {
+    			printExtra("FSA data (raw bytes in the encoding above)");
+    			printExtra("------------------------------------------");
+    
+    			for (ByteBuffer bb : fsa) {
+    				os.write(bb.array(), 0, bb.remaining());
+    				os.write(0x0a);
+    				sequences++;
+    			}
 			}
 		}
 
@@ -197,25 +209,8 @@ public final class DumpTool extends Tool {
 		                millis / 1000.0, sequences,
 		                (int) (sequences / (millis / 1000.0))));
 
-		writer.flush();
+		os.flush();
 	}
-
-	/**
-	 * Convert a byte to a character using the given encoding.
-	 */
-	private char byteAsChar(byte v, String encoding) {
-		try {
-			final String chr = new String(new byte[] { v }, encoding);
-			if (chr.length() != 1) {
-				throw new RuntimeException(
-				        "Unexpected annotation character length (should be 1): "
-				                + chr.length());
-			}
-			return chr.charAt(0);
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
-    }
 
 	/**
 	 * Print {@link CFSA}-specific stuff.
@@ -265,8 +260,8 @@ public final class DumpTool extends Tool {
 	private void printExtra(String msg) throws IOException {
 		if (dataOnly)
 			return;
-		writer.write(msg.getBytes());
-		writer.write(0x0a);
+		os.write(msg.getBytes());
+		os.write(0x0a);
 	}
 
 	/*
@@ -306,13 +301,14 @@ public final class DumpTool extends Tool {
 		options.addOption(SharedOptions.fsaDictionaryFileOption);
 		options.addOption(SharedOptions.dataOnly);
 		options.addOption(SharedOptions.decode);
+		options.addOption(SharedOptions.dot);
 	}
 
 	/**
 	 * Command line entry point.
 	 */
 	public static void main(String[] args) throws Exception {
-		final DumpTool fsaDump = new DumpTool();
+		final FSADump fsaDump = new FSADump();
 		fsaDump.go(args);
 	}
 }

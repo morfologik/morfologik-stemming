@@ -13,7 +13,7 @@ import org.apache.commons.cli.*;
 /**
  * Convert from plain text input to {@link FSA5}.
  */
-public final class Text2FSA5 extends Tool {
+public final class FSABuild extends Tool {
 	/**
 	 * Command line entry point after parsing arguments.
 	 */
@@ -151,7 +151,7 @@ public final class Text2FSA5 extends Tool {
 	 * Command line entry point.
 	 */
 	public static void main(String[] args) throws Exception {
-		final Text2FSA5 tool = new Text2FSA5();
+		final FSABuild tool = new FSABuild();
 		tool.go(args);
 	}
 }
