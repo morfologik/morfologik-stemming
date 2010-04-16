@@ -1,11 +1,14 @@
-1.4.0 (trunk)
-		  Added FSA5 construction in Java (on byte sequences). Added preliminary support for
+
+1.4.1 (trunk)
+
+1.4.0
+          Added FSA5 construction in Java (on byte sequences). Added preliminary support for
           character sequences. Added a command line tool for FSA5 construction from unsorted data.
           
           Added a tool to encode tab-delimited dictionaries to the format accepted by
           fsa_build and FSA5 construction tool.
-          
-          Added a new version of Morfologik dictionary for Polish.   
+
+          Added a new version of Morfologik dictionary for Polish (in CFSA format).
 
 1.3.0      
           Added runtime checking for tools availability so that unavailable
