@@ -26,9 +26,26 @@ public class FSAMorphCoderTest {
 		assertEquals("abc+Dxyz+tag", FSAMorphCoder.standardEncodeUTF8("abc",
 		        "xyz", "tag"));
 		assertEquals("abc+Bć+tag", FSAMorphCoder.standardEncodeUTF8("abc",
-		        "abć", "tag"));
+		        "abć", "tag"));	
 	}
-
+	
+	@Test
+	public void testSeparatorChange() throws UnsupportedEncodingException {
+	assertEquals("abc+Ad+tag", FSAMorphCoder.asString(FSAMorphCoder
+		        .standardEncode("abc".getBytes("UTF-8"), "abcd"
+		                .getBytes("UTF-8"), "tag".getBytes("UTF-8")), "UTF-8"));
+	FSAMorphCoder.setSeparator((byte)'_');
+	assertEquals("abc_Ad_tag", FSAMorphCoder.asString(FSAMorphCoder
+	        .standardEncode("abc".getBytes("UTF-8"), "abcd"
+	                .getBytes("UTF-8"), "tag".getBytes("UTF-8")), "UTF-8"));
+	FSAMorphCoder.setSeparator((byte)'\t');
+	assertEquals("abc\tAd\ttag", FSAMorphCoder.asString(FSAMorphCoder
+	        .standardEncode("abc".getBytes("UTF-8"), "abcd"
+	                .getBytes("UTF-8"), "tag".getBytes("UTF-8")), "UTF-8"));
+	//cleanup
+	FSAMorphCoder.setSeparator((byte)'+');
+	}
+	
 	@Test
 	public void testPrefixEncode() throws UnsupportedEncodingException {
 		assertEquals("abc+AAd+tag", FSAMorphCoder.asString(FSAMorphCoder

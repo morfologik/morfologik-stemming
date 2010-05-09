@@ -12,7 +12,7 @@ import java.io.UnsupportedEncodingException;
  * </ul>
  */
 public final class FSAMorphCoder {
-	private static final byte SEPARATOR = '+';
+	private static byte separator = '+';
 	private static final int MAX_PREFIX_LEN = 3;
 	private static final int MAX_INFIX_LEN = 3;
 	private static final String UTF8 = "UTF-8";	
@@ -21,6 +21,10 @@ public final class FSAMorphCoder {
 		// only static stuff
 	}
 
+	public static void setSeparator(byte newSeparator) {
+		separator = newSeparator;
+	}
+	
 	public static int commonPrefix(final byte[] s1, final byte[] s2) {
 		final int maxLen = Math.min(s1.length, s2.length);
 		for (int i = 0; i < maxLen; i++) {
@@ -74,7 +78,7 @@ public final class FSAMorphCoder {
 		}		
 		final byte[] bytes = new byte[arrayLen]; 
 		pos += copyTo(bytes, pos, wordForm);
-		pos += copyTo(bytes, pos, SEPARATOR);
+		pos += copyTo(bytes, pos, separator);
 		if (prefix == 0) {
 			pos += copyTo(bytes, pos, (byte) ((l1 + 65) & 0xff));
 			pos += copyTo(bytes, pos, wordLemma);
@@ -82,7 +86,7 @@ public final class FSAMorphCoder {
 			pos += copyTo(bytes, pos, (byte) ((l1 - prefix + 65) & 0xff));
 			pos += copyTo(bytes, pos, subsequence(wordLemma, prefix));
 		}
-		pos += copyTo(bytes, pos, SEPARATOR);
+		pos += copyTo(bytes, pos, separator);
 		if (wordTag != null) {
 			pos += copyTo(bytes, pos, wordTag);
 		}
@@ -125,7 +129,7 @@ public final class FSAMorphCoder {
 		final byte[] bytes = new byte[arrayLen]; 
 		int pos = 0;
 		pos += copyTo(bytes, pos, wordForm);
-		pos += copyTo(bytes, pos, SEPARATOR);
+		pos += copyTo(bytes, pos, separator);
 		if (prefix == 0) {
 			int prefixFound = 0;
 			int prefix1 = 0;
@@ -152,7 +156,7 @@ public final class FSAMorphCoder {
 			pos += copyTo(bytes, pos, (byte) ((l1 - prefix + 65) & 0xff));
 			pos += copyTo(bytes, pos, subsequence(wordLemma, prefix));
 		}
-		pos += copyTo(bytes, pos, SEPARATOR);
+		pos += copyTo(bytes, pos, separator);
 		if (wordTag != null) {
 			pos += copyTo(bytes, pos, wordTag);
 		}
@@ -201,7 +205,7 @@ public final class FSAMorphCoder {
 		final byte[] bytes = new byte[arrayLen];
 		int pos = 0;
 		pos += copyTo(bytes, pos, wordForm);
-		pos += copyTo(bytes, pos, SEPARATOR);
+		pos += copyTo(bytes, pos, separator);
 		if (prefix == 0) {
 			// we may have a prefix
 			for (int i = 1; i <= max; i++) {
@@ -280,7 +284,7 @@ public final class FSAMorphCoder {
 			}
 
 		}
-		pos += copyTo(bytes, pos, SEPARATOR);
+		pos += copyTo(bytes, pos, separator);
 		if (wordTag != null) {
 			pos += copyTo(bytes, pos, wordTag);
 		}

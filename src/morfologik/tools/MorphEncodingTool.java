@@ -30,7 +30,17 @@ class MorphEncodingTool extends Tool {
 		if (!infixes) {
 			prefixes = line.hasOption(SharedOptions.prefixEncoding.getOpt());
 		}
-						
+		
+		if (line.hasOption(SharedOptions.fieldSeparator.getOpt())) {
+			String sep = line.getOptionValue
+				(SharedOptions.fieldSeparator.getOpt());
+			char separator = '+';
+			if (sep.length() == 1) {
+				separator = sep.charAt(0);
+			}
+			FSAMorphCoder.setSeparator((byte) separator);
+		}
+		
 		// Determine input and output streams.
 		final DataInputStream input = initializeInput(line);
 		final DataOutputStream output = initializeOutput(line);
@@ -136,6 +146,7 @@ class MorphEncodingTool extends Tool {
 		options.addOption(SharedOptions.prefixEncoding);
 		options.addOption(SharedOptions.infixEncoding);		
 		options.addOption(SharedOptions.noWarnIfTwoFields);
+		options.addOption(SharedOptions.fieldSeparator);
 	}
 
 	/**
