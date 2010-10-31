@@ -77,7 +77,7 @@ public final class FSABuild extends Tool {
 				processLine(input, buffer, pos);
 				pos = 0;
 				if ((line++ % 10000) == 0) {
-					log("Lines read: " + line);
+					log("Lines read: " + (line - 1));
 				}
 			} else {
 				if (pos >= buffer.length) {
