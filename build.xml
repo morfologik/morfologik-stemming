@@ -85,7 +85,7 @@
 
 	<target name="test" depends="compile, compile.test">
 		<mkdir dir="${tmp.dir}/tests" />
-		<junit printsummary="yes" haltonfailure="yes">
+		<junit printsummary="yes" haltonfailure="yes" maxmemory="256m" forkmode="once" fork="true">
 			<classpath refid="compile.classpath" />
 			<classpath location="${build.dir}" />
 			<classpath location="${build.test.dir}" />
