@@ -25,12 +25,12 @@ public final class FSA5Serializer {
 	/**
 	 * @see FSA5#filler
 	 */
-	public byte fillerByte = '|';
+	public byte fillerByte = '_';
 
 	/**
 	 * @see FSA5#annotation
 	 */
-	public byte annotationByte = '_';
+	public byte annotationByte = '+';
 
 	/**
 	 * Node data length. Must be zero (node data not supported).
