@@ -1,10 +1,18 @@
 
 1.4.1 (trunk)
+          Added options to define custom FILLER and ANNOT_SEPARATOR bytes in the fsa_build
+          tool.
+
+          Corrected an inconsistency with the C fsa package -- FILLER and ANNOT_SEPARATOR
+          characters are now identical with the C version.
+          
+          Cleanups to the tools' launcher -- will complain about missing JARs, if any.
 
 1.4.0
           Added FSA5 construction in Java (on byte sequences). Added preliminary support for
-          character sequences. Added a command line tool for FSA5 construction from unsorted data.
-          
+          character sequences. Added a command line tool for FSA5 
+          construction from unsorted data (sorting is done in-memory).
+
           Added a tool to encode tab-delimited dictionaries to the format accepted by
           fsa_build and FSA5 construction tool.
 
