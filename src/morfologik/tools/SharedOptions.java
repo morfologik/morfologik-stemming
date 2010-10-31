@@ -46,7 +46,17 @@ final class SharedOptions {
 	                "Output file. If missing, standard output is used.")
 	        .withLongOpt("output").withType(File.class).isRequired(false)
 	        .create("o");
-	
+
+	public final static Option fillerCharacterOption = OptionBuilder.hasArg()
+    	.withArgName("char").withDescription("Custom filler character")
+    	.isRequired(false).withLongOpt("filler-char")
+    		.create("filler");
+
+	public final static Option annotationSeparatorCharacterOption = OptionBuilder.hasArg()
+		.withArgName("char").withDescription("Custom annotation separator character")
+		.isRequired(false).withLongOpt("annotation-char")
+		.create("annotation");
+
 	public final static Option standardEncoding = OptionBuilder
 	        .withDescription("Encode suffix forms in a standard way")
 	        .withLongOpt("suffix").isRequired(false).create("suf");

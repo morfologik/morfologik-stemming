@@ -42,6 +42,7 @@ public final class FSABuild extends Tool {
 			// Save the result.
 			log("Saving FSA...");
 			FSA5Serializer serializer = new FSA5Serializer();
+			initializeSerializer(serializer, line);
 			serializer.serialize(build, initializeOutput(line)).close();
 
 			log("Done in: " + String.format("%.2f", 
@@ -50,6 +51,38 @@ public final class FSABuild extends Tool {
 			log("Out of memory. Pass -Xmx1024m argument (or more) to java.");
 		}
 	}
+
+	/**
+	 * Initialize automaton serializer.
+	 */
+	private void initializeSerializer(FSA5Serializer serializer,
+            CommandLine line) {
+		String opt = SharedOptions.fillerCharacterOption.getOpt();
+		if (line.hasOption(opt)) {
+			String chr = line.getOptionValue(opt);
+			checkSingleByte(chr);
+			serializer.fillerByte = chr.getBytes()[0];
+		}
+		
+		opt = SharedOptions.annotationSeparatorCharacterOption.getOpt();
+		if (line.hasOption(opt)) {
+			String chr = line.getOptionValue(opt);
+			checkSingleByte(chr);
+			serializer.annotationByte = chr.getBytes()[0];
+		}
+    }
+
+	/**
+	 * Check if the argument is a single byte after conversion using platform-default
+	 * encoding. 
+	 */
+	private void checkSingleByte(String chr) {
+		if (chr.getBytes().length == 1)
+			return;
+
+		throw new IllegalArgumentException("Filler and annotation characters must be single" +
+				"-byte values, " + chr + " has " + chr.getBytes().length + " bytes."); 
+    }
 
 	/**
 	 * Log progress to the console.
@@ -110,6 +143,9 @@ public final class FSABuild extends Tool {
 	protected void initializeOptions(Options options) {
 		options.addOption(SharedOptions.inputFileOption);
 		options.addOption(SharedOptions.outputFileOption);
+		
+		options.addOption(SharedOptions.fillerCharacterOption);
+		options.addOption(SharedOptions.annotationSeparatorCharacterOption);
 	}
 
 	/**
