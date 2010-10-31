@@ -21,7 +21,7 @@ public class InflectionFramesTool {
 
 	/* */
 	@Test
-	@SuppressWarnings( { "unused", "unchecked" })
+	@SuppressWarnings( { "unused" })
 	public void inflectionFrames() throws IOException {
 		final Dictionary pl = Dictionary.getForLanguage("pl");
 		final DictionaryLookup dict = new DictionaryLookup(pl);
@@ -30,7 +30,8 @@ public class InflectionFramesTool {
 		        .newDecoder().onMalformedInput(CodingErrorAction.REPORT)
 		        .onUnmappableCharacter(CodingErrorAction.REPORT);
 
-		final HashMap<String, ArrayList<String>> forms = new HashMap();
+		final HashMap<String, ArrayList<String>> forms = 
+			new HashMap<String, ArrayList<String>>();
 
 		ByteBuffer stemBuffer = ByteBuffer.allocate(0);
 		ByteBuffer inflBuffer = ByteBuffer.allocate(0);
@@ -73,7 +74,8 @@ public class InflectionFramesTool {
 
 		// Sort the forms so that we get a unique key. Then iteratively add them
 		// to another hash (by form this time).
-		final HashMap<String, ArrayList<String>> frames = new HashMap();
+		final HashMap<String, ArrayList<String>> frames = 
+			new HashMap<String, ArrayList<String>>();
 
 		StringBuilder key = new StringBuilder();
 		for (Map.Entry<String, ArrayList<String>> e : forms.entrySet()) {
@@ -94,7 +96,9 @@ public class InflectionFramesTool {
 		}
 
 		// Print inflection frames.
-		ArrayList<Map.Entry<String, ArrayList<String>>> entries = new ArrayList();
+		ArrayList<Map.Entry<String, ArrayList<String>>> entries = 
+			new ArrayList<Map.Entry<String, ArrayList<String>>>();
+
 		entries.addAll(frames.entrySet());
 		Collections.sort(entries,
 		        new Comparator<Map.Entry<String, ArrayList<String>>>() {

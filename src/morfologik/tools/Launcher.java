@@ -1,8 +1,15 @@
 package morfologik.tools;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.TreeMap;
+import java.util.jar.Manifest;
+
+import morfologik.util.FileUtils;
 
 /**
  * A launcher for other command-line tools.
@@ -31,41 +38,17 @@ public final class Launcher {
 	 * Known tools.
 	 */
 	static TreeMap<String, ToolInfo> tools;
-	static {
-		tools = new TreeMap<String, ToolInfo>();
-		tools.put("fsa_build", new ToolInfo(FSABuild.class,
-		        "Create an FSA5 automaton from plain text files."));
-		tools.put("fsa_dump", new ToolInfo(FSADump.class,
-		        "Dump an FSA dictionary."));
-
-		tools.put("fsa2cfsa", new ToolInfo(FSA2CFSA.class,
-		        "Convert FSA5 to CFSA."));
-		tools.put("tab2morph", new ToolInfo(MorphEncodingTool.class,
-		        "Convert tabbed dictionary to fsa encoding format."));
-
-		tools.put("plstem", new ToolInfo(PolishStemmingTool.class,
-		        "Apply Polish dictionary stemming to the input."));
-
-		// Prune unavailable tools.
-		for (Iterator<ToolInfo> i = tools.values().iterator(); i.hasNext();) {
-			ToolInfo ti = i.next();
-			boolean available = true;
-			try {
-				available = ti.clazz.newInstance().isAvailable();
-			} catch (Throwable e) {
-				available = false;
-			}
-
-			if (!available) {
-				i.remove();
-			}
-		}
-	}
 
 	/**
 	 * Command line entry point.
 	 */
 	public static void main(String[] args) throws Exception {
+		// If so, tools are unavailable and a classpath error has been logged.
+		if (!initTools())
+		{
+			return;
+		}
+		
 		if (args.length == 0) {
 			System.out
 			        .println("Provide tool name and its command-line options. "
@@ -89,4 +72,91 @@ public final class Launcher {
 			toolInfo.invoke(subArgs);
 		}
 	}
+
+	/**
+	 * Initialize and check tools' availability.
+	 */
+	private static boolean initTools() {
+		tools = new TreeMap<String, ToolInfo>();
+		tools.put("fsa_build", new ToolInfo(FSABuild.class,
+		        "Create an FSA5 automaton from plain text files."));
+		tools.put("fsa_dump", new ToolInfo(FSADump.class,
+		        "Dump an FSA dictionary."));
+
+		tools.put("fsa2cfsa", new ToolInfo(FSA2CFSA.class,
+		        "Convert FSA5 to CFSA."));
+		tools.put("tab2morph", new ToolInfo(MorphEncodingTool.class,
+		        "Convert tabbed dictionary to fsa encoding format."));
+
+		tools.put("plstem", new ToolInfo(PolishStemmingTool.class,
+		        "Apply Polish dictionary stemming to the input."));
+
+		// Prune unavailable tools.
+		for (Iterator<ToolInfo> i = tools.values().iterator(); i.hasNext();) {
+			ToolInfo ti = i.next();
+			try {
+				ti.clazz.newInstance().isAvailable();
+			} catch (NoClassDefFoundError e) {
+				logJarWarning();
+				return false;
+			} catch (Throwable e) {
+				System.out.println("Tools could not be initialized because" +
+						" of an exception during initialization: "
+						+ e.getClass().getName() + ", " + e.getMessage());
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Log a warning about missing JAR dependencies.
+	 */
+	private static void logJarWarning() {
+		System.out.println("Tools are unavailable, at least one JAR dependency missing.");
+
+		try {
+			final Class<Launcher> clazz = Launcher.class;
+			final ClassLoader classLoader = clazz.getClassLoader();
+
+			final String clazzName = clazz.getName().replace('.', '/') + ".class";
+			// Figure out our own class path location.
+			final URL launcherLocation = classLoader.getResource(clazzName);
+			if (launcherLocation == null)
+				return;
+			
+			String launcherPrefix = launcherLocation.toString()
+				.replace(clazzName, "");
+
+			// Figure our our location's MANIFEST.MF (class loader may be hitting a few).
+			URL manifestResource = null;
+    		Enumeration<URL> manifests = classLoader.getResources("META-INF/MANIFEST.MF");
+    		while (manifests.hasMoreElements())
+    		{
+    			URL candidate = manifests.nextElement();
+    			if (candidate.toString().startsWith(launcherPrefix))
+    			{
+    				manifestResource = candidate;
+    				break;
+    			}
+    		}
+    		
+    		if (manifestResource == null)
+    			return;
+
+			InputStream stream = null;
+			try {
+				stream = manifestResource.openStream();
+				Manifest manifest = new Manifest(stream);
+				
+				System.out.println("Required JARs: "
+						+ manifest.getMainAttributes().getValue("Class-Path"));
+			} catch (IOException e) {
+				FileUtils.close(stream);
+			}
+		} catch (IOException e) {
+			// Ignore.
+		}
+    }
 }

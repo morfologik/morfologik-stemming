@@ -30,7 +30,6 @@
 		<tstamp />
 		<mkdir dir="${build.dir}" />
 		<mkdir dir="${build.test.dir}" />
-		<mkdir dir="${dist.dir}" />
 	</target>
 
 
@@ -38,9 +37,10 @@
 	<target name="clean">
 		<delete dir="${build.dir}" failonerror="false" />
 		<delete dir="${dist.dir}" failonerror="false" />
+		<delete dir="target" failonerror="false" />
 		<delete dir="${tmp.dir}" failonerror="false">
 		        <exclude name="eclipse/**" />
-		    </delete>
+        </delete>
 	</target>
 
 
@@ -161,6 +161,8 @@
 
 
 	<target name="dist" depends="clean, test, build, javadoc, licenses">
+	    <mkdir dir="${dist.dir}" />
+
 		<!-- Package source distribution -->
 		<fileset dir="." id="srcdistfiles">
 			<exclude name="tmp/**" />
