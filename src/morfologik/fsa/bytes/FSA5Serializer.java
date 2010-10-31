@@ -6,20 +6,27 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 
+import morfologik.fsa.FSA;
 import morfologik.fsa.FSA5;
 import morfologik.fsa.Visitor;
 
 /**
- * Serializes in-memory <code>byte</code>-labeled automata to FSA5 format. The
- * automaton after serialization may not be minimal because FSA5 keeps
- * acceptance (final) flag on transitions and {@link FSABuilder} keeps this
- * information inside {@link State}s. The difference in practice is about 10% of
- * the overall size; if super-compact format is required, use the original
- * <code>fsa</code> package. Having distinct acceptor {@link State}s is useful
- * in other applications.
+ * Serializes in-memory {@link State} graphs to a binary format in compatible
+ * with Jan Daciuk's <code>fsa</code>'s package <code>FSA5</code> format.
+ * 
+ * @see FSA5
+ * @see FSA#getInstance(java.io.InputStream)
  */
 public final class FSA5Serializer {
+	/**
+	 * Maximum number of bytes for a serialized arc. 
+	 */
 	private final static int MAX_ARC_SIZE = 1 + 5;
+	
+	/**
+	 * Number of bytes for the arc's flags header (arc representation
+	 * without the goto address).
+	 */
 	private final static int SIZEOF_FLAGS = 1;
 
 	/**
@@ -193,7 +200,7 @@ public final class FSA5Serializer {
 	/**
 	 * A terminal state does not have any outgoing transitions.
 	 */
-	private boolean isTerminal(State state) {
+	private static boolean isTerminal(State state) {
 		return state.hasChildren();
 	}
 }

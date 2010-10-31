@@ -44,7 +44,8 @@ public class FSABuilder {
 	private State root = new State();
 
 	/**
-	 * Previous sequence added to the automaton in {@link #add(byte[], int)}.
+	 * Previous sequence added to the automaton in {@link #add(byte[], int)}. Used
+	 * in assertions only.
 	 */
 	private byte [] previous;
 	private int previousLength;

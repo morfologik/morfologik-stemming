@@ -33,9 +33,10 @@ public final class State implements Traversable<State> {
 	State[] states = NO_STATES;
 
 	/**
-	 * Transitions leaving his node that mark the end of an input sequence. Storing final state
-	 * flag as part of the transition makes automata slightly more compact. 
-	 * Indexed identically to {@link #labels}.
+	 * Transitions leaving this node that mark the end of an input sequence.
+	 * Storing final state flag as part of the transition makes automata
+	 * slightly more compact. Indexed identically to {@link #labels}
+	 * and {@link #states}.
 	 */
 	boolean[] final_transitions = NO_FINALS;
 

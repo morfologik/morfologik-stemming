@@ -139,13 +139,11 @@ public final class FSA5 extends FSA {
 		 */
 		flags = EnumSet.of(FLEXIBLE, STOPBIT, NEXTBIT);
 		if ((header.gtl & 0xf0) != 0) {
-			this.nodeDataLength = (header.gtl >>> 4) & 0x0f;
-			this.gtl = header.gtl & 0x0f;
 			flags.add(NUMBERS);
-		} else {
-			this.nodeDataLength = 0;
-			this.gtl = header.gtl & 0x0f;
 		}
+
+		this.nodeDataLength = (header.gtl >>> 4) & 0x0f;
+		this.gtl = header.gtl & 0x0f;
 		
 		this.filler = header.filler;
 		this.annotation = header.annotation;
