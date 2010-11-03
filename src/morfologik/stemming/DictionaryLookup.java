@@ -148,12 +148,12 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 		final FSAMatch match = matcher.matchSequence(matchResult, byteBuffer
 		        .array(), 0, byteBuffer.remaining(), rootNode);
 
-		if (match.getMatchType() == FSAMatchType.PREMATURE_WORD_END_FOUND) {
+		if (match.getMatchType() == FSAMatchType.SEQUENCE_IS_A_PREFIX) {
 			/*
 			 * The entire sequence exists in the dictionary. A separator should
 			 * be the next symbol.
 			 */
-			final int arc = fsa.getArc(match.getMismatchNode(), separator);
+			final int arc = fsa.getArc(match.getNode(), separator);
 
 			/*
 			 * The situation when the arc points to a final node should NEVER

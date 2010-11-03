@@ -23,7 +23,7 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 	 * and that the content of the byte buffer starts at the array's index 0.
 	 */
 	public Iterator<ByteBuffer> iterator() {
-		return getTraversalHelper().getAllSubsequences(getRootNode());
+		return getTraversalHelper().getAllSubsequences(getRootNode()).iterator();
 	}
 
 	/**

@@ -7,8 +7,8 @@ package morfologik.fsa;
  */
 public final class FSAMatch {
 	private FSAMatchType matchType;
-	private int mismatchAtIndex;
-	private int mismatchAtNode;
+	private int index;
+	private int node;
 
 	/*
      * 
@@ -39,21 +39,21 @@ public final class FSAMatch {
 	}
 
 	/**
-	 * Return the index at which a mismatch occurred.
+	 * Return the index whose interpretation depends on the {@link #getMatchType()}.
 	 * 
 	 * @see FSAMatchType
 	 */
-	public int getMismatchIndex() {
-		return mismatchAtIndex;
+	public int getIndex() {
+		return index;
 	}
 
 	/**
-	 * Return the node at which mismatch occurred.
+	 * Return the node whose interpretation depends on the {@link #getMatchType()}.
 	 * 
 	 * @see FSAMatchType
 	 */
-	public int getMismatchNode() {
-		return mismatchAtNode;
+	public int getNode() {
+		return node;
 	}
 
 	/*
@@ -61,8 +61,8 @@ public final class FSAMatch {
      */
 	void reset(FSAMatchType type, int mismatchAtIndex, int mismatchAtNode) {
 		this.matchType = type;
-		this.mismatchAtIndex = mismatchAtIndex;
-		this.mismatchAtNode = mismatchAtNode;
+		this.index = mismatchAtIndex;
+		this.node = mismatchAtNode;
 	}
 
 	/*
@@ -70,7 +70,7 @@ public final class FSAMatch {
      */
 	void reset(FSAMatchType type) {
 		this.matchType = type;
-		this.mismatchAtIndex = 0;
-		this.mismatchAtNode = 0;
+		this.index = 0;
+		this.node = 0;
 	}
 }

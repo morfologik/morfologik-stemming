@@ -31,13 +31,17 @@ public final class FSATraversalHelper {
 	 * Returns an {@link Iterator} of all subsequences available from the given
 	 * node to all reachable final states.
 	 */
-	public Iterator<ByteBuffer> getAllSubsequences(final int node) {
+	public Iterable<ByteBuffer> getAllSubsequences(final int node) {
 		if (node == 0) {
-			return Collections.<ByteBuffer>emptyList().iterator();
+			return Collections.<ByteBuffer> emptyList();
 		}
 
 		// Create a custom iterator in the FSA
-		return new FSAFinalStatesIterator(fsa, node);
+		return new Iterable<ByteBuffer>() {
+			public Iterator<ByteBuffer> iterator() {
+			    return new FSAFinalStatesIterator(fsa, node);
+			}
+		};
 	}
 
 	/**
@@ -60,7 +64,7 @@ public final class FSATraversalHelper {
 	public FSAMatch matchSequence(FSAMatch result, byte[] sequence, int start,
 	        int length, int node) {
 		if (node == 0) {
-			result.reset(NO_MATCH);
+			result.reset(NO_MATCH, start, node);
 			return result;
 		}
 
@@ -68,36 +72,28 @@ public final class FSATraversalHelper {
 		for (int i = start; i < end; i++) {
 			final int arc = fsa.getArc(node, sequence[i]);
 			if (arc != 0) {
-				if (fsa.isArcFinal(arc)) {
-					if (i + 1 == end) {
-						// The word has been found (exact match).
-						result.reset(EXACT_MATCH);
-						return result;
-					} else {
-						/*
-						 * A prefix of the word has been found (there are still
-						 * characters in the word, but the path is over)
-						 */
-						result.reset(PREMATURE_PATH_END_FOUND, i + 1, 0);
-						return result;
-					}
-				} else {
-					// make a transition along the arc.
-					node = fsa.getEndNode(arc);
+				if (fsa.isArcFinal(arc) && i + 1 == end) {
+					/* The automaton has an exact match of the input sequence. */
+					result.reset(EXACT_MATCH);
+					return result;
 				}
+
+				if (fsa.isArcTerminal(arc)) {
+					/* The automaton contains a prefix of the input sequence. */
+					result.reset(AUTOMATON_HAS_PREFIX, i + 1, 0);
+					return result;
+				}
+
+				// Make a transition along the arc.
+				node = fsa.getEndNode(arc);
 			} else {
-				// The label was not found. i.e. there possibly are prefixes
-				// of the word in the dictionary, but an exact match does not
-				// exist.
-				// [an empty string is also considered a prefix!]
-				result.reset(PREFIX_FOUND, i, node);
+				result.reset(NO_MATCH, i, node);
 				return result;
 			}
 		}
 
-		// The word is a prefix of some other sequence(s) present in the
-		// dictionary.
-		result.reset(PREMATURE_WORD_END_FOUND, 0, node);
+		/* The sequence is a prefix of at least one sequence in the automaton. */
+		result.reset(SEQUENCE_IS_A_PREFIX, 0, node);
 		return result;
 	}
 
@@ -116,8 +112,7 @@ public final class FSATraversalHelper {
 	 * 
 	 * @see #matchSequence(byte [], int)
 	 */
-	public FSAMatch matchSequence(byte[] sequence, int start, int length,
-	        int node) {
+	public FSAMatch matchSequence(byte[] sequence, int start, int length, int node) {
 		return matchSequence(new FSAMatch(), sequence, start, length, node);
 	}
 

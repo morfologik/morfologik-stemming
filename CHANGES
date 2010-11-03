@@ -1,5 +1,15 @@
 
-1.4.1 (trunk)
+1.5.0 (trunk)
+
+          Incompatible API changes to FSATraversalHelper. Cleaned up match types, added
+          unit tests. 
+
+          ################################################################
+          Incompatible API changes have been made in release 1.5.0.
+          ################################################################
+
+1.4.1 (unreleased bugfix branch)
+
           Added options to define custom FILLER and ANNOT_SEPARATOR bytes in the fsa_build
           tool.
 

@@ -10,7 +10,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import morfologik.stemming.Dictionary;
@@ -106,12 +105,10 @@ public final class FSA5Test {
 
 	private static void verifyContent(List<String> expected, FSA fsa) throws IOException {
 		final FSATraversalHelper helper = new FSATraversalHelper(fsa);
-		final Iterator<ByteBuffer> i = helper.getAllSubsequences(fsa.getRootNode());
 		final ArrayList<String> actual = new ArrayList<String>();
 
 		int count = 0;
-		while (i.hasNext()) {
-			ByteBuffer bb = i.next();
+		for (ByteBuffer bb : helper.getAllSubsequences(fsa.getRootNode())) {
 			assertEquals(0, bb.arrayOffset());
 			assertEquals(0, bb.position());
 			actual.add(new String(bb.array(), 0, bb.remaining(), "UTF-8"));

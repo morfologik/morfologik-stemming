@@ -5,39 +5,30 @@ package morfologik.fsa;
  */
 public enum FSAMatchType {
 	/**
-	 * No match for the input sequence of symbols found in the automaton.
+	 * The automaton has no match for the input sequence.
 	 */
 	NO_MATCH,
 
 	/**
-	 * The input sequence ends exactly on the final node.
+	 * The automaton has exactly one match for the input sequence.
 	 */
 	EXACT_MATCH,
 
 	/**
-	 * A terminating node occurs in the dictionary before the end of the input
-	 * sequence. It effectively means a prefix of the input sequence is stored
-	 * in the dictionary (e.g., an empty sequence is a prefix of all other
-	 * sequences). The result {@link FSAMatch} will contain an index of the
-	 * first character not present in the dictionary.
+	 * The automaton contains a prefix of the input sequence. That is:
+	 * one of the input sequences used to build the automaton is a 
+	 * prefix of the input sequence that is shorter than the sequence. 
+	 * 
+	 * <p>{@link FSAMatch#getIndex()} will contain an index of the
+	 * first character of the input sequence not present in the 
+	 * dictionary.</p>
 	 */
-	PREMATURE_PATH_END_FOUND,
+	AUTOMATON_HAS_PREFIX,
 
 	/**
-	 * The sequence ends on an intermediate automaton node. The sequence is
-	 * therefore a prefix of at least one other sequence stored in the
-	 * dictionary. The result {@link FSAMatch} object will contain an index of
-	 * the first character in the input sequence not present in the dictionary
-	 * and a pointer to the {@link FSA}'s <code>node</code> where mismatch
-	 * occurred.
+	 * The sequence is a prefix of at least one sequence in the automaton. 
+	 * {@link FSAMatch#getNode()} returns the node from which all sequences
+	 * with the given prefix start in the automaton. 
 	 */
-	PREFIX_FOUND,
-
-	/**
-	 * The input sequence ends on an intermediate automaton node. This is a
-	 * special case of {@link #PREFIX_FOUND}. A node where the mismatch (missing
-	 * input sequence's characters) occurred is returned in the {@link FSAMatch}
-	 * .
-	 */
-	PREMATURE_WORD_END_FOUND;
+	SEQUENCE_IS_A_PREFIX;
 }
