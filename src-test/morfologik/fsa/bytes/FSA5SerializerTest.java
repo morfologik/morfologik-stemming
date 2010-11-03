@@ -206,8 +206,7 @@ public class FSA5SerializerTest {
 			        rl.remove(sequence));
 		}
 
-		// (2) No other sequence _other_ than the input is in the right
-		// language.
+		// (2) No other sequence _other_ than the input is in the right language.
 		Assert.assertEquals(0, rl.size());
 	}
 }

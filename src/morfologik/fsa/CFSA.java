@@ -259,6 +259,16 @@ public final class CFSA extends FSA {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+    public int getNodeNumber(int node) {
+    	assert getFlags().contains(FSAFlags.NUMBERS) 
+    		: "This FSA was not compiled with NUMBERS.";
+
+	    return FSA5.decodeFromBytes(arcs, node, nodeDataLength);
+    }
+
+	/**
      * {@inheritDoc} 
      */
 	public boolean isArcFinal(int arc) {

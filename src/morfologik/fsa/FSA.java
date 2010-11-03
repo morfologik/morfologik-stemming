@@ -73,6 +73,13 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 	public abstract byte getArcLabel(int arc);
 
 	/**
+	 * If the automaton was compiled with {@link FSAFlags#NUMBERS}, this method
+	 * retrieves the node's number, which (for perfect hashing) equals the count
+	 * of the set of right-language elements (final states) under <code>node</code>.
+	 */
+	public abstract int getNodeNumber(int node);
+
+	/**
 	 * Returns <code>true</code> if the destination node at the end of this
 	 * <code>arc</code> corresponds to an input sequence created when building
 	 * this automaton.

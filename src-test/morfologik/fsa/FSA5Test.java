@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 import morfologik.stemming.Dictionary;
+import morfologik.tools.FSADump;
 
 import org.junit.Test;
 
@@ -33,6 +34,7 @@ public final class FSA5Test {
 	@Test
 	public void testVersion5WithNumbers() throws IOException {
 		final FSA fsa = FSA.getInstance(this.getClass().getResourceAsStream("abc-numbers.fsa"));
+
 		verifyContent(expected, fsa);
 		assertTrue(fsa.getFlags().contains(FSAFlags.NUMBERS));
 	}
@@ -97,8 +99,7 @@ public final class FSA5Test {
 			if (!fsa.isArcTerminal(arc)) {
 				walkNode(buffer, depth + 1, fsa, fsa.getEndNode(arc), cnt,
 				        result);
-				cnt += FSA5.decodeFromBytes(fsa.arcs, fsa.getEndNode(arc),
-				        fsa.nodeDataLength);
+				cnt += fsa.getNodeNumber(fsa.getEndNode(arc));
 			}
 		}
 	}

@@ -97,9 +97,8 @@ public class FSABuilderTest {
 		}
 
 		for (ByteBuffer sequence : uniqueInput) {
-			Assert.assertTrue("Not present in the right language: " + 
-					BufferUtils.toString(sequence),
-			        rl.remove(sequence));
+			Assert.assertTrue("Not present in the right language: "
+			        + BufferUtils.toString(sequence), rl.remove(sequence));
 		}
 
 		// (2) No other sequence _other_ than the input is in the right

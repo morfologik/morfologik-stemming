@@ -39,7 +39,13 @@ public final class FSAUtils {
 	private static void visitNode(Writer w, int d, FSA fsa, int s, BitSet visited) throws IOException {
 		visited.set(s);
 		w.write("  "); w.write(Integer.toString(s));
-		w.write(" [shape=circle,label=\"\"];\n");
+		
+		if (fsa.getFlags().contains(FSAFlags.NUMBERS)) {
+			int nodeNumber = fsa.getNodeNumber(s);
+			w.write(" [shape=circle,label=\"" + nodeNumber + "\"];\n");
+		} else {
+			w.write(" [shape=circle,label=\"\"];\n");
+		}
 
 		for (int arc = fsa.getFirstArc(s); arc != 0; arc = fsa.getNextArc(arc)) {
 			w.write("  ");

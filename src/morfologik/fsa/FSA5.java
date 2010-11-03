@@ -229,6 +229,16 @@ public final class FSA5 extends FSA {
 
 	/**
 	 * {@inheritDoc}
+	 */
+    public int getNodeNumber(int node) {
+    	assert getFlags().contains(FSAFlags.NUMBERS) 
+    		: "This FSA was not compiled with NUMBERS.";
+
+	    return decodeFromBytes(arcs, node, nodeDataLength);
+    }
+
+	/**
+	 * {@inheritDoc}
 	 * 
 	 * <p>For this automaton version, an additional {@link FSAFlags#NUMBERS} flag
 	 * may be set to indicate the automaton contains extra fields for each node.</p>
