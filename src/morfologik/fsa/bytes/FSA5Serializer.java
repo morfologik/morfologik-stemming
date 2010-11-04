@@ -11,8 +11,11 @@ import morfologik.fsa.FSA5;
 import morfologik.fsa.Visitor;
 
 /**
- * Serializes in-memory {@link State} graphs to a binary format in compatible
+ * Serializes in-memory {@link State} graphs to a binary format compatible
  * with Jan Daciuk's <code>fsa</code>'s package <code>FSA5</code> format.
+ * 
+ * <p>It is possible to serialize the automaton with numbers required for 
+ * perfect hashing. See {@link #withNumbers()} method.</p>
  * 
  * @see FSA5
  * @see FSA#getInstance(java.io.InputStream)
@@ -23,6 +26,11 @@ public final class FSA5Serializer {
 	 */
 	private final static int MAX_ARC_SIZE = 1 + 5;
 	
+	/**
+	 * Maximum number of bytes for per-node data.
+	 */
+	private final static int MAX_NODE_DATA_SIZE = 16;
+
 	/**
 	 * Number of bytes for the arc's flags header (arc representation
 	 * without the goto address).
@@ -40,19 +48,39 @@ public final class FSA5Serializer {
 	public byte annotationByte = '+';
 
 	/**
-	 * Node data length. Must be zero (node data not supported).
+	 * <code>true</code> if we should serialize with numbers.
+	 * 
+	 * @see #withNumbers()
 	 */
-	private final int nodeDataLength = 0;
+	private boolean withNumbers;
 
 	/**
 	 * Mutable integer for offset calculation.
 	 */
 	final static class IntHolder {
 		public int value;
+		
+		public IntHolder() { }
+		public IntHolder(int v) { this.value = v; }
 	}
 
 	/**
-	 * Serialize root state <code>s</code> to an output stream.
+	 * Serialize the automaton with the number of right-language sequences in
+	 * each node. This is required to implement perfect hashing. The numbering
+	 * also preserves the order of input sequences.
+	 * 
+	 * @return Returns the same object for easier call chaining.
+	 */
+	public FSA5Serializer withNumbers() {
+		withNumbers = true;
+	    return this;
+    }
+
+	/**
+	 * Serialize root state <code>s</code> to an output stream in <code>FSA5</code> 
+	 * format.
+	 * 
+	 * @see #withNumbers
 	 * 
 	 * @return Returns <code>os</code> for chaining.
 	 */
@@ -86,17 +114,44 @@ public final class FSA5Serializer {
 			}
 		});
 
+		/*
+		 * Calculate the number of bytes required for the node data,
+		 * if serializing with numbers.
+		 */
+		final IdentityHashMap<State, IntHolder> nodeNumbers = new IdentityHashMap<State, IntHolder>();
+		int nodeDataLength = 0;
+		if (withNumbers) {
+			nodeNumbers.put(sink, new IntHolder());
+			s.postOrder(new Visitor<State>() {
+				public void accept(State s) {
+					int thisNodeNumber = 0;
+					for (int i = 0; i < s.states.length; i++) {
+						if (s.final_transitions[i]) 
+							thisNodeNumber++;
+						thisNodeNumber += nodeNumbers.get(s.states[i]).value;
+					}
+					nodeNumbers.put(s, new IntHolder(thisNodeNumber));
+				}
+			});
+
+			int encodedSequences = nodeNumbers.get(s).value;
+			while (encodedSequences > 0) {
+				nodeDataLength++;
+				encodedSequences >>>= 8;
+			}
+		}
+
 		// Calculate minimal goto length.
 		int gtl = 1;
 		while (true) {
 			// First pass: calculate offsets of states.
-			if (!emitArcs(null, linearized, gtl, offsets)) {
+			if (!emitArcs(null, linearized, gtl, offsets, nodeDataLength, nodeNumbers)) {
 				gtl++;
 				continue;
 			}
 
 			// Second pass: check if goto overflows anywhere.
-			if (emitArcs(null, linearized, gtl, offsets))
+			if (emitArcs(null, linearized, gtl, offsets, nodeDataLength, nodeNumbers))
 				break;
 
 			gtl++;
@@ -114,7 +169,7 @@ public final class FSA5Serializer {
 		/*
 		 * Emit the automaton.
 		 */
-		boolean gtlUnchanged = emitArcs(os, linearized, gtl, offsets);
+		boolean gtlUnchanged = emitArcs(os, linearized, gtl, offsets, nodeDataLength, nodeNumbers);
 		assert gtlUnchanged : "gtl changed in the final pass.";
 
 		return os;
@@ -123,10 +178,16 @@ public final class FSA5Serializer {
 	/**
 	 * Update arc offsets assuming the given goto length.
 	 */
-	private boolean emitArcs(OutputStream os, ArrayList<State> linearized,
-	        final int gtl, final IdentityHashMap<State, IntHolder> offsets)
-	        throws IOException {
-		final ByteBuffer bb = ByteBuffer.allocate(MAX_ARC_SIZE);
+	private boolean emitArcs(OutputStream os, 
+							 ArrayList<State> linearized,
+							 int gtl, 
+							 IdentityHashMap<State, IntHolder> offsets,
+							 int nodeDataLength, 
+							 IdentityHashMap<State, IntHolder> nodeNumbers)
+        throws IOException
+    {
+		final ByteBuffer bb = ByteBuffer.allocate(
+				Math.max(MAX_NODE_DATA_SIZE, MAX_ARC_SIZE));
 
 		int offset = 0;
 		int maxStates = linearized.size();
@@ -145,6 +206,20 @@ public final class FSA5Serializer {
 
 			final int maxTransition = labels.length - 1;
 			final int lastTransition = 0;
+
+			offset += nodeDataLength;
+			if (nodeDataLength > 0 && os != null) {
+				int number = nodeNumbers.get(s).value;
+
+				for (int i = 0; i < nodeDataLength; i++) {
+					bb.put((byte) number);
+					number >>>= 8;
+				}
+				bb.flip();
+				os.write(bb.array(), bb.position(), bb.remaining());
+				bb.clear();
+			}
+
 			for (int i = maxTransition; i >= 0; i--) {
 				final State target = states[i];
 
@@ -165,8 +240,9 @@ public final class FSA5Serializer {
 				if (i == lastTransition) {
 					combined |= FSA5.BIT_LAST_ARC;
 
-					if (j + 1 < maxStates && target == linearized.get(j + 1)
-					        && targetOffset != 0) {
+					if (j + 1 < maxStates && 
+							target == linearized.get(j + 1) && 
+							targetOffset != 0) {
 						combined |= FSA5.BIT_TARGET_NEXT;
 						arcBytes = SIZEOF_FLAGS;
 						targetOffset = 0;

@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 
 import morfologik.stemming.Dictionary;
-import morfologik.tools.FSADump;
 
 import org.junit.Test;
 
@@ -83,7 +82,7 @@ public final class FSA5Test {
 		        .asList("0 c", "1 b", "2 ba", "3 a", "4 ac", "5 aba"), result);
 	}
 
-	private void walkNode(byte[] buffer, int depth, FSA5 fsa, int node,
+	public static void walkNode(byte[] buffer, int depth, FSA5 fsa, int node,
 	        int cnt, List<String> result) throws IOException {
 		for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
 			buffer[depth] = fsa.getArcLabel(arc);

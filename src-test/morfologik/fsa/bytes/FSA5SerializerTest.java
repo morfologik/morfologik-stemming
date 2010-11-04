@@ -1,5 +1,9 @@
 package morfologik.fsa.bytes;
 
+import static morfologik.fsa.FSAFlags.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -32,11 +36,7 @@ public class FSA5SerializerTest {
 		Arrays.sort(input, FSABuilder.LEXICAL_ORDERING);
 		State s = FSABuilder.build(input);
 
-		final byte[] fsaData = new FSA5Serializer().serialize(s,
-		        new ByteArrayOutputStream()).toByteArray();
-
-		FSA5 fsa = (FSA5) FSA.getInstance(new ByteArrayInputStream(fsaData));
-		checkCorrect(input, fsa);
+		checkSerialization(input, s);
 	}
 
 	/*
@@ -53,15 +53,52 @@ public class FSA5SerializerTest {
 		Arrays.sort(input, FSABuilder.LEXICAL_ORDERING);
 		State s = FSABuilder.build(input);
 
-		final byte[] fsaData = new FSA5Serializer().serialize(s,
-		        new ByteArrayOutputStream()).toByteArray();
-
-		FSA5 fsa = (FSA5) FSA.getInstance(new ByteArrayInputStream(fsaData));
-		checkCorrect(input, fsa);
+		checkSerialization(input, s);
 
 		// Dump the created automata.
 		// System.out.println(FSAUtils.toDot(fsa, fsa.getRootNode()));
 		// System.out.println(StateUtils.toDot(s));
+	}
+
+	/*
+	 * 
+	 */
+	@Test
+	public void testAutomatonWithNodeNumbers() throws IOException {
+		byte[][] input = new byte[][] {
+				{ 'a' },
+				{ 'a', 'b', 'a' },
+				{ 'a', 'c' },
+		        { 'b' }, 
+		        { 'b', 'a' },
+		        { 'c' },
+		};
+
+		Arrays.sort(input, FSABuilder.LEXICAL_ORDERING);
+		State s = FSABuilder.build(input);
+
+		final byte[] fsaData = 
+				new FSA5Serializer()
+				.withNumbers()
+				.serialize(s, new ByteArrayOutputStream())
+				.toByteArray();
+
+		FSA5 fsa = (FSA5) FSA.getInstance(new ByteArrayInputStream(fsaData));
+
+		// Ensure we have the NUMBERS flag set.
+		assertTrue(fsa.getFlags().contains(NUMBERS));
+		
+		// A single byte should be enough to store numbers in this automaton.
+		assertEquals(1, fsa.nodeDataLength);
+
+		// Get all numbers from nodes.
+		byte[] buffer = new byte[128];
+		final ArrayList<String> result = new ArrayList<String>();
+		FSA5Test.walkNode(buffer, 0, fsa, fsa.getRootNode(), 0, result);
+
+		Collections.sort(result);
+		assertEquals(Arrays
+		        .asList("0 c", "1 b", "2 ba", "3 a", "4 ac", "5 aba"), result);
 	}
 
 	/**
@@ -98,11 +135,7 @@ public class FSA5SerializerTest {
 		Arrays.sort(input, FSABuilder.LEXICAL_ORDERING);
 		State s = FSABuilder.build(input);
 
-		final byte[] fsaData = new FSA5Serializer().serialize(s,
-		        new ByteArrayOutputStream()).toByteArray();
-
-		FSA5 fsa = (FSA5) FSA.getInstance(new ByteArrayInputStream(fsaData));
-		checkCorrect(input, fsa);
+		checkSerialization(input, s);
 	}
 
 
@@ -114,11 +147,7 @@ public class FSA5SerializerTest {
 		byte[][] input = new byte[][] {};
 		State s = FSABuilder.build(input);
 
-		final byte[] fsaData = new FSA5Serializer().serialize(s,
-		        new ByteArrayOutputStream()).toByteArray();
-
-		FSA5 fsa = (FSA5) FSA.getInstance(new ByteArrayInputStream(fsaData));
-		checkCorrect(input, fsa);
+		checkSerialization(input, s);
 	}
 	
 	/**
@@ -172,13 +201,27 @@ public class FSA5SerializerTest {
 		// Check if the DFSA is correct first.
 		FSABuilderTest.checkCorrect(in, root);
 
-		final byte[] fsaData = new FSA5Serializer().serialize(root,
-		        new ByteArrayOutputStream()).toByteArray();
+		// Check serialization.
+		checkSerialization(in, root);
+    }
+
+	/*
+	 * 
+	 */
+	private void checkSerialization(byte[][] input, State root) throws IOException {
+		checkSerialization0(new FSA5Serializer(), input, root);
+		checkSerialization0(new FSA5Serializer().withNumbers(), input, root);
+	}
+
+	/*
+	 * 
+	 */
+	private void checkSerialization0(FSA5Serializer serializer, final byte[][] in, State root)
+            throws IOException {
+	    final byte[] fsaData = serializer.serialize(
+	    		root, new ByteArrayOutputStream()).toByteArray();
 
 		FSA5 fsa2 = (FSA5) FSA.getInstance(new ByteArrayInputStream(fsaData));
-
-		// Dump comparison.
-		// System.out.println(" FSA: " + new FSAInfo(fsa) + "\nJFSA: " + new FSAInfo(fsa2));
 
 		checkCorrect(in, fsa2);
     }
