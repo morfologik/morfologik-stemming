@@ -22,6 +22,16 @@ import morfologik.fsa.Visitor;
  */
 public final class FSA5Serializer {
 	/**
+	 * Default filler.
+	 */
+	public final static byte DEFAULT_FILLER = '_';
+	
+	/**
+	 * Default annotation separator.
+	 */
+	public final static byte DEFAULT_ANNOTATION = '+';
+	
+	/**
 	 * Maximum number of bytes for a serialized arc. 
 	 */
 	private final static int MAX_ARC_SIZE = 1 + 5;
@@ -40,12 +50,12 @@ public final class FSA5Serializer {
 	/**
 	 * @see FSA5#filler
 	 */
-	public byte fillerByte = '_';
+	public byte fillerByte = DEFAULT_FILLER;
 
 	/**
 	 * @see FSA5#annotation
 	 */
-	public byte annotationByte = '+';
+	public byte annotationByte = DEFAULT_ANNOTATION;
 
 	/**
 	 * <code>true</code> if we should serialize with numbers.

@@ -47,14 +47,20 @@ final class SharedOptions {
 	        .withLongOpt("output").withType(File.class).isRequired(false)
 	        .create("o");
 
-	public final static Option fillerCharacterOption = OptionBuilder.hasArg()
-    	.withArgName("char").withDescription("Custom filler character")
-    	.isRequired(false).withLongOpt("filler-char")
-    		.create("filler");
+	public final static Option fillerCharacterOption = OptionBuilder
+		.hasArg()
+    	.withArgName("char")
+    	.withDescription("Custom filler character")
+    	.isRequired(false)
+    	.withLongOpt("filler-char")
+    	.create("filler");
 
-	public final static Option annotationSeparatorCharacterOption = OptionBuilder.hasArg()
-		.withArgName("char").withDescription("Custom annotation separator character")
-		.isRequired(false).withLongOpt("annotation-char")
+	public final static Option annotationSeparatorCharacterOption = OptionBuilder
+		.hasArg()
+		.withArgName("char")
+		.withDescription("Custom annotation separator character")
+		.isRequired(false)
+		.withLongOpt("annotation-char")
 		.create("annotation");
 
 	public final static Option standardEncoding = OptionBuilder
@@ -70,15 +76,10 @@ final class SharedOptions {
 	        .isRequired(false).create("inf");
 
 	public final static Option noWarnIfTwoFields = OptionBuilder.withDescription(
-    "Suppress warning for lines with only two fields (for stemming dictionaries)").withLongOpt("nowarn")
-    .isRequired(false).create("nw");
-	
-	
-	public final static Option fieldSeparator = OptionBuilder.hasArg()
-	.withArgName("char").withDescription(
-	"Dictionary separator character").withLongOpt("separator")
-	.isRequired(false).create("sep"); 
-	
+		"Suppress warning for lines with only two fields (for stemming dictionaries)")
+		.withLongOpt("nowarn")
+		.isRequired(false)
+		.create("nw");
 	
 	/**
 	 * No instances. Use static fields.

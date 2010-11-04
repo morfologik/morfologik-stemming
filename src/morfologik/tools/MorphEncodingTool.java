@@ -2,8 +2,6 @@ package morfologik.tools;
 
 import java.io.*;
 
-import morfologik.fsa.morph.*;
-
 import org.apache.commons.cli.*;
 
 /**
@@ -15,11 +13,12 @@ class MorphEncodingTool extends Tool {
 	
 	private boolean prefixes = false;
 	private boolean infixes = false;
-	
 	private boolean noWarn = false;
-	
+
+	private MorphEncoder encoder;
+
 	/**
-     * @author Marcin Milkowski
+     * 
      */
 	protected void go(final CommandLine line) throws Exception {
 		
@@ -30,15 +29,17 @@ class MorphEncodingTool extends Tool {
 		if (!infixes) {
 			prefixes = line.hasOption(SharedOptions.prefixEncoding.getOpt());
 		}
-		
-		if (line.hasOption(SharedOptions.fieldSeparator.getOpt())) {
-			String sep = line.getOptionValue
-				(SharedOptions.fieldSeparator.getOpt());
+
+		if (line.hasOption(SharedOptions.annotationSeparatorCharacterOption.getOpt())) {
+			String sep = line.getOptionValue(SharedOptions.annotationSeparatorCharacterOption.getOpt());
+
 			char separator = '+';
 			if (sep.length() == 1) {
 				separator = sep.charAt(0);
 			}
-			FSAMorphCoder.setSeparator((byte) separator);
+
+			FSABuild.checkSingleByte(Character.toString(separator));
+			encoder = new MorphEncoder((byte) separator);
 		}
 		
 		// Determine input and output streams.
@@ -113,17 +114,16 @@ class MorphEncodingTool extends Tool {
 						}
 						
 					}
+
 					if (infixes) {
-						output.write(FSAMorphCoder.infixEncode(words[0],
-						        words[1], words[2]));
+						output.write(encoder.infixEncode(words[0], words[1], words[2]));
 					} else if (prefixes) {
-						output.write(FSAMorphCoder.prefixEncode(words[0],
-						        words[1], words[2]));
+						output.write(encoder.prefixEncode(words[0], words[1], words[2]));
 					} else {
-						output.write(FSAMorphCoder.standardEncode(words[0],
-						        words[1], words[2]));
+						output.write(encoder.standardEncode(words[0], words[1], words[2]));
 					}
-					output.writeByte(0xa); //Unix line ends
+
+					output.writeByte('\n'); // Unix line end only.
 					bufPos = 0;
 				} else {
 					if (dataByte != (byte) '\r') { 
@@ -146,7 +146,7 @@ class MorphEncodingTool extends Tool {
 		options.addOption(SharedOptions.prefixEncoding);
 		options.addOption(SharedOptions.infixEncoding);		
 		options.addOption(SharedOptions.noWarnIfTwoFields);
-		options.addOption(SharedOptions.fieldSeparator);
+		options.addOption(SharedOptions.annotationSeparatorCharacterOption);
 	}
 
 	/**

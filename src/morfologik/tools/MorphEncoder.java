@@ -1,28 +1,32 @@
-package morfologik.fsa.morph;
+package morfologik.tools;
 
 import java.io.UnsupportedEncodingException;
+
+import morfologik.fsa.bytes.FSA5Serializer;
 
 /**
  * A class that converts tabular data to fsa morphological format. Three formats
  * are supported:
  * <ul>
- * <li>standard</li>
- * <li>prefix</li>
- * <li>infix</li>
+ * <li><b>standard</b>, see {@link #standardEncode}</li>
+ * <li><b>prefix</b>, see {@link #prefixEncode}</li>
+ * <li><b>infix</b>, see {@link #infixEncode}</li>
  * </ul>
  */
-public final class FSAMorphCoder {
-	private static byte separator = '+';
+public final class MorphEncoder {
+	private final byte annotationSeparator;
+
 	private static final int MAX_PREFIX_LEN = 3;
 	private static final int MAX_INFIX_LEN = 3;
+
 	private static final String UTF8 = "UTF-8";	
 
-	private FSAMorphCoder() {
-		// only static stuff
+	public MorphEncoder() {
+		this(FSA5Serializer.DEFAULT_ANNOTATION);
 	}
 
-	public static void setSeparator(byte newSeparator) {
-		separator = newSeparator;
+	public MorphEncoder(byte annotationSeparator) {
+		this.annotationSeparator = annotationSeparator;
 	}
 	
 	public static int commonPrefix(final byte[] s1, final byte[] s2) {
@@ -65,7 +69,7 @@ public final class FSAMorphCoder {
 	 * produce the lexeme by concatenating the stripped string with the ending.
 	 * 
 	 */
-	public static byte[] standardEncode(final byte[] wordForm,
+	public byte[] standardEncode(final byte[] wordForm,
 	        final byte[] wordLemma, final byte[] wordTag) {
 		final int l1 = wordForm.length;
 		final int prefix = commonPrefix(wordForm, wordLemma);
@@ -78,7 +82,7 @@ public final class FSAMorphCoder {
 		}		
 		final byte[] bytes = new byte[arrayLen]; 
 		pos += copyTo(bytes, pos, wordForm);
-		pos += copyTo(bytes, pos, separator);
+		pos += copyTo(bytes, pos, annotationSeparator);
 		if (prefix == 0) {
 			pos += copyTo(bytes, pos, (byte) ((l1 + 65) & 0xff));
 			pos += copyTo(bytes, pos, wordLemma);
@@ -86,7 +90,7 @@ public final class FSAMorphCoder {
 			pos += copyTo(bytes, pos, (byte) ((l1 - prefix + 65) & 0xff));
 			pos += copyTo(bytes, pos, subsequence(wordLemma, prefix));
 		}
-		pos += copyTo(bytes, pos, separator);
+		pos += copyTo(bytes, pos, annotationSeparator);
 		if (wordTag != null) {
 			pos += copyTo(bytes, pos, wordTag);
 		}
@@ -116,7 +120,7 @@ public final class FSAMorphCoder {
 	 *            - tag
 	 * @return the encoded string
 	 */
-	public static byte[] prefixEncode(final byte[] wordForm,
+	public byte[] prefixEncode(final byte[] wordForm,
 	        final byte[] wordLemma, final byte[] wordTag) {
 		final int l1 = wordForm.length;
 		final int prefix = commonPrefix(wordForm, wordLemma);
@@ -129,7 +133,7 @@ public final class FSAMorphCoder {
 		final byte[] bytes = new byte[arrayLen]; 
 		int pos = 0;
 		pos += copyTo(bytes, pos, wordForm);
-		pos += copyTo(bytes, pos, separator);
+		pos += copyTo(bytes, pos, annotationSeparator);
 		if (prefix == 0) {
 			int prefixFound = 0;
 			int prefix1 = 0;
@@ -156,7 +160,7 @@ public final class FSAMorphCoder {
 			pos += copyTo(bytes, pos, (byte) ((l1 - prefix + 65) & 0xff));
 			pos += copyTo(bytes, pos, subsequence(wordLemma, prefix));
 		}
-		pos += copyTo(bytes, pos, separator);
+		pos += copyTo(bytes, pos, annotationSeparator);
 		if (wordTag != null) {
 			pos += copyTo(bytes, pos, wordTag);
 		}
@@ -189,7 +193,7 @@ public final class FSAMorphCoder {
 	 *            - tag
 	 * @return the encoded string
 	 */
-	public static byte[] infixEncode(final byte[] wordForm,
+	public byte[] infixEncode(final byte[] wordForm,
 	        final byte[] wordLemma, final byte[] wordTag) {
 		final int l1 = wordForm.length;
 		int prefixFound = 0;
@@ -205,7 +209,7 @@ public final class FSAMorphCoder {
 		final byte[] bytes = new byte[arrayLen];
 		int pos = 0;
 		pos += copyTo(bytes, pos, wordForm);
-		pos += copyTo(bytes, pos, separator);
+		pos += copyTo(bytes, pos, annotationSeparator);
 		if (prefix == 0) {
 			// we may have a prefix
 			for (int i = 1; i <= max; i++) {
@@ -284,7 +288,7 @@ public final class FSAMorphCoder {
 			}
 
 		}
-		pos += copyTo(bytes, pos, separator);
+		pos += copyTo(bytes, pos, annotationSeparator);
 		if (wordTag != null) {
 			pos += copyTo(bytes, pos, wordTag);
 		}
@@ -322,7 +326,7 @@ public final class FSAMorphCoder {
 	 * 
 	 * @throws UnsupportedEncodingException
 	 */
-	public static String standardEncodeUTF8(final String wordForm,
+	public String standardEncodeUTF8(final String wordForm,
 	        final String wordLemma, final String wordTag)
 	        throws UnsupportedEncodingException {
 		return asString(standardEncode(wordForm.getBytes(UTF8), wordLemma
@@ -352,7 +356,7 @@ public final class FSAMorphCoder {
 	 * @return the encoded string
 	 * @throws UnsupportedEncodingException
 	 */
-	public static String prefixEncodeUTF8(final String wordForm,
+	public String prefixEncodeUTF8(final String wordForm,
 	        final String wordLemma, final String wordTag)
 	        throws UnsupportedEncodingException {
 		return asString(prefixEncode(wordForm.getBytes(UTF8), wordLemma
@@ -386,7 +390,7 @@ public final class FSAMorphCoder {
 	 * @return the encoded string
 	 * @throws UnsupportedEncodingException
 	 */
-	public static String infixEncodeUTF8(final String wordForm,
+	public String infixEncodeUTF8(final String wordForm,
 	        final String wordLemma, final String wordTag)
 	        throws UnsupportedEncodingException {
 		return asString(infixEncode(wordForm.getBytes(UTF8), wordLemma

@@ -76,7 +76,7 @@ public final class FSABuild extends Tool {
 	 * Check if the argument is a single byte after conversion using platform-default
 	 * encoding. 
 	 */
-	private void checkSingleByte(String chr) {
+	public static void checkSingleByte(String chr) {
 		if (chr.getBytes().length == 1)
 			return;
 
