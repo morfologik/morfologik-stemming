@@ -6,8 +6,9 @@ import java.util.*;
  * A view over a range of an array.
  */
 @SuppressWarnings("serial")
-final class ArrayViewList<E> extends AbstractList<E> implements RandomAccess,
-        java.io.Serializable {
+final class ArrayViewList<E> extends AbstractList<E> 
+	implements RandomAccess, java.io.Serializable
+{
 	/** Backing array. */
 	private E[] a;
 	private int start;
@@ -102,7 +103,7 @@ final class ArrayViewList<E> extends AbstractList<E> implements RandomAccess,
 	/*
      * 
      */
-	public void wrap(E[] array, int start, int length) {
+	void wrap(E[] array, int start, int length) {
 		this.a = array;
 		this.start = start;
 		this.length = length;

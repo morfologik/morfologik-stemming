@@ -1,4 +1,4 @@
-package morfologik.fsa.bytes;
+package morfologik.fsa;
 
 import static morfologik.fsa.FSAFlags.*;
 import static org.junit.Assert.assertEquals;
@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
-import morfologik.fsa.*;
 import morfologik.util.BufferUtils;
 
 import org.junit.Assert;

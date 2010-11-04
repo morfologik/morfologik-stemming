@@ -1,10 +1,8 @@
-package morfologik.fsa.bytes;
+package morfologik.fsa;
 
 import java.util.Arrays;
 import java.util.IdentityHashMap;
 
-import morfologik.fsa.Traversable;
-import morfologik.fsa.Visitor;
 
 /**
  * DFSA state with <code>byte</code> labels on transitions.

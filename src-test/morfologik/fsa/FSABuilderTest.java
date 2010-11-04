@@ -1,4 +1,4 @@
-package morfologik.fsa.bytes;
+package morfologik.fsa;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
+import morfologik.fsa.FSABuilder;
+import morfologik.fsa.State;
+import morfologik.fsa.StateUtils;
 import morfologik.fsa.Visitor;
 import morfologik.util.BufferUtils;
 import morfologik.util.MinMax;

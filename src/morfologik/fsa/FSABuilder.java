@@ -1,4 +1,4 @@
-package morfologik.fsa.bytes;
+package morfologik.fsa;
 
 import java.util.Comparator;
 import java.util.HashMap;

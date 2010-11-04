@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import morfologik.fsa.FSA5;
-import morfologik.fsa.bytes.*;
+import morfologik.fsa.FSA5Serializer;
+import morfologik.fsa.FSABuilder;
+import morfologik.fsa.State;
 import morfologik.util.Arrays;
 
 import org.apache.commons.cli.*;

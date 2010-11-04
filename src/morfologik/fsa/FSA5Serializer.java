@@ -1,4 +1,4 @@
-package morfologik.fsa.bytes;
+package morfologik.fsa;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -6,9 +6,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 
-import morfologik.fsa.FSA;
-import morfologik.fsa.FSA5;
-import morfologik.fsa.Visitor;
 
 /**
  * Serializes in-memory {@link State} graphs to a binary format compatible

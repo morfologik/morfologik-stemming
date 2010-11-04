@@ -2,7 +2,7 @@ package morfologik.tools;
 
 import java.io.UnsupportedEncodingException;
 
-import morfologik.fsa.bytes.FSA5Serializer;
+import morfologik.fsa.FSA5Serializer;
 
 /**
  * A class that converts tabular data to fsa morphological format. Three formats
