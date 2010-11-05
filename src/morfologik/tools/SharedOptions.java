@@ -99,6 +99,12 @@ final class SharedOptions {
         .withLongOpt("progress")
         .create();
 
+    public final static Option inputSortedOption = OptionBuilder
+        .withDescription("Assume the input is already sorted using C-sort (builds FSA directly, no in-memory sorting)")
+        .isRequired(false)
+        .withLongOpt("sorted")
+        .create();
+
 	public final static Option standardEncoding = OptionBuilder
 	    .withDescription("Encode suffix forms in a standard way")
 	    .withLongOpt("suffix")
