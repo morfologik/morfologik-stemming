@@ -1,5 +1,9 @@
 
 1.5.0 (trunk)
+          Added traversal routines to calculate perfect hashing based on FSA with NUMBERS.
+
+          Changed the order of serialized arcs in the binary serializer for FSA5.
+
           Removed character-based automata.
 
           Incompatible API changes to FSA builders (moved to morfologik.fsa).
