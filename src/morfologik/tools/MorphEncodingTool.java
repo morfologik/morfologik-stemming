@@ -30,18 +30,18 @@ class MorphEncodingTool extends Tool {
 			prefixes = line.hasOption(SharedOptions.prefixEncoding.getOpt());
 		}
 
+		char separator = '+';
 		if (line.hasOption(SharedOptions.annotationSeparatorCharacterOption.getOpt())) {
 			String sep = line.getOptionValue(SharedOptions.annotationSeparatorCharacterOption.getOpt());
 
-			char separator = '+';
 			if (sep.length() == 1) {
 				separator = sep.charAt(0);
 			}
 
 			FSABuild.checkSingleByte(Character.toString(separator));
-			encoder = new MorphEncoder((byte) separator);
 		}
-		
+		encoder = new MorphEncoder((byte) separator);
+
 		// Determine input and output streams.
 		final DataInputStream input = initializeInput(line);
 		final DataOutputStream output = initializeOutput(line);
@@ -112,7 +112,6 @@ class MorphEncodingTool extends Tool {
 						if (words[i] == null && !noWarn) {	
 							System.err.println("Line number: " + lnumber + " has less than three fields.");
 						}
-						
 					}
 
 					if (infixes) {
