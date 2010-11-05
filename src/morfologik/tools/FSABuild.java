@@ -72,6 +72,11 @@ public final class FSABuild extends Tool {
 			checkSingleByte(chr);
 			serializer.annotationByte = chr.getBytes()[0];
 		}
+		
+        opt = SharedOptions.withNumbersOption.getOpt();
+        if (line.hasOption(opt)) {
+            serializer.withNumbers();
+        }
     }
 
 	/**
@@ -148,6 +153,8 @@ public final class FSABuild extends Tool {
 		
 		options.addOption(SharedOptions.fillerCharacterOption);
 		options.addOption(SharedOptions.annotationSeparatorCharacterOption);
+
+		options.addOption(SharedOptions.withNumbersOption);
 	}
 
 	/**
