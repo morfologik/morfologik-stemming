@@ -3,8 +3,7 @@ package morfologik.fsa;
 import static org.junit.Assert.assertEquals;
 import static morfologik.fsa.MatchResult.*;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -45,16 +44,32 @@ public final class FSATraversalTest {
      */
 	@Test
 	public void testPerfectHash() throws IOException {
-		final FSA5 fsa = FSA.read(this.getClass().getResourceAsStream("abc-numbers.fsa"));
-		
+		byte[][] input = new byte[][] {
+				{ 'a' },
+				{ 'a', 'b', 'a' },
+				{ 'a', 'c' },
+		        { 'b' }, 
+		        { 'b', 'a' },
+		        { 'c' },
+		};
+
+		Arrays.sort(input, FSABuilder.LEXICAL_ORDERING);
+		State s = FSABuilder.build(input);
+
+		final byte[] fsaData = 
+				new FSA5Serializer()
+				.withNumbers()
+				.serialize(s, new ByteArrayOutputStream())
+				.toByteArray();
+
+		final FSA5 fsa = (FSA5) FSA.read(new ByteArrayInputStream(fsaData));
 		final FSATraversal traversal = new FSATraversal(fsa);
 
-		assertEquals(0, traversal.perfectHash("c".getBytes("UTF-8")));
-		assertEquals(1, traversal.perfectHash("b".getBytes("UTF-8")));
-		assertEquals(2, traversal.perfectHash("ba".getBytes("UTF-8")));
-		assertEquals(3, traversal.perfectHash("a".getBytes("UTF-8")));
-		assertEquals(4, traversal.perfectHash("ac".getBytes("UTF-8")));
-		assertEquals(5, traversal.perfectHash("aba".getBytes("UTF-8")));
+		int i = 0;
+		for (byte [] seq : input)
+		{
+			assertEquals(new String(seq), i++, traversal.perfectHash(seq));
+		}
 	}
 
 	/**

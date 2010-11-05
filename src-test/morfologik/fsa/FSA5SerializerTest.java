@@ -97,7 +97,7 @@ public class FSA5SerializerTest {
 
 		Collections.sort(result);
 		assertEquals(Arrays
-		        .asList("0 c", "1 b", "2 ba", "3 a", "4 ac", "5 aba"), result);
+		        .asList("0 a", "1 aba", "2 ac", "3 b", "4 ba", "5 c"), result);
 	}
 
 	/**
