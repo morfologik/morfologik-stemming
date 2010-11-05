@@ -14,7 +14,7 @@ public class LauncherTest {
 	/* */
 	@Test
 	public void testTools() throws Exception {
-		for (Map.Entry<String, ToolInfo> e : Launcher.tools.entrySet()) {
+		for (Map.Entry<String, ToolInfo> e : Launcher.initTools().entrySet()) {
 			try {
 				e.getValue().invoke(new String[] {});
 			} catch (Throwable t) {

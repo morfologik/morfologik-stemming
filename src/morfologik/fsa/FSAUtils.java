@@ -1,7 +1,8 @@
 package morfologik.fsa;
 
 import java.io.*;
-import java.util.BitSet;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 /**
  * Other FSA-related utilities not directly associated with the class hierarchy.
@@ -41,7 +42,7 @@ public final class FSAUtils {
 		w.write("  "); w.write(Integer.toString(s));
 		
 		if (fsa.getFlags().contains(FSAFlags.NUMBERS)) {
-			int nodeNumber = fsa.getNodeNumber(s);
+			int nodeNumber = fsa.getNumberAtNode(s);
 			w.write(" [shape=circle,label=\"" + nodeNumber + "\"];\n");
 		} else {
 			w.write(" [shape=circle,label=\"\"];\n");
@@ -88,5 +89,20 @@ public final class FSAUtils {
 				}
 			}
 		}
+    }
+
+	/**
+	 * Return an {@link Iterable} over all suffixes from a given node. 
+	 */
+	static Iterable<ByteBuffer> getSequences(final FSA fsa, final int node) {
+		if (node == 0) {
+			return Collections.<ByteBuffer> emptyList();
+		}
+
+		return new Iterable<ByteBuffer>() {
+			public Iterator<ByteBuffer> iterator() {
+			    return new FSAFinalStatesIterator(fsa, node);
+			}
+		};
     }
 }

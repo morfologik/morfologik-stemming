@@ -25,14 +25,14 @@ public final class FSA5Test {
 
 	@Test
 	public void testVersion5() throws IOException {
-		final FSA fsa = FSA.getInstance(this.getClass().getResourceAsStream("abc.fsa"));
+		final FSA fsa = FSA.read(this.getClass().getResourceAsStream("abc.fsa"));
 		assertFalse(fsa.getFlags().contains(FSAFlags.NUMBERS));
 		verifyContent(expected, fsa);
 	}
 
 	@Test
 	public void testVersion5WithNumbers() throws IOException {
-		final FSA fsa = FSA.getInstance(this.getClass().getResourceAsStream("abc-numbers.fsa"));
+		final FSA fsa = FSA.read(this.getClass().getResourceAsStream("abc-numbers.fsa"));
 
 		verifyContent(expected, fsa);
 		assertTrue(fsa.getFlags().contains(FSAFlags.NUMBERS));
@@ -40,9 +40,9 @@ public final class FSA5Test {
 
 	@Test
 	public void testArcsAndNodes() throws IOException {
-		final FSA fsa1 = FSA.getInstance(this.getClass().getResourceAsStream(
+		final FSA fsa1 = FSA.read(this.getClass().getResourceAsStream(
 		        "abc.fsa"));
-		final FSA fsa2 = FSA.getInstance(this.getClass().getResourceAsStream(
+		final FSA fsa2 = FSA.read(this.getClass().getResourceAsStream(
 		        "abc-numbers.fsa"));
 
 		FSAInfo info1 = new FSAInfo(fsa1);
@@ -67,8 +67,7 @@ public final class FSA5Test {
 
 	@Test
 	public void testNumbers() throws IOException {
-		final FSA5 fsa = (FSA5) FSA.getInstance(
-				this.getClass().getResourceAsStream("abc-numbers.fsa"));
+		final FSA5 fsa = FSA.read(this.getClass().getResourceAsStream("abc-numbers.fsa"));
 
 		assertTrue(fsa.getFlags().contains(NEXTBIT));
 
@@ -98,7 +97,7 @@ public final class FSA5Test {
 			if (!fsa.isArcTerminal(arc)) {
 				walkNode(buffer, depth + 1, fsa, fsa.getEndNode(arc), cnt,
 				        result);
-				cnt += fsa.getNodeNumber(fsa.getEndNode(arc));
+				cnt += fsa.getNumberAtNode(fsa.getEndNode(arc));
 			}
 		}
 	}
@@ -108,7 +107,7 @@ public final class FSA5Test {
 		final ArrayList<String> actual = new ArrayList<String>();
 
 		int count = 0;
-		for (ByteBuffer bb : helper.getAllSubsequences(fsa.getRootNode())) {
+		for (ByteBuffer bb : fsa.getSequences()) {
 			assertEquals(0, bb.arrayOffset());
 			assertEquals(0, bb.position());
 			actual.add(new String(bb.array(), 0, bb.remaining(), "UTF-8"));

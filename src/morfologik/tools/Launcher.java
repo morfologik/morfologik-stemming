@@ -35,20 +35,17 @@ public final class Launcher {
 	}
 
 	/**
-	 * Known tools.
-	 */
-	static TreeMap<String, ToolInfo> tools;
-
-	/**
 	 * Command line entry point.
 	 */
 	public static void main(String[] args) throws Exception {
 		// If so, tools are unavailable and a classpath error has been logged.
-		if (!initTools())
+		final TreeMap<String, ToolInfo> tools = initTools();
+
+		if (tools == null)
 		{
 			return;
 		}
-		
+
 		if (args.length == 0) {
 			System.out
 			        .println("Provide tool name and its command-line options. "
@@ -76,8 +73,9 @@ public final class Launcher {
 	/**
 	 * Initialize and check tools' availability.
 	 */
-	private static boolean initTools() {
-		tools = new TreeMap<String, ToolInfo>();
+	static TreeMap<String, ToolInfo> initTools() {
+		TreeMap<String, ToolInfo> tools = new TreeMap<String, ToolInfo>();
+
 		tools.put("fsa_build", new ToolInfo(FSABuild.class,
 		        "Create an FSA5 automaton from plain text files."));
 		tools.put("fsa_dump", new ToolInfo(FSADump.class,
@@ -98,16 +96,16 @@ public final class Launcher {
 				ti.clazz.newInstance().isAvailable();
 			} catch (NoClassDefFoundError e) {
 				logJarWarning();
-				return false;
+				return null;
 			} catch (Throwable e) {
 				System.out.println("Tools could not be initialized because" +
 						" of an exception during initialization: "
 						+ e.getClass().getName() + ", " + e.getMessage());
-				return false;
+				return null;
 			}
 		}
 		
-		return true;
+		return tools;
 	}
 	
 	/**

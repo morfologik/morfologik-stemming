@@ -41,7 +41,7 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
 	/**
 	 * Create an instance of the iterator for a given node.
 	 */
-	FSAFinalStatesIterator(FSA fsa, int node) {
+	public FSAFinalStatesIterator(FSA fsa, int node) {
 		this.fsa = fsa;
 
 		if (fsa.getFirstArc(node) != 0) {
@@ -50,7 +50,7 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
 	}
 
 	/**
-	 * Restart walking from <code>node</code>.
+	 * Restart walking from <code>node</code>. Allows iterator reuse. 
 	 */
 	public void restartFrom(int node) {
 		position = 0;
@@ -61,6 +61,7 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
 	}
 
 	/** Returns <code>true</code> if there are still elements in this iterator. */
+	@Override
 	public boolean hasNext() {
 		if (nextElement == null) {
 			nextElement = advance();
@@ -73,6 +74,7 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
 	 * @return Returns a {@link ByteBuffer} with the sequence corresponding to
 	 *         the next final state in the automaton.
 	 */
+	@Override
 	public ByteBuffer next() {
 		if (nextElement != null) {
 			final ByteBuffer cache = nextElement;
@@ -136,7 +138,8 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
 	/**
 	 * Not implemented in this iterator.
 	 */
-	public final void remove() {
+	@Override
+	public void remove() {
 		throw new UnsupportedOperationException("Read-only iterator.");
 	}
 

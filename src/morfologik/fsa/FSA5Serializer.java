@@ -15,7 +15,7 @@ import java.util.IdentityHashMap;
  * perfect hashing. See {@link #withNumbers()} method.</p>
  * 
  * @see FSA5
- * @see FSA#getInstance(java.io.InputStream)
+ * @see FSA#read(java.io.InputStream)
  */
 public final class FSA5Serializer {
 	/**

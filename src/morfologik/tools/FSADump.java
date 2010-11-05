@@ -86,7 +86,7 @@ public final class FSADump extends Tool {
 			}
 		} else {
 			dictionary = null;
-			fsa = FSA.getInstance(new FileInputStream(dictionaryFile));
+			fsa = FSA.read(new FileInputStream(dictionaryFile));
 			printWarning("Warning: FSA automaton without metadata file.");
 		}
 

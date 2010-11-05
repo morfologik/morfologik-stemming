@@ -1,7 +1,7 @@
 package morfologik.fsa;
 
 /**
- * FSA automaton flags.
+ * FSA automaton flags, exactly as in Daciuk's <code>fsa</code> package.
  */
 public enum FSAFlags {
 	FLEXIBLE(1 << 0), 

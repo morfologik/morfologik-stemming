@@ -101,9 +101,9 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 		this.dictionary = dictionary;
 		this.dictionaryMetadata = dictionary.metadata;
 		this.rootNode = dictionary.fsa.getRootNode();
-		this.matcher = dictionary.fsa.getTraversalHelper();
-		this.finalStatesIterator = matcher.getFinalStatesIterator();
 		this.fsa = dictionary.fsa;
+		this.matcher = new FSATraversalHelper(fsa);
+		this.finalStatesIterator = new FSAFinalStatesIterator(fsa, fsa.getRootNode());
 
 		if (rootNode == 0) {
 			throw new IllegalArgumentException(

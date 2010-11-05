@@ -82,7 +82,7 @@ public class FSA5SerializerTest {
 				.serialize(s, new ByteArrayOutputStream())
 				.toByteArray();
 
-		FSA5 fsa = (FSA5) FSA.getInstance(new ByteArrayInputStream(fsaData));
+		FSA5 fsa = (FSA5) FSA.read(new ByteArrayInputStream(fsaData));
 
 		// Ensure we have the NUMBERS flag set.
 		assertTrue(fsa.getFlags().contains(NUMBERS));
@@ -154,7 +154,7 @@ public class FSA5SerializerTest {
 	 */
 	@Test
 	public void test_abc() throws IOException {
-		testBuiltIn(FSA.getInstance(FSA5Test.class.getResourceAsStream("abc.fsa")));
+		testBuiltIn(FSA.read(FSA5Test.class.getResourceAsStream("abc.fsa")));
 	}
 
 	/**
@@ -162,7 +162,7 @@ public class FSA5SerializerTest {
 	 */
 	@Test
 	public void test_minimal() throws IOException {
-		testBuiltIn(FSA.getInstance(FSA5Test.class.getResourceAsStream("minimal.fsa")));
+		testBuiltIn(FSA.read(FSA5Test.class.getResourceAsStream("minimal.fsa")));
 	}
 
 	/**
@@ -170,7 +170,7 @@ public class FSA5SerializerTest {
 	 */
 	@Test
 	public void test_minimal2() throws IOException {
-		testBuiltIn(FSA.getInstance(FSA5Test.class.getResourceAsStream("minimal2.fsa")));
+		testBuiltIn(FSA.read(FSA5Test.class.getResourceAsStream("minimal2.fsa")));
 	}
 
 	/**
@@ -178,7 +178,7 @@ public class FSA5SerializerTest {
 	 */
 	@Test
 	public void test_en_tst() throws IOException {
-		testBuiltIn(FSA.getInstance(FSA5Test.class.getResourceAsStream("en_tst.dict")));
+		testBuiltIn(FSA.read(FSA5Test.class.getResourceAsStream("en_tst.dict")));
 	}
 
 	/*
@@ -220,7 +220,7 @@ public class FSA5SerializerTest {
 	    final byte[] fsaData = serializer.serialize(
 	    		root, new ByteArrayOutputStream()).toByteArray();
 
-		FSA5 fsa2 = (FSA5) FSA.getInstance(new ByteArrayInputStream(fsaData));
+		FSA5 fsa2 = (FSA5) FSA.read(new ByteArrayInputStream(fsaData));
 
 		checkCorrect(in, fsa2);
     }

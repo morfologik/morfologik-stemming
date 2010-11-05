@@ -5,6 +5,7 @@ import static morfologik.util.FileUtils.readFully;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.*;
 
 /**
@@ -152,17 +153,9 @@ public final class FSA5 extends FSA {
 	}
 
 	/**
-	 * Read the arc's layout and skip as many bytes, as needed.
-	 */
-	private int skipArc(int offset) {
-		return offset + (isNextSet(offset) 
-				? 1 + 1 /* label + flags */ 
-				: 1 + gtl /* label + flags/address */);
-	}
-
-	/**
 	 * Returns the start node of this automaton.
 	 */
+	@Override
 	public int getRootNode() {
 		return getDestinationNodeOffset(getFirstArc(skipArc(nodeDataLength)));
 	}
@@ -170,6 +163,7 @@ public final class FSA5 extends FSA {
 	/**
      * {@inheritDoc} 
      */
+	@Override
 	public final int getFirstArc(int node) {
 		return nodeDataLength + node;
 	}
@@ -177,6 +171,7 @@ public final class FSA5 extends FSA {
 	/**
      * {@inheritDoc} 
      */
+	@Override
 	public final int getNextArc(int arc) {
 		if (isArcLast(arc))
 			return 0;
@@ -187,6 +182,7 @@ public final class FSA5 extends FSA {
 	/**
      * {@inheritDoc} 
      */
+	@Override
 	public int getArc(int node, byte label) {
 		for (int arc = getFirstArc(node); arc != 0; arc = getNextArc(arc)) {
 			if (getArcLabel(arc) == label)
@@ -200,6 +196,7 @@ public final class FSA5 extends FSA {
 	/**
      * {@inheritDoc} 
      */
+	@Override
 	public int getEndNode(int arc) {
 		final int nodeOffset = getDestinationNodeOffset(arc);
 		assert nodeOffset != 0 : "No target node for terminal arcs.";
@@ -209,6 +206,7 @@ public final class FSA5 extends FSA {
 	/**
      * {@inheritDoc} 
      */
+	@Override
 	public byte getArcLabel(int arc) {
 		return arcs[arc];
 	}
@@ -216,6 +214,7 @@ public final class FSA5 extends FSA {
 	/**
      * {@inheritDoc} 
      */
+	@Override
 	public boolean isArcFinal(int arc) {
 		return (arcs[arc + ADDRESS_OFFSET] & BIT_FINAL_ARC) != 0;
 	}
@@ -223,6 +222,7 @@ public final class FSA5 extends FSA {
 	/**
      * {@inheritDoc} 
      */
+	@Override
 	public boolean isArcTerminal(int arc) {
 		return (0 == getDestinationNodeOffset(arc));
 	}
@@ -230,7 +230,8 @@ public final class FSA5 extends FSA {
 	/**
 	 * {@inheritDoc}
 	 */
-    public int getNodeNumber(int node) {
+	@Override
+    public int getNumberAtNode(int node) {
     	assert getFlags().contains(FSAFlags.NUMBERS) 
     		: "This FSA was not compiled with NUMBERS.";
 
@@ -243,6 +244,7 @@ public final class FSA5 extends FSA {
 	 * <p>For this automaton version, an additional {@link FSAFlags#NUMBERS} flag
 	 * may be set to indicate the automaton contains extra fields for each node.</p>
 	 */
+	@Override
 	public Set<FSAFlags> getFlags() {
 	    return Collections.unmodifiableSet(flags);
 	}
@@ -264,6 +266,14 @@ public final class FSA5 extends FSA {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Iterable<ByteBuffer> getSequences(int node) {
+	    return FSAUtils.getSequences(this, node);
+	}
+
+	/**
 	 * Returns an n-byte integer encoded in byte-packed representation.
 	 */
 	static final int decodeFromBytes(
@@ -279,7 +289,7 @@ public final class FSA5 extends FSA {
 	/**
 	 * Returns the address of the node pointed to by this arc.
 	 */
-	protected final int getDestinationNodeOffset(int arc) {
+	final int getDestinationNodeOffset(int arc) {
 		if (isNextSet(arc)) {
 			/* The destination node follows this arc in the array. */
 			return skipArc(arc);
@@ -291,4 +301,13 @@ public final class FSA5 extends FSA {
 			return decodeFromBytes(arcs, arc + ADDRESS_OFFSET, gtl) >>> 3;
 		}
 	}
+
+	/**
+     * Read the arc's layout and skip as many bytes, as needed.
+     */
+    private int skipArc(int offset) {
+    	return offset + (isNextSet(offset) 
+    			? 1 + 1 /* label + flags */ 
+    			: 1 + gtl /* label + flags/address */);
+    }
 }

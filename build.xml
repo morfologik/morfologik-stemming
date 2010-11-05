@@ -1,193 +1,194 @@
 <project name="Stempelator" default="build">
-	<property name="build.name" value="morfologik-stemming" />
-	<property name="build.ver" value="trunk" />
+    <property name="build.name" value="morfologik-stemming" />
+    <property name="build.ver" value="trunk" />
 
-	<property name="tmp.dir" value="tmp" />
-	<property name="build.dir" value="${tmp.dir}/build" />
-	<property name="build.test.dir" value="${tmp.dir}/test" />
-	<property name="dist.dir" value="dist" />
+    <property name="tmp.dir" value="tmp" />
+    <property name="build.dir" value="${tmp.dir}/build" />
+    <property name="build.test.dir" value="${tmp.dir}/test" />
+    <property name="dist.dir" value="dist" />
 
-	<property name="jarfile-nodict" value="${tmp.dir}/bin/${build.name}-nodict-${build.ver}.jar" />
-	<property name="jarfile" value="${tmp.dir}/bin/${build.name}-${build.ver}.jar" />
+    <property name="jarfile-nodict" value="${tmp.dir}/bin/${build.name}-nodict-${build.ver}.jar" />
+    <property name="jarfile" value="${tmp.dir}/bin/${build.name}-${build.ver}.jar" />
 
-	<property name="srczip" value="${dist.dir}/${build.name}-${build.ver}-src.zip" />
-	<property name="binzip" value="${dist.dir}/${build.name}-${build.ver}.zip" />
+    <property name="srczip" value="${dist.dir}/${build.name}-${build.ver}-src.zip" />
+    <property name="binzip" value="${dist.dir}/${build.name}-${build.ver}.zip" />
 
+    <presetdef name="javac">
+        <javac deprecation="false" debug="true" target="1.6" source="1.6"
+            encoding="UTF-8" includeantruntime="false" />
+    </presetdef>
 
-	<path id="compile.classpath">
-		<fileset dir="lib">
-			<include name="**/*.jar" />
-		</fileset>
-	</path>
+    <path id="compile.classpath">
+        <fileset dir="lib">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
 
-	<fileset dir="lib" id="runtime.dependencies">
-		<include name="**/*.jar" />
-		<exclude name="junit*.jar" />
-	</fileset>
-
-
-	<target name="init">
-		<tstamp />
-		<mkdir dir="${build.dir}" />
-		<mkdir dir="${build.test.dir}" />
-	</target>
+    <fileset dir="lib" id="runtime.dependencies">
+        <include name="**/*.jar" />
+        <exclude name="junit*.jar" />
+    </fileset>
 
 
+    <target name="init">
+        <tstamp />
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${build.test.dir}" />
+    </target>
 
-	<target name="clean">
-		<delete dir="${build.dir}" failonerror="false" />
-		<delete dir="${dist.dir}" failonerror="false" />
-		<delete dir="target" failonerror="false" />
-		<delete dir="${tmp.dir}" failonerror="false">
-		        <exclude name="eclipse/**" />
+
+
+    <target name="clean">
+        <delete dir="${build.dir}" failonerror="false" />
+        <delete dir="${dist.dir}" failonerror="false" />
+        <delete dir="target" failonerror="false" />
+        <delete dir="${tmp.dir}" failonerror="false">
+            <exclude name="eclipse/**" />
         </delete>
-	</target>
+    </target>
 
 
 
-	<target name="compile" depends="init">
-		<javac classpath="${classpath}" destdir="${build.dir}" encoding="UTF-8" 
-				source="1.5" target="1.5" includeantruntime="no"
-		        debug="true">
-			<classpath refid="compile.classpath" />
-			<include name="**/*.java" />
-			<src location="src" />
-		</javac>
+    <target name="compile" depends="init">
+        <javac classpath="${classpath}" destdir="${build.dir}">
+            <classpath refid="compile.classpath" />
+            <include name="**/*.java" />
+            <src location="src" />
+        </javac>
 
-		<!-- Copy additional resources to the build folder. -->
-		<copy todir="${build.dir}">
-			<fileset dir="src">
-				<exclude name="**/*.java" />
-			</fileset>
-		</copy>
-	</target>
+        <!-- Copy additional resources to the build folder. -->
+        <copy todir="${build.dir}">
+            <fileset dir="src">
+                <exclude name="**/*.java" />
+            </fileset>
+        </copy>
+    </target>
 
 
 
-	<target name="compile.test" depends="init,compile">
-		<javac classpath="${classpath}" destdir="${build.test.dir}" encoding="UTF-8" 
-		    includeantruntime="no">
-			<classpath refid="compile.classpath" />
-			<classpath location="${build.dir}" />
+    <target name="compile.test" depends="init,compile">
+        <javac classpath="${classpath}" destdir="${build.test.dir}">
+            <classpath refid="compile.classpath" />
+            <classpath location="${build.dir}" />
 
-			<src location="src-test" />
-		</javac>
+            <src location="src-test" />
+        </javac>
 
-		<!-- Copy additional resources to the build folder. -->
-		<copy todir="${build.test.dir}">
-			<fileset dir="src-test">
-				<exclude name="**/*.java" />
-			</fileset>
-		</copy>
-	</target>
-
-
-
-	<target name="test" depends="compile, compile.test">
-		<mkdir dir="${tmp.dir}/tests" />
-		<junit printsummary="yes" haltonfailure="yes" maxmemory="256m" forkmode="once" fork="true">
-			<classpath refid="compile.classpath" />
-			<classpath location="${build.dir}" />
-			<classpath location="${build.test.dir}" />
-			
-            <jvmarg value="-ea" /> 
-
-			<formatter type="plain" />
-
-			<batchtest todir="${tmp.dir}/tests">
-				<fileset dir="src-test">
-					<include name="**/*Test.java" />
-				</fileset>
-			</batchtest>
-		</junit>
-	</target>
+        <!-- Copy additional resources to the build folder. -->
+        <copy todir="${build.test.dir}">
+            <fileset dir="src-test">
+                <exclude name="**/*.java" />
+            </fileset>
+        </copy>
+    </target>
 
 
 
-	<target name="javadoc" depends="init">
-		<javadoc sourcepath="src" packagenames="morfologik.*" destdir="${tmp.dir}/javadoc">
-			<classpath refid="compile.classpath" />
-		</javadoc>
-	</target>
+    <target name="test" depends="compile, compile.test">
+        <mkdir dir="${tmp.dir}/tests" />
+        <junit printsummary="yes" haltonfailure="yes" maxmemory="256m" forkmode="once" fork="true">
+            <classpath refid="compile.classpath" />
+            <classpath location="${build.dir}" />
+            <classpath location="${build.test.dir}" />
+
+            <jvmarg value="-ea" />
+
+            <formatter type="plain" />
+
+            <batchtest todir="${tmp.dir}/tests">
+                <fileset dir="src-test">
+                    <include name="**/*Test.java" />
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
 
 
 
-	<target name="jar" depends="clean, compile, licenses">
-		<mkdir dir="${tmp.dir}/bin" />
-
-		<property name="main.class" value="morfologik.tools.Launcher" />
-		
-		<pathconvert property="manifest.classpath" pathsep=" ">
-			<flattenmapper />
-			<path>
-				<fileset refid="runtime.dependencies" />
-			</path>
-		</pathconvert>
-
-		<jar jarfile="${jarfile}">
-			<fileset dir="${build.dir}" />
-			<zipfileset file="${tmp.dir}/licenses/morfologik-stemming.LICENSE" fullpath="META-INF/Morfologik.LICENSE" />
-			<manifest>
-				<attribute name="Main-Class" value="${main.class}" />
-				<attribute name="Class-Path" value="${manifest.classpath}" />
-			</manifest>
-		</jar>
-
-		<jar jarfile="${jarfile-nodict}">
-			<fileset dir="${build.dir}">
-				<exclude name="morfologik/dictionaries/**" />
-			</fileset>
-			<zipfileset file="${tmp.dir}/licenses/morfologik-stemming-nodict.LICENSE" fullpath="META-INF/Morfologik.LICENSE" />
-			<manifest>
-				<attribute name="Main-Class" value="${main.class}" />
-				<attribute name="Class-Path" value="${manifest.classpath}" />
-			</manifest>
-		</jar>
-	</target>
+    <target name="javadoc" depends="init">
+        <javadoc sourcepath="src" packagenames="morfologik.*" destdir="${tmp.dir}/javadoc">
+            <classpath refid="compile.classpath" />
+        </javadoc>
+    </target>
 
 
 
-	<target name="build" depends="jar">
-		<copy todir="${tmp.dir}/bin">
-			<fileset refid="runtime.dependencies" />
-			<fileset dir=".">
-				<include name="LICENSE*.txt" />
-				<include name="README.txt" />
-				<include name="version.txt" />
-			</fileset>
-		</copy>
-	</target>
+    <target name="jar" depends="clean, compile, licenses">
+        <mkdir dir="${tmp.dir}/bin" />
+
+        <property name="main.class" value="morfologik.tools.Launcher" />
+
+        <pathconvert property="manifest.classpath" pathsep=" ">
+            <flattenmapper />
+            <path>
+                <fileset refid="runtime.dependencies" />
+            </path>
+        </pathconvert>
+
+        <jar jarfile="${jarfile}">
+            <fileset dir="${build.dir}" />
+            <zipfileset file="${tmp.dir}/licenses/morfologik-stemming.LICENSE" fullpath="META-INF/Morfologik.LICENSE" />
+            <manifest>
+                <attribute name="Main-Class" value="${main.class}" />
+                <attribute name="Class-Path" value="${manifest.classpath}" />
+            </manifest>
+        </jar>
+
+        <jar jarfile="${jarfile-nodict}">
+            <fileset dir="${build.dir}">
+                <exclude name="morfologik/dictionaries/**" />
+            </fileset>
+            <zipfileset file="${tmp.dir}/licenses/morfologik-stemming-nodict.LICENSE" fullpath="META-INF/Morfologik.LICENSE" />
+            <manifest>
+                <attribute name="Main-Class" value="${main.class}" />
+                <attribute name="Class-Path" value="${manifest.classpath}" />
+            </manifest>
+        </jar>
+    </target>
 
 
 
-	<target name="dist" depends="clean, test, build, javadoc, licenses">
-	    <mkdir dir="${dist.dir}" />
+    <target name="build" depends="jar">
+        <copy todir="${tmp.dir}/bin">
+            <fileset refid="runtime.dependencies" />
+            <fileset dir=".">
+                <include name="LICENSE*.txt" />
+                <include name="README.txt" />
+                <include name="version.txt" />
+            </fileset>
+        </copy>
+    </target>
 
-		<!-- Package source distribution -->
-		<fileset dir="." id="srcdistfiles">
-			<exclude name="tmp/**" />
-			<exclude name="dist/**" />
-			<exclude name=".settings/**" />
-			<exclude name="${srczip}" />
-		</fileset>
 
-		<zip destfile="${srczip}">
-			<fileset refid="srcdistfiles" />
-			<zipfileset prefix="doc/api" dir="${tmp.dir}/javadoc" />
-		</zip>
 
-		<zip destfile="${binzip}">
-			<fileset dir="${tmp.dir}/bin" />
-			<zipfileset prefix="api" dir="${tmp.dir}/javadoc" />
+    <target name="dist" depends="clean, test, build, javadoc, licenses">
+        <mkdir dir="${dist.dir}" />
+
+        <!-- Package source distribution -->
+        <fileset dir="." id="srcdistfiles">
+            <exclude name="tmp/**" />
+            <exclude name="dist/**" />
+            <exclude name=".settings/**" />
+            <exclude name="${srczip}" />
+        </fileset>
+
+        <zip destfile="${srczip}">
+            <fileset refid="srcdistfiles" />
+            <zipfileset prefix="doc/api" dir="${tmp.dir}/javadoc" />
+        </zip>
+
+        <zip destfile="${binzip}">
+            <fileset dir="${tmp.dir}/bin" />
+            <zipfileset prefix="api" dir="${tmp.dir}/javadoc" />
 
             <!-- Include licenses. -->
             <zipfileset dir="${tmp.dir}/licenses" />
-		</zip>
-	</target>
-    
-    
-    
-    <target name="licenses"> 
+        </zip>
+    </target>
+
+
+
+    <target name="licenses">
         <delete dir="${tmp.dir}/licenses" />
         <mkdir dir="${tmp.dir}/licenses" />
 

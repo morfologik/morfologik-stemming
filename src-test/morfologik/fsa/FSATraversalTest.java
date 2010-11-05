@@ -22,8 +22,7 @@ public final class FSATraversalTest {
      */
 	@Before
 	public void setUp() throws Exception {
-		fsa = FSA.getInstance(
-				this.getClass().getResourceAsStream("en_tst.dict"));
+		fsa = FSA.read(this.getClass().getResourceAsStream("en_tst.dict"));
 	}
 
 	/**
@@ -31,10 +30,8 @@ public final class FSATraversalTest {
      */
 	@Test
 	public void testTraversalWithIterable() {
-		final FSATraversalHelper helper = fsa.getTraversalHelper();
-
 		int count = 0;
-		for (ByteBuffer bb : helper.getAllSubsequences(fsa.getRootNode())) {
+		for (ByteBuffer bb : fsa.getSequences()) {
 			assertEquals(0, bb.arrayOffset());
 			assertEquals(0, bb.position());
 			count++;
@@ -76,14 +73,14 @@ public final class FSATraversalTest {
      */
 	@Test
 	public void testTraversalHelperMatcher() throws IOException {
-		final FSA5 fsa = (FSA5) FSA.getInstance(this.getClass().getResourceAsStream("abc.fsa"));
-		final FSATraversalHelper traversalHelper = fsa.getTraversalHelper();
-		
+		final FSA5 fsa = FSA.read(this.getClass().getResourceAsStream("abc.fsa"));
+		final FSATraversalHelper traversalHelper = new FSATraversalHelper(fsa);
+
 		FSAMatch m = traversalHelper.matchSequence("ax".getBytes());
 		assertEquals(FSAMatchType.NO_MATCH, m.getMatchType());
 		assertEquals(1, m.getIndex());
 		assertEquals(new HashSet<String>(Arrays.asList("ba", "c")), 
-				     suffixes(traversalHelper, m.getNode()));
+				suffixes(fsa, m.getNode()));
 
 		assertEquals(FSAMatchType.EXACT_MATCH, 
 				traversalHelper.matchSequence("aba".getBytes()).getMatchType());
@@ -95,15 +92,15 @@ public final class FSATraversalTest {
 		m = traversalHelper.matchSequence("ab".getBytes());
 		assertEquals(FSAMatchType.SEQUENCE_IS_A_PREFIX, m.getMatchType());
 		assertEquals(new HashSet<String>(Arrays.asList("a")), 
-				     suffixes(traversalHelper, m.getNode()));
+				suffixes(fsa, m.getNode()));
 	}
 
 	/**
 	 * Return all sequences reachable from a given node, as strings.  
 	 */
-	private HashSet<String> suffixes(FSATraversalHelper traversalHelper, int node) {
+	private HashSet<String> suffixes(FSA fsa, int node) {
 		HashSet<String> result = new HashSet<String>(); 
-		for (ByteBuffer bb : traversalHelper.getAllSubsequences(node))
+		for (ByteBuffer bb : fsa.getSequences(node))
 		{
 			try {
 	            result.add(new String(bb.array(), bb.position(), bb.remaining(), "UTF-8"));

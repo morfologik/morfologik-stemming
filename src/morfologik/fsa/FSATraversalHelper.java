@@ -8,12 +8,8 @@ import static morfologik.fsa.FSAMatchType.*;
 /**
  * This class implements some common matching and scanning operations on a
  * generic FSA.
- * 
- * <p>
- * Optimized implementations may be provided my specific versions of FSA,
- * therefore objects of this class should be instantiated via
- * {@link FSA#getTraversalHelper()}.
  */
+@Deprecated
 public final class FSATraversalHelper {
 	/**
 	 * Target automaton.
@@ -21,36 +17,10 @@ public final class FSATraversalHelper {
 	private final FSA fsa;
 
 	/**
-	 * Only allow new instances from within the package.
+	 * 
 	 */
-	FSATraversalHelper(FSA fsa) {
+	public FSATraversalHelper(FSA fsa) {
 		this.fsa = fsa;
-	}
-
-	/**
-	 * Returns an {@link Iterator} of all subsequences available from the given
-	 * node to all reachable final states.
-	 */
-	public Iterable<ByteBuffer> getAllSubsequences(final int node) {
-		if (node == 0) {
-			return Collections.<ByteBuffer> emptyList();
-		}
-
-		// Create a custom iterator in the FSA
-		return new Iterable<ByteBuffer>() {
-			public Iterator<ByteBuffer> iterator() {
-			    return new FSAFinalStatesIterator(fsa, node);
-			}
-		};
-	}
-
-	/**
-	 * Returns a new iterator for walking along the final states of this FSA.
-	 * The iterator is initially set to walk along all final states reachable
-	 * from the root node.
-	 */
-	public FSAFinalStatesIterator getFinalStatesIterator() {
-		return new FSAFinalStatesIterator(fsa, fsa.getRootNode());
 	}
 
 	/**

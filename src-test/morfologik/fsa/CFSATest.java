@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Iterator;
 
 import org.junit.Test;
 
@@ -30,7 +31,7 @@ public class CFSATest {
 	}
 
 	private void checkIdentity(String resource) throws IOException {
-		final FSA fsa = FSA.getInstance(this.getClass().getResourceAsStream(resource));
+		final FSA fsa = FSA.read(this.getClass().getResourceAsStream(resource));
 
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -40,7 +41,7 @@ public class CFSATest {
 		encoder.serialize(baos);
 
 		final byte[] input = baos.toByteArray();
-		FSA cfsa = FSA.getInstance(new ByteArrayInputStream(input));
+		FSA cfsa = FSA.read(new ByteArrayInputStream(input));
 
 		assertTrue(cfsa instanceof CFSA);
 		assertIdentical(fsa, cfsa);
@@ -57,8 +58,8 @@ public class CFSATest {
 		assertEquals(info1.nodeCount, info2.nodeCount);
 		assertEquals(info1.arcsCount, info2.arcsCount);
 
-		FSAFinalStatesIterator fsi1 = fsa1.getTraversalHelper().getFinalStatesIterator();
-		FSAFinalStatesIterator fsi2 = fsa2.getTraversalHelper().getFinalStatesIterator();
+		Iterator<ByteBuffer> fsi1 = fsa1.getSequences().iterator();
+		Iterator<ByteBuffer> fsi2 = fsa2.getSequences().iterator();
 
 		while (true) {
 			assertEquals(fsi1.hasNext(), fsi2.hasNext());

@@ -2,8 +2,7 @@ package morfologik.tools;
 
 import java.io.*;
 
-import morfologik.fsa.FSA5;
-import morfologik.fsa.FSAInfo;
+import morfologik.fsa.*;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,8 +30,8 @@ public class Text2FSA5Test {
 				"--input", input.getAbsolutePath(),
 				"--output", output.getAbsolutePath()
 		});
-		
-		FSA5 fsa = (FSA5) FSA5.getInstance(new FileInputStream(output));
+
+		FSA5 fsa = FSA.read(new FileInputStream(output));
 		Assert.assertEquals(3, new FSAInfo(fsa).finalStatesCount);
 	}
 }
