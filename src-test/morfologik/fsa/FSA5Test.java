@@ -103,7 +103,6 @@ public final class FSA5Test {
 	}
 
 	private static void verifyContent(List<String> expected, FSA fsa) throws IOException {
-		final FSATraversalHelper helper = new FSATraversalHelper(fsa);
 		final ArrayList<String> actual = new ArrayList<String>();
 
 		int count = 0;

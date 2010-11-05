@@ -10,6 +10,8 @@ import java.util.Set;
  * Daciuk's <i>Incremental Construction of Finite-State Automata and
  * Transducers, and Their Use in the Natural Language Processing</i> (PhD
  * thesis, Technical University of Gdansk).
+ * 
+ * @see FSATraversal
  */
 public abstract class FSA implements Iterable<ByteBuffer> {
 	/**

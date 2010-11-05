@@ -1,5 +1,7 @@
 package morfologik.stemming;
 
+import static morfologik.fsa.MatchResult.*;
+
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
@@ -26,7 +28,7 @@ import morfologik.util.BufferUtils;
  */
 public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 	/** A Finite State Automaton used for look ups. */
-	private final FSATraversalHelper matcher;
+	private final FSATraversal matcher;
 
 	/** An iterator for walking along the final states of {@link #fsa}. */
 	private final FSAFinalStatesIterator finalStatesIterator;
@@ -81,7 +83,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 	/**
 	 * Reusable match result.
 	 */
-	private final FSAMatch matchResult = new FSAMatch();
+	private final MatchResult matchResult = new MatchResult();
 
 	/**
 	 * The {@link Dictionary} this lookup is using.
@@ -102,7 +104,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 		this.dictionaryMetadata = dictionary.metadata;
 		this.rootNode = dictionary.fsa.getRootNode();
 		this.fsa = dictionary.fsa;
-		this.matcher = new FSATraversalHelper(fsa);
+		this.matcher = new FSATraversal(fsa);
 		this.finalStatesIterator = new FSAFinalStatesIterator(fsa, fsa.getRootNode());
 
 		if (rootNode == 0) {
@@ -145,15 +147,15 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 		byteBuffer = charsToBytes(charBuffer, byteBuffer);
 
 		// Try to find a partial match in the dictionary.
-		final FSAMatch match = matcher.matchSequence(matchResult, byteBuffer
+		final MatchResult match = matcher.match(matchResult, byteBuffer
 		        .array(), 0, byteBuffer.remaining(), rootNode);
 
-		if (match.getMatchType() == FSAMatchType.SEQUENCE_IS_A_PREFIX) {
+		if (match.kind == SEQUENCE_IS_A_PREFIX) {
 			/*
 			 * The entire sequence exists in the dictionary. A separator should
 			 * be the next symbol.
 			 */
-			final int arc = fsa.getArc(match.getNode(), separator);
+			final int arc = fsa.getArc(match.node, separator);
 
 			/*
 			 * The situation when the arc points to a final node should NEVER

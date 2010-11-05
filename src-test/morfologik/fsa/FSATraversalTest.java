@@ -1,6 +1,7 @@
 package morfologik.fsa;
 
 import static org.junit.Assert.assertEquals;
+import static morfologik.fsa.MatchResult.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -12,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Tests {@link FSATraversalHelper}.
+ * Tests {@link FSATraversal}.
  */
 public final class FSATraversalTest {
 	private FSA fsa;
@@ -69,30 +70,30 @@ public final class FSATraversalTest {
 	}
 
 	/**
-     * Test {@link FSATraversalHelper} and matching results.
+     * Test {@link FSATraversal} and matching results.
      */
 	@Test
 	public void testTraversalHelperMatcher() throws IOException {
 		final FSA5 fsa = FSA.read(this.getClass().getResourceAsStream("abc.fsa"));
-		final FSATraversalHelper traversalHelper = new FSATraversalHelper(fsa);
+		final FSATraversal traversalHelper = new FSATraversal(fsa);
 
-		FSAMatch m = traversalHelper.matchSequence("ax".getBytes());
-		assertEquals(FSAMatchType.NO_MATCH, m.getMatchType());
-		assertEquals(1, m.getIndex());
+		MatchResult m = traversalHelper.match("ax".getBytes());
+		assertEquals(NO_MATCH, m.kind);
+		assertEquals(1, m.index);
 		assertEquals(new HashSet<String>(Arrays.asList("ba", "c")), 
-				suffixes(fsa, m.getNode()));
+				suffixes(fsa, m.node));
 
-		assertEquals(FSAMatchType.EXACT_MATCH, 
-				traversalHelper.matchSequence("aba".getBytes()).getMatchType());
+		assertEquals(EXACT_MATCH, 
+				traversalHelper.match("aba".getBytes()).kind);
 
-		m = traversalHelper.matchSequence("abalonger".getBytes());
-		assertEquals(FSAMatchType.AUTOMATON_HAS_PREFIX, m.getMatchType());
-		assertEquals("longer", "abalonger".substring(m.getIndex()));
+		m = traversalHelper.match("abalonger".getBytes());
+		assertEquals(AUTOMATON_HAS_PREFIX, m.kind);
+		assertEquals("longer", "abalonger".substring(m.index));
 		
-		m = traversalHelper.matchSequence("ab".getBytes());
-		assertEquals(FSAMatchType.SEQUENCE_IS_A_PREFIX, m.getMatchType());
+		m = traversalHelper.match("ab".getBytes());
+		assertEquals(SEQUENCE_IS_A_PREFIX, m.kind);
 		assertEquals(new HashSet<String>(Arrays.asList("a")), 
-				suffixes(fsa, m.getNode()));
+				suffixes(fsa, m.node));
 	}
 
 	/**

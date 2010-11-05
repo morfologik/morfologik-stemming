@@ -1,50 +1,48 @@
 package morfologik.fsa;
 
-import java.nio.ByteBuffer;
-import java.util.Collections;
-import java.util.Iterator;
-import static morfologik.fsa.FSAMatchType.*;
+import static morfologik.fsa.MatchResult.*;
 
 /**
  * This class implements some common matching and scanning operations on a
  * generic FSA.
  */
-@Deprecated
-public final class FSATraversalHelper {
+public final class FSATraversal {
 	/**
 	 * Target automaton.
 	 */
 	private final FSA fsa;
 
 	/**
-	 * 
+	 * Traversals of the given FSA.
 	 */
-	public FSATraversalHelper(FSA fsa) {
+	public FSATraversal(FSA fsa) {
 		this.fsa = fsa;
 	}
 
 	/**
-	 * Same as {@link #matchSequence(byte[], int, int, int)}, but allows passing
-	 * a reusable {@link FSAMatch} object so that no intermediate garbage is
+	 * Same as {@link #match(byte[], int, int, int)}, but allows passing
+	 * a reusable {@link MatchResult} object so that no intermediate garbage is
 	 * produced.
 	 * 
 	 * @return The same object as <code>result</code>, but with reset internal
 	 *         type and other fields.
 	 */
-	public FSAMatch matchSequence(FSAMatch result, byte[] sequence, int start,
-	        int length, int node) {
+	public MatchResult match(MatchResult result, 
+			byte[] sequence, int start, int length, int node)
+	{
 		if (node == 0) {
 			result.reset(NO_MATCH, start, node);
 			return result;
 		}
 
+		final FSA fsa = this.fsa;
 		final int end = start + length;
 		for (int i = start; i < end; i++) {
 			final int arc = fsa.getArc(node, sequence[i]);
 			if (arc != 0) {
 				if (fsa.isArcFinal(arc) && i + 1 == end) {
 					/* The automaton has an exact match of the input sequence. */
-					result.reset(EXACT_MATCH);
+					result.reset(EXACT_MATCH, i, node);
 					return result;
 				}
 
@@ -80,23 +78,23 @@ public final class FSATraversalHelper {
 	 * @param node
 	 *            Start node identifier in the FSA.
 	 * 
-	 * @see #matchSequence(byte [], int)
+	 * @see #match(byte [], int)
 	 */
-	public FSAMatch matchSequence(byte[] sequence, int start, int length, int node) {
-		return matchSequence(new FSAMatch(), sequence, start, length, node);
+	public MatchResult match(byte[] sequence, int start, int length, int node) {
+		return match(new MatchResult(), sequence, start, length, node);
 	}
 
 	/**
-	 * @see #matchSequence(byte[], int, int, int)
+	 * @see #match(byte[], int, int, int)
 	 */
-	public FSAMatch matchSequence(byte[] sequence, int node) {
-		return matchSequence(sequence, 0, sequence.length, node);
+	public MatchResult match(byte[] sequence, int node) {
+		return match(sequence, 0, sequence.length, node);
 	}
 
 	/**
-	 * @see #matchSequence(byte[], int, int, int)
+	 * @see #match(byte[], int, int, int)
 	 */
-	public FSAMatch matchSequence(byte[] sequence) {
-		return matchSequence(sequence, fsa.getRootNode());
+	public MatchResult match(byte[] sequence) {
+		return match(sequence, fsa.getRootNode());
 	}
 }
