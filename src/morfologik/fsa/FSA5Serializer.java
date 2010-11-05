@@ -211,8 +211,7 @@ public final class FSA5Serializer {
 			final State[] states = s.states;
 			final boolean[] final_transitions = s.final_transitions;
 
-			final int maxTransition = labels.length - 1;
-			final int lastTransition = 0;
+			final int lastTransition = labels.length - 1;
 
 			offset += nodeDataLength;
 			if (nodeDataLength > 0 && os != null) {
@@ -227,7 +226,7 @@ public final class FSA5Serializer {
 				bb.clear();
 			}
 
-			for (int i = maxTransition; i >= 0; i--) {
+			for (int i = 0; i <= lastTransition; i++) {
 				final State target = states[i];
 
 				int targetOffset;
