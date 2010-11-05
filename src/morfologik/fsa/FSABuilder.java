@@ -10,7 +10,8 @@ import morfologik.util.Arrays;
  */
 public class FSABuilder {
 	/**
-	 * Lexicographic order of input sequences.
+	 * Lexicographic order of input sequences. By default, consistent with the "C"
+	 * (absolute value of bytes, 0-255).
 	 */
 	public static int compare(byte [] s1, int lens1, byte [] s2, int lens2) {
 		final int max = Math.min(lens1, lens2);
@@ -19,13 +20,14 @@ public class FSABuilder {
 			final byte c1 = s1[i];
 			final byte c2 = s2[i];
 			if (c1 != c2)
-				return c1 - c2;
+				return (c1 & 0xff) - (c2 & 0xff);
 		}
 		return lens1 - lens2;
 	}
 
 	/**
-	 * Comparator comparing full byte arrays.
+	 * Comparator comparing full byte arrays consistently with 
+	 * {@link #compare(byte[], int, byte[], int)}.
 	 */
 	public static final Comparator<byte[]> LEXICAL_ORDERING = new Comparator<byte[]>() {
 		public int compare(byte[] o1, byte[] o2) {

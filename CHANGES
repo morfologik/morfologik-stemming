@@ -1,5 +1,8 @@
 
 1.5.0 (trunk)
+          Changed the default ordering from Java signed-byte to C-like unsigned byte value.
+          This lets one use GNU sort to sort the input using 'export LC_ALL=C; sort input'.  
+
           Added traversal routines to calculate perfect hashing based on FSA with NUMBERS.
 
           Changed the order of serialized arcs in the binary serializer for FSA5.

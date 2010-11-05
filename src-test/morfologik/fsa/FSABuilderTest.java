@@ -1,5 +1,8 @@
 package morfologik.fsa;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -7,6 +10,8 @@ import morfologik.util.BufferUtils;
 import morfologik.util.MinMax;
 
 import org.junit.*;
+
+import static org.junit.Assert.*;
 
 public class FSABuilderTest {
 	private static byte[][] input;
@@ -27,6 +32,38 @@ public class FSABuilderTest {
 		State s = FSABuilder.build(input);
 		checkCorrect(input, s);
 	}
+
+	/**
+     * Verify absolute byte-value ordering in the comparators and serialized automaton.
+     */
+    @Test
+    public void testLexicographicOrder() throws IOException {
+        byte[][] input = { 
+                {0},
+                {1},
+                {(byte) 0xff},
+        };
+        Arrays.sort(input, FSABuilder.LEXICAL_ORDERING);
+
+        // Check if lexical ordering is consistent with absolute byte value.
+        assertEquals(0, input[0][0]);
+        assertEquals(1, input[1][0]);
+        assertEquals((byte) 0xff, input[2][0]);
+
+        State s = FSABuilder.build(input);
+        checkCorrect(input, s);
+        
+        // Check if arcs are ordered after serialization.
+        FSA5 fsa = FSA.read(new ByteArrayInputStream(
+                new FSA5Serializer().serialize(s, new ByteArrayOutputStream()).toByteArray()));
+
+        int arc = fsa.getFirstArc(fsa.getRootNode());
+        assertEquals(0, fsa.getArcLabel(arc));
+        arc = fsa.getNextArc(arc);
+        assertEquals(1, fsa.getArcLabel(arc));
+        arc = fsa.getNextArc(arc);
+        assertEquals((byte) 0xff, fsa.getArcLabel(arc));
+    }
 
 	/**
 	 * 
