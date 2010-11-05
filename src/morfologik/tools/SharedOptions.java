@@ -93,6 +93,12 @@ final class SharedOptions {
 	    .withLongOpt("with-numbers")
 	    .create("n");
 
+    public final static Option progressOption = OptionBuilder
+        .withDescription("Print more verbose progress information")
+        .isRequired(false)
+        .withLongOpt("progress")
+        .create();
+
 	public final static Option standardEncoding = OptionBuilder
 	    .withDescription("Encode suffix forms in a standard way")
 	    .withLongOpt("suffix")

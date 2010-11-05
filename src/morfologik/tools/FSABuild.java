@@ -3,11 +3,14 @@ package morfologik.tools;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Locale;
 
 import morfologik.fsa.FSA5;
 import morfologik.fsa.FSA5Serializer;
 import morfologik.fsa.FSABuilder;
+import morfologik.fsa.FSAInfo;
 import morfologik.fsa.State;
+import morfologik.fsa.StateUtils;
 import morfologik.util.Arrays;
 
 import org.apache.commons.cli.*;
@@ -16,6 +19,26 @@ import org.apache.commons.cli.*;
  * Convert from plain text input to {@link FSA5}.
  */
 public final class FSABuild extends Tool {
+    /**
+     * Be more verbose about progress.
+     */
+    private boolean printProgress;
+    
+    /**
+     * Last part's start time.
+     */
+    private long partStart;
+
+    /**
+     * Start of the process.
+     */
+    private long world;
+    
+    /**
+     * Serializer used for emitting the FSA.
+     */
+    private FSA5Serializer serializer = new FSA5Serializer();
+    
 	/**
 	 * Command line entry point after parsing arguments.
 	 */
@@ -25,40 +48,54 @@ public final class FSABuild extends Tool {
 			printUsage();
 			return;
 		}
+		
+		// Parse the input options.
+        parseOptions(line);
 
-		final long world = System.currentTimeMillis();
+		world = System.currentTimeMillis();
 		try {
-			log("Reading input...");
+			if (!printProgress) {
+			    startPart("Reading input");
+			} else {
+			    this.partStart = System.currentTimeMillis();
+			}
 			final ArrayList<byte[]> input = readInput(initializeInput(line));
+			if (printProgress) {
+			    long partStart = this.partStart;
+			    startPart("Reading input");
+			    this.partStart = partStart;
+			}
+		    endPart();
+            logInt("Input sequences", input.size());
 
-			log("Sorting...");
+			startPart("Sorting");
 			Collections.sort(input, FSABuilder.LEXICAL_ORDERING);
-			log("Input consists of: " + input.size() + " sequences.");
+			endPart();
 
-			log("Building FSA...");
-			final long start = System.currentTimeMillis();
-			State build = FSABuilder.build(input);
-			final long end = System.currentTimeMillis();
-			log("FSA built in: " + String.format("%.2f", (end - start) / 1000.0) + " sec.");
+			startPart("Building FSA");
+			State root = FSABuilder.build(input);
+			endPart();
+
+			startPart("Statistics");
+			FSAInfo info = StateUtils.getInfo(root);
+	        endPart();
+
+            logInt("Nodes", info.nodeCount);
+            logInt("Arcs", info.arcsCount);
 
 			// Save the result.
-			log("Saving FSA...");
-			FSA5Serializer serializer = new FSA5Serializer();
-			initializeSerializer(serializer, line);
-			serializer.serialize(build, initializeOutput(line)).close();
-
-			log("Done in: " + String.format("%.2f", 
-					(System.currentTimeMillis() - world) / 1000.0) + " sec.");
+            startPart("Serializing FSA");
+			serializer.serialize(root, initializeOutput(line)).close();
+			endPart();
 		} catch (OutOfMemoryError e) {
 			log("Out of memory. Pass -Xmx1024m argument (or more) to java.");
 		}
 	}
 
-	/**
-	 * Initialize automaton serializer.
+    /**
+	 * Parse input options.
 	 */
-	private void initializeSerializer(FSA5Serializer serializer,
-            CommandLine line) {
+	private void parseOptions(CommandLine line) {
 		String opt = SharedOptions.fillerCharacterOption.getLongOpt();
 		if (line.hasOption(opt)) {
 			String chr = line.getOptionValue(opt);
@@ -76,6 +113,11 @@ public final class FSABuild extends Tool {
         opt = SharedOptions.withNumbersOption.getOpt();
         if (line.hasOption(opt)) {
             serializer.withNumbers();
+        }
+        
+        opt = SharedOptions.progressOption.getLongOpt();
+        if (line.hasOption(opt)) {
+            printProgress = true;
         }
     }
 
@@ -96,9 +138,37 @@ public final class FSABuild extends Tool {
 	 */
 	private void log(String msg) {
 		System.err.println(msg);
+		System.err.flush();
 	}
 
 	/**
+     * Log message header and save current time.
+     */
+    private void startPart(String header) {
+        System.err.print(String.format(Locale.ENGLISH, "%-20s", header + "..."));
+        System.err.flush();
+        partStart = System.currentTimeMillis();
+    }
+
+    /**
+     * 
+     */
+    private void endPart() {
+        long now = System.currentTimeMillis();
+        System.err.println(
+                String.format(Locale.ENGLISH, "%13.2f sec.  [%6.2f sec.]", 
+                (now - partStart) / 1000.0,
+                (now - world) / 1000.0));
+    }
+
+    /**
+     * Log an integer statistic.
+     */
+    private void logInt(String header, int v) {
+        System.err.println(String.format(Locale.ENGLISH, "%-20s  %,11d", header, v));
+    }
+
+    /**
 	 * Read all the input lines.
 	 */
 	private ArrayList<byte[]> readInput(InputStream is) throws IOException {
@@ -116,7 +186,7 @@ public final class FSABuild extends Tool {
 			if (b == '\n') {
 				processLine(input, buffer, pos);
 				pos = 0;
-				if ((line++ % 10000) == 0) {
+				if (printProgress && (line++ % 10000) == 0) {
 					log("Lines read: " + (line - 1));
 				}
 			} else {
@@ -154,6 +224,7 @@ public final class FSABuild extends Tool {
 		options.addOption(SharedOptions.annotationSeparatorCharacterOption);
 
 		options.addOption(SharedOptions.withNumbersOption);
+		options.addOption(SharedOptions.progressOption);
 	}
 
 	/**

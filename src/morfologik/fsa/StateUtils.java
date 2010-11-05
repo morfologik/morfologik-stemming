@@ -118,6 +118,6 @@ public class StateUtils {
 					if (isFinal) counters[2]++;
 			}
 		});
-		return new FSAInfo(counters[0], counters[1], counters[0], counters[2]);
+		return new FSAInfo(counters[0], counters[1], counters[1], counters[2]);
 	}
 }
