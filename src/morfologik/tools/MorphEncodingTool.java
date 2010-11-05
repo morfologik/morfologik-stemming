@@ -1,8 +1,19 @@
 package morfologik.tools;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import morfologik.fsa.FSA5Serializer;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 /**
  * This utility converts the dictionary in a text (tabbed) format into 
@@ -30,9 +41,9 @@ class MorphEncodingTool extends Tool {
 			prefixes = line.hasOption(SharedOptions.prefixEncoding.getOpt());
 		}
 
-		char separator = '+';
-		if (line.hasOption(SharedOptions.annotationSeparatorCharacterOption.getOpt())) {
-			String sep = line.getOptionValue(SharedOptions.annotationSeparatorCharacterOption.getOpt());
+		char separator = FSA5Serializer.DEFAULT_ANNOTATION;
+		if (line.hasOption(SharedOptions.annotationSeparatorCharacterOption.getLongOpt())) {
+			String sep = line.getOptionValue(SharedOptions.annotationSeparatorCharacterOption.getLongOpt());
 
 			if (sep.length() == 1) {
 				separator = sep.charAt(0);
