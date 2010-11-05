@@ -88,6 +88,7 @@ final class SharedOptions {
 		.create("annotation");
 	
 	public final static Option withNumbersOption = OptionBuilder
+	    .withDescription("Include numbers required for perfect hashing (larger automaton)")
 	    .isRequired(false)
 	    .withLongOpt("with-numbers")
 	    .create("n");
