@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 
 
 /**
@@ -62,16 +61,6 @@ public final class FSA5Serializer {
 	private boolean withNumbers;
 
 	/**
-	 * Mutable integer for offset calculation.
-	 */
-	final static class IntHolder {
-		public int value;
-		
-		public IntHolder() { }
-		public IntHolder(int v) { this.value = v; }
-	}
-
-	/**
 	 * Serialize the automaton with the number of right-language sequences in
 	 * each node. This is required to implement perfect hashing. The numbering
 	 * also preserves the order of input sequences.
@@ -85,7 +74,8 @@ public final class FSA5Serializer {
 
 	/**
 	 * Serialize root state <code>s</code> to an output stream in <code>FSA5</code> 
-	 * format.
+	 * format. The serialization process is not thread-safe on the set of 
+	 * the same {@link State}s (mutates {@link State} internals).
 	 * 
 	 * @see #withNumbers
 	 * 
@@ -94,7 +84,6 @@ public final class FSA5Serializer {
 	public <T extends OutputStream> T serialize(State s, T os)
 	        throws IOException {
 
-		final IdentityHashMap<State, IntHolder> offsets = new IdentityHashMap<State, IntHolder>();
 		final ArrayList<State> linearized = new ArrayList<State>();
 
 		// Add the "sink node", with a single arc pointing to itself.
@@ -104,7 +93,6 @@ public final class FSA5Serializer {
 		sink.final_transitions = new boolean [] {false};
 
 		linearized.add(sink); // Sink is not part of the automaton.
-		offsets.put(sink, new IntHolder());
 
 		// Add a special, initial "meta state".
 		State meta = new State();
@@ -116,7 +104,7 @@ public final class FSA5Serializer {
 		// Prepare space for arc offsets and linearize all the states.
 		s.preOrder(new Visitor<State>() {
 			public void accept(State s) {
-				offsets.put(s, new IntHolder());
+				s.offset = 0;
 				linearized.add(s);
 			}
 		});
@@ -125,26 +113,13 @@ public final class FSA5Serializer {
 		 * Calculate the number of bytes required for the node data,
 		 * if serializing with numbers.
 		 */
-		final IdentityHashMap<State, IntHolder> nodeNumbers = new IdentityHashMap<State, IntHolder>();
 		int nodeDataLength = 0;
 		if (withNumbers) {
-			nodeNumbers.put(sink, new IntHolder());
-			s.postOrder(new Visitor<State>() {
-				public void accept(State s) {
-					int thisNodeNumber = 0;
-					for (int i = 0; i < s.states.length; i++) {
-						if (s.final_transitions[i]) 
-							thisNodeNumber++;
-						thisNodeNumber += nodeNumbers.get(s.states[i]).value;
-					}
-					nodeNumbers.put(s, new IntHolder(thisNodeNumber));
-				}
-			});
-
-			int encodedSequences = nodeNumbers.get(s).value;
-			while (encodedSequences > 0) {
+		    s.intern();
+			int maxNumber = s.number;
+			while (maxNumber > 0) {
 				nodeDataLength++;
-				encodedSequences >>>= 8;
+				maxNumber >>>= 8;
 			}
 		}
 
@@ -152,13 +127,13 @@ public final class FSA5Serializer {
 		int gtl = 1;
 		while (true) {
 			// First pass: calculate offsets of states.
-			if (!emitArcs(null, linearized, gtl, offsets, nodeDataLength, nodeNumbers)) {
+			if (!emitArcs(null, linearized, gtl, nodeDataLength)) {
 				gtl++;
 				continue;
 			}
 
 			// Second pass: check if goto overflows anywhere.
-			if (emitArcs(null, linearized, gtl, offsets, nodeDataLength, nodeNumbers))
+			if (emitArcs(null, linearized, gtl, nodeDataLength))
 				break;
 
 			gtl++;
@@ -176,7 +151,7 @@ public final class FSA5Serializer {
 		/*
 		 * Emit the automaton.
 		 */
-		boolean gtlUnchanged = emitArcs(os, linearized, gtl, offsets, nodeDataLength, nodeNumbers);
+		boolean gtlUnchanged = emitArcs(os, linearized, gtl, nodeDataLength);
 		assert gtlUnchanged : "gtl changed in the final pass.";
 
 		return os;
@@ -188,9 +163,7 @@ public final class FSA5Serializer {
 	private boolean emitArcs(OutputStream os, 
 							 ArrayList<State> linearized,
 							 int gtl, 
-							 IdentityHashMap<State, IntHolder> offsets,
-							 int nodeDataLength, 
-							 IdentityHashMap<State, IntHolder> nodeNumbers)
+							 int nodeDataLength)
         throws IOException
     {
 		final ByteBuffer bb = ByteBuffer.allocate(
@@ -202,9 +175,9 @@ public final class FSA5Serializer {
 			final State s = linearized.get(j);
 
 			if (os == null) {
-				offsets.get(s).value = offset;
+				s.offset = offset;
 			} else {
-				assert offsets.get(s).value == offset;
+				assert s.offset == offset;
 			}
 
 			final byte[] labels = s.labels;
@@ -215,12 +188,12 @@ public final class FSA5Serializer {
 
 			offset += nodeDataLength;
 			if (nodeDataLength > 0 && os != null) {
-				int number = nodeNumbers.get(s).value;
-
+				int number = s.number;
 				for (int i = 0; i < nodeDataLength; i++) {
 					bb.put((byte) number);
 					number >>>= 8;
 				}
+
 				bb.flip();
 				os.write(bb.array(), bb.position(), bb.remaining());
 				bb.clear();
@@ -231,7 +204,7 @@ public final class FSA5Serializer {
 
 				int targetOffset;
 				if (isTerminal(target)) {
-					targetOffset = offsets.get(target).value;
+					targetOffset = target.offset;
 				} else {
 					targetOffset = 0;
 				}

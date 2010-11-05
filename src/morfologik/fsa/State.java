@@ -39,6 +39,17 @@ public final class State implements Traversable<State> {
 	boolean[] final_transitions = NO_FINALS;
 
 	/**
+	 * An internal field for storing this state's offset during serialization.
+	 */
+    int offset;
+
+    /**
+     * An internal field for storing this state's count of right-language sequences
+     * (for perfect hashing).
+     */
+    int number;
+
+	/**
 	 * Returns the target state of a transition leaving this state and labeled
 	 * with <code>label</code>. If no such transition exists, returns
 	 * <code>null</code>.
@@ -183,6 +194,22 @@ public final class State implements Traversable<State> {
     void replaceLastChild(State state) {
     	assert hasChildren() : "No outgoing transitions.";
     	states[states.length - 1] = state;
+    }
+
+    /**
+     * This state has been interned and will not change again.
+     */
+    void intern() {
+        // Calculate the number of right-language states.
+        int number = 0;
+        for (int i = states.length; --i >= 0;) {
+            if (final_transitions[i])
+                number++;
+            number += states[i].number;
+        }
+
+        assert this.number == 0 : "The state's number is not zero (already interned)?";
+        this.number = number;
     }
 
 	/**

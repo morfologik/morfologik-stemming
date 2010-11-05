@@ -91,7 +91,9 @@ public class FSABuilder {
 		if (root.hasChildren())
 			replaceOrRegister(root);
 
-		register = null;
+        register = null; // Help the GC.
+
+		root.intern();
 		return root;
     }
 
@@ -145,6 +147,7 @@ public class FSABuilder {
 		if (registered != null) {
 			state.replaceLastChild(registered);
 		} else {
+		    child.intern();
 			register.put(child, child);
 		}
 	}

@@ -21,6 +21,5 @@ public class ConstructionAndSerializerSpeed extends AbstractBenchmark {
         State s = FSABuilder.build(input);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         new FSA5Serializer().withNumbers().serialize(s, os);
-        System.out.println(os.size());
     }
 }
