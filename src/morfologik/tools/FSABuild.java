@@ -59,14 +59,14 @@ public final class FSABuild extends Tool {
 	 */
 	private void initializeSerializer(FSA5Serializer serializer,
             CommandLine line) {
-		String opt = SharedOptions.fillerCharacterOption.getOpt();
+		String opt = SharedOptions.fillerCharacterOption.getLongOpt();
 		if (line.hasOption(opt)) {
 			String chr = line.getOptionValue(opt);
 			checkSingleByte(chr);
 			serializer.fillerByte = chr.getBytes()[0];
 		}
 		
-		opt = SharedOptions.annotationSeparatorCharacterOption.getOpt();
+		opt = SharedOptions.annotationSeparatorCharacterOption.getLongOpt();
 		if (line.hasOption(opt)) {
 			String chr = line.getOptionValue(opt);
 			checkSingleByte(chr);
@@ -142,8 +142,7 @@ public final class FSABuild extends Tool {
 	@Override
 	protected void printUsage() {
 		final HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp(this.getClass().getName() + " in.fsa out.cfsa",
-		        options, true);
+		formatter.printHelp(this.getClass().getName(), options, true);
 	}
 
 	@Override

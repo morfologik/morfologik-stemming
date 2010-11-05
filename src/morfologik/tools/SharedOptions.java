@@ -76,17 +76,17 @@ final class SharedOptions {
     	.withArgName("char")
     	.withDescription("Custom filler character")
     	.isRequired(false)
-    	.withLongOpt("filler-char")
-    	.create("filler");
+    	.withLongOpt("filler")
+    	.create();
 
 	public final static Option annotationSeparatorCharacterOption = OptionBuilder
 		.hasArg()
 		.withArgName("char")
 		.withDescription("Custom annotation separator character")
 		.isRequired(false)
-		.withLongOpt("annotation-char")
-		.create("annotation");
-	
+		.withLongOpt("annotation")
+		.create();
+
 	public final static Option withNumbersOption = OptionBuilder
 	    .withDescription("Include numbers required for perfect hashing (larger automaton)")
 	    .isRequired(false)
