@@ -44,7 +44,24 @@ public final class FSATraversalTest {
      * 
      */
 	@Test
-	public void testTraversalWithRecursion() {
+	public void testPerfectHash() throws IOException {
+		final FSA5 fsa = FSA.read(this.getClass().getResourceAsStream("abc-numbers.fsa"));
+		
+		final FSATraversal traversal = new FSATraversal(fsa);
+
+		assertEquals(0, traversal.perfectHash("c".getBytes("UTF-8")));
+		assertEquals(1, traversal.perfectHash("b".getBytes("UTF-8")));
+		assertEquals(2, traversal.perfectHash("ba".getBytes("UTF-8")));
+		assertEquals(3, traversal.perfectHash("a".getBytes("UTF-8")));
+		assertEquals(4, traversal.perfectHash("ac".getBytes("UTF-8")));
+		assertEquals(5, traversal.perfectHash("aba".getBytes("UTF-8")));
+	}
+
+	/**
+     * 
+     */
+	@Test
+	public void testRecursiveTraversal() {
 		final int[] counter = new int[] { 0 };
 
 		class Recursion {
@@ -73,7 +90,7 @@ public final class FSATraversalTest {
      * Test {@link FSATraversal} and matching results.
      */
 	@Test
-	public void testTraversalHelperMatcher() throws IOException {
+	public void testMatch() throws IOException {
 		final FSA5 fsa = FSA.read(this.getClass().getResourceAsStream("abc.fsa"));
 		final FSATraversal traversalHelper = new FSATraversal(fsa);
 

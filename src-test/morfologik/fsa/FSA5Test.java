@@ -87,16 +87,14 @@ public final class FSA5Test {
 			buffer[depth] = fsa.getArcLabel(arc);
 
 			if (fsa.isArcFinal(arc) || fsa.isArcTerminal(arc)) {
-				result.add(cnt + " "
-				        + new String(buffer, 0, depth + 1, "UTF-8"));
+				result.add(cnt + " " + new String(buffer, 0, depth + 1, "UTF-8"));
 			}
 
 			if (fsa.isArcFinal(arc))
 				cnt++;
 
 			if (!fsa.isArcTerminal(arc)) {
-				walkNode(buffer, depth + 1, fsa, fsa.getEndNode(arc), cnt,
-				        result);
+				walkNode(buffer, depth + 1, fsa, fsa.getEndNode(arc), cnt, result);
 				cnt += fsa.getNumberAtNode(fsa.getEndNode(arc));
 			}
 		}

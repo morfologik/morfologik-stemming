@@ -19,6 +19,73 @@ public final class FSATraversal {
 		this.fsa = fsa;
 	}
 
+	public static final class HashResult {
+	}
+	
+	/**
+	 * Calculate perfect hash for a given input sequence of bytes. The perfect hash requires
+	 * that {@link FSA} is built with {@link FSAFlags#NUMBERS} and corresponds to the sequential
+	 * order of input sequences used at automaton construction time.
+	 * 
+	 * @param start Start index in the sequence array. 
+	 * @param length Length of the byte sequence, must be at least 1.
+	 */
+	public int perfectHash(byte[] sequence, int start, int length, int node) {
+		assert fsa.getFlags().contains(FSAFlags.NUMBERS) : "FSA not built with NUMBERS option.";
+		assert length > 0 : "Must be a non-empty sequence.";
+
+		int hash = 0;
+		final int end = start + length - 1;
+
+		int seqIndex = start;
+		byte label = sequence[seqIndex];
+
+		// Seek through the current node's labels, looking for 'label', update hash.
+		for (int arc = fsa.getFirstArc(node); arc != 0;) {
+			if (fsa.getArcLabel(arc) == label) {
+				if (fsa.isArcFinal(arc)) {
+					if (seqIndex == end)
+						return hash;
+
+					hash++;
+				}
+
+				if (fsa.isArcTerminal(arc)) {
+					/* The automaton contains a prefix of the input sequence. */
+					return -2;
+				}
+
+				// The sequence is a prefix of one of the sequences stored in the automaton.
+				if (seqIndex == end) {
+					return -3;
+				}
+
+				// Make a transition along the arc, go the target node's first arc.
+				arc = fsa.getFirstArc(fsa.getEndNode(arc));
+				label = sequence[++seqIndex];
+				continue;
+			} else {
+				if (fsa.isArcFinal(arc))
+					hash++;
+				if (!fsa.isArcTerminal(arc))
+					hash += fsa.getNumberAtNode(fsa.getEndNode(arc));
+			}
+
+			arc = fsa.getNextArc(arc);
+		}
+
+		// Labels of this node ended without a match on the sequence. 
+		// Perfect hash does not exist.
+		return -1;
+	}
+	
+	/**
+	 * @see #perfectHash(byte[], int, int, int)  
+	 */
+	public int perfectHash(byte[] sequence) {
+		return perfectHash(sequence, 0, sequence.length, fsa.getRootNode());
+	}
+
 	/**
 	 * Same as {@link #match(byte[], int, int, int)}, but allows passing
 	 * a reusable {@link MatchResult} object so that no intermediate garbage is
