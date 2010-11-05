@@ -1,22 +1,12 @@
 package morfologik.fsa;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
-import morfologik.fsa.FSABuilder;
-import morfologik.fsa.State;
-import morfologik.fsa.StateUtils;
-import morfologik.fsa.Visitor;
 import morfologik.util.BufferUtils;
 import morfologik.util.MinMax;
 
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 public class FSABuilderTest {
 	private static byte[][] input;
@@ -61,7 +51,7 @@ public class FSABuilderTest {
 	/**
 	 * Generate a sorted list of random sequences.
 	 */
-	private static byte[][] generateRandom(int count, MinMax length,
+	static byte[][] generateRandom(int count, MinMax length,
 	        MinMax alphabet) {
 		final byte[][] input = new byte[count][];
 		final Random rnd = new Random(0x11223344);
