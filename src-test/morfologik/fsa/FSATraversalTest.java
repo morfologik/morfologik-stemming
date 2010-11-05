@@ -70,6 +70,9 @@ public final class FSATraversalTest {
 		{
 			assertEquals(new String(seq), i++, traversal.perfectHash(seq));
 		}
+
+		// Check if the total number of sequences is encoded at the root node.
+		assertEquals(6, fsa.getNumberAtNode(fsa.getRootNode()));
 	}
 
 	/**
