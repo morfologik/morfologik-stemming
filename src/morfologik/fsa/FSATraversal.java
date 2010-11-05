@@ -19,9 +19,6 @@ public final class FSATraversal {
 		this.fsa = fsa;
 	}
 
-	public static final class HashResult {
-	}
-	
 	/**
 	 * Calculate perfect hash for a given input sequence of bytes. The perfect hash requires
 	 * that {@link FSA} is built with {@link FSAFlags#NUMBERS} and corresponds to the sequential
@@ -29,6 +26,11 @@ public final class FSATraversal {
 	 * 
 	 * @param start Start index in the sequence array. 
 	 * @param length Length of the byte sequence, must be at least 1.
+	 * 
+	 * @return Returns a unique integer assigned to the input sequence in the automaton (reflecting
+	 * the number of that sequence in the input used to build the automaton). Returns a negative
+	 * integer if the input sequence was not part of the input from which the automaton was created.
+	 * The type of mismatch is a constant defined in {@link MatchResult}.
 	 */
 	public int perfectHash(byte[] sequence, int start, int length, int node) {
 		assert fsa.getFlags().contains(FSAFlags.NUMBERS) : "FSA not built with NUMBERS option.";
@@ -52,12 +54,12 @@ public final class FSATraversal {
 
 				if (fsa.isArcTerminal(arc)) {
 					/* The automaton contains a prefix of the input sequence. */
-					return -2;
+					return AUTOMATON_HAS_PREFIX;
 				}
 
 				// The sequence is a prefix of one of the sequences stored in the automaton.
 				if (seqIndex == end) {
-					return -3;
+					return SEQUENCE_IS_A_PREFIX;
 				}
 
 				// Make a transition along the arc, go the target node's first arc.
@@ -76,7 +78,7 @@ public final class FSATraversal {
 
 		// Labels of this node ended without a match on the sequence. 
 		// Perfect hash does not exist.
-		return -1;
+		return NO_MATCH;
 	}
 	
 	/**

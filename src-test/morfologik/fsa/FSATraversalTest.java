@@ -1,6 +1,6 @@
 package morfologik.fsa;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static morfologik.fsa.MatchResult.*;
 
 import java.io.*;
@@ -73,6 +73,16 @@ public final class FSATraversalTest {
 
 		// Check if the total number of sequences is encoded at the root node.
 		assertEquals(6, fsa.getNumberAtNode(fsa.getRootNode()));
+
+		// Check sub/super sequence scenarios.
+		assertEquals(AUTOMATON_HAS_PREFIX, traversal.perfectHash("abax".getBytes("UTF-8")));
+		assertEquals(SEQUENCE_IS_A_PREFIX, traversal.perfectHash("ab".getBytes("UTF-8")));
+		assertEquals(NO_MATCH, traversal.perfectHash("d".getBytes("UTF-8")));
+		assertEquals(NO_MATCH, traversal.perfectHash(new byte [] {0}));
+		
+		assertTrue(AUTOMATON_HAS_PREFIX < 0);
+		assertTrue(SEQUENCE_IS_A_PREFIX < 0);
+		assertTrue(NO_MATCH < 0);
 	}
 
 	/**
