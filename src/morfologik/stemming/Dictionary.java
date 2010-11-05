@@ -149,14 +149,13 @@ public final class Dictionary {
 				return dict;
 
 			try {
-				final String dictPath = "/morfologik/dictionaries/"
-				        + languageCode + ".dict";
+				final String dictPath = "morfologik/dictionaries/" + languageCode + ".dict";
 				final String metaPath = Dictionary
 				        .getExpectedFeaturesName(dictPath);
 
-				dict = Dictionary.readAndClose(ResourceUtils
-				        .openInputStream(dictPath), ResourceUtils
-				        .openInputStream(metaPath));
+				dict = Dictionary.readAndClose(
+						ResourceUtils.openInputStream(dictPath), 
+						ResourceUtils.openInputStream(metaPath));
 
 				defaultDictionaries.put(languageCode, dict);
 				return dict;

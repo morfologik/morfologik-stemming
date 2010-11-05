@@ -23,8 +23,8 @@ public final class PolishStemmer implements IStemmer, Iterable<WordData> {
 	 */
 	public PolishStemmer() {
 		final String languageCode = "pl";
-		this.delegate = new DictionaryLookup(Dictionary
-		        .getForLanguage(languageCode));
+
+		this.delegate = new DictionaryLookup(Dictionary.getForLanguage(languageCode));
 	}
 
 	/**
