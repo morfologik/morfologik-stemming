@@ -97,7 +97,7 @@ import java.util.*;
  *                  | | +--------- the arc is final
  *                  | | |
  *       +-+-+-+-+-+-+-+-+\
- *     0 |A|A|A|A|A|N|L|F| +------ flags + (A) address field, lower bits
+ *     0 |A|A|A|A|A|0|L|F| +------ flags + (A) address field, lower bits
  *       +-+-+-+-+-+-+-+-+/
  *       +-+-+-+-+-+-+-+-+\
  *     1 | | | | | | | | | +------ label
