@@ -1,4 +1,4 @@
-<project name="Stempelator" default="build">
+<project name="morfologik-stemming" default="build">
     <property name="build.name" value="morfologik-stemming" />
     <property name="build.ver" value="trunk" />
 
