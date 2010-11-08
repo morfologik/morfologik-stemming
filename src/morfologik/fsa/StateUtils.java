@@ -35,7 +35,7 @@ public class StateUtils {
 				b.append("  ").append(codes.get(s));
 				b.append(" [shape=circle,label=\"\"];\n");
 
-				for (int i = 0; i < s.getArcs(); i++) {
+				for (int i = 0; i < s.arcsCount(); i++) {
 				    final State sub = s.arcState(i);
 
 					b.append("  ");
@@ -82,7 +82,7 @@ public class StateUtils {
 				b = morfologik.util.Arrays.copyOf(b, position + 1);
 			}
 
-			for (int i = 0; i < state.getArcs(); i++) {
+			for (int i = 0; i < state.arcsCount(); i++) {
 				b[position] = state.arcLabel(i);
 
 				if (state.arcFinal(i)) {
@@ -107,9 +107,9 @@ public class StateUtils {
 				// states
 				counters[0]++; 
 				// transitions
-				counters[1] += s.getArcs();
+				counters[1] += s.arcsCount();
 				// final states
-				for (int i = 0; i < s.getArcs(); i++)
+				for (int i = 0; i < s.arcsCount(); i++)
 					if (s.arcFinal(i)) counters[2]++;
 			}
 		});

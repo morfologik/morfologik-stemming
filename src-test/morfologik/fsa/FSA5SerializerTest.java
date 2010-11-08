@@ -34,6 +34,7 @@ public class FSA5SerializerTest {
 
 		Arrays.sort(input, FSABuilder.LEXICAL_ORDERING);
 		State s = FSABuilder.build(input);
+		System.out.println(StateUtils.toDot(s));
 
 		checkSerialization(input, s);
 	}

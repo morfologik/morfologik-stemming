@@ -10,101 +10,16 @@ import morfologik.util.Arrays;
  */
 public final class State implements Traversable<State> {
     /**
-     * 
-     */
-    static final class InterningPool {
-        private final static int INCREMENT_SIZE = 65536; 
-
-        /**
-         * The next available index in {@link #labels},
-         * {@link #states} and {@link #final_transitions}. 
-         */
-        private int last = 0;
-
-        /*
-         * arrays, shared by all interned states.
-         */
-        byte[] labels = new byte [0];
-        private State[] states = new State [0];
-        private boolean[] final_transitions = new boolean [0];
-
-        /*
-         * A pool of reusable, mutable states.
-         */
-        State [] statePool = new State [0];
-        int lastState;
-
-        /**
-         * 
-         */
-        State intern(State state) {
-            final int current = last;
-            final int arcs = state.arcs;
-
-            // Increase interned arrays, if needed.
-            last += state.arcs;
-            if (last > labels.length) {
-                labels = Arrays.copyOf(labels, last + INCREMENT_SIZE);
-                states = Arrays.copyOf(states, last + INCREMENT_SIZE);
-                final_transitions = Arrays.copyOf(final_transitions, last + INCREMENT_SIZE);
-            }
-            
-            // Copy over the state's data.
-            System.arraycopy(state.labels, 0, labels, current, arcs);
-            System.arraycopy(state.states, 0, states, current, arcs);
-            System.arraycopy(state.final_transitions, 0, final_transitions, current, arcs);
-
-            State interned = new State();
-            interned.arcs = state.arcs;
-            interned.number = state.number;
-            interned.start = current;
-            interned.final_transitions = final_transitions;
-            interned.labels = labels;
-            interned.states = states;
-
-            returnState(state);
-            return interned;
-        }
-
-        /**
-         * 
-         */
-        void returnState(State state) {
-            state.reset();
-
-            if (statePool.length == lastState) {
-                statePool = Arrays.copyOf(statePool, lastState + 1);
-            }
-            statePool[lastState++] = state;
-        }
-
-        /**
-         * Get a mutable state from the pool or create a new one.
-         */
-        State createState() {
-            if (lastState == 0) {
-                State s = new State();
-                s.labels = new byte [256];
-                s.final_transitions = new boolean [256];
-                s.states = new State [256];
-                return s;
-            } else {
-                return statePool[--lastState];
-            }
-        }
-    }
-
-	/**
 	 * Labels of outgoing transitions. Indexed identically to {@link #states}.
 	 * Labels must be sorted lexicographically.
 	 */
-    private byte[] labels;
+    byte[] labels;
 
 	/**
 	 * States reachable from outgoing transitions. Indexed identically to
 	 * {@link #labels}.
 	 */
-	private State[] states;
+	State[] states;
 
 	/**
 	 * Transitions leaving this node that mark the end of an input sequence.
@@ -112,17 +27,17 @@ public final class State implements Traversable<State> {
 	 * slightly more compact. Indexed identically to {@link #labels}
 	 * and {@link #states}.
 	 */
-	private boolean[] final_transitions;
+	boolean[] final_transitions;
 
 	/**
 	 * Number of arcs.
 	 */
-	private int arcs;
+	int arcs;
 	
     /**
      * Start index in parallel arrays.
      */
-    private int start;	
+    int start;	
 
 	/**
 	 * An internal field for storing this state's offset during serialization.
@@ -131,14 +46,14 @@ public final class State implements Traversable<State> {
 
     /**
      * An internal field for storing this state's count of right-language sequences
-     * (for perfect hashing).
+     * (for perfect hashing). Also used as a flag for interned vs. mutable state.
      */
     int number = -1;
 
     /**
-     * Keep hidden, use the interning pool.
+     * Keep package-private, use the interning pool.
      */
-    private State() {
+    State() {
     }
 
     /**
@@ -194,6 +109,7 @@ public final class State implements Traversable<State> {
 	@Override
 	public int hashCode() {
 		int hash = 0;
+
 		final int arcs = this.arcs;
 		final int start = this.start;
 
@@ -233,7 +149,9 @@ public final class State implements Traversable<State> {
 	}
 
 	/**
-	 * 
+	 * Add a single outgoing arc from this state to <code>newState</code>. Addition can
+	 * only be performed if there are no arcs with this label. The label should be lexicographically
+	 * higher than any other label in this state.
 	 */
     State addArc(byte label, State newState, boolean finalTransition) {
         assert !interned() : "Shouldn't be interned.";
@@ -253,15 +171,12 @@ public final class State implements Traversable<State> {
      * the order of bytes in the <code>array</code> may not be the signed-value
      * order.
      */
-    private int binarySearch(byte label) {
+    private final int binarySearch(byte label) {
         final byte [] a = labels; 
         final int key = label & 0xff;
 
-        int fromIndex = start;
-        int toIndex = arcs;
-
-        int low = fromIndex;
-        int high = toIndex - 1;
+        int low = start;
+        int high = arcs - 1;
 
         while (low <= high) {
             int mid = (low + high) >>> 1;
@@ -274,6 +189,7 @@ public final class State implements Traversable<State> {
             else
                 return mid;
         }
+
         return -(low + 1);
     }
 	
@@ -330,7 +246,7 @@ public final class State implements Traversable<State> {
     /**
      * This state has been interned and will not change again.
      */
-    State intern(InterningPool pool) {
+    State intern(StateInterningPool pool) {
         assert !interned() : "Shouldn't be interned.";
         assert start == 0 : "Expected start to be zero: " + start;
         assert childrenInterned() : "Expected all children to be interned.";
@@ -356,7 +272,7 @@ public final class State implements Traversable<State> {
     boolean interned() {
         return this.number >= 0;
     }
-    
+
     /**
      * Assertion that all children of this state should be interned.
      */
@@ -396,18 +312,30 @@ public final class State implements Traversable<State> {
 		}
 	}
 
-    int getArcs() {
+	/**
+	 * Return the number of arcs leaving this state.
+	 */
+    int arcsCount() {
         return arcs;
     }
 
+    /**
+     * Return the state of arc number <code>i</code>. 
+     */
     State arcState(int i) {
         return states[start + i];
     }
     
+    /**
+     * Return the label of arc number <code>i</code>. 
+     */
     byte arcLabel(int i) {
         return labels[start + i];
     }
 
+    /**
+     * Return the final flag of arc number <code>i</code>. 
+     */
     boolean arcFinal(int i) {
         return final_transitions[start + i];
     }

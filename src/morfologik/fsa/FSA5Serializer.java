@@ -85,7 +85,8 @@ public final class FSA5Serializer {
 	        throws IOException {
 
 		final ArrayList<State> linearized = new ArrayList<State>();
-		final State.InterningPool pool = new State.InterningPool();
+		final StateInterningPool pool = new StateInterningPool(
+		        StateInterningPool.MINIMUM_BLOCK_SIZE);
 
 		// Add the "sink node", with a single arc pointing to itself.
 		State sink = pool.createState();
@@ -176,7 +177,7 @@ public final class FSA5Serializer {
 				assert s.offset == offset;
 			}
 
-			final int lastTransition = s.getArcs() - 1;
+			final int lastTransition = s.arcsCount() - 1;
 
 			offset += nodeDataLength;
 			if (nodeDataLength > 0 && os != null) {

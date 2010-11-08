@@ -10,7 +10,7 @@ import morfologik.util.Arrays;
  */
 public class FSABuilder {
 	/**
-	 * Lexicographic order of input sequences. By default, consistent with the "C"
+	 * Lexicographic order of input sequences. By default, consistent with the "C" sort
 	 * (absolute value of bytes, 0-255).
 	 */
 	public static int compare(byte [] s1, int lens1, byte [] s2, int lens2) {
@@ -36,14 +36,15 @@ public class FSABuilder {
 	};
 
 	/**
-	 * "register" for state interning.
+	 * A "register" for state interning. States with an identical set of outgoing arcs (to the
+	 * same set of states) are replaced with interned states.
 	 */
 	private HashMap<State, State> register = new HashMap<State, State>();
 
 	/**
 	 * Interning pool.
 	 */
-	private final State.InterningPool pool = new State.InterningPool();
+	private final StateInterningPool pool = new StateInterningPool();
 
 	/**
      * Root automaton state.
@@ -55,6 +56,10 @@ public class FSABuilder {
 	 * in assertions only.
 	 */
 	private byte [] previous;
+	
+	/**
+	 * {@link #previous} sequence's length, used in assertions only.
+	 */
 	private int previousLength;
 
 	/**
