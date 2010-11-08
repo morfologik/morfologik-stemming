@@ -47,7 +47,7 @@ public final class State implements Traversable<State> {
      * An internal field for storing this state's count of right-language sequences
      * (for perfect hashing).
      */
-    int number;
+    int number = -1;
 
 	/**
 	 * Returns the target state of a transition leaving this state and labeled
@@ -55,7 +55,7 @@ public final class State implements Traversable<State> {
 	 * <code>null</code>.
 	 */
 	public State getState(byte label) {
-		final int index = Arrays.binarySearch(labels, label);
+		final int index = binarySearch(labels, label);
 		if (index >= 0) {
 			return states[index];
 		} else
@@ -151,7 +151,7 @@ public final class State implements Traversable<State> {
      * the newly created target state for this transition.
      */
     State newState(byte label, boolean finalTransition) {
-    	assert Arrays.binarySearch(labels, label) < 0 : 
+    	assert binarySearch(labels, label) < 0 : 
     		"State already has transition labeled: " + label;
 
     	final int newLength = labels.length + 1;
@@ -165,7 +165,36 @@ public final class State implements Traversable<State> {
     	return states[index] = new State();
     }
 
-	/**
+    /**
+     * Binary search for <code>label</code> in the <code>array</code>.
+     * We can't use {@link Arrays#binarySearch(byte[], byte)} because
+     * the order of bytes in the <code>array</code> may not be the signed-value
+     * order.
+     */
+    private int binarySearch(byte[] a, byte label) {
+        final int key = label & 0xff;
+
+        int fromIndex = 0;
+        int toIndex = a.length;
+
+        int low = fromIndex;
+        int high = toIndex - 1;
+
+        while (low <= high) {
+            int mid = (low + high) >>> 1;
+            int midVal = a[mid] & 0xff;
+
+            if (midVal < key)
+                low = mid + 1;
+            else if (midVal > key)
+                high = mid - 1;
+            else
+                return mid;
+        }
+        return -(low + 1);
+    }
+	
+    /**
      * Return the most recent transitions's target state.
      */
     State lastChild() {
@@ -183,7 +212,8 @@ public final class State implements Traversable<State> {
     	if (index >= 0 && labels[index] == label) {
     		s = states[index];
     	}
-    	assert s == getState(label);
+
+    	assert s == getState(label) : "Expected last child.";
     	return s;
     }
 
@@ -208,7 +238,7 @@ public final class State implements Traversable<State> {
             number += states[i].number;
         }
 
-        assert this.number == 0 : "The state's number is not zero (already interned)?";
+        assert this.number != 0 : "The state's number is not zero (already interned)?";
         this.number = number;
     }
 

@@ -267,7 +267,7 @@ public final class FSADump extends Tool {
 	/*
      * 
      */
-	private void printWarning(String msg) throws IOException {
+	private void printWarning(String msg) {
 		System.err.println(msg);
 	}
 

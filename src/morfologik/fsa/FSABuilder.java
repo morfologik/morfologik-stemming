@@ -70,6 +70,7 @@ public class FSABuilder {
 		int pos = 0, max = length;
 		State next, state = root;
 		while (pos < max && (next = state.lastChild(current[pos])) != null) {
+		    assert state.number == -1 : "Interned?";
 			state = next;
 			pos++;
 		}
