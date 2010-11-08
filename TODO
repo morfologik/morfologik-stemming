@@ -1,3 +1,5 @@
+
+BUGS?
     
 - Check what's going on with no-args invocation:
 
@@ -11,11 +13,20 @@ Processed 0 words in 0.001 seconds (0 words per second).
 (no words? no output?]
     
     
-PLANS FOR VERSION 1.4
+NEXT MAJOR VERSION
+
+- New binary automaton format;
+  - allow direct arc lookup on highly fanning nodes, especially root nodes
+  - allow direct perf. hashing number on arcs of highly fanning nodes, especially root nodes
+  - variable coding for state numbers
+  - state flags to encode single-arc-final tails in a compact form (no arcs at all?).
+
+- fsa_build should serialize to FSA5 or CFSA, depending on a switch. 
+
+
+NOT EVEN SCHEDULED
 
 - Add arc reuse (optimisation).
-
-- Modify automaton structure to allow binary search on highly fanning nodes. Measure perf. gain. 
 
 - Add a set of utility classes for parsing morphological tags. This could be similar 
   (or even compatible?) with Morfeusz-Java.
