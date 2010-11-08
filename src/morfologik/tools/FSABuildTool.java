@@ -127,6 +127,7 @@ public final class FSABuildTool extends Tool {
 		    } else {
 	            root = processUnsortedInput(inputStream);
 		    }
+	        if (crWarning) log("Warning: input contained carriage returns?");
 
 			startPart("Statistics");
 			FSAInfo info = StateUtils.getInfo(root);
@@ -158,7 +159,6 @@ public final class FSABuildTool extends Tool {
         }
         endPart();
 
-        if (crWarning) log("Warning: input contains carriage returns?");
         logInt("Input sequences", input.size());
 
         startPart("Sorting");
@@ -208,8 +208,6 @@ public final class FSABuildTool extends Tool {
                 return this.current;
             }
         });
-        logInt("Input sequences", lines);
-
         root = builder.complete();
 
         if (printProgress) {
@@ -218,6 +216,8 @@ public final class FSABuildTool extends Tool {
             this.partStart = partStart;
         }
         endPart();
+        logInt("Input sequences", lines);
+
         return root;
     }
 
