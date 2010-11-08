@@ -108,28 +108,21 @@ public final class State implements Traversable<State> {
 	 */
 	@Override
 	public int hashCode() {
-		int hash = 0;
-
-		final int arcs = this.arcs;
-		final int start = this.start;
-
-		final boolean [] transitions = this.final_transitions;
-		for (int i = start + arcs; --i >= start;)
-			hash = hash * 17 + (transitions[i] ? 1 : 0);
-
-        final byte [] labels = this.labels;
-        for (int i = start + arcs; --i >= start;)
-			hash = hash * 31 + (labels[i] & 0xFF);
+		int hash = 13;
 
 		/*
-		 * Compare the right-language of this state using reference-identity of
-		 * outgoing states. This is possible because states are interned (stored
-		 * in registry) and traversed in post-order, so any outgoing transitions
-		 * are already interned.
+		 * Calculate the hash of the right-language of this state using 
+		 * reference-identity of outgoing states. This is possible because states 
+		 * are interned (stored in registry) and traversed in post-order, 
+		 * so any outgoing transitions are already interned.
+		 * 
+		 * We assume collisions on the same set of states and different labels/final arcs
+		 * should be relatively rare, so the hash is only from states.
 		 */
         final State [] states = this.states;
-        for (int i = start + arcs; --i >= start;)
-			hash ^= System.identityHashCode(states[i]);
+        final int start = this.start;
+        for (int i = start + this.arcs; --i >= start;)
+			hash = hash * 17 + System.identityHashCode(states[i]);
 
 		return hash;
 	}
