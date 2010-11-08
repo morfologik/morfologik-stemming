@@ -7,7 +7,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
+import java.util.*;
+
+import morfologik.util.Arrays;
 
 import org.junit.Test;
 
@@ -33,18 +35,31 @@ public class CFSATest {
 	private void checkIdentity(String resource) throws IOException {
 		final FSA fsa = FSA.read(this.getClass().getResourceAsStream(resource));
 
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ArrayList<byte[]> input = new ArrayList<byte[]>(); 
+		for (ByteBuffer bb : fsa) {
+		    input.add(Arrays.copyOf(bb.array(), bb.remaining()));
+		}
+		Collections.sort(input, FSABuilder.LEXICAL_ORDERING);
 
-		final CFSAEncoder encoder = new CFSAEncoder(fsa);
-		encoder.doLabelMapping();
-		encoder.updateOffsets();
-		encoder.serialize(baos);
+		// Rebuild the automaton to make sure we keep the same order of arcs.
+		State root = FSABuilder.build(input);
+		
+		// Serializers
+		FSA5Serializer ser1 = new FSA5Serializer();
+		CFSASerializer ser2 = new CFSASerializer();
 
-		final byte[] input = baos.toByteArray();
-		FSA cfsa = FSA.read(new ByteArrayInputStream(input));
+		if (fsa.getFlags().contains(FSAFlags.NUMBERS)) {
+		    ser1.withNumbers();
+		    ser2.withNumbers();
+		}
+
+		FSA fsa5 = FSA.read(new ByteArrayInputStream(
+		        ser1.serialize(root, new ByteArrayOutputStream()).toByteArray()));
+        FSA cfsa = FSA.read(new ByteArrayInputStream(
+                ser2.serialize(root, new ByteArrayOutputStream()).toByteArray()));
 
 		assertTrue(cfsa instanceof CFSA);
-		assertIdentical(fsa, cfsa);
+		assertIdentical(fsa5, cfsa);
 	}
 
 	/**

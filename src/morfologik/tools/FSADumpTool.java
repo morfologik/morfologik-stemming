@@ -18,7 +18,7 @@ import org.apache.commons.cli.Options;
  * dictionary. It can dump dictionaries in the raw form (as fed to the
  * <code>fsa_build</code> program) or decoding compressed stem forms.
  */
-public final class FSADump extends Tool {
+public final class FSADumpTool extends Tool {
 	/**
 	 * Writer used to print messages and dictionary dump.
 	 */
@@ -308,7 +308,7 @@ public final class FSADump extends Tool {
 	 * Command line entry point.
 	 */
 	public static void main(String[] args) throws Exception {
-		final FSADump fsaDump = new FSADump();
+		final FSADumpTool fsaDump = new FSADumpTool();
 		fsaDump.go(args);
 	}
 }

@@ -178,7 +178,7 @@ public final class State implements Traversable<State> {
         final int key = label & 0xff;
 
         int low = start;
-        int high = arcs - 1;
+        int high = start + arcs - 1;
 
         while (low <= high) {
             int mid = (low + high) >>> 1;
@@ -340,5 +340,18 @@ public final class State implements Traversable<State> {
      */
     boolean arcFinal(int i) {
         return final_transitions[start + i];
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append("arcs = " + arcs + ", number = " + number + " [");
+        for (int i = 0; i < arcs; i++) {
+            if (i > 0) b.append(", ");
+            b.append((char) arcLabel(i));
+            if (arcFinal(i)) b.append("!F");
+        }
+        b.append("]");
+        return b.toString();
     }
 }

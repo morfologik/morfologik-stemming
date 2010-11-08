@@ -49,7 +49,7 @@ class MorphEncodingTool extends Tool {
 				separator = sep.charAt(0);
 			}
 
-			FSABuild.checkSingleByte(Character.toString(separator));
+			FSABuildTool.checkSingleByte(Character.toString(separator));
 		}
 		encoder = new MorphEncoder((byte) separator);
 

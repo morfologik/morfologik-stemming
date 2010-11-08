@@ -81,7 +81,7 @@ public final class FSA5Test {
 		        .asList("0 c", "1 b", "2 ba", "3 a", "4 ac", "5 aba"), result);
 	}
 
-	public static void walkNode(byte[] buffer, int depth, FSA5 fsa, int node,
+	public static void walkNode(byte[] buffer, int depth, FSA fsa, int node,
 	        int cnt, List<String> result) throws IOException {
 		for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
 			buffer[depth] = fsa.getArcLabel(arc);

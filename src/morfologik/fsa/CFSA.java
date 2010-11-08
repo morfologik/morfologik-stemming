@@ -13,8 +13,9 @@ import java.util.*;
  * at some (minor) performance penalty.
  * 
  * <p>This automaton version is not supported nor produced by the original
- * <code>fsa</code> package. Use {@link CFSAEncoder} to convert {@link FSA5}
- * automata to this compact representation.</p>
+ * <code>fsa</code> package. Convert {@link FSA5} automata by dumping all contained 
+ * byte sequences to disk, rebuilding the automaton and then serializing it using
+ * {@link CFSASerializer}.</p>
  * 
  * <p>The encoding of automaton body is as follows.</p>
  * 
@@ -205,7 +206,7 @@ public final class CFSA extends FSA {
 	 */
 	@Override
 	public int getRootNode() {
-		return getEndNode(getFirstArc(skipArc(nodeDataLength)));
+		return getDestinationNodeOffset(getFirstArc(skipArc(nodeDataLength)));
 	}
 
 	/**

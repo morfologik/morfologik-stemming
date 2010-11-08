@@ -1,24 +1,37 @@
 package morfologik.tools;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Locale;
+import java.util.*;
 
-import morfologik.fsa.FSA5;
-import morfologik.fsa.FSA5Serializer;
-import morfologik.fsa.FSABuilder;
-import morfologik.fsa.FSAInfo;
-import morfologik.fsa.State;
-import morfologik.fsa.StateUtils;
+import morfologik.fsa.*;
 import morfologik.util.Arrays;
 
 import org.apache.commons.cli.*;
 
 /**
- * Convert from plain text input to {@link FSA5}.
+ * Convert from plain text input to {@link FSA5} or {@link CFSA}.
  */
-public final class FSABuild extends Tool {
+public final class FSABuildTool extends Tool {
+    /**
+     * The serialization format to use for the binary output.
+     */
+    public enum Format {
+        FSA5,
+        CFSA;
+
+        public FSASerializer getSerializer() {
+            switch (this) {
+                case FSA5:
+                    return new FSA5Serializer();
+                case CFSA:
+                    return new CFSASerializer();
+
+                default:
+                    throw new RuntimeException();
+            }
+        }
+    }
+
     /**
      * Be more verbose about progress.
      */
@@ -37,7 +50,12 @@ public final class FSABuild extends Tool {
     /**
      * Serializer used for emitting the FSA.
      */
-    private FSA5Serializer serializer = new FSA5Serializer();
+    private FSASerializer serializer;
+
+    /**
+     * Output format name.
+     */
+    private Format format;
     
     /**
      * Warn about CR characters in the input (usually not what you want).
@@ -65,7 +83,11 @@ public final class FSABuild extends Tool {
      * To help break out of the anonymous delegate on error.
      */
     @SuppressWarnings("serial")
-    private static class InputNotSortedException extends RuntimeException {
+    private static class TerminateProgramException extends RuntimeException {
+        public TerminateProgramException(String msg) {
+            super(msg);
+        }
+
         public synchronized Throwable fillInStackTrace() {
             return null;
         }
@@ -114,7 +136,7 @@ public final class FSABuild extends Tool {
             logInt("Arcs", info.arcsCount);
 
 			// Save the result.
-            startPart("Serializing FSA");
+            startPart("Serializing " + format);
 			serializer.serialize(root, initializeOutput(line)).close();
 			endPart();
 		} catch (OutOfMemoryError e) {
@@ -171,7 +193,7 @@ public final class FSABuild extends Tool {
                         log("\n\nERROR: The input is not sorted: ");
                         log(dumpLine(previous, previousLen));
                         log(dumpLine(current, currentLen));
-                        throw new InputNotSortedException();
+                        throw new TerminateProgramException("Input is not sorted.");
                     }
                 }
 
@@ -222,20 +244,36 @@ public final class FSABuild extends Tool {
 	 * Parse input options.
 	 */
 	private void parseOptions(CommandLine line) {
-		String opt = SharedOptions.fillerCharacterOption.getLongOpt();
+	    String opt;
+
+	    opt = SharedOptions.outputFormatOption.getOpt();
+	    if (line.hasOption(opt)) {
+            String formatValue = line.getOptionValue(opt);
+            try {
+                format = Format.valueOf(formatValue.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new TerminateProgramException("Not a valid format: " 
+                        + formatValue);
+            }
+	    } else {
+	        format = Format.FSA5;
+	    }
+        serializer = format.getSerializer();
+
+		opt = SharedOptions.fillerCharacterOption.getLongOpt();
 		if (line.hasOption(opt)) {
 			String chr = line.getOptionValue(opt);
 			checkSingleByte(chr);
-			serializer.fillerByte = chr.getBytes()[0];
+			serializer.withFiller(chr.getBytes()[0]);
 		}
 		
 		opt = SharedOptions.annotationSeparatorCharacterOption.getLongOpt();
 		if (line.hasOption(opt)) {
 			String chr = line.getOptionValue(opt);
 			checkSingleByte(chr);
-			serializer.annotationByte = chr.getBytes()[0];
+			serializer.withAnnotationSeparator(chr.getBytes()[0]);
 		}
-		
+
         opt = SharedOptions.withNumbersOption.getOpt();
         if (line.hasOption(opt)) {
             serializer.withNumbers();
@@ -361,6 +399,8 @@ public final class FSABuild extends Tool {
 	protected void initializeOptions(Options options) {
 		options.addOption(SharedOptions.inputFileOption);
 		options.addOption(SharedOptions.outputFileOption);
+
+		options.addOption(SharedOptions.outputFormatOption);
 		
 		options.addOption(SharedOptions.fillerCharacterOption);
 		options.addOption(SharedOptions.annotationSeparatorCharacterOption);
@@ -410,7 +450,7 @@ public final class FSABuild extends Tool {
 	 * Command line entry point.
 	 */
 	public static void main(String[] args) throws Exception {
-		final FSABuild tool = new FSABuild();
+		final FSABuildTool tool = new FSABuildTool();
 		tool.go(args);
 	}
 }

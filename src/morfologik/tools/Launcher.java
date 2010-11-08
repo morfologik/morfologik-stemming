@@ -76,13 +76,12 @@ public final class Launcher {
 	static TreeMap<String, ToolInfo> initTools() {
 		TreeMap<String, ToolInfo> tools = new TreeMap<String, ToolInfo>();
 
-		tools.put("fsa_build", new ToolInfo(FSABuild.class,
-		        "Create an FSA5 automaton from plain text files."));
-		tools.put("fsa_dump", new ToolInfo(FSADump.class,
+		tools.put("fsa_build", new ToolInfo(FSABuildTool.class,
+		        "Create an automaton from plain text files."));
+
+		tools.put("fsa_dump", new ToolInfo(FSADumpTool.class,
 		        "Dump an FSA dictionary."));
 
-		tools.put("fsa2cfsa", new ToolInfo(FSA2CFSA.class,
-		        "Convert FSA5 to CFSA."));
 		tools.put("tab2morph", new ToolInfo(MorphEncodingTool.class,
 		        "Convert tabbed dictionary to fsa encoding format."));
 

@@ -10,8 +10,6 @@ NEXT MAJOR VERSION
   - variable coding for state numbers
   - state flags to encode single-arc-final tails in a compact form (no arcs at all?).
 
-- fsa_build should serialize to FSA5 or CFSA, depending on a switch. 
-
 
 NOT EVEN SCHEDULED
 

@@ -71,6 +71,14 @@ final class SharedOptions {
 	    .isRequired(false)
 	    .create("o");
 
+    public final static Option outputFormatOption = OptionBuilder
+        .hasArg()
+        .withArgName("format")
+        .withDescription("Name of the binary output format. Currently CFSA or FSA5 (default) can be used.")
+        .withLongOpt("format")
+        .isRequired(false)
+        .create("f");
+
 	public final static Option fillerCharacterOption = OptionBuilder
 		.hasArg()
     	.withArgName("char")

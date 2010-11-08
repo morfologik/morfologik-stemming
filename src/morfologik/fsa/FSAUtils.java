@@ -8,6 +8,11 @@ import java.util.*;
  * Other FSA-related utilities not directly associated with the class hierarchy.
  */
 public final class FSAUtils {
+    /**
+     * Returns the right-language reachable from a given FSA node, formatted
+     * as an input for the graphviz package (expressed in the <code>dot</code>
+     * language).
+     */
 	public static String toDot(FSA fsa, int node) {
 		try {
     		StringWriter w = new StringWriter();
@@ -19,9 +24,9 @@ public final class FSAUtils {
 	}
 
 	/**
-	 * Returns the right-language reachable from a given FSA node, formatted
+	 * Saves the right-language reachable from a given FSA node, formatted
 	 * as an input for the graphviz package (expressed in the <code>dot</code>
-	 * language).
+	 * language), to the given writer.
 	 */
 	public static void toDot(Writer w, FSA fsa, int node) throws IOException {
 		w.write("digraph Automaton {\n");

@@ -3,20 +3,20 @@ package morfologik.fsa;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
+import java.util.*;
 
 
 /**
- * Serializes in-memory {@link State} graphs to a binary format compatible
- * with Jan Daciuk's <code>fsa</code>'s package <code>FSA5</code> format.
+ * Serializes in-memory {@link State} graphs to a binary format {@link CFSA}
+ * (compacted most frequent arcs with {@link FSA5#BIT_TARGET_NEXT} bit set).
  * 
  * <p>It is possible to serialize the automaton with numbers required for 
  * perfect hashing. See {@link #withNumbers()} method.</p>
  * 
- * @see FSA5
+ * @see CFSA
  * @see FSA#read(java.io.InputStream)
  */
-public final class FSA5Serializer implements FSASerializer {
+public final class CFSASerializer implements FSASerializer {
 	/**
 	 * Maximum number of bytes for a serialized arc. 
 	 */
@@ -28,20 +28,14 @@ public final class FSA5Serializer implements FSASerializer {
 	private final static int MAX_NODE_DATA_SIZE = 16;
 
 	/**
-	 * Number of bytes for the arc's flags header (arc representation
-	 * without the goto address).
-	 */
-	private final static int SIZEOF_FLAGS = 1;
-
-	/**
 	 * @see FSA5#filler
 	 */
-	public byte fillerByte = DEFAULT_FILLER;
+	public byte fillerByte = FSASerializer.DEFAULT_FILLER;
 
 	/**
 	 * @see FSA5#annotation
 	 */
-	public byte annotationByte = DEFAULT_ANNOTATION;
+	public byte annotationByte = FSASerializer.DEFAULT_ANNOTATION;
 
 	/**
 	 * <code>true</code> if we should serialize with numbers.
@@ -50,6 +44,16 @@ public final class FSA5Serializer implements FSASerializer {
 	 */
 	private boolean withNumbers;
 
+    /**
+     * A mapping of compressed labels.
+     */
+    private final byte[] compressedLabels = new byte[1 << 5];
+
+    /**
+     * Indicates which byte values should be placed together with flags.
+     */
+    private final byte[] compressedLabelsIndex = new byte[256];
+
 	/**
 	 * Serialize the automaton with the number of right-language sequences in
 	 * each node. This is required to implement perfect hashing. The numbering
@@ -57,17 +61,16 @@ public final class FSA5Serializer implements FSASerializer {
 	 * 
 	 * @return Returns the same object for easier call chaining.
 	 */
-	@Override
-	public FSA5Serializer withNumbers() {
+	public CFSASerializer withNumbers() {
 		withNumbers = true;
 	    return this;
     }
 
-	/**
+    /**
      * {@inheritDoc}
      */
     @Override
-    public FSA5Serializer withFiller(byte filler) {
+    public CFSASerializer withFiller(byte filler) {
         this.fillerByte = filler;
         return this;
     }
@@ -76,13 +79,13 @@ public final class FSA5Serializer implements FSASerializer {
      * {@inheritDoc}
      */
     @Override
-    public FSA5Serializer withAnnotationSeparator(byte annotationSeparator) {
+    public CFSASerializer withAnnotationSeparator(byte annotationSeparator) {
         this.annotationByte = annotationSeparator;
         return this;
     }
 
-    /**
-	 * Serialize root state <code>s</code> to an output stream in <code>FSA5</code> 
+	/**
+	 * Serialize root state <code>s</code> to an output stream in {@link CFSA} 
 	 * format. The serialization process is not thread-safe on the set of 
 	 * the same {@link State}s (mutates {@link State} internals).
 	 * 
@@ -90,9 +93,10 @@ public final class FSA5Serializer implements FSASerializer {
 	 * 
 	 * @return Returns <code>os</code> for chaining.
 	 */
-	@Override
-	public <T extends OutputStream> T serialize(State s, T os)
-	        throws IOException {
+	public <T extends OutputStream> T serialize(State s, T os) throws IOException
+	{
+	    Arrays.fill(compressedLabelsIndex, (byte) -1);
+	    Arrays.fill(compressedLabels, (byte) 0);
 
 		final ArrayList<State> linearized = new ArrayList<State>();
 		final StateInterningPool pool = new StateInterningPool(
@@ -109,13 +113,16 @@ public final class FSA5Serializer implements FSASerializer {
         meta.addArc((byte) '^', s, false);
 		s = meta.intern(pool);
 
-		// Prepare space for arc offsets and linearize all the states.
-		s.preOrder(new Visitor<State>() {
-			public void accept(State s) {
-				s.offset = 0;
-				linearized.add(s);
-			}
-		});
+        // Prepare space for arc offsets and linearize all the states.
+        s.preOrder(new Visitor<State>() {
+            public void accept(State s) {
+                s.offset = 0;
+                linearized.add(s);
+            }
+        });
+
+		// Calculate most frequent labels on arcs with NEXT bit set.
+		doLabelMapping(s, linearized);
 
 		/*
 		 * Calculate the number of bytes required for the node data,
@@ -150,10 +157,15 @@ public final class FSA5Serializer implements FSASerializer {
 		 * Emit the header.
 		 */
 		os.write(new byte[] { '\\', 'f', 's', 'a' });
-		os.write(FSA5.VERSION);
+		os.write(CFSA.VERSION);
 		os.write(fillerByte);
 		os.write(annotationByte);
 		os.write((nodeDataLength << 4) | gtl);
+
+		/*
+         * Emit label mapping for arc.
+         */
+        os.write(compressedLabels);
 
 		/*
 		 * Emit the automaton.
@@ -165,6 +177,53 @@ public final class FSA5Serializer implements FSASerializer {
 	}
 
 	/**
+	 * Calculate most frequent labels on arcs with NEXT bit set.
+	 */
+	private void doLabelMapping(State root, ArrayList<State> linearized) {
+        class IndexValue {
+            int index;
+            int value;
+
+            public IndexValue(int index) {
+                this.index = index;
+            }
+        }
+
+        final IndexValue[] counts = new IndexValue[256];
+        for (int i = 0; i < counts.length; i++)
+            counts[i] = new IndexValue(i);
+
+        // Count the distribution of labels on arcs with NEXT bit set.
+        int maxStates = linearized.size() - 1;
+        for (int j = 0; j < maxStates; j++) {
+            final State state = linearized.get(j);
+
+            if (state.hasChildren()) {
+                final int arcIndex = state.arcsCount() - 1;
+                if (state.arcState(arcIndex) == linearized.get(j + 1)) {
+                    counts[state.arcLabel(arcIndex) & 0xff].value++;
+                }
+            }
+        }
+
+        // Pick the most frequent labels for mapping.
+        Arrays.sort(counts, new Comparator<IndexValue>() {
+            public int compare(IndexValue o1, IndexValue o2) {
+                return o2.value - o1.value;
+            };
+        });
+
+        // Take the 31 most frequent values.
+        for (int i = 0; i < (1 << 5) - 1; i++) {
+            compressedLabelsIndex[counts[i].index] = (byte) (i + 1);
+            if (counts[i].value > 0)
+                compressedLabels[i + 1] = (byte) counts[i].index;
+            else
+                compressedLabels[i + 1] = -1;
+        }
+    }
+
+    /**
 	 * Update arc offsets assuming the given goto length.
 	 */
 	private boolean emitArcs(OutputStream os, 
@@ -213,7 +272,6 @@ public final class FSA5Serializer implements FSASerializer {
 				}
 
 				int combined = 0;
-				int arcBytes = gtl;
 
 				if (s.arcFinal(i)) {
 					combined |= FSA5.BIT_FINAL_ARC;
@@ -226,21 +284,38 @@ public final class FSA5Serializer implements FSASerializer {
 							target == linearized.get(j + 1) && 
 							targetOffset != 0) {
 						combined |= FSA5.BIT_TARGET_NEXT;
-						arcBytes = SIZEOF_FLAGS;
 						targetOffset = 0;
 					}
 				}
 
-				combined |= (targetOffset << 3);
-				bb.put(s.arcLabel(i));
-				for (int b = 0; b < arcBytes; b++) {
-					bb.put((byte) combined);
-					combined >>>= 8;
-				}
+				final byte label = s.arcLabel(i);
 
-				if (combined != 0) {
-					// gtl too small. interrupt eagerly.
-					return false;
+				if ((combined & FSA5.BIT_TARGET_NEXT) != 0) {
+	                byte index = compressedLabelsIndex[label & 0xff];
+	                if (index > 0) {
+	                    // arc version 1
+	                    bb.put((byte) ((index << 3) | combined));
+	                } else {
+	                    // arc version 2
+	                    bb.put((byte) combined);
+	                    bb.put(label);
+	                }
+				} else {
+	                // flags, label, goto field
+				    combined |= (targetOffset << 3);
+	                bb.put((byte) (combined & 0xff));
+	                bb.put(label);
+
+                    combined >>>= 8;
+	                for (int b = 1; b < gtl; b++) {
+	                    bb.put((byte) combined);
+                        combined >>>= 8;
+	                }
+	                
+	                if (combined != 0) {
+	                    // gtl too small. interrupt eagerly.
+	                    return false;
+	                }
 				}
 
 				bb.flip();
