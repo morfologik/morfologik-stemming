@@ -198,7 +198,9 @@ public final class State implements Traversable<State> {
      * Return the most recent transitions's target state.
      */
     State lastChild() {
-    	assert hasChildren() : "No outgoing transitions.";
+    	assert hasChildren() : "Should have outgoing transitions.";
+    	assert !interned() : "Shouldn't be interned."; 
+
     	return states[states.length - 1];
     }
 
@@ -207,6 +209,8 @@ public final class State implements Traversable<State> {
      * is labeled with <code>label</code>.
      */
     State lastChild(byte label) {
+        assert !interned() : "Shouldn't be interned.";
+
     	final int index = labels.length - 1;
     	State s = null;
     	if (index >= 0 && labels[index] == label) {
@@ -238,8 +242,28 @@ public final class State implements Traversable<State> {
             number += states[i].number;
         }
 
-        assert this.number != 0 : "The state's number is not zero (already interned)?";
+        assert !interned() : "Shouldn't be interned.";
+        assert childrenInterned() : "Expected all children to be interned.";
+
         this.number = number;
+    }
+    
+    /**
+     * Assertion check for interned state.
+     */
+    private boolean interned() {
+        return this.number >= 0;
+    }
+    
+    /**
+     * Assertion that all children of this state should be interned.
+     */
+    private boolean childrenInterned() {
+        for (State s : states) {
+            if (!s.interned())
+                return false;
+        }
+        return true;
     }
 
 	/**
