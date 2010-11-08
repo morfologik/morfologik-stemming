@@ -1,5 +1,9 @@
 
 1.5.0 (trunk)
+          Added state interning. Speedup in automaton construction by about 30%, memory use 
+          decreased significantly (did not perform exact measurements, but incremental 
+          clustering from presorted data should consume way less memory).
+
           Added an option to build FSA from already sorted data.
 
           Changed the default ordering from Java signed-byte to C-like unsigned byte value.

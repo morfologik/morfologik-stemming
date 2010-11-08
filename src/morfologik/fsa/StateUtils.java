@@ -35,24 +35,23 @@ public class StateUtils {
 				b.append("  ").append(codes.get(s));
 				b.append(" [shape=circle,label=\"\"];\n");
 
-				int i = 0;
-				for (State sub : s.states) {
+				for (int i = 0; i < s.getArcs(); i++) {
+				    final State sub = s.arcState(i);
+
 					b.append("  ");
 					b.append(codes.get(s));
 					b.append(" -> ");
 					b.append(codes.get(sub));
 					b.append(" [label=\"");
-					if (Character.isLetterOrDigit(s.labels[i]))
-						b.append((char) s.labels[i]);
+					if (Character.isLetterOrDigit(s.arcLabel(i)))
+						b.append((char) s.arcLabel(i));
 					else {
 						b.append("0x");
-						b.append(Integer.toHexString(s.labels[i] & 0xFF));
+						b.append(Integer.toHexString(s.arcLabel(i) & 0xFF));
 					}
 					b.append("\"");
-					if (s.final_transitions[i]) b.append(" arrowhead=\"tee\"");
+					if (s.arcFinal(i)) b.append(" arrowhead=\"tee\"");
 					b.append("]\n");
-
-					i++;
 				}
 			}
 		});
@@ -79,22 +78,18 @@ public class StateUtils {
 	private static byte[] descend(State state, byte [] b, int position, 
 			ArrayList<byte[]> rl) {
 		if (state.hasChildren()) {
-			final State[] states = state.states;
-			final byte[] labels = state.labels;
-			final boolean[] final_transitions = state.final_transitions;
-
 			if (b.length <= position) {
 				b = morfologik.util.Arrays.copyOf(b, position + 1);
 			}
 
-			for (int i = 0; i < labels.length; i++) {
-				b[position] = labels[i];
+			for (int i = 0; i < state.getArcs(); i++) {
+				b[position] = state.arcLabel(i);
 
-				if (final_transitions[i]) {
+				if (state.arcFinal(i)) {
 					rl.add(morfologik.util.Arrays.copyOf(b, position + 1));
 				}
 
-				b = descend(states[i], b, position + 1, rl);
+				b = descend(state.arcState(i), b, position + 1, rl);
 			}
 		}
 		return b;
@@ -112,10 +107,10 @@ public class StateUtils {
 				// states
 				counters[0]++; 
 				// transitions
-				counters[1] += s.labels.length;
+				counters[1] += s.getArcs();
 				// final states
-				for (boolean isFinal : s.final_transitions)
-					if (isFinal) counters[2]++;
+				for (int i = 0; i < s.getArcs(); i++)
+					if (s.arcFinal(i)) counters[2]++;
 			}
 		});
 		return new FSAInfo(counters[0], counters[1], counters[1], counters[2]);

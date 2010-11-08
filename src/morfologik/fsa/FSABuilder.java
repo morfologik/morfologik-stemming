@@ -41,9 +41,14 @@ public class FSABuilder {
 	private HashMap<State, State> register = new HashMap<State, State>();
 
 	/**
-	 * Root automaton state.
+	 * Interning pool.
 	 */
-	private State root = new State();
+	private final State.InterningPool pool = new State.InterningPool();
+
+	/**
+     * Root automaton state.
+     */
+    private State root = pool.createState();
 
 	/**
 	 * Previous sequence added to the automaton in {@link #add(byte[], int)}. Used
@@ -96,7 +101,7 @@ public class FSABuilder {
 
         register = null; // Help the GC.
 
-		root.intern();
+		root = root.intern(pool);
 		return root;
     }
 
@@ -141,7 +146,8 @@ public class FSABuilder {
 	 * state or register the last child state.
 	 */
 	private void replaceOrRegister(State state) {
-		final State child = state.lastChild();
+		State child = state.lastChild();
+        assert !child.interned() : "Shouldn't be interned.";
 
 		if (child.hasChildren())
 			replaceOrRegister(child);
@@ -149,9 +155,11 @@ public class FSABuilder {
 		final State registered = register.get(child);
 		if (registered != null) {
 			state.replaceLastChild(registered);
+			pool.returnState(child);
 		} else {
-		    child.intern();
+		    child = child.intern(pool);
 			register.put(child, child);
+			state.replaceLastChild(child);
 		}
 	}
 
@@ -162,7 +170,7 @@ public class FSABuilder {
 	private void addSuffix(State state, byte[] current, int length, int fromIndex) {
 		final int lastIndex = length - 1;
 		for (int i = fromIndex; i <= lastIndex; i++) {
-			state = state.newState(current[i], i == lastIndex);
+			state = state.addArc(current[i], pool.createState(), i == lastIndex);
 		}
 	}
 }

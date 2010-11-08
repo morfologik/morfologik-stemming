@@ -57,17 +57,47 @@ public final class Arrays {
 	/**
 	 * Compare two lists of objects for reference-equality.
 	 */
-	public static boolean referenceEquals(Object[] a1, Object[] a2) {
-		if (a1.length != a2.length)
-			return false;
-	
-		for (int i = 0; i < a1.length; i++)
-			if (a1[i] != a2[i])
+	public static boolean referenceEquals(Object[] a1, int a1s, Object[] a2, int a2s, int length) {
+		for (int i = 0; i < length; i++)
+            if (a1[a1s++] != a2[a2s++])
 				return false;
-	
+
 		return true;
 	}
-	
+
+	/**
+     * Compare two arrays for equality.
+     */
+    public static boolean equals(byte[] a1, int a1s, byte [] a2, int a2s, int length) {
+        for (int i = 0; i < length; i++)
+            if (a1[a1s++] != a2[a2s++])
+                return false;
+
+        return true;
+    }
+
+    /**
+     * Compare two arrays for equality.
+     */
+    public static boolean equals(boolean[] a1, int a1s, boolean[] a2, int a2s, int length) {
+        for (int i = 0; i < length; i++)
+            if (a1[a1s++] != a2[a2s++])
+                return false;
+
+        return true;
+    }
+
+    /**
+     * Compare two arrays for equality.
+     */
+    public static boolean equals(int[] a1, int a1s, int[] a2, int a2s, int length) {
+        for (int i = 0; i < length; i++)
+            if (a1[a1s++] != a2[a2s++])
+                return false;
+
+        return true;
+    }
+
 	/**
 	 * Convert an array of strings to bytes. JDK1.5-equivalent of {@link Arrays#copyOf(byte[], int)}
 	 * and then {@link java.util.Arrays#toString(byte[])}.

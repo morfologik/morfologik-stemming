@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
+import morfologik.stemming.Dictionary;
 import morfologik.util.BufferUtils;
 import morfologik.util.MinMax;
 
@@ -22,6 +23,26 @@ public class FSABuilderTest {
 		input = generateRandom(25000, new MinMax(1, 20), new MinMax(0, 255));
 		input2 = generateRandom(25000, new MinMax(1, 20), new MinMax(0, 3));
 	}
+
+	/**
+     * 
+     */
+    @Test
+    public void testNormalInput() throws Exception {
+        // Extract some real-life input from the built-in dictionary. 
+        FSA plDict = Dictionary.getForLanguage("pl").fsa;
+        byte [][] input = new byte [100000][];
+        int i = 0;
+        for (ByteBuffer bb : plDict) {
+            input[i++] = Arrays.copyOfRange(bb.array(), 0, bb.remaining());
+            if (i == input.length) break;
+        }
+
+        // Sort.
+        Arrays.sort(input, FSABuilder.LEXICAL_ORDERING);
+        State s = FSABuilder.build(input);
+        checkCorrect(input, s);
+    }
 
 	/**
 	 * 

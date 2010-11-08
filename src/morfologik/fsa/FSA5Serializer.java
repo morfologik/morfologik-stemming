@@ -85,21 +85,18 @@ public final class FSA5Serializer {
 	        throws IOException {
 
 		final ArrayList<State> linearized = new ArrayList<State>();
+		final State.InterningPool pool = new State.InterningPool();
 
 		// Add the "sink node", with a single arc pointing to itself.
-		State sink = new State();
-		sink.labels = new byte[] { 0 };
-		sink.states = new State[] { sink };
-		sink.final_transitions = new boolean [] {false};
+		State sink = pool.createState();
+		sink.addArc((byte) 0, sink, false);
 
 		linearized.add(sink); // Sink is not part of the automaton.
 
 		// Add a special, initial "meta state".
-		State meta = new State();
-		meta.labels = new byte[] { '^' };
-		meta.states = new State[] { s };
-		meta.final_transitions = new boolean [] {false};
-		s = meta;
+		State meta = pool.createState();
+        meta.addArc((byte) '^', s, false);
+		s = meta.intern(pool);
 
 		// Prepare space for arc offsets and linearize all the states.
 		s.preOrder(new Visitor<State>() {
@@ -115,7 +112,6 @@ public final class FSA5Serializer {
 		 */
 		int nodeDataLength = 0;
 		if (withNumbers) {
-		    s.intern();
 			int maxNumber = s.number;
 			while (maxNumber > 0) {
 				nodeDataLength++;
@@ -180,11 +176,7 @@ public final class FSA5Serializer {
 				assert s.offset == offset;
 			}
 
-			final byte[] labels = s.labels;
-			final State[] states = s.states;
-			final boolean[] final_transitions = s.final_transitions;
-
-			final int lastTransition = labels.length - 1;
+			final int lastTransition = s.getArcs() - 1;
 
 			offset += nodeDataLength;
 			if (nodeDataLength > 0 && os != null) {
@@ -200,7 +192,7 @@ public final class FSA5Serializer {
 			}
 
 			for (int i = 0; i <= lastTransition; i++) {
-				final State target = states[i];
+				final State target = s.arcState(i);
 
 				int targetOffset;
 				if (isTerminal(target)) {
@@ -212,7 +204,7 @@ public final class FSA5Serializer {
 				int combined = 0;
 				int arcBytes = gtl;
 
-				if (final_transitions[i]) {
+				if (s.arcFinal(i)) {
 					combined |= FSA5.BIT_FINAL_ARC;
 				}
 
@@ -229,7 +221,7 @@ public final class FSA5Serializer {
 				}
 
 				combined |= (targetOffset << 3);
-				bb.put(labels[i]);
+				bb.put(s.arcLabel(i));
 				for (int b = 0; b < arcBytes; b++) {
 					bb.put((byte) combined);
 					combined >>>= 8;
