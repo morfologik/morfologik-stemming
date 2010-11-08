@@ -1,17 +1,6 @@
 
 BUGS?
     
-- Check what's going on with no-args invocation:
-
-- Check what's going on:
-
-echo "trawa trawy" | java -jar morfologik-stemming-trunk.jar plstem -o output
-Input encoding: Cp1252
-Output encoding: Cp1252
-Processed 0 words in 0.001 seconds (0 words per second).
-
-(no words? no output?]
-    
     
 NEXT MAJOR VERSION
 
