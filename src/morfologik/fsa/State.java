@@ -89,10 +89,10 @@ public final class State implements Traversable<State> {
 		return
 			   Arrays.equals(this.labels, this.start, 
 			                 that.labels, that.start, this.arcs)
-			&& Arrays.equals(this.final_transitions, this.start, 
-			                 that.final_transitions, that.start, this.arcs)
 			&& Arrays.referenceEquals(this.states, this.start, 
-			                          that.states, that.start, this.arcs);
+			                          that.states, that.start, this.arcs)
+            && Arrays.equals(this.final_transitions, this.start, 
+                             that.final_transitions, that.start, this.arcs);
 	}
 
 	/**
