@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import morfologik.fsa.*;
+import morfologik.fsa.StateUtils.IntIntHolder;
 import morfologik.util.Arrays;
 
 import org.apache.commons.cli.*;
@@ -145,6 +146,7 @@ public final class FSABuildTool extends Tool {
                 FSAInfo info = StateUtils.getInfo(root);
                 TreeMap<Integer, Integer> fanout = StateUtils.calculateFanOuts(root);
                 int [] tailNodes = StateUtils.calculateTails(root);
+                TreeMap<Integer, IntIntHolder> depthFanout = StateUtils.calculateDepthFanOuts(root);
                 endPart();
 
                 logInt("Nodes", info.nodeCount);
@@ -155,6 +157,15 @@ public final class FSABuildTool extends Tool {
                 log("States with the given # of outgoing arcs:");
                 for (Map.Entry<Integer, Integer> e : fanout.entrySet()) {
                     logInt("  #" + e.getKey(), e.getValue());
+                }
+
+                log("Outgoing nodes and arcs at the given depth:");
+                for (Map.Entry<Integer, IntIntHolder> e : depthFanout.entrySet()) {
+                    log("  #" + e.getKey(),
+                            String.format(Locale.ENGLISH, "%,11d %,11d  [%,11.2f arc per node]", 
+                                    e.getValue().a,
+                                    e.getValue().b,
+                                    (double) e.getValue().b / e.getValue().a));
                 }
             }
 
@@ -362,6 +373,13 @@ public final class FSABuildTool extends Tool {
      */
     private void logInt(String header, int v) {
         System.err.println(String.format(Locale.ENGLISH, "%-20s  %,11d", header, v));
+    }
+
+    /**
+     * Log a two-part message.
+     */
+    private void log(String header, Object v) {
+        System.err.println(String.format(Locale.ENGLISH, "%-20s  %11s", header, v.toString()));
     }
 
     /**

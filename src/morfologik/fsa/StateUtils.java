@@ -8,6 +8,11 @@ import java.util.*;
  * clarity.
  */
 public class StateUtils {
+    public final static class IntIntHolder {
+        public int a;
+        public int b;
+    }
+    
 	/**
 	 * Returns the right-language reachable from a given graph node, formatted
 	 * as an input for the graphviz package (expressed in the <code>dot</code>
@@ -174,5 +179,36 @@ public class StateUtils {
         });
 
         return result;
+    }
+
+    /**
+     * Calculate the number of nodes and their arcs at the given depth.
+     */
+    public static TreeMap<Integer, IntIntHolder> calculateDepthFanOuts(State root) {
+        final TreeMap<Integer, IntIntHolder> result = new TreeMap<Integer, IntIntHolder>();
+        preOrder(root, 0, result, new IdentityHashMap<State, State>());
+        return result;
+    }
+
+    /** Helper for {@link #calculateDepthFanOuts(State)} */
+    private static void preOrder(State s, Integer depth,
+            TreeMap<Integer, IntIntHolder> result,
+            IdentityHashMap<State, State> visited) {
+        if (visited.containsKey(s))
+            return;
+        visited.put(s, s);
+
+        IntIntHolder h = result.get(depth);
+        if (h == null) {
+            h = new IntIntHolder();
+            result.put(depth, h);
+        }
+
+        h.a += 1;
+        h.b += s.arcsCount();
+
+        for (int i = s.arcsCount(); --i >= 0;) {
+            preOrder(s.arcState(i), depth + 1, result, visited);
+        }
     }
 }
