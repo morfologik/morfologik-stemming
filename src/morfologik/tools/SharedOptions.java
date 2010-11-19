@@ -137,6 +137,12 @@ final class SharedOptions {
 		.isRequired(false)
 		.create("nw");
 
+    public final static Option statistics = OptionBuilder
+        .withDescription("Print extra statistics.")
+        .isRequired(false)
+        .withLongOpt("stats")
+        .create();
+
 	/**
 	 * No instances. Use static fields.
 	 */

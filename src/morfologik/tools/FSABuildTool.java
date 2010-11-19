@@ -73,6 +73,11 @@ public final class FSABuildTool extends Tool {
      * must be sorted externally (using the "C" convention: unsigned byte values).
      */
     private boolean inputSorted;
+    
+    /**
+     * Print additional statistics about the output automaton.
+     */
+    private boolean statistics;
 
     /**
      * Gets fed with the lines read from the input.
@@ -135,12 +140,20 @@ public final class FSABuildTool extends Tool {
 		    }
 	        if (crWarning) log("Warning: input contained carriage returns?");
 
-			startPart("Statistics");
-			FSAInfo info = StateUtils.getInfo(root);
-	        endPart();
+            if (statistics) {
+                startPart("Statistics");
+                FSAInfo info = StateUtils.getInfo(root);
+                TreeMap<Integer, Integer> fanout = StateUtils.calculateFanOuts(root);
+                endPart();
 
-            logInt("Nodes", info.nodeCount);
-            logInt("Arcs", info.arcsCount);
+                logInt("Nodes", info.nodeCount);
+                logInt("Arcs", info.arcsCount);
+
+                log("States with the given # of outgoing arcs:");
+                for (Map.Entry<Integer, Integer> e : fanout.entrySet()) {
+                    logInt("  #" + e.getKey(), e.getValue());
+                }
+            }
 
 			// Save the result.
             startPart("Serializing " + format);
@@ -294,6 +307,11 @@ public final class FSABuildTool extends Tool {
         if (line.hasOption(opt)) {
             inputSorted = true;
         }
+
+        opt = SharedOptions.statistics.getLongOpt();
+        if (line.hasOption(opt)) {
+            statistics = true;
+        }
     }
 	
 	/**
@@ -415,6 +433,8 @@ public final class FSABuildTool extends Tool {
 		options.addOption(SharedOptions.progressOption);
 		
 		options.addOption(SharedOptions.inputSortedOption);
+
+		options.addOption(SharedOptions.statistics);
 	}
 
 	/**

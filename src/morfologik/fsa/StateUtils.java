@@ -1,7 +1,6 @@
 package morfologik.fsa;
 
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
+import java.util.*;
 
 
 /**
@@ -115,4 +114,31 @@ public class StateUtils {
 		});
 		return new FSAInfo(counters[0], counters[1], counters[1], counters[2]);
 	}
+
+	/**
+	 * Calculate fan-out ratio.
+	 * @return The returned array: result[outgoing-arcs]
+	 */
+    public static TreeMap<Integer, Integer> calculateFanOuts(State root) {
+        final int [] result = new int [256];
+        root.preOrder(new Visitor<State>() {
+            public void accept(State s) {
+                result[s.arcsCount()]++;
+            }
+        });
+
+        TreeMap<Integer, Integer> output = new TreeMap<Integer, Integer>();
+        
+        int low = 1; // Omit #0, there is always a single node like that (dummy).
+        while (low < result.length && result[low] == 0) low++;
+
+        int high = result.length - 1;
+        while (high >= 0 && result[high] == 0) high--;
+
+        for (int i = low; i <= high; i++) {
+            output.put(i, result[i]);
+        }
+
+        return output;
+    }
 }
