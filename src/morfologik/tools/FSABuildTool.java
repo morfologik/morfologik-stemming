@@ -12,6 +12,12 @@ import org.apache.commons.cli.*;
  * Convert from plain text input to {@link FSA5} or {@link CFSA}.
  */
 public final class FSABuildTool extends Tool {
+    
+    /**
+     * One megabyte.
+     */
+    private final static int MB = 1024 * 1024;
+    
     /**
      * The serialization format to use for the binary output.
      */
@@ -431,14 +437,24 @@ public final class FSABuildTool extends Tool {
 	/**
      * 
      */
-	private static InputStream initializeInput(CommandLine line)
+	private InputStream initializeInput(CommandLine line)
 	        throws IOException, ParseException {
 		final InputStream input;
 		final String opt = SharedOptions.inputFileOption.getOpt();
 
 		if (line.hasOption(opt)) {
 			// Use input file.
-			input = new FileInputStream((File) line.getParsedOptionValue(opt));
+			File inputFile = (File) line.getParsedOptionValue(opt);
+			if (!inputSorted && inputFile.length() > 20 * MB) {
+			    log("WARN: The input file is quite large, avoid\n" +
+			        "      in-memory sorting by piping pre-sorted\n" +
+			        "      input directly to fsa_build. Linux:\n" +
+			        "      export LC_ALL=C && \\\n" +
+			        "         sort input | \\\n" +
+			        "         java -jar morfologik.jar fsa_build --sorted -o dict.fsa");
+			}
+
+            input = new FileInputStream(inputFile);
 		} else {
 			// Use standard input.
 			input = System.in;
