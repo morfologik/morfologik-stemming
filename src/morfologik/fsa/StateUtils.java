@@ -19,9 +19,11 @@ public class StateUtils {
 
 		final IdentityHashMap<State, Integer> codes = new IdentityHashMap<State, Integer>();
 		root.preOrder(new Visitor<State>() {
-			public void accept(State s) {
+			public boolean accept(State s) {
 				if (!codes.containsKey(s))
 					codes.put(s, codes.size());
+				
+				return true;
 			}
 		});
 
@@ -30,7 +32,7 @@ public class StateUtils {
 
 		// States and transitions.
 		root.preOrder(new Visitor<State>() {
-			public void accept(State s) {
+			public boolean accept(State s) {
 				b.append("  ").append(codes.get(s));
 				b.append(" [shape=circle,label=\"\"];\n");
 
@@ -52,6 +54,8 @@ public class StateUtils {
 					if (s.arcFinal(i)) b.append(" arrowhead=\"tee\"");
 					b.append("]\n");
 				}
+
+				return true;
 			}
 		});
 
@@ -102,7 +106,7 @@ public class StateUtils {
 				0, 0, 0
 		};
 		s.preOrder(new Visitor<State>() {
-			public void accept(State s) {
+			public boolean accept(State s) {
 				// states
 				counters[0]++; 
 				// transitions
@@ -110,6 +114,8 @@ public class StateUtils {
 				// final states
 				for (int i = 0; i < s.arcsCount(); i++)
 					if (s.arcFinal(i)) counters[2]++;
+
+				return true;
 			}
 		});
 		return new FSAInfo(counters[0], counters[1], counters[1], counters[2]);
@@ -122,8 +128,9 @@ public class StateUtils {
     public static TreeMap<Integer, Integer> calculateFanOuts(State root) {
         final int [] result = new int [256];
         root.preOrder(new Visitor<State>() {
-            public void accept(State s) {
+            public boolean accept(State s) {
                 result[s.arcsCount()]++;
+                return true;
             }
         });
 
@@ -140,5 +147,32 @@ public class StateUtils {
         }
 
         return output;
+    }
+    
+    /**
+     * Calculate the number of "tails" (arc chains that lead to a single final state).
+     * @return The returned array: result[0] = tail nodes, total; result[1] = unique suffixes.
+     */
+    public static int [] calculateTails(State root) {
+        final int [] result = new int [2];
+        root.preOrder(new Visitor<State>() {
+            public boolean accept(State s) {
+                if (s.number == 1) result[0]++;
+                return true;
+            }
+        });
+
+        root.preOrder(new Visitor<State>() {
+            public boolean accept(State s) {
+                if (s.number == 1) { 
+                    result[1]++;
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        });
+
+        return result;
     }
 }

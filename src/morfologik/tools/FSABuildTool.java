@@ -144,10 +144,13 @@ public final class FSABuildTool extends Tool {
                 startPart("Statistics");
                 FSAInfo info = StateUtils.getInfo(root);
                 TreeMap<Integer, Integer> fanout = StateUtils.calculateFanOuts(root);
+                int [] tailNodes = StateUtils.calculateTails(root);
                 endPart();
 
                 logInt("Nodes", info.nodeCount);
                 logInt("Arcs", info.arcsCount);
+                logInt("Tail nodes", tailNodes[0]);
+                logInt("Unique suffixes", tailNodes[1]);
 
                 log("States with the given # of outgoing arcs:");
                 for (Map.Entry<Integer, Integer> e : fanout.entrySet()) {

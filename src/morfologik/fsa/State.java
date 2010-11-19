@@ -308,9 +308,10 @@ public final class State implements Traversable<State> {
 			return;
 
 		visited.put(this, this);
-		v.accept(this);
-		for (int i = start; i < start + arcs; i++) {
-			states[i].preOrder(v, visited);
+		if (v.accept(this)) {
+    		for (int i = start; i < start + arcs; i++) {
+    			states[i].preOrder(v, visited);
+    		}
 		}
 	}
 

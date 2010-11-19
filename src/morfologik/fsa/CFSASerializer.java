@@ -115,9 +115,10 @@ public final class CFSASerializer implements FSASerializer {
 
         // Prepare space for arc offsets and linearize all the states.
         s.preOrder(new Visitor<State>() {
-            public void accept(State s) {
+            public boolean accept(State s) {
                 s.offset = 0;
                 linearized.add(s);
+                return true;
             }
         });
 

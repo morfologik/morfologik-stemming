@@ -166,7 +166,7 @@ public class FSABuilderTest {
 		s.postOrder(new Visitor<State>() {
 			private StringBuilder b = new StringBuilder();
 
-			public void accept(State s) {
+			public boolean accept(State s) {
 				List<byte[]> rightLanguage = StateUtils.rightLanguage(s);
 				Collections.sort(rightLanguage, FSABuilder.LEXICAL_ORDERING);
 
@@ -179,6 +179,8 @@ public class FSABuilderTest {
 				String full = b.toString();
 				Assert.assertFalse(stateLanguages.contains(full));
 				stateLanguages.add(full);
+				
+				return true;
 			}
 		});
 	}
