@@ -1,5 +1,7 @@
 
 1.5.0 (trunk)
+          Polish dictionary updated to Morfologik 1.7.
+
           Added an option to serialize automaton to CFSA or FSA5 directly from fsa_build.
 
           Added state interning. Speedup in automaton construction by about 30%, memory use 
