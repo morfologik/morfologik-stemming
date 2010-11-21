@@ -206,7 +206,11 @@ public final class CFSA extends FSA {
 	 */
 	@Override
 	public int getRootNode() {
-		return getDestinationNodeOffset(getFirstArc(skipArc(nodeDataLength)));
+        // Skip dummy node marking terminating state.
+        final int epsilonNode = skipArc(getFirstArc(0));
+        
+        // And follow the epsilon node's first (and only) arc.
+        return getDestinationNodeOffset(getFirstArc(epsilonNode));
 	}
 
 	/**

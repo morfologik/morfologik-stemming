@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.*;
 
+import static morfologik.fsa.CFSA.*;
+
 
 /**
  * Serializes in-memory {@link State} graphs to a binary format {@link CFSA}
@@ -158,7 +160,7 @@ public final class CFSASerializer implements FSASerializer {
 		 * Emit the header.
 		 */
 		os.write(new byte[] { '\\', 'f', 's', 'a' });
-		os.write(CFSA.VERSION);
+		os.write(VERSION);
 		os.write(fillerByte);
 		os.write(annotationByte);
 		os.write((nodeDataLength << 4) | gtl);
@@ -275,23 +277,23 @@ public final class CFSASerializer implements FSASerializer {
 				int combined = 0;
 
 				if (s.arcFinal(i)) {
-					combined |= FSA5.BIT_FINAL_ARC;
+					combined |= BIT_FINAL_ARC;
 				}
 
 				if (i == lastTransition) {
-					combined |= FSA5.BIT_LAST_ARC;
+					combined |= BIT_LAST_ARC;
 
 					if (j + 1 < maxStates && 
 							target == linearized.get(j + 1) && 
 							targetOffset != 0) {
-						combined |= FSA5.BIT_TARGET_NEXT;
+						combined |= BIT_TARGET_NEXT;
 						targetOffset = 0;
 					}
 				}
 
 				final byte label = s.arcLabel(i);
 
-				if ((combined & FSA5.BIT_TARGET_NEXT) != 0) {
+				if ((combined & BIT_TARGET_NEXT) != 0) {
 	                byte index = compressedLabelsIndex[label & 0xff];
 	                if (index > 0) {
 	                    // arc version 1
