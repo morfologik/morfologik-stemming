@@ -60,9 +60,9 @@ public final class FSA5Test {
 		final FSA fsa3 = Dictionary.getForLanguage("pl").fsa;
 		FSAInfo info3 = new FSAInfo(fsa3);
 
-		assertEquals(299903, info3.nodeCount);
-		assertEquals(687834, info3.arcsCount);
-		assertEquals(3565575, info3.finalStatesCount);
+		assertEquals(293329, info3.nodeCount);
+		assertEquals(679676, info3.arcsCount);
+		assertEquals(3672200, info3.finalStatesCount);
 	}
 
 	@Test

@@ -76,7 +76,7 @@ public final class Launcher {
 	/**
 	 * Initialize and check tools' availability.
 	 */
-	private static boolean initTools() {
+	static boolean initTools() {
 		tools = new TreeMap<String, ToolInfo>();
 		tools.put("fsa_build", new ToolInfo(FSABuild.class,
 		        "Create an FSA5 automaton from plain text files."));

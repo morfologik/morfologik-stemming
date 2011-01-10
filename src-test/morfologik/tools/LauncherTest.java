@@ -14,6 +14,7 @@ public class LauncherTest {
 	/* */
 	@Test
 	public void testTools() throws Exception {
+		Assert.assertTrue(Launcher.initTools());
 		for (Map.Entry<String, ToolInfo> e : Launcher.tools.entrySet()) {
 			try {
 				e.getValue().invoke(new String[] {});

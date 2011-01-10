@@ -6,8 +6,7 @@ import java.util.Set;
 
 import morfologik.util.MinMax;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
@@ -15,6 +14,7 @@ import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 /**
  * 
  */
+@Ignore
 @BenchmarkOptions(callgc = false, warmupRounds = 10, benchmarkRounds = 50)
 public class FSAImmutableSetPerformanceTest extends AbstractBenchmark {
 	private static String [] data;
