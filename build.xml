@@ -169,7 +169,7 @@
             <exclude name="tmp/**" />
             <exclude name="dist/**" />
             <exclude name=".settings/**" />
-	    <exclude name=".git" />
+	    <exclude name=".git/**" />
             <exclude name="${srczip}" />
         </fileset>
 
