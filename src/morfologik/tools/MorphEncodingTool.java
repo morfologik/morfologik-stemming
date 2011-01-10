@@ -9,7 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import morfologik.fsa.FSA5Serializer;
+import morfologik.fsa.FSA5;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -41,7 +41,7 @@ class MorphEncodingTool extends Tool {
 			prefixes = line.hasOption(SharedOptions.prefixEncoding.getOpt());
 		}
 
-		char separator = FSA5Serializer.DEFAULT_ANNOTATION;
+		char separator = FSA5.DEFAULT_ANNOTATION;
 		if (line.hasOption(SharedOptions.annotationSeparatorCharacterOption.getLongOpt())) {
 			String sep = line.getOptionValue(SharedOptions.annotationSeparatorCharacterOption.getLongOpt());
 

@@ -4,16 +4,17 @@ import java.io.*;
 import java.util.*;
 
 import morfologik.fsa.*;
-import morfologik.fsa.StateUtils.IntIntHolder;
-import morfologik.util.Arrays;
 
 import org.apache.commons.cli.*;
 
+import com.carrotsearch.hppc.IntIntOpenHashMap;
+import com.carrotsearch.hppc.cursors.IntIntCursor;
+
 /**
- * Convert from plain text input to {@link FSA5} or {@link CFSA}.
+ * Convert from plain text input to a serialized FSA in any of the
+ * available {@link Format}s.
  */
 public final class FSABuildTool extends Tool {
-    
     /**
      * One megabyte.
      */
@@ -23,15 +24,16 @@ public final class FSABuildTool extends Tool {
      * The serialization format to use for the binary output.
      */
     public enum Format {
-        FSA5,
-        CFSA;
+        FSA5, 
+        CFSA2;
 
         public FSASerializer getSerializer() {
             switch (this) {
                 case FSA5:
                     return new FSA5Serializer();
-                case CFSA:
-                    return new CFSASerializer();
+
+                case CFSA2:
+                    return new CFSA2Serializer();
 
                 default:
                     throw new RuntimeException();
@@ -43,16 +45,6 @@ public final class FSABuildTool extends Tool {
      * Be more verbose about progress.
      */
     private boolean printProgress;
-    
-    /**
-     * Last part's start time.
-     */
-    private long partStart;
-
-    /**
-     * Start of the process.
-     */
-    private long world;
     
     /**
      * Serializer used for emitting the FSA.
@@ -79,6 +71,18 @@ public final class FSABuildTool extends Tool {
      * Print additional statistics about the output automaton.
      */
     private boolean statistics;
+
+    /**
+     * The actual construction of the FSA.
+     */
+    private FSABuilder builder = new FSABuilder();
+    
+    /**
+     * Start time.
+     */
+    private long start = System.currentTimeMillis();
+
+    private IMessageLogger logger;
 
     /**
      * Gets fed with the lines read from the input.
@@ -118,99 +122,103 @@ public final class FSABuildTool extends Tool {
 		// Parse the input options.
         parseOptions(line);
 
-		world = System.currentTimeMillis();
+        logger = new WriterMessageLogger(new PrintWriter(System.err));
+        this.serializer.withLogger(logger);
+
 		try {
 		    InputStream inputStream = initializeInput(line);
 
-            if (!printProgress) {
-                if (inputSorted) {
-                    log("Assuming input is already sorted");
-                    startPart("Building FSA");
-                } else {
-                    startPart("Reading input");
-                }
-            } else {
-                this.partStart = System.currentTimeMillis();
+            if (inputSorted) {
+                logger.log("Assuming input is already sorted");
             }
 
-		    final State root;
+		    final FSA fsa;
 		    if (inputSorted) {
-                root = processSortedInput(inputStream);
+                fsa = processSortedInput(inputStream);
 		    } else {
-	            root = processUnsortedInput(inputStream);
+		        fsa = processUnsortedInput(inputStream);
 		    }
-	        if (crWarning) log("Warning: input contained carriage returns?");
+	        if (crWarning) logger.log("Warning: input contained carriage returns?");
 
             if (statistics) {
-                startPart("Statistics");
-                FSAInfo info = StateUtils.getInfo(root);
-                TreeMap<Integer, Integer> fanout = StateUtils.calculateFanOuts(root);
-                int [] tailNodes = StateUtils.calculateTails(root);
-                TreeMap<Integer, IntIntHolder> depthFanout = StateUtils.calculateDepthFanOuts(root);
-                endPart();
+                logger.startPart("Statistics");
+                FSAInfo info = new FSAInfo(fsa);
+                TreeMap<Integer, Integer> fanout = FSAUtils.calculateFanOuts(fsa, fsa.getRootNode());
+                logger.endPart();
 
-                logInt("Nodes", info.nodeCount);
-                logInt("Arcs", info.arcsCount);
-                logInt("Tail nodes", tailNodes[0]);
-                logInt("Unique suffixes", tailNodes[1]);
+                final IntIntOpenHashMap numbers = new IntIntOpenHashMap();
+                fsa.visitInPostOrder(new StateVisitor() {
+                    public boolean accept(int state) {
+                        int thisNodeNumber = 0;
+                        for (int arc = fsa.getFirstArc(state); arc != 0; arc = fsa.getNextArc(arc)) {
+                            thisNodeNumber +=
+                                (fsa.isArcFinal(arc) ? 1 : 0) +
+                                (fsa.isArcTerminal(arc) ? 0 : numbers.get(fsa.getEndNode(arc)));
+                        }
+                        numbers.put(state, thisNodeNumber);
+                        return true;
+                    }
+                });
 
-                log("States with the given # of outgoing arcs:");
+                int singleRLC = 0;
+                for (IntIntCursor c : numbers) {
+                    if (c.value == 1) singleRLC++;
+                }
+                
+                logger.log("Nodes", info.nodeCount);
+                logger.log("Arcs", info.arcsCount);
+                logger.log("Tail nodes", singleRLC);
+
+                logger.log("States with the given # of outgoing arcs:");
                 for (Map.Entry<Integer, Integer> e : fanout.entrySet()) {
-                    logInt("  #" + e.getKey(), e.getValue());
+                    logger.log("  #" + e.getKey(), e.getValue());
                 }
 
-                log("Outgoing nodes and arcs at the given depth:");
-                for (Map.Entry<Integer, IntIntHolder> e : depthFanout.entrySet()) {
-                    log("  #" + e.getKey(),
-                            String.format(Locale.ENGLISH, "%,11d %,11d  [%,11.2f arc per node]", 
-                                    e.getValue().a,
-                                    e.getValue().b,
-                                    (double) e.getValue().b / e.getValue().a));
+                logger.log("FSA builder properties:");
+                for (Map.Entry<FSABuilder.InfoEntry, Object> e : builder.getInfo().entrySet()) {
+                    logger.log(e.getKey().toString(), e.getValue());
                 }
             }
 
 			// Save the result.
-            startPart("Serializing " + format);
-			serializer.serialize(root, initializeOutput(line)).close();
-			endPart();
+            logger.startPart("Serializing " + format);
+			serializer.serialize(fsa, initializeOutput(line)).close();
+			logger.endPart();
 		} catch (OutOfMemoryError e) {
-			log("Out of memory. Pass -Xmx1024m argument (or more) to java.");
+		    logger.log("Error: Out of memory. Pass -Xmx1024m argument (or more) to java.");
 		}
 	}
 
 	/**
-	 * 
+	 * Process unsorted input (sort and construct FSA).
 	 */
-    private State processUnsortedInput(InputStream inputStream)
+    private FSA processUnsortedInput(InputStream inputStream)
             throws IOException {
-        final State root;
+        final FSA root;
+        logger.startPart("Reading input");
         final ArrayList<byte[]> input = readInput(inputStream);
-        if (printProgress) {
-            long partStart = this.partStart;
-            startPart("Reading input");
-            this.partStart = partStart;
-        }
-        endPart();
+        logger.endPart();
 
-        logInt("Input sequences", input.size());
+        logger.log("Input sequences", input.size());
 
-        startPart("Sorting");
+        logger.startPart("Sorting");
         Collections.sort(input, FSABuilder.LEXICAL_ORDERING);
-        endPart();
+        logger.endPart();
 
-        startPart("Building FSA");
-        root = FSABuilder.build(input);
-        endPart();
+        logger.startPart("Building FSA");
+        for (byte [] bb : input)
+            builder.add(bb, 0, bb.length);
+        root = builder.complete();
+        logger.endPart();
         return root;
     }
 
     /**
      * 
      */
-    private State processSortedInput(InputStream inputStream)
+    private FSA processSortedInput(InputStream inputStream)
             throws IOException {
-        final State root;
-        final FSABuilder builder = new FSABuilder();
+
         int lines = forAllLines(inputStream, new LineConsumer() {
             private byte [] current;
             private byte [] previous = null;
@@ -222,17 +230,17 @@ public final class FSABuildTool extends Tool {
 
                 // Verify the order.
                 if (previous != null) {
-                    if (FSABuilder.compare(previous, previousLen, current, currentLen) > 0) {
-                        log("\n\nERROR: The input is not sorted: ");
-                        log(dumpLine(previous, previousLen));
-                        log(dumpLine(current, currentLen));
+                    if (FSABuilder.compare(previous, 0, previousLen, current, 0, currentLen) > 0) {
+                        logger.log("\n\nERROR: The input is not sorted: \n" + 
+                                dumpLine(previous, previousLen) + "\n" +
+                                dumpLine(current, currentLen));
                         throw new TerminateProgramException("Input is not sorted.");
                     }
                 }
 
                 // Add to the automaton.
-                builder.add(current, currentLen);
-                
+                builder.add(current, 0, currentLen);
+
                 // Swap buffers.
                 this.current = previous != null ? previous : new byte [current.length];
                 this.previous = current;
@@ -241,17 +249,13 @@ public final class FSABuildTool extends Tool {
                 return this.current;
             }
         });
-        root = builder.complete();
 
-        if (printProgress) {
-            long partStart = this.partStart;
-            startPart("Building FSA");
-            this.partStart = partStart;
-        }
-        endPart();
-        logInt("Input sequences", lines);
+        logger.startPart("Building FSA");
+        FSA fsa = builder.complete();
+        logger.endPart();
+        logger.log("Input sequences", lines);
 
-        return root;
+        return fsa;
     }
 
 	/**
@@ -294,24 +298,24 @@ public final class FSABuildTool extends Tool {
         serializer = format.getSerializer();
 
 		opt = SharedOptions.fillerCharacterOption.getLongOpt();
-		if (line.hasOption(opt)) {
+		if (line.hasOption(opt) && requiredCapability(opt, FSAFlags.SEPARATORS)) {
 			String chr = line.getOptionValue(opt);
 			checkSingleByte(chr);
 			serializer.withFiller(chr.getBytes()[0]);
 		}
 		
 		opt = SharedOptions.annotationSeparatorCharacterOption.getLongOpt();
-		if (line.hasOption(opt)) {
+		if (line.hasOption(opt) && requiredCapability(opt, FSAFlags.SEPARATORS)) {
 			String chr = line.getOptionValue(opt);
 			checkSingleByte(chr);
 			serializer.withAnnotationSeparator(chr.getBytes()[0]);
 		}
 
         opt = SharedOptions.withNumbersOption.getOpt();
-        if (line.hasOption(opt)) {
+        if (line.hasOption(opt) && requiredCapability(opt, FSAFlags.NUMBERS)) {
             serializer.withNumbers();
         }
-        
+
         opt = SharedOptions.progressOption.getLongOpt();
         if (line.hasOption(opt)) {
             printProgress = true;
@@ -328,7 +332,14 @@ public final class FSABuildTool extends Tool {
         }
     }
 	
-	/**
+	private boolean requiredCapability(String opt, FSAFlags flag) {
+	    if (!serializer.getFlags().contains(flag)) {
+	        throw new RuntimeException("This serializer does not support option: " + opt);
+	    }
+	    return true;
+    }
+
+    /**
 	 * Check if the argument is a single byte after conversion using platform-default
 	 * encoding. 
 	 */
@@ -340,48 +351,6 @@ public final class FSABuildTool extends Tool {
 				"-byte values, " + chr + " has " + chr.getBytes().length + " bytes."); 
     }
 
-	/**
-	 * Log progress to the console.
-	 */
-	private void log(String msg) {
-		System.err.println(msg);
-		System.err.flush();
-	}
-
-	/**
-     * Log message header and save current time.
-     */
-    private void startPart(String header) {
-        System.err.print(String.format(Locale.ENGLISH, "%-20s", header + "..."));
-        System.err.flush();
-        partStart = System.currentTimeMillis();
-    }
-
-    /**
-     * 
-     */
-    private void endPart() {
-        long now = System.currentTimeMillis();
-        System.err.println(
-                String.format(Locale.ENGLISH, "%13.2f sec.  [%6.2f sec.]", 
-                (now - partStart) / 1000.0,
-                (now - world) / 1000.0));
-    }
-
-    /**
-     * Log an integer statistic.
-     */
-    private void logInt(String header, int v) {
-        System.err.println(String.format(Locale.ENGLISH, "%-20s  %,11d", header, v));
-    }
-
-    /**
-     * Log a two-part message.
-     */
-    private void log(String header, Object v) {
-        System.err.println(String.format(Locale.ENGLISH, "%-20s  %11s", header, v.toString()));
-    }
-
     /**
 	 * Read all the input lines, unsorted.
 	 */
@@ -389,7 +358,7 @@ public final class FSABuildTool extends Tool {
 	    final ArrayList<byte[]> result = new ArrayList<byte[]>();
 	    forAllLines(is, new LineConsumer() {
 	        public byte[] process(byte[] buffer, int pos) {
-	            result.add(Arrays.copyOf(buffer, pos));
+	            result.add(java.util.Arrays.copyOf(buffer, pos));
 	            return buffer;
 	        }
         });
@@ -415,12 +384,12 @@ public final class FSABuildTool extends Tool {
 	                lines++;
 			    }
 
-				if (printProgress && (line++ % 10000) == 0) {
-					log("Lines read: " + (line - 1));
+				if (printProgress && line++ > 0 && (line % 1000000) == 0) {
+				    logger.log(String.format(Locale.ENGLISH, "%6.2fs, sequences: %d", elapsedTime(), line));
 				}
 			} else {
 				if (pos >= buffer.length) {
-					buffer = Arrays.copyOf(buffer, buffer.length + 10);
+					buffer = java.util.Arrays.copyOf(buffer, buffer.length + 10);
 				}
 				buffer[pos++] = (byte) b;
 			}
@@ -434,7 +403,11 @@ public final class FSABuildTool extends Tool {
 		return lines;
 	}
 
-	@Override
+	private double elapsedTime() {
+        return (System.currentTimeMillis() - start) / 1000.0d;
+    }
+
+    @Override
 	protected void printUsage() {
 		final HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp(this.getClass().getName(), options, true);
@@ -452,7 +425,7 @@ public final class FSABuildTool extends Tool {
 
 		options.addOption(SharedOptions.withNumbersOption);
 		options.addOption(SharedOptions.progressOption);
-		
+
 		options.addOption(SharedOptions.inputSortedOption);
 
 		options.addOption(SharedOptions.statistics);
@@ -487,7 +460,7 @@ public final class FSABuildTool extends Tool {
 			// Use input file.
 			File inputFile = (File) line.getParsedOptionValue(opt);
 			if (!inputSorted && inputFile.length() > 20 * MB) {
-			    log("WARN: The input file is quite large, avoid\n" +
+			    logger.log("WARN: The input file is quite large, avoid\n" +
 			        "      in-memory sorting by piping pre-sorted\n" +
 			        "      input directly to fsa_build. Linux:\n" +
 			        "      export LC_ALL=C && \\\n" +

@@ -2,40 +2,44 @@ package morfologik.fsa;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Set;
+
+import morfologik.tools.IMessageLogger;
 
 /**
- * All FSA serializers to binary format will implement this interface.
+ * All FSA serializers to binary formats will implement this interface.
  */
 public interface FSASerializer {
     /**
-     * Default filler.
+     * Serialize a finite state automaton to an output stream.
      */
-    public final static byte DEFAULT_FILLER = '_';
-    
-    /**
-     * Default annotation separator.
-     */
-    public final static byte DEFAULT_ANNOTATION = '+';
+    public <T extends OutputStream> T serialize(FSA fsa, T os) throws IOException;
 
     /**
-     * Serialize with numbers allowing perfect hashing.
+     * Returns the set of flags supported by the serializer (and the output automaton).
      */
-    FSASerializer withNumbers();
+    public Set<FSAFlags> getFlags();
 
     /**
-     * Serialize to an output stream.
+     * Log extra messages during construction. 
      */
-    public <T extends OutputStream> T serialize(State s, T os) throws IOException;
+    public FSASerializer withLogger(IMessageLogger logger);
     
     /**
-     * Set special filler byte in automaton header, 
-     * if applicable (<code>fsa</code> package legacy). 
+     * Supports built-in filler separator. Only if {@link #getFlags()} returns 
+     * {@link FSAFlags#SEPARATORS}.
      */
     public FSASerializer withFiller(byte filler);
-    
+
     /**
-     * Set special annotation separator byte in automaton header, 
-     * if applicable (<code>fsa</code> package legacy). 
+     * Supports built-in annotation separator. Only if {@link #getFlags()} returns 
+     * {@link FSAFlags#SEPARATORS}.
      */
     public FSASerializer withAnnotationSeparator(byte annotationSeparator);
+
+    /**
+     * Supports built-in right language count on nodes, speeding up perfect hash counts. 
+     * Only if {@link #getFlags()} returns {@link FSAFlags#NUMBERS}.
+     */
+    public FSASerializer withNumbers();
 }

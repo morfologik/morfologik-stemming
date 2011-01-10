@@ -114,13 +114,6 @@ public final class FSADumpTool extends Tool {
 			printExtra("");
 		}
 
-		if (fsa instanceof CFSA) {
-			printExtra("CFSA properties");
-			printExtra("--------------------");
-			printCFSA((CFSA) fsa);
-			printExtra("");
-		}
-
 		if (dictionary != null) {
 			printExtra("Dictionary metadata");
 			printExtra("--------------------");
@@ -211,27 +204,6 @@ public final class FSADumpTool extends Tool {
 
 		os.flush();
 	}
-
-	/**
-	 * Print {@link CFSA}-specific stuff.
-	 */
-	private void printCFSA(CFSA fsa) throws IOException {
-		printExtra("GTL                 : " + fsa.gtl);
-		printExtra("Node extra data     : " + fsa.nodeDataLength);
-		printExtra("Label mapping       : " + bytesAsChars(fsa.labelMapping));
-    }
-
-	/**
-	 * 
-	 */
-	private String bytesAsChars(byte[] bytes) {
-		char [] chars = new char [bytes.length];
-		
-		for (int i = 0; i < bytes.length; i++)
-			chars[i] = byteAsChar(bytes[i]);
-
-	    return new String(chars);
-    }
 
 	/**
 	 * Print {@link FSA5}-specific stuff.

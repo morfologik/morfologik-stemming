@@ -1,8 +1,10 @@
 package morfologik.fsa;
 
-
+/**
+ * 
+ */
 public class FSA5SerializerTest extends SerializerTestBase {
-	protected FSASerializer createSerializer() {
+	protected FSA5Serializer createSerializer() {
         return new FSA5Serializer();
     }
 }

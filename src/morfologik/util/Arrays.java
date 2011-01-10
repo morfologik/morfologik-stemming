@@ -1,57 +1,11 @@
 package morfologik.util;
 
-import java.lang.reflect.Array;
-
 /**
  * Compatibility layer for JVM 1.5.
  */
 public final class Arrays {
 	private Arrays() {
 		// No instances.
-	}
-
-	public static byte[] copyOf(byte[] original, int newLength) {
-		byte[] copy = new byte[newLength];
-		System.arraycopy(original, 0, copy, 0, Math.min(original.length,
-		        newLength));
-		return copy;
-	}
-
-	public static boolean[] copyOf(boolean[] original, int newLength) {
-		boolean[] copy = new boolean[newLength];
-		System.arraycopy(original, 0, copy, 0, Math.min(original.length,
-		        newLength));
-		return copy;
-	}
-
-	public static char[] copyOf(char[] original, int newLength) {
-		char[] copy = new char[newLength];
-		System.arraycopy(original, 0, copy, 0, Math.min(original.length,
-		        newLength));
-		return copy;
-	}
-
-	public static int[] copyOf(int[] original, int newLength) {
-		int[] copy = new int[newLength];
-		System.arraycopy(original, 0, copy, 0, Math.min(original.length,
-		        newLength));
-		return copy;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T> T[] copyOf(T[] original, int newLength) {
-		return (T[]) copyOf(original, newLength, original.getClass());
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T, U> T[] copyOf(U[] original, int newLength,
-	        Class<? extends T[]> newType) {
-		T[] copy = ((Object) newType == (Object) Object[].class) ? (T[]) new Object[newLength]
-		        : (T[]) Array
-		                .newInstance(newType.getComponentType(), newLength);
-		System.arraycopy(original, 0, copy, 0, Math.min(original.length,
-		        newLength));
-		return copy;
 	}
 
 	/**
@@ -99,15 +53,14 @@ public final class Arrays {
     }
 
 	/**
-	 * Convert an array of strings to bytes. JDK1.5-equivalent of {@link Arrays#copyOf(byte[], int)}
-	 * and then {@link java.util.Arrays#toString(byte[])}.
+	 * Convert an array of strings to bytes.
 	 */
-	public static String toString(byte [] bytes, int length)
+	public static String toString(byte [] bytes, int start, int length)
 	{
 		if (bytes.length != length)
 		{
 			final byte [] sub = new byte [length];
-			System.arraycopy(bytes, 0, sub, 0, length);
+			System.arraycopy(bytes, start, sub, 0, length);
 			bytes = sub;
 		}
 		return java.util.Arrays.toString(bytes);

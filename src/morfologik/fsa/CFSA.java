@@ -4,19 +4,15 @@ import static morfologik.fsa.FSAFlags.*;
 import static morfologik.util.FileUtils.readFully;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.util.*;
 
 /**
  * CFSA (Compact Finite State Automaton) binary format implementation. This is a
  * slightly reorganized version of {@link FSA5} offering smaller automata size
  * at some (minor) performance penalty.
- * 
- * <p>This automaton version is not supported nor produced by the original
- * <code>fsa</code> package. Convert {@link FSA5} automata by dumping all contained 
- * byte sequences to disk, rebuilding the automaton and then serializing it using
- * {@link CFSASerializer}.</p>
- * 
+ *
+ * <p><b>Note:</b> Serialize to {@link CFSA2} for new code.</p>
+ *
  * <p>The encoding of automaton body is as follows.</p>
  * 
  * <pre>
@@ -163,7 +159,7 @@ public final class CFSA extends FSA {
 	public final byte[] labelMapping;
 
 	/**
-	 * Creates a new automaton reading it from a file in FSA format, version 5.
+	 * Creates a new automaton, reading it from a file in FSA format, version 5.
 	 */
 	public CFSA(InputStream fsaStream) throws IOException {
 		// Read the header first.
@@ -274,10 +270,8 @@ public final class CFSA extends FSA {
 	 * {@inheritDoc}
 	 */
 	@Override
-    public int getNumberAtNode(int node) {
-    	assert getFlags().contains(FSAFlags.NUMBERS) 
-    		: "This FSA was not compiled with NUMBERS.";
-
+	public int getRightLanguageCount(int node) {
+        assert getFlags().contains(FSAFlags.NUMBERS): "This FSA was not compiled with NUMBERS.";
 	    return FSA5.decodeFromBytes(arcs, node, nodeDataLength);
     }
 
@@ -329,14 +323,6 @@ public final class CFSA extends FSA {
 	 */
 	public Set<FSAFlags> getFlags() {
 	    return Collections.unmodifiableSet(flags);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Iterable<ByteBuffer> getSequences(int node) {
-	    return FSAUtils.getSequences(this, node);
 	}
 
 	/**

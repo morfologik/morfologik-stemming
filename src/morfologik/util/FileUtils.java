@@ -91,11 +91,28 @@ public final class FileUtils {
 	 */
 	public static int readInt(InputStream in) throws IOException {
 		int v = 0;
-		for (int i = 0; i < 4; i++)
-		{
-			v = (v << 8) | readByte(in);
+		for (int i = 0; i < 4; i++) {
+			v = (v << 8) | (readByte(in) & 0xff);
 		}
 	    return v;
+    }
+
+    /**
+     * 
+     */
+    public static void writeInt(OutputStream os, int v) throws IOException {
+        os.write( v >>> 24);
+        os.write((v >>> 16) & 0xff);
+        os.write((v >>> 8)  & 0xff);
+        os.write( v         & 0xff);
+    }
+	
+	/**
+     * Read exactly 2 bytes from the input stream.
+     */
+    public static short readShort(InputStream in) throws IOException {
+        return (short) (readByte(in) << 8 |
+                        readByte(in) & 0xff);
     }
 
 	/**
@@ -109,4 +126,12 @@ public final class FileUtils {
 			throw new EOFException();
 		return (byte) b;
 	}
+
+    /**
+     * 
+     */
+    public static void writeShort(OutputStream os, short v) throws IOException {
+        os.write((v >>> 8)  & 0xff);
+        os.write( v         & 0xff);
+    }
 }

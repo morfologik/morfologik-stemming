@@ -70,7 +70,7 @@ public final class FSATraversal {
 				if (fsa.isArcFinal(arc))
 					hash++;
 				if (!fsa.isArcTerminal(arc))
-					hash += fsa.getNumberAtNode(fsa.getEndNode(arc));
+					hash += fsa.getRightLanguageCount(fsa.getEndNode(arc));
 			}
 
 			arc = fsa.getNextArc(arc);

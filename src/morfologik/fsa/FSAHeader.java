@@ -13,7 +13,7 @@ final class FSAHeader {
 	/**
 	 * FSA magic (4 bytes).
 	 */
-	private final static int FSA_MAGIC = ('\\' << 24) | ('f' << 16) | ('s' << 8) | ('a');
+	public final static int FSA_MAGIC = ('\\' << 24) | ('f' << 16) | ('s' << 8) | ('a');
 
 	/**
 	 * Maximum length of the header block.

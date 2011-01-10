@@ -1,6 +1,7 @@
 package morfologik.tools;
 
 import java.io.File;
+import java.util.Arrays;
 
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
@@ -74,7 +75,7 @@ final class SharedOptions {
     public final static Option outputFormatOption = OptionBuilder
         .hasArg()
         .withArgName("format")
-        .withDescription("Name of the binary output format. Currently CFSA or FSA5 (default) can be used.")
+        .withDescription("Name of the binary output format. Allowed values: " + Arrays.toString(FSABuildTool.Format.values()))
         .withLongOpt("format")
         .isRequired(false)
         .create("f");

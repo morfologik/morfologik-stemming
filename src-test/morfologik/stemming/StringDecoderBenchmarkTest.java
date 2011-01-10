@@ -5,12 +5,14 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 
 @BenchmarkOptions(callgc = false, warmupRounds = 5, benchmarkRounds = 20)
+@Ignore
 public class StringDecoderBenchmarkTest extends AbstractBenchmark {
 	/* Guard against escape analysis and HotSpot opts. */
 	public volatile int guard;

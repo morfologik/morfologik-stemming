@@ -1,12 +1,16 @@
 package morfologik.fsa;
 
-import static morfologik.fsa.FSAFlags.*;
+import static morfologik.fsa.FSAFlags.FLEXIBLE;
+import static morfologik.fsa.FSAFlags.NEXTBIT;
+import static morfologik.fsa.FSAFlags.NUMBERS;
+import static morfologik.fsa.FSAFlags.STOPBIT;
 import static morfologik.util.FileUtils.readFully;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * FSA binary format implementation for version 5.
@@ -64,6 +68,16 @@ import java.util.*;
  * </pre>
  */
 public final class FSA5 extends FSA {
+    /**
+     * Default filler byte.
+     */
+    public final static byte DEFAULT_FILLER = '_';
+
+    /**
+    * Default annotation byte.
+    */
+    public final static byte DEFAULT_ANNOTATION = '+';
+
 	/**
 	 * Automaton version as in the file header.
 	 */
@@ -133,7 +147,7 @@ public final class FSA5 extends FSA {
 		if (header.version != VERSION) {
 			throw new IOException("This class can read FSA version 5 only: " + header.version);
 		}
-		
+
 		/*
 		 * Determine if the automaton was compiled with NUMBERS. If so, modify
 		 * ctl and goto fields accordingly.
@@ -159,7 +173,7 @@ public final class FSA5 extends FSA {
 	public int getRootNode() {
 	    // Skip dummy node marking terminating state.
         final int epsilonNode = skipArc(getFirstArc(0));
-        
+
         // And follow the epsilon node's first (and only) arc.
         return getDestinationNodeOffset(getFirstArc(epsilonNode));
 	}
@@ -232,13 +246,13 @@ public final class FSA5 extends FSA {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Returns the number encoded at the given node. The number equals the count
+	 * of the set of suffixes reachable from <code>node</code> (called its right 
+	 * language).  
 	 */
 	@Override
-    public int getNumberAtNode(int node) {
-    	assert getFlags().contains(FSAFlags.NUMBERS) 
-    		: "This FSA was not compiled with NUMBERS.";
-
+    public int getRightLanguageCount(int node) {
+	    assert getFlags().contains(FSAFlags.NUMBERS): "This FSA was not compiled with NUMBERS.";
 	    return decodeFromBytes(arcs, node, nodeDataLength);
     }
 
@@ -267,14 +281,6 @@ public final class FSA5 extends FSA {
 	 */
 	public boolean isNextSet(int arc) {
 		return (arcs[arc + ADDRESS_OFFSET] & BIT_TARGET_NEXT) != 0;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Iterable<ByteBuffer> getSequences(int node) {
-	    return FSAUtils.getSequences(this, node);
 	}
 
 	/**

@@ -2,7 +2,7 @@ package morfologik.tools;
 
 import java.io.UnsupportedEncodingException;
 
-import morfologik.fsa.FSA5Serializer;
+import morfologik.fsa.FSA5;
 
 /**
  * A class that converts tabular data to fsa morphological format. Three formats
@@ -22,7 +22,7 @@ public final class MorphEncoder {
 	private static final String UTF8 = "UTF-8";	
 
 	public MorphEncoder() {
-		this(FSA5Serializer.DEFAULT_ANNOTATION);
+		this(FSA5.DEFAULT_ANNOTATION);
 	}
 
 	public MorphEncoder(byte annotationSeparator) {

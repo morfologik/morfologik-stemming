@@ -1,10 +1,20 @@
 
-1.5.0 (trunk)
-          Polish dictionary updated to Morfologik 1.7.
+1.5.0
+          Major size saving improvements in CFSA2. Built in Polish dictionary size decreased from
+          2,811,345 to 1,806,661 (CFSA2 format).
 
-          Added an option to serialize automaton to CFSA or FSA5 directly from fsa_build.
+          FSABuilder returns a ready-to-be-used FSA (ConstantArcSizeFSA). Construction overhead
+          for this automaton is a round zero (it is immediately serialized in-memory).
 
-          Added state interning. Speedup in automaton construction by about 30%, memory use 
+          Polish dictionary updated to Morfologik 1.7. [19.11.2010]
+
+          Added an option to serialize automaton to CFSA2 or FSA5 directly from fsa_build.
+
+          CFSA is now deprecated for serialization (the code still reads CFSA automata, but will
+          no be able to serialize them). Use CFSA2.
+
+          Added immediate state interning. 
+          Speedup in automaton construction by about 30%, memory use 
           decreased significantly (did not perform exact measurements, but incremental 
           clustering from presorted data should consume way less memory).
 
@@ -25,10 +35,13 @@
           unit tests. 
 
           ################################################################
-          Incompatible API changes have been made in release 1.5.0.
+          - Incompatible API changes have been made in release 1.5.0. See above.
+          - An external dependency HPPC (high performance primitive collections) is now required
+              for compiling FSAs (it is optional for traversals).
           ################################################################
 
-1.4.1 (unreleased bugfix branch)
+1.4.1
+          Upgrade of the built-in Morfologik dictionary for Polish (in CFSA format).
 
           Added options to define custom FILLER and ANNOT_SEPARATOR bytes in the fsa_build
           tool.

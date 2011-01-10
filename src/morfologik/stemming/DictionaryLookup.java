@@ -8,7 +8,6 @@ import java.nio.charset.*;
 import java.util.*;
 
 import morfologik.fsa.*;
-import morfologik.util.Arrays;
 import morfologik.util.BufferUtils;
 
 /**
@@ -27,7 +26,7 @@ import morfologik.util.BufferUtils;
  *      site</a>
  */
 public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
-	/** A Finite State Automaton used for look ups. */
+	/** An FSA used for lookups. */
 	private final FSATraversal matcher;
 
 	/** An iterator for walking along the final states of {@link #fsa}. */
@@ -162,8 +161,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 			 * happen. After all, we want the word to have SOME base form.
 			 */
 			if (arc != 0 && !fsa.isArcFinal(arc)) {
-				// There is such word in the dictionary. Return its base
-				// forms.
+				// There is such a word in the dictionary. Return its base forms.
 				int formsCount = 0;
 
 				finalStatesIterator.restartFrom(fsa.getEndNode(arc));
@@ -173,8 +171,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 					final int bbSize = bb.remaining();
 
 					if (formsCount >= forms.length) {
-						forms = Arrays
-						        .copyOf(forms, forms.length + EXPAND_SIZE);
+						forms = Arrays.copyOf(forms, forms.length + EXPAND_SIZE);
 						for (int k = 0; k < forms.length; k++) {
 							if (forms[k] == null)
 								forms[k] = new WordData(decoder);

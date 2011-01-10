@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
 
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -54,7 +55,7 @@ public final class FSATraversalTest {
 		};
 
 		Arrays.sort(input, FSABuilder.LEXICAL_ORDERING);
-		State s = FSABuilder.build(input);
+		FSA s = FSABuilder.build(input);
 
 		final byte[] fsaData = 
 				new FSA5Serializer()
@@ -72,7 +73,7 @@ public final class FSATraversalTest {
 		}
 
 		// Check if the total number of sequences is encoded at the root node.
-		assertEquals(6, fsa.getNumberAtNode(fsa.getRootNode()));
+		assertEquals(6, fsa.getRightLanguageCount(fsa.getRootNode()));
 
 		// Check sub/super sequence scenarios.
 		assertEquals(AUTOMATON_HAS_PREFIX, traversal.perfectHash("abax".getBytes("UTF-8")));
