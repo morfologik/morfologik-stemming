@@ -1,6 +1,6 @@
 <project name="Stempelator" default="build">
 	<property name="build.name" value="morfologik-stemming" />
-	<property name="build.ver" value="1.4.1" />
+	<property name="build.ver" value="1.4.2-dev" />
 
 	<property name="tmp.dir" value="tmp" />
 	<property name="build.dir" value="${tmp.dir}/build" />
