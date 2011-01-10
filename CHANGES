@@ -1,5 +1,7 @@
 
 1.4.1 (trunk)
+          Upgrade of the built-in Morfologik dictionary for Polish (in CFSA format).
+
           Added options to define custom FILLER and ANNOT_SEPARATOR bytes in the fsa_build
           tool.
 
