@@ -16,16 +16,18 @@
           Added immediate state interning. 
           Speedup in automaton construction by about 30%, memory use 
           decreased significantly (did not perform exact measurements, but incremental 
-          clustering from presorted data should consume way less memory).
+          construction from presorted data should consume way less memory).
 
-          Added an option to build FSA from already sorted data.
+          Added an option to build FSA from already sorted data (--sorted). Avoids in-memory sorting. 
+          Pipe the input through shell sort if building FSA from large data.
 
           Changed the default ordering from Java signed-byte to C-like unsigned byte value.
           This lets one use GNU sort to sort the input using 'export LC_ALL=C; sort input'.  
 
           Added traversal routines to calculate perfect hashing based on FSA with NUMBERS.
 
-          Changed the order of serialized arcs in the binary serializer for FSA5.
+          Changed the order of serialized arcs in the binary serializer for FSA5 to lexicographic 
+          (consistent with the input). Depth-first traversal recreates the input, in other words.
 
           Removed character-based automata.
 
