@@ -1,6 +1,6 @@
 <project name="morfologik-stemming" default="build">
     <property name="build.name" value="morfologik-stemming" />
-    <property name="build.ver" value="1.5.0" />
+    <property name="build.ver" value="trunk" />
 
     <property name="tmp.dir" value="tmp" />
     <property name="build.dir" value="${tmp.dir}/build" />
