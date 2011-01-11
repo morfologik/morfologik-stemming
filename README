@@ -6,10 +6,11 @@ This project provides:
 
   - Finite state automaton traversal routines for Jan Daciuk's FSA package.
   
-  - Creation of byte-based, efficient finite state automata in Java. Daciuk-alternative storage
-    formats that are more space efficient compared to FSA5).
+  - Creation of byte-based, efficient finite state automata in Java, including
+    custom, efficient data storage formats (not compatible with Daciuk's FSA package).
 
-  - A stemming engine for the Polish language built on top of FSA traversal.
+  - A stemming engine for the Polish language built on top of a large dictionary
+    of inflected forms, stems and grammatical annotations.
 
 There are a few command-line tools you may find useful. Type:
 
