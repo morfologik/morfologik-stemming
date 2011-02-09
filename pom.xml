@@ -15,7 +15,7 @@
   <!-- Project info. -->
   <groupId>org.carrot2</groupId>
   <artifactId>morfologik-stemming</artifactId>
-  <version>1.5.1</version>
+  <version>1.5.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Morfologik</name>
