@@ -1,6 +1,9 @@
 trunk
 	  [trunk version]
 
+1.5.1     
+          Build system switch to Maven (tested with Maven2).
+
 1.5.0
           Major size saving improvements in CFSA2. Built in Polish dictionary size decreased from
           2,811,345 to 1,806,661 (CFSA2 format).

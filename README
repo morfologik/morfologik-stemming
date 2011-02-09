@@ -1,20 +1,22 @@
 
-CONTENTS
---------
+Morfologik
+==========
 
 This project provides:
 
-  - Finite state automaton traversal routines for Jan Daciuk's FSA package.
-  
   - Creation of byte-based, efficient finite state automata in Java, including
-    custom, efficient data storage formats (not compatible with Daciuk's FSA package).
+    custom, efficient data storage formats.
 
-  - A stemming engine for the Polish language built on top of a large dictionary
-    of inflected forms, stems and grammatical annotations.
+  - Compatibility with FSA5, binary format of finite state automata produced by
+    Jan Daciuk's "fsa" package.
+
+  - A lemmatization engine for the Polish language built on top of a 
+    large dictionary of inflected forms, stems and grammatical annotations.
+
 
 There are a few command-line tools you may find useful. Type:
 
-  java -jar morfologik-stemming-*.jar
+  java -jar morfologik-stemming-${version}.jar
 
 for an up-to-date list of all tools.
 
@@ -30,4 +32,5 @@ Grzegorz Słowikowski [maven bundles maintenance]
 QUESTIONS, COMMENTS
 ===================
 
-www.morfologik.blogspot.com
+Web site:     http://www.morfologik.blogspot.com
+Mailing list: morfologik-devel@lists.sourceforge.net
