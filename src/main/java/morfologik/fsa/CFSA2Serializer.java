@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.TreeSet;
 
 import morfologik.fsa.FSAUtils.IntIntHolder;
 import morfologik.tools.IMessageLogger;
@@ -177,17 +178,24 @@ public final class CFSA2Serializer implements FSASerializer {
             }
         };
 
-        PriorityQueue<IntIntHolder> labelAndCount = new PriorityQueue<IntIntHolder>(countByValue.length, comparator);
+        TreeSet<IntIntHolder> labelAndCount = new TreeSet<IntIntHolder>(comparator);
         for (int label = 0; label < countByValue.length; label++) {
             if (countByValue[label] > 0) {
                 labelAndCount.add(new IntIntHolder(label, countByValue[label]));
             }
         }
+        
+        this.logger.startPart("Label distribution");
+        for (IntIntHolder c : labelAndCount) {
+            this.logger.log("0x" + Integer.toHexString(c.a), c.b);
+        }
+        this.logger.endPart();
 
         labelsIndex = new byte [1 + Math.min(labelAndCount.size(), CFSA2.LABEL_INDEX_SIZE)];
         labelsInvIndex = new int [256];
         for (int i = labelsIndex.length - 1; i > 0 && !labelAndCount.isEmpty(); i--) {
-            IntIntHolder p = labelAndCount.remove();
+            IntIntHolder p = labelAndCount.first();
+            labelAndCount.remove(p);
             labelsInvIndex[p.a] = i;
             labelsIndex[i] = (byte) p.a;
         }

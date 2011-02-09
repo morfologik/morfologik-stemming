@@ -9,8 +9,6 @@ import java.util.Map.Entry;
 import morfologik.stemming.*;
 import morfologik.stemming.Dictionary;
 
-import org.junit.Test;
-
 /**
  * Calculate inflection frames from the Polish dictionary.
  */
@@ -20,7 +18,6 @@ public class InflectionFramesTool {
 	}
 
 	/* */
-	@Test
 	@SuppressWarnings( { "unused" })
 	public void inflectionFrames() throws IOException {
 		final Dictionary pl = Dictionary.getForLanguage("pl");

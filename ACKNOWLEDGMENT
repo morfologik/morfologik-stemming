@@ -1,6 +1,0 @@
-Polish stemming data comes from Polish ispell/myspell dictionary hosted at 
-http://sjp.pl/. It was corrected and enriched with part-of-speech tags in 
-Morfologik project. The resulting data set is licensed on the terms 
-of LGPL and/or Creative Commons ShareAlike (pick the suitable license). 
-
-See http://morfologik.blogspot.com
