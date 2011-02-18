@@ -1,0 +1,137 @@
+INFORMACJA
+
+Morfologik to projekt tworzenia polskich s³owników
+morfosyntaktycznych (st±d nazwa) s³u¿±cych do znakowania 
+morfosyntaktycznego i syntezy gramatycznej.
+
+LICENCJA
+
+Dane pochodz± ze s³ownika alternatywnego ze strony
+kurnik.pl/slownik i s± licencjonowane na licencji (m.in.) LGPL lub
+Creative Commons ShareAlike. 
+Morfologik ma równie¿ licencjê LGPL lub (do wyboru) Creative Commons ShareAlike.
+
+PLIKI
+
+1. morfologik.txt to plik tekstowy z polami rozdzielanymi tabulatorem,
+o nastêpuj±cym formacie:
+
+forma-odmienionaHTforma-podstawowaHTznaczniki
+
+gdzie HT oznacza tabulator poziomy.
+
+2. polish.dict to binarny plik s³ownika dla programu fsa_morph Jana Daciuka 
+(zob. http://www.eti.pg.gda.pl/katedry/kiw/pracownicy/Jan.Daciuk/personal/fsa.html), 
+wykorzystywany równie¿ bezpo¶rednio przez korektor gramatyczny LanguageTool.
+
+3. polish_synth.dict to binarny plik s³ownika syntezy gramatycznej,
+u¿ywany w fsa_morph i LanguageTool. Aby uzyskaæ formê odmienion±,
+nale¿y u¿ywaæ nastêpuj±cej sk³adni w zapytaniu programu fsa_morph:
+
+<wyraz>|<znacznik>
+
+Na przyk³ad:
+
+niemiecki|adjp
+
+daje "niemiecku+".
+
+4. polish.info i polish_synth.info - pliki wymagane do u¿ycia plików
+binarnych w bibliotece morfologik-stemming.
+
+Do wykonania skryptów ¼ród³owych s± potrzebne nastêpuj±ce pliki:
+
+Plik:   odm.txt  - aktualny s³ownik z witryny www.kurnik.pl/slownik (s³ownik odmian)
+Strona: http://www.kurnik.pl/slownik/odmiany/
+Pobieranie: http://www.kurnik.org/dictionary/odm/alt-odm-<data>.tar.gz
+
+Plik:   polish.all - ze s³ownika alternatywnego
+Strona: http://www.kurnik.pl/slownik/ort/
+Pobieranie: http://www.kurnik.org/dictionary/alt-ispell-pl-src.tar.bz2
+
+Plik : pl_PL.aff (plik afiksów)
+Strona: http://www.kurnik.pl/slownik/ort/
+Pobieranie: http://www.kurnik.org/dictionary/alt-myspell-pl.tar.bz2 
+
+Nale¿y te¿ ze strony http://www.eti.pg.gda.pl/katedry/kiw/pracownicy/Jan.Daciuk/personal/fsa_polski.html
+Pobraæ ftp://ftp.pg.gda.pl/pub/software/xtras-PG/fsa/fsa_current.tar.gz i zbudowaæ *fsa_build
+Z tego pakietu wykorzystany bedzie skrypt *morph_infix.awk*.
+W pliku Makefile nale¿y sprawdziæ, czy ¶cie¿ka do pliku jest prawid³owa.
+
+
+ZNACZNIKI MORFOSYNTAKTYCZNE
+
+Zestaw znaczników jest zbli¿ony do zestawu korpusu IPI (www.korpus.pl).
+
+    * adj - przymiotnik (np. "niemiecki")
+    * adjp - przymiotnik poprzyimkowy (np. "niemiecku")
+    * adv - przys³ówek (np. "g³upio")
+    * conj - spójnik    
+    * num - liczebnik
+    * pact - imies³ów przymiotnikowy czynny
+    * pant - imies³ów przys³ówkowy uprzedni
+    * pcon - imies³ów przys³ówkowy wspó³czesny
+    * ppas - imies³ów przymiotnikowy bierny
+    * ppron12 - zaimek nietrzecioosobowy
+    * ppron3 - zaimek trzecioosobowy
+    * pred - predykatyw (np. "trzeba")
+    * prep - przyimek
+    * siebie - zaimek "siebie"
+    * subst - rzeczownik
+    * verb - czasownik
+    * brev - skrót
+    * interj - wykrzyknienie
+    * xxx - jednostka obca
+
+Atrybuty podstawowych form:
+
+    * sg - liczba pojedyncza
+    * pl - liczba mnoga    
+    * irreg - forma nieregularna (nierozpoznana dok³adniej pod wzglêdem warto¶ci atrybutów, np. subst:irreg)
+    * nom - mianownik
+    * gen - dope³niacz
+    * acc - biernik
+    * dat - celownik
+    * inst - narzêdnik
+    * loc - miejscownik
+    * voc - wo³acz
+    * pos - stopieñ równy
+    * comp - stopieñ wy¿szy
+    * sup - stopieñ najwy¿szy
+    * m (a tak¿e, w sposób nie do koñca uporz±dkowany, m1... m3) - rodzaj mêski
+    * n - rodzaj nijaki
+    * f - rodzaj ¿eñski
+    * pri - pierwsza osoba
+    * sec - druga osoba
+    * tri - trzecia osoba
+    * depr - forma deprecjatywna
+    * aff - forma niezanegowana
+    * neg - forma zanegowana
+    * refl - forma zwrotna czasownika [nie wystêpuje w znacznikach IPI]
+    * perf - czasownik dokonany
+    * imperf - czasownik niedokonany
+    * imperf.perf - czasownik, który mo¿e wystêpowaæ zarówno jako dokonany, jak i jako niedokonany
+    * nakc - forma nieakcentowana zaimka
+    * akc - forma akcentowana zaimka
+    * praep - forma poprzyimkowa
+    * npraep - forma niepoprzyimkowa
+    * ger - rzeczownik ods³owny
+    * imps - forma bezosobowa
+    * impt - tryb rozkazuj±cy
+    * inf - bezokolicznik
+    * fin - forma nieprzesz³a
+    * bedzie - forma przysz³a "byæ"
+    * praet - forma przesz³a czasownika (pseudoimies³ów)
+    * pot - tryb przypuszczaj±cy [nie wystêpuje w znacznikach IPI]
+    * nstd - forma niestandardowa, np. archaiczna [nie wystêpuje w znacznikach IPI]
+    * pun - skrót z kropk¹ [za NKJP]
+    * npun - bez kropki [za NKJP]
+
+W znacznikach Morfologika nie wystêpuje i nie bêdzie wystêpowaæ 
+znacznik aglt, a to ze wzglêdu na inn± zasadê segmentacji wyrazów 
+(zasady IPI utrudnia³yby w ogromnym stopniu realizacjê wielu zasad 
+poprawnej pisowni ³±cznej i roz³±cznej, gdy¿ stosowana w korpusie IPI 
+segmentacja nie pokrywa³a siê z granic± wyrazu definiowan± przez spacjê 
+lub znak przestankowy).
+
+Morfologik, (c) 2007-2011 Marcin Mi³kowski.
