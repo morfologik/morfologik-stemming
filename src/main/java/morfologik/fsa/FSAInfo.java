@@ -1,7 +1,8 @@
 package morfologik.fsa;
 
 import java.util.BitSet;
-import java.util.HashMap;
+
+import com.carrotsearch.hppc.IntIntOpenHashMap;
 
 /**
  * Compute additional information about an FSA: number of arcs, nodes, etc.
@@ -51,8 +52,7 @@ public final class FSAInfo {
 	 * Computes the exact number of final states.
 	 */
 	private static class FinalStateVisitor {
-		final HashMap<Integer, Integer> visitedNodes 
-			= new HashMap<Integer, Integer>();
+		final IntIntOpenHashMap visitedNodes = new IntIntOpenHashMap();
 
 		private final FSA fsa;
 
@@ -61,9 +61,8 @@ public final class FSAInfo {
 		}
 
 		public int visitNode(int node) {
-			Integer cached = visitedNodes.get(node);
-			if (cached != null)
-				return cached;
+			if (visitedNodes.containsKey(node))
+				return visitedNodes.lget();
 
 			int fromHere = 0;
 			for (int arc = fsa.getFirstArc(node); 
