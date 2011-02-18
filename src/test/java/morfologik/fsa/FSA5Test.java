@@ -54,15 +54,15 @@ public final class FSA5Test {
 		assertEquals(4, info2.nodeCount);
 		assertEquals(7, info2.arcsCount);
 	}
-	
+
 	@Test
 	public void testArcsAndNodesLarge() throws IOException {
 		final FSA fsa3 = Dictionary.getForLanguage("pl").fsa;
 		FSAInfo info3 = new FSAInfo(fsa3);
 
-		assertEquals(293329, info3.nodeCount);
-		assertEquals(679676, info3.arcsCount);
-		assertEquals(3672200, info3.finalStatesCount);
+		assertEquals(295810, info3.nodeCount);
+		assertEquals(681613, info3.arcsCount);
+		assertEquals(3662366, info3.finalStatesCount);
 	}
 
 	@Test
