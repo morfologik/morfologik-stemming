@@ -190,6 +190,14 @@ public final class WordData implements Cloneable {
 		throw new UnsupportedOperationException(COLLECTIONS_ERROR_MESSAGE);
 	}
 
+	@Override
+	public String toString() {
+	    return "WordData["
+	        + this.getWord() + ","
+	        + this.getStem() + ","
+	        + this.getTag() + "]";
+	}
+	
 	/**
 	 * Declare a covariant of {@link Object#clone()} that returns a deep copy of
 	 * this object. The content of all internal buffers is copied.
