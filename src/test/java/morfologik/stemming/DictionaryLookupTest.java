@@ -3,9 +3,13 @@ package morfologik.stemming;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.*;
+
+import morfologik.fsa.FSA;
+import morfologik.fsa.FSABuilder;
 
 import org.junit.Test;
 
@@ -227,6 +231,39 @@ public class DictionaryLookupTest {
 	}
 
 	/* */
+    @Test
+    public void testSeparatorInLookupTerm() throws IOException {
+        FSA fsa = FSABuilder.build(toBytes("iso8859-1", new String [] {
+                "l+A+LW",
+                "l+A+NN1d",
+        }));
+
+        final DictionaryLookup s = new DictionaryLookup(
+                new Dictionary(fsa, new DictionaryMetadata('+', "iso8859-1", true, true, 
+                        Collections.<String, String> emptyMap())));
+
+        try {
+            s.lookup("l+A");
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected.
+        }
+    }
+
+	private static byte[][] toBytes(String charset, String[] strings) {
+	    byte [][] out = new byte [strings.length][];
+	    for (int i = 0; i < strings.length; i++)
+	    {
+	        try {
+                out[i] = strings[i].getBytes(charset);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+	    }
+        return out;
+    }
+
+    /* */
 	public static String[] stem(IStemmer s, String word) {
 		ArrayList<String> result = new ArrayList<String>();
 		for (WordData wd : s.lookup(word)) {

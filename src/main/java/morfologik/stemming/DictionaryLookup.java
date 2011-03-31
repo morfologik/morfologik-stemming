@@ -136,7 +136,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 	 */
 	public List<WordData> lookup(CharSequence word) {
 		final byte separator = dictionaryMetadata.separator;
-
+		
 		// Encode word characters into bytes in the same encoding as the FSA's.
 		charBuffer.clear();
 		charBuffer = BufferUtils.ensureCapacity(charBuffer, word.length());
@@ -144,6 +144,18 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 			charBuffer.put(word.charAt(i));
 		charBuffer.flip();
 		byteBuffer = charsToBytes(charBuffer, byteBuffer);
+		
+		// Verify the input does not contain the separator character as this would
+		// run the logic of further processing.
+		int max = byteBuffer.remaining();
+		byte [] array = byteBuffer.array();
+		for (int i = 0; i < max; i++)
+		{
+		    if (array[i] == separator)
+		        throw new IllegalArgumentException(
+		                "The input term must not contain the dictionary's separator byte: 0x"
+		                    + Integer.toHexString(separator));
+		}
 
 		// Try to find a partial match in the dictionary.
 		final MatchResult match = matcher.match(matchResult, byteBuffer
@@ -189,8 +201,8 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 					wordData.wordCharSequence = word;
 
 					/*
-					 * Find the separator byte's position splitting word form
-					 * and tag.
+					 * Find the separator byte's position splitting the inflection instructions 
+					 * from the tag.
 					 */
 					int sepPos;
 					for (sepPos = 0; sepPos < bbSize; sepPos++) {
@@ -212,11 +224,14 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 					/*
 					 * Decode the tag data.
 					 */
-					wordData.tagBuffer = BufferUtils.ensureCapacity(
-					        wordData.tagBuffer, bbSize - sepPos);
-					wordData.tagBuffer.clear();
-					wordData.tagBuffer.put(ba, sepPos, bbSize - sepPos);
-					wordData.tagBuffer.flip();
+					final int tagSize = bbSize - sepPos;
+					if (tagSize > 0) {
+                        wordData.tagBuffer = BufferUtils.ensureCapacity(
+    					        wordData.tagBuffer, tagSize);
+    					wordData.tagBuffer.clear();
+    					wordData.tagBuffer.put(ba, sepPos, tagSize);
+    					wordData.tagBuffer.flip();
+					}
 				}
 
 				formsList.wrap(forms, 0, formsCount);
