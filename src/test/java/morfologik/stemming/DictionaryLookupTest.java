@@ -242,12 +242,16 @@ public class DictionaryLookupTest {
                 new Dictionary(fsa, new DictionaryMetadata('+', "iso8859-1", true, true, 
                         Collections.<String, String> emptyMap())));
 
-        try {
-            s.lookup("l+A");
-            fail();
-        } catch (IllegalArgumentException e) {
-            // expected.
-        }
+        assertEquals(0, s.lookup("l+A").size()); 
+    }
+    
+
+    /* */
+    @Test
+    public void testGetSeparator() throws IOException {
+        final URL url = this.getClass().getResource("test-separators.dict");
+        final DictionaryLookup s = new DictionaryLookup(Dictionary.read(url));
+        assertEquals('+', s.getSeparatorChar());
     }
 
 	private static byte[][] toBytes(String charset, String[] strings) {

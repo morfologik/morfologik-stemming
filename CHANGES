@@ -1,6 +1,10 @@
 trunk
 	  [trunk version]
 
+          Added guards against the input term having separator character somewhere (this will now
+          return an empty list of matches). Added getSeparatorChar to DictionaryLookup so that
+          one can check for this condition manually, if needed.
+
 1.5.1     
           Build system switch to Maven (tested with Maven2).
 

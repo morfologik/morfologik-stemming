@@ -66,6 +66,11 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 	 * The FSA we are using.
 	 */
 	private final FSA fsa;
+	
+	/**
+	 * @see #getSeparatorChar()
+	 */
+	private final char separatorChar;
 
 	/**
 	 * Internal reusable buffer for encoding words into byte arrays using
@@ -127,6 +132,22 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 			        "FSA's encoding charset is not supported: "
 			                + dictionaryMetadata.encoding);
 		}
+
+		try {
+		    CharBuffer decoded = decoder.decode(ByteBuffer.wrap(new byte [] { dictionaryMetadata.separator }));
+		    if (decoded.remaining() != 1) {
+		        throw new RuntimeException("FSA's separator byte takes more than one character after conversion "
+		                + " of byte 0x" 
+		                + Integer.toHexString(dictionaryMetadata.separator) + " using encoding "
+		                + dictionaryMetadata.encoding);
+		    }
+		    this.separatorChar = decoded.get();
+		} catch (CharacterCodingException e) {
+		    throw new RuntimeException(
+		            "FSA's separator character cannot be decoded from byte value 0x"
+		            + Integer.toHexString(dictionaryMetadata.separator) + " using encoding "
+		            + dictionaryMetadata.encoding, e);
+		}
 	}
 
 	/**
@@ -137,25 +158,20 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 	public List<WordData> lookup(CharSequence word) {
 		final byte separator = dictionaryMetadata.separator;
 		
+		// Reset the output list to zero length.
+		formsList.wrap(forms, 0, 0);
+
 		// Encode word characters into bytes in the same encoding as the FSA's.
 		charBuffer.clear();
 		charBuffer = BufferUtils.ensureCapacity(charBuffer, word.length());
-		for (int i = 0; i < word.length(); i++)
-			charBuffer.put(word.charAt(i));
+		for (int i = 0; i < word.length(); i++) {
+			char chr = word.charAt(i);
+			if (chr == separatorChar)
+			    return formsList;
+            charBuffer.put(chr);
+		}
 		charBuffer.flip();
 		byteBuffer = charsToBytes(charBuffer, byteBuffer);
-		
-		// Verify the input does not contain the separator character as this would
-		// run the logic of further processing.
-		int max = byteBuffer.remaining();
-		byte [] array = byteBuffer.array();
-		for (int i = 0; i < max; i++)
-		{
-		    if (array[i] == separator)
-		        throw new IllegalArgumentException(
-		                "The input term must not contain the dictionary's separator byte: 0x"
-		                    + Integer.toHexString(separator));
-		}
 
 		// Try to find a partial match in the dictionary.
 		final MatchResult match = matcher.match(matchResult, byteBuffer
@@ -235,7 +251,6 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 				}
 
 				formsList.wrap(forms, 0, formsCount);
-				return formsList;
 			}
 		} else {
 			/*
@@ -244,8 +259,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 			 * being.
 			 */
 		}
-
-		return Collections.emptyList();
+        return formsList;
 	}
 
 	/**
@@ -367,4 +381,14 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 	public Dictionary getDictionary() {
 		return dictionary;
 	}
+
+	/**
+	 * @return Returns the logical separator character splitting inflected form,
+	 *         lemma correction token and a tag. Note that this character is a best-effort
+	 *         conversion from a byte in {@link DictionaryMetadata#separator} and
+	 *         may not be valid in the target encoding (although this is highly unlikely).
+	 */
+    public char getSeparatorChar() {
+        return separatorChar;
+    }
 }
