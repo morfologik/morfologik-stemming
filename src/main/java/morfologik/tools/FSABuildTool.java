@@ -6,6 +6,7 @@ import java.util.*;
 import morfologik.fsa.*;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import com.carrotsearch.hppc.IntIntOpenHashMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
@@ -299,14 +300,14 @@ public final class FSABuildTool extends Tool {
 
 		opt = SharedOptions.fillerCharacterOption.getLongOpt();
 		if (line.hasOption(opt) && requiredCapability(opt, FSAFlags.SEPARATORS)) {
-			String chr = line.getOptionValue(opt);
+			String chr = StringEscapeUtils.unescapeJava(line.getOptionValue(opt));
 			checkSingleByte(chr);
 			serializer.withFiller(chr.getBytes()[0]);
 		}
-		
+
 		opt = SharedOptions.annotationSeparatorCharacterOption.getLongOpt();
 		if (line.hasOption(opt) && requiredCapability(opt, FSAFlags.SEPARATORS)) {
-			String chr = line.getOptionValue(opt);
+			String chr = StringEscapeUtils.unescapeJava(line.getOptionValue(opt));
 			checkSingleByte(chr);
 			serializer.withAnnotationSeparator(chr.getBytes()[0]);
 		}
