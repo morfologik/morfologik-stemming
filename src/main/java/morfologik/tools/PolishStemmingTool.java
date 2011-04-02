@@ -33,8 +33,8 @@ class PolishStemmingTool extends Tool {
 		final String outputEncoding = getEncodingOption(line,
 		        SharedOptions.outputEncodingOption.getOpt());
 
-		System.out.println("Input encoding: " + inputEncoding);
-		System.out.println("Output encoding: " + outputEncoding);
+		System.err.println("Input encoding: " + inputEncoding);
+		System.err.println("Output encoding: " + outputEncoding);
 
 		// Determine input and output streams.
 		final Reader input = initializeInput(line, inputEncoding);
@@ -131,6 +131,7 @@ class PolishStemmingTool extends Tool {
 			                .getParsedOptionValue(opt))), outputEncoding);
 		} else {
 			// Use standard output.
+            System.err.println("Using standard output for output.");
 			output = new OutputStreamWriter(System.out, outputEncoding);
 		}
 		return output;
@@ -151,6 +152,7 @@ class PolishStemmingTool extends Tool {
 			                .getParsedOptionValue(opt))), inputEncoding);
 		} else {
 			// Use standard input.
+		    System.err.println("Using standard input for input.");
 			input = new InputStreamReader(System.in, inputEncoding);
 		}
 		return input;

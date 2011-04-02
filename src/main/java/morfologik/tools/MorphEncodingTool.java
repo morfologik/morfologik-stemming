@@ -14,6 +14,7 @@ import morfologik.fsa.FSA5;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * This utility converts the dictionary in a text (tabbed) format into 
@@ -21,7 +22,6 @@ import org.apache.commons.cli.ParseException;
  * the Perl and AWK scripts from the original FSA package. 
  */
 class MorphEncodingTool extends Tool {
-	
 	private boolean prefixes = false;
 	private boolean infixes = false;
 	private boolean noWarn = false;
@@ -32,11 +32,9 @@ class MorphEncodingTool extends Tool {
      * 
      */
 	protected void go(final CommandLine line) throws Exception {
-		
 		noWarn = line.hasOption(SharedOptions.noWarnIfTwoFields.getOpt());
-		
 		infixes = line.hasOption(SharedOptions.infixEncoding.getOpt());
-		
+
 		if (!infixes) {
 			prefixes = line.hasOption(SharedOptions.prefixEncoding.getOpt());
 		}
@@ -45,9 +43,15 @@ class MorphEncodingTool extends Tool {
 		if (line.hasOption(SharedOptions.annotationSeparatorCharacterOption.getLongOpt())) {
 			String sep = line.getOptionValue(SharedOptions.annotationSeparatorCharacterOption.getLongOpt());
 
-			if (sep.length() == 1) {
-				separator = sep.charAt(0);
+			// Decode escape sequences.
+			sep = StringEscapeUtils.unescapeJava(sep);
+			if (sep.length() != 1) {
+			    throw new IllegalArgumentException("Field separator must be a single character: " + sep);
 			}
+			if (sep.charAt(0) > 0xff) {
+			    throw new IllegalArgumentException("Field separator not within byte range: " + (int) sep.charAt(0));
+			}
+            separator = sep.charAt(0);
 
 			FSABuildTool.checkSingleByte(Character.toString(separator));
 		}
@@ -65,7 +69,6 @@ class MorphEncodingTool extends Tool {
 			input.close();
 			output.close();
 		}
-
 	}
 
 	/**

@@ -13,17 +13,23 @@ abstract class Tool {
 	 * Initializes application context.
 	 */
 	protected final void go(String[] args) {
+        options.addOption(SharedOptions.help);
 		initializeOptions(options);
-
-		if (args.length == 0) {
-			printUsage();
-			return;
-		}
 
 		final Parser parser = new GnuParser();
 		final CommandLine line;
 		try {
 			line = parser.parse(options, args);
+			if (line.hasOption(SharedOptions.help.getLongOpt())) {
+			    printUsage();
+			    return;
+			}
+			if (line.getArgList().size() > 0) {
+			    printError("Unreconized left over command line arguments: "
+			            + line.getArgList());
+			    return;
+			}
+
 			try {
 				go(line);
 			} catch (Throwable e) {
@@ -55,6 +61,7 @@ abstract class Tool {
 	protected void printError(String msg) {
 		System.err.println();
 		System.err.println(msg);
+		System.err.println("Invoke with '--help' for help.");
 	}
 
 	/**

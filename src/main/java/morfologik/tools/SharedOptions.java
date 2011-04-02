@@ -144,6 +144,12 @@ final class SharedOptions {
         .withLongOpt("stats")
         .create();
 
+    public final static Option help = OptionBuilder
+        .withDescription("Help on available options.")
+        .withLongOpt("help")
+        .isRequired(false)
+        .create();
+
 	/**
 	 * No instances. Use static fields.
 	 */
