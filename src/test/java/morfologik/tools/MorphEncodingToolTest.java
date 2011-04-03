@@ -74,6 +74,21 @@ public class MorphEncodingToolTest {
 
 		testOutput.close();
 
+		// custom annotation - test tabs
+        MorphEncodingTool.main(new String[] {
+                "--annotation", "\t",
+                "--input", input.getAbsolutePath(), 
+                "--output", output.getAbsolutePath(), 
+                "-inf" });
+
+        testOutput = new BufferedReader(new InputStreamReader(
+                new FileInputStream(output.getAbsolutePath()), "UTF-8"));
+        Assert.assertEquals("passagère\tAAEer\ttag", testOutput.readLine());
+        Assert.assertEquals("nieduży\tADA\ttest", testOutput.readLine());
+        Assert.assertEquals("abcd\tAAB\txyz", testOutput.readLine());
+
+        testOutput.close();
+		
 	}
 
 	/* */
