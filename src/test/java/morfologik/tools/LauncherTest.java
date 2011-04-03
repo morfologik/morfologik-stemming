@@ -16,7 +16,7 @@ public class LauncherTest {
 	public void testTools() throws Exception {
 		for (Map.Entry<String, ToolInfo> e : Launcher.initTools().entrySet()) {
 			try {
-				e.getValue().invoke(new String[] {});
+				e.getValue().invoke(new String[] {"--help"});
 			} catch (Throwable t) {
 				Assert.fail("Unable to launch " + e.getKey() + ": "
 				        + t.getMessage());
