@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
-import org.apache.commons.lang.StringEscapeUtils;
-
 /**
  * Description of attributes, their types and default values.
  * 
@@ -98,11 +96,7 @@ public final class DictionaryMetadata {
             throw new IOException("Attribute " + ATTR_NAME_SEPARATOR
                     + " must be " + "a single character.");
         }
-		//unescape
-		separator = StringEscapeUtils.unescapeJava(separator);
-        if (separator.length() != 1) {
-            throw new IllegalArgumentException("Field separator must be a single character: " + separator);
-        }
+		
         if (separator.charAt(0) > 0xff) {
             throw new IllegalArgumentException("Field separator not within byte range: " + (int) separator.charAt(0));
         }
