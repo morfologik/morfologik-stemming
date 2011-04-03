@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 /**
  * Description of attributes, their types and default values.
  * 
@@ -91,12 +93,20 @@ public final class DictionaryMetadata {
 	 * , validating attribute values.
 	 */
 	static DictionaryMetadata fromMap(Properties properties) throws IOException {
-		final String separator = properties.getProperty(ATTR_NAME_SEPARATOR);
+		String separator = properties.getProperty(ATTR_NAME_SEPARATOR);
 		if (separator == null || separator.length() != 1) {
-			throw new IOException("Attribute " + ATTR_NAME_SEPARATOR
-			        + " must be " + "a single character.");
-		}
-
+            throw new IOException("Attribute " + ATTR_NAME_SEPARATOR
+                    + " must be " + "a single character.");
+        }
+		//unescape
+		separator = StringEscapeUtils.unescapeJava(separator);
+        if (separator.length() != 1) {
+            throw new IllegalArgumentException("Field separator must be a single character: " + separator);
+        }
+        if (separator.charAt(0) > 0xff) {
+            throw new IllegalArgumentException("Field separator not within byte range: " + (int) separator.charAt(0));
+        }
+                		
 		final String encoding = properties.getProperty(ATTR_NAME_ENCODING);
 		if (encoding == null || encoding.length() == 0) {
 			throw new IOException("Attribute " + ATTR_NAME_ENCODING
@@ -114,8 +124,8 @@ public final class DictionaryMetadata {
 		final HashMap<String, String> metadata = new HashMap<String, String>();
 		for (Map.Entry<Object, Object> e : properties.entrySet()) {
 			metadata.put(e.getKey().toString(), e.getValue().toString());
-		}
-
+		}		
+		
 		return new DictionaryMetadata(separator.charAt(0), encoding,
 		        usesPrefixes, usesInfixes, metadata);
 	}
