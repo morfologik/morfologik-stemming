@@ -240,6 +240,7 @@
       <build>
         <plugins>
           <!-- Attach and modify JavaDocs. -->
+          <!-- 
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
@@ -257,8 +258,10 @@
               </execution>
             </executions>
           </plugin>
+          -->
 
           <!-- Attach sources -->
+          <!-- 
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
@@ -274,6 +277,7 @@
               </execution>
             </executions>
           </plugin>
+          -->
         </plugins>
       </build>
     </profile>
