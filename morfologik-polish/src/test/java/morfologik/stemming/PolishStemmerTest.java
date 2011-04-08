@@ -1,6 +1,5 @@
 package morfologik.stemming;
 
-import static morfologik.stemming.DictionaryLookupTest.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -114,5 +113,27 @@ public class PolishStemmerTest {
             assertEquals(0, copy.compareTo(ByteBuffer.wrap(word
                     .getBytes("iso-8859-2"))));
         }
+    }
+
+    /* */
+    public static String asString(CharSequence s) {
+        if (s == null)
+            return null;
+        return s.toString();
+    }
+
+    /* */
+    public static String[] stem(IStemmer s, String word) {
+        ArrayList<String> result = new ArrayList<String>();
+        for (WordData wd : s.lookup(word)) {
+            result.add(asString(wd.getStem()));
+            result.add(asString(wd.getTag()));
+        }
+        return result.toArray(new String[result.size()]);
+    }
+    
+    /* */
+    public static void assertNoStemFor(IStemmer s, String word) {
+        assertArrayEquals(new String[] {}, stem(s, word));
     }
 }

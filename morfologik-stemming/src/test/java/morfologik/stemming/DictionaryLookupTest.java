@@ -200,16 +200,6 @@ public class DictionaryLookupTest {
         return out;
     }
 
-    /* */
-	public static String[] stem(IStemmer s, String word) {
-		ArrayList<String> result = new ArrayList<String>();
-		for (WordData wd : s.lookup(word)) {
-			result.add(asString(wd.getStem()));
-			result.add(asString(wd.getTag()));
-		}
-		return result.toArray(new String[result.size()]);
-	}
-
 	/* */
 	public static String asString(CharSequence s) {
 		if (s == null)
@@ -217,6 +207,16 @@ public class DictionaryLookupTest {
 		return s.toString();
 	}
 
+    /* */
+    public static String[] stem(IStemmer s, String word) {
+        ArrayList<String> result = new ArrayList<String>();
+        for (WordData wd : s.lookup(word)) {
+            result.add(asString(wd.getStem()));
+            result.add(asString(wd.getTag()));
+        }
+        return result.toArray(new String[result.size()]);
+    }
+	
 	/* */
 	public static void assertNoStemFor(IStemmer s, String word) {
 		assertArrayEquals(new String[] {}, stem(s, word));

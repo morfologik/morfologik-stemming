@@ -1,6 +1,14 @@
 
-Morfologik
+MORFOLOGIK
 ==========
+
+FSA (automata), stemming, dictionaries and tools. Tools quickstart:
+
+java -jar lib/morfologik-tools-${version}.jar
+
+
+MODULES
+=======
 
 This project provides:
 
@@ -26,7 +34,7 @@ morfologik-tools:
   - Command line tools to preprocess, build and dump FSA automata and dictionaries.
 
   - There are a few command-line tools you may find useful. Type:
-    java -jar morfologik-tools-${version}.jar
+    java -jar lib/morfologik-tools-${version}.jar
     for an up-to-date list of all tools.
 
 
