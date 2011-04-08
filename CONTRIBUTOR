@@ -25,4 +25,6 @@ M2Eclipse, just use "import existing maven project".
 Sonatype/ release push
 ======================
 
-mvn clean deploy  		# snapshot deploy
+mvn clean deploy -Prelease  		# snapshot deploy, create single-JAR version,
+                                    # javadocs, etc.
+
