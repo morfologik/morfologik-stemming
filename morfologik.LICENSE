@@ -3,8 +3,8 @@ Copyright (c) 2006 Dawid Weiss
 Copyright (c) 2007-2011 Dawid Weiss, Marcin Miłkowski
 All rights reserved.
 
-IMPORTANT: JAR-embedded dictionaries licensed on their own terms, 
-see dictionary-*.LICENSE files.
+IMPORTANT: JAR-embedded dictionaries are licensed on their own terms, see
+morfologik-[language].LICENSE files for more information.
 
 Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:

@@ -32,25 +32,6 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <id>dependency-tree</id>
-            <phase>package</phase>
-            <goals>
-              <goal>tree</goal>
-            </goals>
-            <configuration>
-              <outputFile>${project.build.directory}/DEPENDENCIES</outputFile>
-              <excludes>junit</excludes>
-              <tokens>whitespace</tokens>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
             <id>copy-dependencies</id>
             <phase>package</phase>
             <goals>

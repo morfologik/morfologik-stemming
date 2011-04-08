@@ -1,6 +1,6 @@
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
-	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
 
   <id>bin</id>
 
@@ -10,6 +10,7 @@
   </formats>
 
   <fileSets>
+    <!-- All JARs -->
     <fileSet>
       <directory>target/dependency</directory>
       <includes>
@@ -19,17 +20,19 @@
       <outputDirectory>lib</outputDirectory>
     </fileSet>
 
+    <!-- Licenses -->
     <fileSet>
-      <directory>target</directory>
+      <directory>../licenses</directory>
+      <outputDirectory>lib</outputDirectory>
       <includes>
-        <include>DEPENDENCIES</include>
+        <include>*.LICENSE</include>
       </includes>
-      <outputDirectory></outputDirectory>
     </fileSet>
 
+    <!-- READMEs and top-level files. -->
     <fileSet>
       <directory>../</directory>
-      <outputDirectory/>
+      <outputDirectory />
       <includes>
         <include>morfologik.LICENSE</include>
         <include>README</include>
@@ -38,12 +41,25 @@
       <fileMode>0644</fileMode>
     </fileSet>
 
+    <!-- Per-project javadocs -->
     <fileSet>
-      <directory>../licenses</directory>
-      <outputDirectory>lib</outputDirectory>
-      <includes>
-        <include>*.LICENSE</include>
-      </includes>
+      <directory>../morfologik-fsa/target/apidocs</directory>
+      <outputDirectory>apidocs/morfologik-fsa</outputDirectory>
+    </fileSet>
+
+    <fileSet>
+      <directory>../morfologik-polish/target/apidocs</directory>
+      <outputDirectory>apidocs/morfologik-polish</outputDirectory>
+    </fileSet>
+
+    <fileSet>
+      <directory>../morfologik-stemming/target/apidocs</directory>
+      <outputDirectory>apidocs/morfologik-stemming</outputDirectory>
+    </fileSet>
+
+    <fileSet>
+      <directory>../morfologik-tools/target/apidocs</directory>
+      <outputDirectory>apidocs/morfologik-tools</outputDirectory>
     </fileSet>
   </fileSets>
 </assembly>
