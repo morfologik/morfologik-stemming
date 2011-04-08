@@ -58,5 +58,48 @@
 
   <build>
     <defaultGoal>install</defaultGoal>
+    
+    <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+            <archive>
+              <manifest>
+                <mainClass>morfologik.tools.Launcher</mainClass>
+              </manifest>
+            </archive>
+          </configuration>
+        </plugin>      
+    
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>jarjar-maven-plugin</artifactId>
+        <version>1.3</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>jarjar</goal>
+            </goals>
+            <configuration>
+              <excludes>
+                <exclude>junit:junit</exclude>
+              </excludes>
+              <rules>
+                <rule>
+                  <pattern>org.apache.**</pattern>
+                  <result>morfologik.jarjar.org.apache.@1</result>
+                </rule>
+                <rule>
+                  <pattern>com.carrotsearch.**</pattern>
+                  <result>morfologik.jarjar.com.carrotsearch.@1</result>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>    
+    </plugins>
   </build>
 </project>
