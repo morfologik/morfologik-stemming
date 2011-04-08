@@ -23,14 +23,20 @@
   <dependencies>
     <dependency>
       <groupId>org.carrot2</groupId>
+      <artifactId>morfologik-fsa</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.carrot2</groupId>
       <artifactId>morfologik-stemming</artifactId>
-      <version>1.5.2-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     
     <dependency>
       <groupId>org.carrot2</groupId>
       <artifactId>morfologik-polish</artifactId>
-      <version>1.5.2-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     
     <dependency>

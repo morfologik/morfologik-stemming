@@ -1,7 +1,6 @@
 package morfologik.stemming;
 
-import static morfologik.stemming.DictionaryLookupTest.assertNoStemFor;
-import static morfologik.stemming.DictionaryLookupTest.stem;
+import static morfologik.stemming.DictionaryLookupTest.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;

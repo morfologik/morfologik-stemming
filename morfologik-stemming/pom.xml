@@ -24,7 +24,15 @@
     <dependency>
       <groupId>org.carrot2</groupId>
       <artifactId>morfologik-fsa</artifactId>
-      <version>1.5.2-SNAPSHOT</version>
+      <version>${project.version}</version>
+
+      <exclusions>
+        <!-- Not needed at runtime. -->
+        <exclusion>
+          <groupId>com.carrotsearch</groupId>
+          <artifactId>hppc</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
