@@ -240,7 +240,6 @@
       <build>
         <plugins>
           <!-- Attach and modify JavaDocs. -->
-          <!-- 
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
@@ -248,6 +247,8 @@
               <encoding>${project.build.sourceEncoding}</encoding>
               <windowtitle>${project.name} v${project.version} API Documentation</windowtitle>
               <doctitle>${project.name} v${project.version} API Documentation</doctitle>
+              <charset>UTF-8</charset>
+              <detectJavaApiLink>false</detectJavaApiLink>
             </configuration>
             <executions>
               <execution>
@@ -258,10 +259,8 @@
               </execution>
             </executions>
           </plugin>
-          -->
 
           <!-- Attach sources -->
-          <!-- 
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
@@ -277,7 +276,6 @@
               </execution>
             </executions>
           </plugin>
-          -->
         </plugins>
       </build>
     </profile>
