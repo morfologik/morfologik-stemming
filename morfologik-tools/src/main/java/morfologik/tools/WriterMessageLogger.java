@@ -3,6 +3,8 @@ package morfologik.tools;
 import java.io.PrintWriter;
 import java.util.*;
 
+import morfologik.fsa.IMessageLogger;
+
 /**
  * A logger dumping info to <code>System.err</code>.
  */
