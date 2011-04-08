@@ -10,14 +10,26 @@
   </formats>
 
   <fileSets>
-    <!-- All JARs -->
+    <!-- All JARs split into modules -->
     <fileSet>
       <directory>target/dependency</directory>
       <includes>
         <include>*.jar</include>
         <include>*.txt</include>
       </includes>
+      <excludes>
+        <exclude>*-standalone.jar</exclude>
+      </excludes>
       <outputDirectory>lib</outputDirectory>
+    </fileSet>
+
+    <!-- Standalone JAR at the top level. -->
+    <fileSet>
+      <directory>target/dependency</directory>
+      <includes>
+        <include>*-standalone.jar</include>
+      </includes>
+      <outputDirectory></outputDirectory>
     </fileSet>
 
     <!-- Licenses -->

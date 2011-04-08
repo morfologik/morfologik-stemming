@@ -4,7 +4,7 @@ MORFOLOGIK
 
 FSA (automata), stemming, dictionaries and tools. Tools quickstart:
 
-java -jar lib/morfologik-tools-${version}.jar
+java -jar lib/morfologik-tools-${version}-standalone.jar
 
 
 MODULES

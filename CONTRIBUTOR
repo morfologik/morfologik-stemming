@@ -1,0 +1,28 @@
+
+Compiling
+=========
+
+You will need maven. Then, in the top folder of the checkout:
+
+mvn clean install
+
+or 
+
+mvn clean install -Pquick  		# no tests
+
+
+Eclipse
+=======
+
+In the top folder of the checkout:
+
+mvn eclipse:eclipse
+
+and Eclipse:File->Import->Existing projects into workspace. You're set. With
+M2Eclipse, just use "import existing maven project".
+
+
+Sonatype/ release push
+======================
+
+mvn clean deploy  		# snapshot deploy

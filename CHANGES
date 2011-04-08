@@ -1,7 +1,8 @@
 trunk
 	  [trunk version]
 
-          Project split into modules. A single jar still produced using jarjar.
+          Project split into modules. A single jar version (no external dependencies)
+          added by transforming via proguard.
 
           Enabled use of escaped special characters in the tab2morph tool.
 

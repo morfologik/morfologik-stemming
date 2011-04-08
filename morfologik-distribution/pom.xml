@@ -66,6 +66,7 @@
                   <goal>single</goal>
                 </goals>
                 <configuration>
+                  <attach>false</attach>
                   <skipAssembly>${morfologik.skip.distribution}</skipAssembly>
                   <descriptors>
                     <descriptor>src/main/assembly/bin.xml</descriptor>
@@ -104,6 +105,15 @@
       <groupId>org.carrot2</groupId>
       <artifactId>morfologik-tools</artifactId>
       <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.carrot2</groupId>
+      <artifactId>morfologik-tools</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+      <classifier>standalone</classifier>
     </dependency>
   </dependencies>
 </project>
