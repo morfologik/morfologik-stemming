@@ -1,7 +1,7 @@
 tmp/
 dist/
-*.patch
 target/
+*.patch
 .eclipse/
 .project
 .classpath
