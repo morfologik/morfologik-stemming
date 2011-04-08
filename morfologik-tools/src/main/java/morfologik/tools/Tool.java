@@ -15,6 +15,17 @@ abstract class Tool {
 	protected final void go(String[] args) {
         options.addOption(SharedOptions.help);
 		initializeOptions(options);
+		
+		// Commons-cli is pretty dumb in terms of option parsing because it
+		// validates immediately and there is no way to determine
+		// if an option exists without bailing out with an exception. This
+		// is a hardcoded workaround for --help
+		for (String arg : args) { 
+		    if ("--help".equals(arg)) {
+		        printUsage();
+	            System.exit(0);
+		    }
+		}
 
 		final Parser parser = new GnuParser();
 		final CommandLine line;
