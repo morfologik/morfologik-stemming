@@ -121,6 +121,15 @@
           <outputDirectory>${project.build.directory}</outputDirectory>
           <proguardInclude>${basedir}/src/proguard/rules.pro</proguardInclude>
         </configuration>
+	<dependencies>
+	  <dependency>
+	    <groupId>net.sf.proguard</groupId>
+	    <artifactId>proguard</artifactId>
+	    <version>4.6-customized</version>
+	    <scope>system</scope>
+	    <systemPath>${project.basedir}/lib/proguard.jar</systemPath>
+	  </dependency>
+	</dependencies>
       </plugin>
     </plugins>
   </build>
