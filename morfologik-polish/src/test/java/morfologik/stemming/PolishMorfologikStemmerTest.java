@@ -12,7 +12,7 @@ import org.junit.Test;
 /*
  * 
  */
-public class PolishStemmerTest {
+public class PolishMorfologikStemmerTest {
 	/* */
 	@Test
 	public void testLexemes() throws IOException {

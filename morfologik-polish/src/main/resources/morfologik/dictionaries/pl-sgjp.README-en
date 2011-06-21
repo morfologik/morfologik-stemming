@@ -1,0 +1,58 @@
+Morphological analyser Morfeusz SGJP
+
+The program including contained linguistic data is hereby released
+under the conditions of the so called 2-clause BSD License:
+
+-----------------------------------------------------------------------
+Copyright © 2011 Zygmunt Saloni, Włodzimierz Gruszczyński, 
+	    	 Marcin Woliński, Robert Wołosz
+
+All rights reserved.
+
+Redistribution and  use in  source and binary  forms, with  or without
+modification, are permitted provided that the following conditions are
+met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the
+   distribution.
+
+THIS SOFTWARE IS PROVIDED BY COPYRIGHT HOLDERS “AS IS” AND ANY EXPRESS
+OR  IMPLIED WARRANTIES,  INCLUDING, BUT  NOT LIMITED  TO,  THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED.  IN NO EVENT  SHALL COPYRIGHT  HOLDERS OR  CONTRIBUTORS BE
+LIABLE FOR  ANY DIRECT,  INDIRECT, INCIDENTAL, SPECIAL,  EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES  (INCLUDING, BUT NOT LIMITED  TO, PROCUREMENT OF
+SUBSTITUTE  GOODS OR  SERVICES;  LOSS  OF USE,  DATA,  OR PROFITS;  OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED  AND ON ANY THEORY OF LIABILITY,
+WHETHER IN  CONTRACT, STRICT LIABILITY, OR  TORT (INCLUDING NEGLIGENCE
+OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-----------------------------------------------------------------------
+
+
+For more information about the program we refer you to
+http://sgjp.pl/morfeusz/ .  Reading this page is especially
+recommended if you feel that the program gives strange answers or
+“doesn’t work”.  Reading the following article may also help
+(in Polish):
+
+Marcin Woliński, “System znaczników morfosyntaktycznych w korpusie
+IPI PAN”, Polonica XXII–XXIII, pp. 39–55, 2003.
+
+Those interested in modifying the program will quickly find that the
+code is full of oddities and is not very ceeplusplusy.  We deeply
+apologise for that.  Some help in understanding the program’s inner
+workings may come from the article:
+
+Marcin Woliński, “Morfeusz — a Practical Tool for the Morphological
+Analysis of Polish”, In: Mieczysław Kłopotek, Sławomir Wierzchoń,
+Krzysztof Trojanowski, eds., Intelligent Information Processing and
+Web Mining, IIS:IIPWM'06 Proceedings, pp. 503–512, Springer, 2006.
+
+The authors of Morfeusz can be contacted under the address
+sgjpol@gmail.com.

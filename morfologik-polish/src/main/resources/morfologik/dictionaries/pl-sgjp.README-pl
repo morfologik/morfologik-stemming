@@ -1,0 +1,62 @@
+Analizator morfologiczny Morfeusz SGJP
+
+Program i zawarte w nim dane fleksyjne zostają niniejszym udostępnione
+na tzw. dwuklauzulowej licencji BSD:
+
+-----------------------------------------------------------------------
+Copyright © 2011 Zygmunt Saloni, Włodzimierz Gruszczyński, 
+	    	 Marcin Woliński, Robert Wołosz
+
+Wszelkie prawa zastrzeżone.
+
+Redystrybucja  i używanie,  czy to  w  formie kodu  źródłowego, czy  w
+formie  kodu  wykonawczego,  są  dozwolone  pod  warunkiem  spełnienia
+poniższych warunków:
+
+1. Redystrybucja kodu źródłowego musi zawierać powyższą notę
+   copyrightową, niniejszą listę warunków oraz poniższe oświadczenie
+   o wyłączeniu odpowiedzialności.
+
+2. Redystrybucja kodu wykonawczego musi zawierać powyższą notę
+   copyrightową, niniejszą listę warunków oraz poniższe oświadczenie
+   o wyłączeniu odpowiedzialności w dokumentacji i/lub w innych
+   materiałach dostarczanych wraz z kopią oprogramowania.
+
+NINIEJSZE  OPROGRAMOWANIE  JEST  DOSTARCZONE  PRZEZ  WŁAŚCICIELI  PRAW
+AUTORSKICH  „TAKIM, JAKIE JEST”.  KAŻDA, DOROZUMIANA  LUB BEZPOŚREDNIO
+WYRAŻONA GWARANCJA, NIE WYŁĄCZAJĄC DOROZUMIANEJ GWARANCJI PRZYDATNOŚCI
+HANDLOWEJ   I   PRZYDATNOŚCI   DO   OKREŚLONEGO   ZASTOSOWANIA,   JEST
+WYŁĄCZONA. W  ŻADNYM WYPADKU WŁAŚCICIELE PRAW AUTORSKICH  NIE MOGĄ BYĆ
+ODPOWIEDZIALNI ZA  JAKIEKOLWIEK BEZPOŚREDNIE, POŚREDNIE, INCYDENTALNE,
+SPECJALNE,   UBOCZNE  I  WTÓRNE   SZKODY  (NIE   WYŁĄCZAJĄC  OBOWIĄZKU
+DOSTARCZENIA  PRODUKTU   ZASTĘPCZEGO  LUB  SERWISU,  ODPOWIEDZIALNOŚCI
+Z TYTUŁU  UTRATY WALORÓW  UŻYTKOWYCH,  UTRATY DANYCH  LUB KORZYŚCI,  A
+TAKŻE  PRZERW  W  PRACY  PRZEDSIĘBIORSTWA) SPOWODOWANE  W  JAKIKOLWIEK
+SPOSÓB   I  NA   PODSTAWIE   ISTNIEJĄCEJ  W TEORII   ODPOWIEDZIALNOŚCI
+KONTRAKTOWEJ,   CAŁKOWITEJ   LUB   DELIKTOWEJ  (WYNIKŁEJ   ZARÓWNO   Z
+NIEDBALSTWA JAK  INNYCH POSTACI  WINY), POWSTAŁE W  JAKIKOLWIEK SPOSÓB
+W WYNIKU UŻYWANIA LUB MAJĄCE ZWIĄZEK Z UŻYWANIEM OPROGRAMOWANIA, NAWET
+JEŚLI O MOŻLIWOŚCI POWSTANIA TAKICH SZKÓD OSTRZEŻONO.
+-----------------------------------------------------------------------
+
+
+Więcej informacji o programie można znaleźć na stronie
+http://sgjp.pl/morfeusz/ . Bardzo zachęcamy do zapoznania się z nią,
+zwłaszcza jeśli mają Państwo poczucie, że program daje dziwaczne
+odpowiedzi lub „nie działa”.  Pomóc może też lektura artykułu:
+
+Marcin Woliński, „System znaczników morfosyntaktycznych w korpusie
+IPI PAN”, Polonica XXII–XXIII, s. 39–55, 2003.
+
+Osoby zainteresowane modyfikacją programu zapewne szybko zauważą, że
+kod jest pełen dziwacznych zaszłości.  Z góry za to przepraszamy.
+Prawdopodobnie w studiowaniu sposobu działania programu może pomóc
+następujący artykuł:
+
+Marcin Woliński, „Morfeusz — a Practical Tool for the Morphological
+Analysis of Polish”, w: Mieczysław Kłopotek, Sławomir Wierzchoń,
+Krzysztof Trojanowski, red., Intelligent Information Processing and
+Web Mining, IIS:IIPWM'06 Proceedings, s. 503–512, Springer, 2006.
+
+W sprawach związanych z Morfeuszem można się kontaktować z autorami
+pod adresem sgjpol@gmail.com.
