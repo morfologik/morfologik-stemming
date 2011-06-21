@@ -26,15 +26,20 @@
 
   <build>
     <defaultGoal>install</defaultGoal>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 
   <profiles>
     <profile>
-      <id>release</id>
-
-      <properties>
-        <morfologik.skip.distribution>false</morfologik.skip.distribution>
-      </properties>
+      <id>distribution</id>
 
       <build>
         <plugins>
@@ -107,7 +112,7 @@
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
-    
+
     <dependency>
       <groupId>org.carrot2</groupId>
       <artifactId>morfologik-tools</artifactId>
