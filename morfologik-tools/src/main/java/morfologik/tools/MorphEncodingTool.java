@@ -120,11 +120,14 @@ class MorphEncodingTool extends Tool {
 					for (int i = 0; i < words.length; i++) {
 						if (i < 1 && words[i] == null) {
 							throw new IllegalArgumentException(
-							        "The input file has less than 2 fields in line: "
-							                + lnumber);
+							        "The input file has less than 2 tab-separated fields in line "
+							                + lnumber + ": " 
+							                + new String(buf, "iso8859-1"));
 						} 
 						if (words[i] == null && !noWarn) {	
-							System.err.println("Line number: " + lnumber + " has less than three fields.");
+							System.err.println("Line number " + lnumber 
+							    + " has less than 3 tab-separated fields: "
+							    + new String(buf, "iso8859-1"));
 						}
 					}
 
