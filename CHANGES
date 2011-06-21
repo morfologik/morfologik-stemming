@@ -1,5 +1,3 @@
-1.5.3	  [trunk version]
-
 1.5.2
           An alternative Polish dictionary added (BSD licensed): SGJP (Morfeusz). PolishStemmer
           can now take an enum switching between the dictionary to be used or combine both.

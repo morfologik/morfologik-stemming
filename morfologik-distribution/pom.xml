@@ -20,10 +20,6 @@
   <name>Morfologik Distribution Package</name>
   <description>Morfologik Distribution Package</description>
 
-  <properties>
-    <morfologik.skip.distribution>true</morfologik.skip.distribution>
-  </properties>
-
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
@@ -72,7 +68,6 @@
                 </goals>
                 <configuration>
                   <attach>false</attach>
-                  <skipAssembly>${morfologik.skip.distribution}</skipAssembly>
                   <descriptors>
                     <descriptor>src/main/assembly/bin.xml</descriptor>
                   </descriptors>

@@ -26,5 +26,10 @@ Sonatype/ release push
 ======================
 
 # snapshot deploy, create single-JAR version, javadocs, etc.
+mvn clean deploy -Prelease
+
+# ZIP with full release artifacts
 mvn clean deploy -Prelease,distribution
 
+# For final releases, GPG sign.
+mvn clean deploy -Prelease,distribution,sign
