@@ -8,13 +8,13 @@
   <parent>
     <groupId>org.carrot2</groupId>
     <artifactId>morfologik-parent</artifactId>
-    <version>1.5.2-SNAPSHOT</version>
+    <version>1.5.2</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>org.carrot2</groupId>
   <artifactId>morfologik-distribution</artifactId>
-  <version>1.5.2-SNAPSHOT</version>
+  <version>1.5.2</version>
   <packaging>pom</packaging>
 
   <name>Morfologik Distribution Package</name>
