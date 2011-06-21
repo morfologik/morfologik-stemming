@@ -1,6 +1,7 @@
 
 -dontnote
 -dontoptimize
+-dontwarn
 
 -renamepackage org.apache=>morfologik.dependencies
 -renamepackage com.carrotsearch=>morfologik.dependencies
