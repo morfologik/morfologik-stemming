@@ -1,6 +1,7 @@
 1.5.3     [trunk]
 
-
+          Updated morfologik-polish licensing info to include MPL:
+          "Licensed under GPL, LGPL, MPL or CC SA licenses."
 
 1.5.2
           An alternative Polish dictionary added (BSD licensed): SGJP (Morfeusz). PolishStemmer
