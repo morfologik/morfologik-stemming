@@ -20,7 +20,7 @@ final class ArrayViewList<E> extends AbstractList<E>
 	ArrayViewList(E[] array, int start, int length) {
 		if (array == null)
 			throw new IllegalArgumentException();
-		wrap(a, start, length);
+		wrap(array, start, length);
 	}
 
 	/*
