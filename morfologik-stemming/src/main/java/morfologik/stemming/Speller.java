@@ -389,7 +389,9 @@ public class Speller {
 			// |i - j|
 			for (int j = 0; j < 2 * distance + 1; j++) {
 				p[j * rowLength] = distance + 1 - j; // H(i=0..distance+1,0)=i
-				p[(j + distance + 1) * rowLength + j] = j; // H(0,j=0..distance+1)=j
+				//FIXME: dla distance == 2 tu mamy wykroczenie poza rozmiar tablicy
+				p[Math.min(p.length - 1, (j + distance + 1) * rowLength + j)] = j; // H(0,j=0..distance+1)=j
+				//w spell.cc jest tutaj błąd, Jaś już wie...
 			}
 		}
 
