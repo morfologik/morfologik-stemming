@@ -46,6 +46,7 @@ public class DictionaryLookupTest {
 
 		// This word is not in the dictionary.
 		assertNoStemFor(s, "martygalski");
+		assertNoStemFor(s, "Rzeczyckiõh");
 	}
 
 	/* */

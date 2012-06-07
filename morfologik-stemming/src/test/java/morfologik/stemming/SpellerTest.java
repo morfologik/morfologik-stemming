@@ -28,7 +28,7 @@ public class SpellerTest {
 	@Test
 	public void testFindReplacements() throws IOException {
 		final URL url = this.getClass().getResource("slownik.dict");		
-		final Speller spell = new Speller(Dictionary.read(url));
+		final Speller spell = new Speller(Dictionary.read(url), 2);
 		assertTrue(spell.findReplacements("abka").contains("abak"));
 		
 		final URL url1 = this.getClass().getResource("test-infix.dict");		
