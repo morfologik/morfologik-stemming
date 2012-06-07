@@ -359,9 +359,9 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 		}
 
 		chars.mark();
-		encoder.reset();
-		CoderResult result = encoder.encode(chars, bytes, true);
-		if (result.isError()) { // remove everything, we don't want to accept malformed intput
+		encoder.reset();		
+		if (encoder.encode(chars, bytes, true).
+		        isError()) { // remove everything, we don't want to accept malformed intput
 		    bytes.clear();
 		}
 		bytes.flip();
