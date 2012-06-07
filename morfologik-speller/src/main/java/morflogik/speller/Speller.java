@@ -1,6 +1,6 @@
 // this will go to another package but 
 // creating a new pom.xml for maven is beyond me...
-package morfologik.stemming;
+package morflogik.speller;
 
 import static morfologik.fsa.MatchResult.EXACT_MATCH;
 import static morfologik.fsa.MatchResult.SEQUENCE_IS_A_PREFIX;
@@ -13,24 +13,27 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ArrayList;
 
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSATraversal;
 import morfologik.fsa.MatchResult;
+import morfologik.stemming.Dictionary;
+import morfologik.stemming.DictionaryMetadata;
 import morfologik.util.BufferUtils;
 
+/**
+ * Find suggestions by using K. Oflazer's algorithm. See Jan Daciuk's <code>s_fsa</code>
+ * package.
+ */
 public class Speller {
 
-	final int editDistance;
-
+	private final int editDistance;
 	private int e_d; // effective edit distance
 
-	final boolean convertCase;
-
-	final hMatrix H;
+	private final hMatrix H;
 
 	public static int MAX_WORD_LENGTH = 120;
 
@@ -40,9 +43,6 @@ public class Speller {
 	private byte[] word_ff; /* word being processed */
 	private final List<String> candidates = new ArrayList<String>();
 
-	/**
-	 * @see #getSeparatorChar()
-	 */
 	protected final char separatorChar;
 
 	/**
@@ -79,11 +79,6 @@ public class Speller {
 	 */
 	protected final CharsetDecoder decoder;
 
-	/**
-	 * The {@link Dictionary} this speller is using.
-	 */
-	private final Dictionary dictionary;
-
 	/** An FSA used for lookups. */
 	private final FSATraversal matcher;
 
@@ -103,13 +98,10 @@ public class Speller {
 		this(dictionary, editDistance, true);
 	}
 
-	public Speller(final Dictionary dictionary, final int editDistance,
-			final boolean convertCase) {
+	public Speller(final Dictionary dictionary, final int editDistance, final boolean convertCase) {
 		this.editDistance = editDistance;
-		this.convertCase = convertCase;
 		H = new hMatrix(editDistance, MAX_WORD_LENGTH);
 
-		this.dictionary = dictionary;
 		this.dictionaryMetadata = dictionary.metadata;
 		this.rootNode = dictionary.fsa.getRootNode();
 		this.fsa = dictionary.fsa;
@@ -363,9 +355,9 @@ public class Speller {
 		/**
 		 * Allocates memory and initializes matrix (constructor).
 		 * 
-		 * @param <code>distance</code> - (int) max edit distance allowed for
+		 * @param distance (int) max edit distance allowed for
 		 *        candidates;
-		 * @param <code>maxLength</code> - (int) max length of words.
+		 * @param maxLength (int) max length of words.
 		 * @return: Nothing. Remarks: See Oflazer. To save space, the matrix is
 		 *          stored as a vector. To save time, additional raws and
 		 *          columns are added. They are initialized to their distance in

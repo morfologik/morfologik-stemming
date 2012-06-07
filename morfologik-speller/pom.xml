@@ -12,33 +12,19 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>morfologik-stemming</artifactId>
+  <artifactId>morfologik-speller</artifactId>
   <packaging>jar</packaging>
 
-  <name>Morfologik Stemming APIs</name>
-  <description>Morfologik Stemming APIs.</description>
+  <name>Morfologik Speller</name>
+  <description>Morfologik Speller</description>
 
   <dependencies>
     <dependency>
       <groupId>org.carrot2</groupId>
-      <artifactId>morfologik-fsa</artifactId>
+      <artifactId>morfologik-stemming</artifactId>
       <version>${project.version}</version>
-
-      <exclusions>
-        <!-- Not needed at runtime. -->
-        <exclusion>
-          <groupId>com.carrotsearch</groupId>
-          <artifactId>hppc</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
-    <dependency>
-      <groupId>com.carrotsearch</groupId>
-      <artifactId>junit-benchmarks</artifactId>
-      <scope>test</scope>
-    </dependency>
-    
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

@@ -12,25 +12,18 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>org.carrot2</groupId>
   <artifactId>morfologik-distribution</artifactId>
-  <version>1.5.3-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Morfologik Distribution Package</name>
   <description>Morfologik Distribution Package</description>
+  
+  <properties>
+    <skip.deployment>true</skip.deployment>
+  </properties>
 
   <build>
     <defaultGoal>install</defaultGoal>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
 
   <profiles>

@@ -67,6 +67,8 @@
     <maven.compiler.source>1.6</maven.compiler.source>
     <maven.compiler.target>1.6</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <skip.deployment>false</skip.deployment>
   </properties>
 
   <!-- Add snapshots from SonaType -->
@@ -90,6 +92,7 @@
     <module>morfologik-polish</module>
     <module>morfologik-tools</module>
     <module>morfologik-distribution</module>
+    <module>morfologik-speller</module>
   </modules>
 
   <!-- Manage dependencies; we keep versions separate to possibly split out submodules 
@@ -134,6 +137,14 @@
 
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <configuration>
+            <skip>${skip.deployment}</skip>
+          </configuration>
+        </plugin>
+      
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>

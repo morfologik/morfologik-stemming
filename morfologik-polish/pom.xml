@@ -12,9 +12,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>org.carrot2</groupId>
   <artifactId>morfologik-polish</artifactId>
-  <version>1.5.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Morfologik Stemming Dictionary for Polish</name>
