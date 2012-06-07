@@ -247,17 +247,18 @@ public class Speller {
 	private void findRepl(final int depth, final int node)
 			throws CharacterCodingException {
 		int dist = 0; // not yet used, might be useful for sorting suggestions
-		int nextNode = fsa.getEndNode(node);
 		if (depth + 1 >= candLen) {
 			candidate = Arrays.copyOf(candidate, MAX_WORD_LENGTH);
 		}
 
-		for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa
-				.getNextArc(arc)) {
+		for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
 			if (!fsa.isArcTerminal(arc)) {
 				candidate[depth] = fsa.getArcLabel(arc);
 				if (cuted(depth) <= e_d) {
-					findRepl(depth + 1, nextNode);
+				    // TODO: shouldn't findRepl be invoked _after_ a check
+				    // for a potential suggestion? After you return from recursion
+				    // the candidate array may be corrupted/ filled with junk data?
+					findRepl(depth + 1, fsa.getEndNode(arc));
 					if (Math.abs(wordLen - 1 - depth) <= e_d
 							&& (dist = ed(wordLen - 1, depth)) <= e_d
 							&& (fsa.isArcFinal(arc) || isBeforeSeparator(arc))) {
