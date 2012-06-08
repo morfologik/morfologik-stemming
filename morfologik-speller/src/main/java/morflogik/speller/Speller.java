@@ -15,6 +15,7 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import morfologik.fsa.FSA;
@@ -41,7 +42,7 @@ public class Speller {
 	private int candLen;
 	private int wordLen; /* length of word being processed */
 	private byte[] word_ff; /* word being processed */
-	private final List<String> candidates = new ArrayList<String>();
+	private final List<CandidateData> candidates = new ArrayList<CandidateData>();
 
 	protected final char separatorChar;
 
@@ -247,7 +248,13 @@ public class Speller {
 			e_d = (wordLen <= editDistance ? (wordLen - 1) : editDistance);
 			findRepl(0, fsa.getRootNode());
 		}
-		return candidates;
+		
+		Collections.sort(candidates);
+		List<String> candStringList = new ArrayList<String>(candidates.size());
+		for (CandidateData cd : candidates) {
+		    candStringList.add(cd.getWord());
+		}
+		return candStringList;
 	}
 
 	private void findRepl(final int depth, final int node)
@@ -269,7 +276,7 @@ public class Speller {
 						bb1.limit(depth + 1);
 						bb1.flip();
 						CharBuffer ch = decoder.decode(bb1);
-						candidates.add(ch.toString());
+						candidates.add(new CandidateData(ch.toString(), dist));
 					}
 					findRepl(depth + 1, fsa.getEndNode(arc));
 				}
@@ -388,4 +395,31 @@ public class Speller {
 	    return e_d;
 	}
 
+	/**
+	 * Used to sort candidates according to edit distance,
+	 * and possibly according to their frequency in the future.
+	 *
+	 */
+	private class CandidateData implements Comparable<CandidateData> {
+	    private final String word;
+	    private final int distance;
+	    
+	    CandidateData(final String word, final int distance) {
+	        this.word = word;
+	        this.distance = distance;
+	    }
+	    
+	    final String getWord() {
+	        return word;
+	    }
+	    
+	    final int getDistance() {
+	        return distance;
+	    }
+
+        public int compareTo(CandidateData cd) {            
+            return ((cd.getDistance() > this.distance ? -1 :
+                (cd.getDistance() == this.distance ? 0 : 1)));
+        }
+	}
 }
