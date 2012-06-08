@@ -155,23 +155,29 @@ public class Speller {
 	 * Encode a character sequence into a byte buffer, optionally expanding
 	 * buffer.
 	 */
-	protected ByteBuffer charsToBytes(CharBuffer chars, ByteBuffer bytes) {
+	private ByteBuffer charsToBytes(CharBuffer chars, ByteBuffer bytes) {
 		bytes.clear();
 		final int maxCapacity = (int) (chars.remaining() * encoder
 				.maxBytesPerChar());
 		if (bytes.capacity() <= maxCapacity) {
 			bytes = ByteBuffer.allocate(maxCapacity);
 		}
-
 		chars.mark();
 		encoder.reset();
-		encoder.encode(chars, bytes, true);
+		if (encoder.encode(chars, bytes, true).
+		        isError()) { // in the case of encoding errors, clear the buffer
+		    bytes.clear();
+		}
 		bytes.flip();
 		chars.reset();
-
 		return bytes;
 	}
 
+	/**
+	 * Test whether the word is found in the dictionary. 
+	 * @param word - the word to be tested
+	 * @return - true if it is found.
+	 */
 	public boolean isInDictionary(CharSequence word) {
 
 		// Encode word characters into bytes in the same encoding as the FSA's.
@@ -192,7 +198,7 @@ public class Speller {
 	}
 
 	/**
-	 * Propose suggestions for misspelled runon words. This algorithm comes from
+	 * Propose suggestions for misspelled runon words. This algorithm is inspired by
 	 * spell.cc in s_fsa package by Jan Daciuk.
 	 * 
 	 * @param original
@@ -338,6 +344,48 @@ public class Speller {
 
 	private int min(final int a, final int b, final int c) {
 		return Math.min(a, Math.min(b, c));
+	}
+	
+	/**
+	 * Sets up the word and candidate.
+	 * Used only to test the edit distance in JUnit tests.
+	 * @param word - the first word
+	 * @param candidate - the second word used for edit distance calculation 
+	 */
+	public void setWordAndCandidate(final String word, final String candidate) {
+	    CharBuffer ch = CharBuffer.allocate(word.length());
+        ch.put(CharBuffer.wrap(word));
+        ch.flip();
+        ByteBuffer bb1 = ByteBuffer.allocate(word.length());
+        bb1 = charsToBytes(ch, bb1);
+        if (bb1.hasRemaining()) {
+            word_ff = bb1.array();
+        }
+        wordLen = word_ff.length;
+        
+        ch.clear();
+        ch = BufferUtils.ensureCapacity(ch, candidate.length());
+        ch.put(CharBuffer.wrap(candidate));
+        ch.flip();
+        bb1 = BufferUtils.ensureCapacity(bb1, candidate.length());
+        bb1 = charsToBytes(ch, bb1);
+        if (bb1.hasRemaining()) {
+            this.candidate = bb1.array();
+        }
+        candLen = this.candidate.length;
+        e_d = (wordLen <= editDistance ? (wordLen - 1) : editDistance);	    
+	}
+	
+	public final int getWordLen() {
+	    return wordLen;
+	}
+	
+	public final int getCandLen() {
+	    return candLen;
+	}
+	
+	public final int getEffectiveED(){
+	    return e_d;
 	}
 
 }

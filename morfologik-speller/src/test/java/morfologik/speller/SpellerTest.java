@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 
 import morflogik.speller.Speller;
@@ -60,5 +61,56 @@ public class SpellerTest {
         //nothing for separator
         assertTrue(spell1.findReplacements("+").isEmpty());
 
-	}	
+	}
+	
+	@Test
+	public void testEditDistanceCalculation() throws IOException {
+	    final URL url = getClass().getResource("slownik.dict");        
+        final Speller spell = new Speller(Dictionary.read(url), 5);
+        //test examples from Oflazer's paper
+	    assertTrue(getEditDistance(spell, "recoginze", "recognize") == 1);
+	    assertTrue(getEditDistance(spell, "sailn", "failing") == 3);
+	    assertTrue(getEditDistance(spell, "abc", "abcd") == 1);
+	    assertTrue(getEditDistance(spell, "abc", "abcde") == 2);
+	}
+	
+	@Test
+	public void testCutOffEditDistance() throws IOException {
+	    final URL url = getClass().getResource("slownik.dict");
+	    final Speller spell2 = new Speller(Dictionary.read(url), 2); //note: threshold = 2        
+        //test cut edit distance - reprter / repo from Oflazer	    
+        assertTrue(getCutOffDistance(spell2, "repo", "reprter") == 1);
+        assertTrue(getCutOffDistance(spell2, "reporter", "reporter") == 0);
+	}
+	
+	private int getCutOffDistance(final Speller spell, final String word, final String candidate) {
+	    spell.setWordAndCandidate(word, candidate);
+        final int [] ced = new int[spell.getCandLen() - spell.getWordLen()];
+        for (int i = 0; i < spell.getCandLen() - spell.getWordLen(); i++) {
+            ced[i] = spell.cuted(spell.getWordLen() + i);
+        }
+        Arrays.sort(ced);
+        //and the min value...
+        if (ced.length > 0) {
+            return ced[0];
+        }
+        return 0;
+	}
+	
+	private int getEditDistance(final Speller spell, final String word, final String candidate) {
+	    spell.setWordAndCandidate(word, candidate);	    	   	    
+	    final int maxDistance = spell.getEffectiveED(); 
+	    final int candidateLen = spell.getCandLen();
+	    final int wordLen = spell.getWordLen();
+	    int ed = 0;
+	    for (int i = 0; i < candidateLen; i++) {
+	        if (spell.cuted(i) <= maxDistance) {
+	            if (Math.abs(wordLen - 1 - i) <= maxDistance) {
+	                ed = spell.ed(wordLen - 1, i);
+	            }
+	        } 
+	    }
+	    return ed;
+	}
+	
 }
