@@ -32,7 +32,7 @@ public class SpellerTest {
 	@Test
 	public void testFindReplacements() throws IOException {
 		final URL url = getClass().getResource("slownik.dict");		
-		final Speller spell = new Speller(Dictionary.read(url), 2);
+		final Speller spell = new Speller(Dictionary.read(url), 1);
 		assertTrue(spell.findReplacements("abka").contains("abak"));
 	      //check if we get only dictionary words...
 		List<String> reps = spell.findReplacements("bak");
@@ -70,8 +70,13 @@ public class SpellerTest {
         //test examples from Oflazer's paper
 	    assertTrue(getEditDistance(spell, "recoginze", "recognize") == 1);
 	    assertTrue(getEditDistance(spell, "sailn", "failing") == 3);
-	    assertTrue(getEditDistance(spell, "abc", "abcd") == 1);
+	    assertTrue(getEditDistance(spell, "abc", "abcd") == 1);	    
 	    assertTrue(getEditDistance(spell, "abc", "abcde") == 2);
+	    //test words from fsa_spell output
+	    assertTrue(getEditDistance(spell, "abka", "abaka") == 1);
+	    assertTrue(getEditDistance(spell, "abka", "abakan") == 2);
+	    assertTrue(getEditDistance(spell, "abka", "abaką") == 2);
+	    assertTrue(getEditDistance(spell, "abka", "abaki") == 2);
 	}
 	
 	@Test
