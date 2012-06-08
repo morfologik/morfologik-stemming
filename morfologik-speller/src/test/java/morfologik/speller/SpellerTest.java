@@ -10,13 +10,31 @@ import java.util.List;
 import morflogik.speller.Speller;
 import morfologik.stemming.Dictionary;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SpellerTest {
+    private static Dictionary slownikDictionary;
+
+    @BeforeClass
+    public static void setup() throws Exception {
+        final URL url = SpellerTest.class.getResource("slownik.dict");     
+        slownikDictionary = Dictionary.read(url);
+    }
+
+    
+    @Test
+    public void testAbka() throws Exception {
+        final Speller spell = new Speller(slownikDictionary, 2);
+        System.out.println("Replacements:");
+        for (String s : spell.findReplacements("abka")) {
+            System.out.println(s);
+        }
+    }
+    
 	@Test
 	public void testRunonWords() throws IOException {
-        final URL url = getClass().getResource("slownik.dict");		
-		final Speller spell = new Speller(Dictionary.read(url));
+		final Speller spell = new Speller(slownikDictionary);
 		assertTrue(spell.replaceRunOnWords("abaka").isEmpty());
 		assertTrue(spell.replaceRunOnWords("abakaabace").
 				contains("abaka abace"));
@@ -31,8 +49,7 @@ public class SpellerTest {
 	
 	@Test
 	public void testFindReplacements() throws IOException {
-		final URL url = getClass().getResource("slownik.dict");		
-		final Speller spell = new Speller(Dictionary.read(url), 1);
+		final Speller spell = new Speller(slownikDictionary, 1);
 		assertTrue(spell.findReplacements("abka").contains("abak"));
 	      //check if we get only dictionary words...
 		List<String> reps = spell.findReplacements("bak");
@@ -65,8 +82,7 @@ public class SpellerTest {
 	
 	@Test
 	public void testEditDistanceCalculation() throws IOException {
-	    final URL url = getClass().getResource("slownik.dict");        
-        final Speller spell = new Speller(Dictionary.read(url), 5);
+        final Speller spell = new Speller(slownikDictionary, 5);
         //test examples from Oflazer's paper
 	    assertTrue(getEditDistance(spell, "recoginze", "recognize") == 1);
 	    assertTrue(getEditDistance(spell, "sailn", "failing") == 3);
@@ -81,8 +97,7 @@ public class SpellerTest {
 	
 	@Test
 	public void testCutOffEditDistance() throws IOException {
-	    final URL url = getClass().getResource("slownik.dict");
-	    final Speller spell2 = new Speller(Dictionary.read(url), 2); //note: threshold = 2        
+	    final Speller spell2 = new Speller(slownikDictionary, 2); //note: threshold = 2        
         //test cut edit distance - reprter / repo from Oflazer	    
         assertTrue(getCutOffDistance(spell2, "repo", "reprter") == 1);
         assertTrue(getCutOffDistance(spell2, "reporter", "reporter") == 0);
@@ -117,5 +132,4 @@ public class SpellerTest {
 	    }
 	    return ed;
 	}
-	
 }

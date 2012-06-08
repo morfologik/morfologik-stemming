@@ -265,20 +265,20 @@ public class Speller {
 		}
 
 		for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
-			if (!fsa.isArcTerminal(arc)) {
-				candidate[depth] = fsa.getArcLabel(arc);
-				if (cuted(depth) <= e_d) {
-					if (Math.abs(wordLen - 1 - depth) <= e_d
-							&& (dist = ed(wordLen - 1, depth)) <= e_d
-							&& (fsa.isArcFinal(arc) || isBeforeSeparator(arc))) {
-						ByteBuffer bb1 = ByteBuffer.allocate(MAX_WORD_LENGTH);
-						bb1.put(candidate);
-						bb1.limit(depth + 1);
-						bb1.flip();
-						CharBuffer ch = decoder.decode(bb1);
-						candidates.add(new CandidateData(ch.toString(), dist));
-					}
-					findRepl(depth + 1, fsa.getEndNode(arc));
+			candidate[depth] = fsa.getArcLabel(arc);
+			if (cuted(depth) <= e_d) {
+				if (Math.abs(wordLen - 1 - depth) <= e_d
+						&& (dist = ed(wordLen - 1, depth)) <= e_d
+						&& (fsa.isArcFinal(arc) || isBeforeSeparator(arc))) {
+					ByteBuffer bb1 = ByteBuffer.allocate(MAX_WORD_LENGTH);
+					bb1.put(candidate);
+					bb1.limit(depth + 1);
+					bb1.flip();
+					CharBuffer ch = decoder.decode(bb1);
+					candidates.add(new CandidateData(ch.toString(), dist));
+				}
+				if (!fsa.isArcTerminal(arc)) {
+				    findRepl(depth + 1, fsa.getEndNode(arc));
 				}
 			}
 		}
