@@ -1,5 +1,3 @@
-// this will go to another package but 
-// creating a new pom.xml for maven is beyond me...
 package morflogik.speller;
 
 import static morfologik.fsa.MatchResult.EXACT_MATCH;
@@ -259,7 +257,7 @@ public class Speller {
 
 	private void findRepl(final int depth, final int node)
 			throws CharacterCodingException {
-		int dist = 0; // not yet used, might be useful for sorting suggestions
+		int dist = 0; 
 		if (depth + 1 >= candLen) {
 			candidate = Arrays.copyOf(candidate, MAX_WORD_LENGTH);
 		}
