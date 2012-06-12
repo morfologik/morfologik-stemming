@@ -23,7 +23,7 @@ abstract class Tool {
 		for (String arg : args) { 
 		    if ("--help".equals(arg)) {
 		        printUsage();
-	            System.exit(0);
+	            return;
 		    }
 		}
 
