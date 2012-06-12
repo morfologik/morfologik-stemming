@@ -15,7 +15,7 @@
   <!-- Project info. -->
   <groupId>org.carrot2</groupId>
   <artifactId>morfologik-parent</artifactId>
-  <version>1.5.3</version>
+  <version>1.5.4-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Morfologik (parent POM)</name>
