@@ -7,7 +7,7 @@ fsa.dict.created=12.06.2012
 fsa.dict.license=BSD. http://morfologik.blogspot.com
 
 fsa.dict.separator=+
-fsa.dict.encoding=iso-8859-2
+fsa.dict.encoding=UTF-8
 
 fsa.dict.uses-prefixes=true
 fsa.dict.uses-infixes=true

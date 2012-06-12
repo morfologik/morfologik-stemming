@@ -21,7 +21,7 @@ public class PolishMorfologikStemmerTest {
 		assertEquals("żywotopisarstwo", stem(s, "żywotopisarstwie")[0]);
 		assertEquals("abradować", stem(s, "abradowałoby")[0]);
 
-		assertArrayEquals(new String[] { "żywotopisarstwo", "subst:sg:loc:n" },
+		assertArrayEquals(new String[] { "żywotopisarstwo", "subst:sg:loc:n2" },
 		        stem(s, "żywotopisarstwie"));
 		assertArrayEquals(new String[] { "bazia", "subst:pl:inst:f" }, stem(s,
 		        "baziami"));
@@ -76,13 +76,15 @@ public class PolishMorfologikStemmerTest {
             tags.contains(wd.getTag().toString());
         }
 
+        final String ENCODING = "UTF-8";
+
         // Run the same consistency check for the returned buffers.
         final ByteBuffer temp = ByteBuffer.allocate(100);
         for (WordData wd : response) {
             // Buffer should be copied.
             final ByteBuffer copy = wd.getStemBytes(null);
             final String stem = new String(copy.array(), copy.arrayOffset()
-                    + copy.position(), copy.remaining(), "iso-8859-2");
+                    + copy.position(), copy.remaining(), ENCODING);
             // The buffer should be present in stems set.
             assertTrue(stem, stems.contains(stem));
             // Buffer large enough to hold the contents.
@@ -96,7 +98,7 @@ public class PolishMorfologikStemmerTest {
             // Buffer should be copied.
             final ByteBuffer copy = wd.getTagBytes(null);
             final String tag = new String(copy.array(), copy.arrayOffset()
-                    + copy.position(), copy.remaining(), "iso-8859-2");
+                    + copy.position(), copy.remaining(), ENCODING);
             // The buffer should be present in tags set.
             assertTrue(tag, tags.contains(tag));
             // Buffer large enough to hold the contents.
@@ -111,7 +113,7 @@ public class PolishMorfologikStemmerTest {
             final ByteBuffer copy = wd.getWordBytes(null);
             assertNotNull(copy);
             assertEquals(0, copy.compareTo(ByteBuffer.wrap(word
-                    .getBytes("iso-8859-2"))));
+                    .getBytes(ENCODING))));
         }
     }
 
