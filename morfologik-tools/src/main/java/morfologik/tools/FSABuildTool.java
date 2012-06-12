@@ -224,11 +224,8 @@ public final class FSABuildTool extends Tool {
             private byte [] current;
             private byte [] previous = null;
             private int previousLen;
-            private int line;
 
             public byte[] process(byte[] current, int currentLen) {
-                line++;
-
                 // Verify the order.
                 if (previous != null) {
                     if (FSABuilder.compare(previous, 0, previousLen, current, 0, currentLen) > 0) {
