@@ -37,12 +37,16 @@ morfologik-tools:
     java -jar lib/morfologik-tools-${version}.jar
     for an up-to-date list of all tools.
 
+morfologik-speller:
+
+  - Simplistic automaton-based spelling correction (suggester).
+
 
 AUTHORS
 =======
 
-Marcin Miłkowski (http://marcinmilkowski.pl) [linguistic data lead]
-Dawid Weiss (http://www.dawidweiss.com) [fsa lead]
+Marcin Miłkowski (http://marcinmilkowski.pl) [linguistic data lead, code]
+Dawid Weiss (http://www.dawidweiss.com) [fsa lead, code]
 
 
 CONTRIBUTORS
