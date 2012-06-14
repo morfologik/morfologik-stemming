@@ -2,7 +2,7 @@ package morfologik.speller;
 
 import static org.junit.Assert.*;
 
-import morflogik.speller.HMatrix;
+import morfologik.speller.HMatrix;
 
 import org.junit.Test;
 

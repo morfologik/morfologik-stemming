@@ -7,7 +7,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
-import morflogik.speller.Speller;
+import morfologik.speller.Speller;
 import morfologik.stemming.Dictionary;
 
 import org.junit.BeforeClass;

@@ -1,4 +1,4 @@
-package morflogik.speller;
+package morfologik.speller;
 
 /**
  * Keeps track of already computed values of edit distance.<br/>

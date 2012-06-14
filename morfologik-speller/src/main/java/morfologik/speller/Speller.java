@@ -1,4 +1,4 @@
-package morflogik.speller;
+package morfologik.speller;
 
 import static morfologik.fsa.MatchResult.EXACT_MATCH;
 import static morfologik.fsa.MatchResult.SEQUENCE_IS_A_PREFIX;
