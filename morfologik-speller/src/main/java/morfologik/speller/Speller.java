@@ -1,7 +1,6 @@
 package morfologik.speller;
 
 import static morfologik.fsa.MatchResult.EXACT_MATCH;
-import static morfologik.fsa.MatchResult.SEQUENCE_IS_A_PREFIX;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -105,7 +104,7 @@ public class Speller {
 		this.rootNode = dictionary.fsa.getRootNode();
 		this.fsa = dictionary.fsa;
 		this.matcher = new FSATraversal(fsa);
-
+		
 		if (rootNode == 0) {
 			throw new IllegalArgumentException(
 					"Dictionary must have at least the root node.");
@@ -115,6 +114,16 @@ public class Speller {
 			throw new IllegalArgumentException(
 					"Dictionary metadata must not be null.");
 		}
+		
+		if (dictionaryMetadata.usesInfixes) {
+            throw new IllegalArgumentException(
+                    "The spelling dictionary cannot use infixes.");
+        }
+		
+		if (dictionaryMetadata.usesPrefixes) {
+            throw new IllegalArgumentException(
+                    "The spelling dictionary cannot use prefixes.");
+        }
 
 		try {
 			Charset charset = Charset.forName(dictionaryMetadata.encoding);
@@ -193,7 +202,7 @@ public class Speller {
 		final MatchResult match = matcher.match(matchResult,
 				byteBuffer.array(), 0, byteBuffer.remaining(), rootNode);
 
-		return (match.kind == SEQUENCE_IS_A_PREFIX || match.kind == EXACT_MATCH);
+		return (match.kind == EXACT_MATCH);
 	}
 
 	/**
