@@ -116,19 +116,6 @@ public class Speller {
 		}
 		
 		
-		/*
-		if (dictionaryMetadata.usesInfixes) {
-            throw new IllegalArgumentException(
-                    "The spelling dictionary cannot use infixes.");
-        }
-		
-		if (dictionaryMetadata.usesPrefixes) {
-            throw new IllegalArgumentException(
-                    "The spelling dictionary cannot use prefixes.");
-        }
-        
-        */
-
 		try {
 			Charset charset = Charset.forName(dictionaryMetadata.encoding);
 			encoder = charset.newEncoder();
@@ -258,7 +245,7 @@ public class Speller {
 			wordLen = word_ff.length;
 			candidate = word_ff.clone();
 			candLen = candidate.length;
-			e_d = (wordLen <= editDistance ? (wordLen - 1) : editDistance);
+			e_d = (wordLen <= editDistance ? (wordLen - 1) : editDistance);			
 			findRepl(0, fsa.getRootNode());
 		}
 		
@@ -283,12 +270,7 @@ public class Speller {
 				if (Math.abs(wordLen - 1 - depth) <= e_d
 						&& (dist = ed(wordLen - 1, depth)) <= e_d
 						&& (fsa.isArcFinal(arc) || isBeforeSeparator(arc))) {
-					ByteBuffer bb1 = ByteBuffer.allocate(MAX_WORD_LENGTH);
-					bb1.put(candidate);
-					bb1.limit(depth + 1);
-					bb1.flip();
-					CharBuffer ch = decoder.decode(bb1);
-					candidates.add(new CandidateData(ch.toString(), dist));
+					    addCandidate(depth, dist);
 				}
 				if (!fsa.isArcTerminal(arc)) {
 				    findRepl(depth + 1, fsa.getEndNode(arc));
@@ -302,6 +284,16 @@ public class Speller {
         final int arc1 = fsa.getArc(fsa.getEndNode(arc),
                 dictionaryMetadata.separator);
         return (arc1 != 0 && !fsa.isArcTerminal(arc1));
+    }
+    
+    private void addCandidate(final int depth, final int dist) 
+            throws CharacterCodingException {
+        ByteBuffer bb1 = ByteBuffer.allocate(MAX_WORD_LENGTH);
+        bb1.put(candidate);
+        bb1.limit(depth + 1);
+        bb1.flip();
+        CharBuffer ch = decoder.decode(bb1);
+        candidates.add(new CandidateData(ch.toString(), dist));
     }
 
 	/**
@@ -348,8 +340,8 @@ public class Speller {
 	 */
 	public int cuted(final int depth) {
 		int l = Math.max(0, depth - e_d); // min chars from word to consider - 1
-		int u = Math.min(wordLen - 1, depth + e_d);// max chars from word to
-		// consider - 1
+		int u = Math.min(wordLen - 1, depth + e_d); // max chars from word to
+		                                            // consider - 1
 		int min_ed = e_d + 1; // what is to be computed
 		int d;
 

@@ -58,6 +58,17 @@ public class SpellerTest {
      assertTrue(spell1.isInDictionary("Rzekunia"));
      assertTrue(!spell1.isInDictionary("Rzekunia+"));
      assertTrue(!spell1.isInDictionary("Rzekunia+aaa"));
+     //test UTF-8 dictionary
+     final URL url = getClass().getResource("test-utf-spell.dict");     
+     final Speller spell = new Speller(Dictionary.read(url));
+     assertTrue(spell.isInDictionary("jaźń"));
+     assertTrue(spell.isInDictionary("zażółć"));
+     assertTrue(spell.isInDictionary("żółwiową"));
+     assertTrue(spell.isInDictionary("ćwikła"));
+     assertTrue(spell.isInDictionary("Żebrowski"));
+     assertTrue(spell.isInDictionary("Święto"));
+     assertTrue(spell.isInDictionary("Świerczewski"));
+     assertTrue(spell.isInDictionary("abc"));
 	}
 	
 	@Test
