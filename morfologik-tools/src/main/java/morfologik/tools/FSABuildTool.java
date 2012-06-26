@@ -1,11 +1,35 @@
 package morfologik.tools;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
-import morfologik.fsa.*;
+import morfologik.fsa.CFSA2Serializer;
+import morfologik.fsa.FSA;
+import morfologik.fsa.FSA5Serializer;
+import morfologik.fsa.FSABuilder;
+import morfologik.fsa.FSAFlags;
+import morfologik.fsa.FSAInfo;
+import morfologik.fsa.FSASerializer;
+import morfologik.fsa.FSAUtils;
+import morfologik.fsa.IMessageLogger;
+import morfologik.fsa.StateVisitor;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import com.carrotsearch.hppc.IntIntOpenHashMap;
@@ -127,11 +151,13 @@ public final class FSABuildTool extends Tool {
         this.serializer.withLogger(logger);
 
 		try {
-		    InputStream inputStream = initializeInput(line);
+		    BufferedInputStream inputStream = initializeInput(line);
 
             if (inputSorted) {
                 logger.log("Assuming input is already sorted");
             }
+
+            checkUtf8Bom(inputStream);
 
 		    final FSA fsa;
 		    if (inputSorted) {
@@ -139,6 +165,7 @@ public final class FSABuildTool extends Tool {
 		    } else {
 		        fsa = processUnsortedInput(inputStream);
 		    }
+
 	        if (crWarning) logger.log("Warning: input contained carriage returns?");
 
             if (statistics) {
@@ -191,6 +218,26 @@ public final class FSABuildTool extends Tool {
 	}
 
 	/**
+	 * Warn in case UTF-8 BOM is detected as this is 99% a mistake.
+	 */
+	private void checkUtf8Bom(InputStream is) throws IOException {
+	    if (!is.markSupported()) {
+	        // throw a hard assertion.
+	        throw new AssertionError("Mark should be supported on input stream.");
+	    }
+
+	    is.mark(3);
+	    if (is.read() == 0xef &&
+	        is.read() == 0xbb &&
+	        is.read() == 0xbf) {
+	        System.err.println("Warning: input starts with UTF-8 BOM bytes which is" +
+	        		" most likely not what you want. Use header-less UTF-8 file (unless you are" +
+	        		" encoding plain bytes in which case this message doesn't apply).");
+	    }
+	    is.reset();
+    }
+
+    /**
 	 * Process unsorted input (sort and construct FSA).
 	 */
     private FSA processUnsortedInput(InputStream inputStream)
@@ -449,7 +496,7 @@ public final class FSABuildTool extends Tool {
 	/**
      * 
      */
-	private InputStream initializeInput(CommandLine line)
+	private BufferedInputStream initializeInput(CommandLine line)
 	        throws IOException, ParseException {
 		final InputStream input;
 		final String opt = SharedOptions.inputFileOption.getOpt();
