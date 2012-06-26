@@ -1,6 +1,6 @@
 package morfologik.speller;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URL;
@@ -23,6 +23,7 @@ public class SpellerTest {
     }
 
     
+    /*
     @Test
     public void testAbka() throws Exception {
         final Speller spell = new Speller(slownikDictionary, 2);
@@ -31,6 +32,7 @@ public class SpellerTest {
             System.out.println(s);
         }
     }
+    */
     
 	@Test
 	public void testRunonWords() throws IOException {
@@ -39,21 +41,23 @@ public class SpellerTest {
 		assertTrue(spell.replaceRunOnWords("abakaabace").
 				contains("abaka abace"));
 
+		// Test on an morphological dictionary - should work as well
+		final URL url1 = getClass().getResource("test-infix.dict");		
+		final Speller spell1 = new Speller(Dictionary.read(url1));
+		assertTrue(spell1.replaceRunOnWords("Rzekunia").isEmpty());
+		assertTrue(spell1.replaceRunOnWords("RzekuniaRzeczypospolitej").
+				contains("Rzekunia Rzeczypospolitej"));				
+		assertTrue(spell1.replaceRunOnWords("RzekuniaRze").isEmpty());
 	}
 	
 	@Test
-	public void testInfixedNotSupported() {    
-       // Test on an morphological dictionary - should NOT work as well
-        final URL url1 = getClass().getResource("test-infix.dict");     
-        Speller spell1;
-        try {
-            spell1 = new Speller(Dictionary.read(url1));
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertTrue(true);            
-        } catch (IOException e) {
-            fail("File test-infix.dict not found!");
-        }
+	public void testIsInDictionary() throws IOException {
+	 // Test on an morphological dictionary, including separators
+     final URL url1 = getClass().getResource("test-infix.dict");     
+     final Speller spell1 = new Speller(Dictionary.read(url1));
+     assertTrue(spell1.isInDictionary("Rzekunia"));
+     assertTrue(!spell1.isInDictionary("Rzekunia+"));
+     assertTrue(!spell1.isInDictionary("Rzekunia+aaa"));
 	}
 	
 	@Test
@@ -67,22 +71,25 @@ public class SpellerTest {
 		    }
 		assertTrue(spell.findReplacements("abka~~").isEmpty()); // 2 characters more -> edit distance too large
 		assertTrue(!spell.findReplacements("Rezkunia").contains("Rzekunia"));
-				
+		
+		final URL url1 = getClass().getResource("test-infix.dict");		
+		final Speller spell1 = new Speller(Dictionary.read(url1));
+		assertTrue(spell1.findReplacements("Rezkunia").contains("Rzekunia"));
 		//diacritics
-		assertTrue(spell.findReplacements("ąbak").contains("abak"));
+		assertTrue(spell1.findReplacements("Rzękunia").contains("Rzekunia"));
 		//we should get no candidates for correct words
-		assertTrue(spell.isInDictionary("abak"));
-		assertTrue(spell.findReplacements("abako").isEmpty());
+		assertTrue(spell1.isInDictionary("Rzekunia"));
+		assertTrue(spell1.findReplacements("Rzekunia").isEmpty());
 		//and no for things that are too different from the dictionary
-		assertTrue(spell.findReplacements("Strefakibica").isEmpty());
+		assertTrue(spell1.findReplacements("Strefakibica").isEmpty());
 		//nothing for nothing
-		assertTrue(spell.findReplacements("").isEmpty());
+		assertTrue(spell1.findReplacements("").isEmpty());
 	    //nothing for weird characters
-        assertTrue(spell.findReplacements("\u0000").isEmpty());
+        assertTrue(spell1.findReplacements("\u0000").isEmpty());
         //nothing for other characters
-        assertTrue(spell.findReplacements("«…»").isEmpty());
+        assertTrue(spell1.findReplacements("«…»").isEmpty());
         //nothing for separator
-        assertTrue(spell.findReplacements("+").isEmpty());
+        assertTrue(spell1.findReplacements("+").isEmpty());
 
 	}
 	

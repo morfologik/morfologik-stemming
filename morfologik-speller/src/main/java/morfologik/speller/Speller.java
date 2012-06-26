@@ -1,6 +1,6 @@
 package morfologik.speller;
 
-import static morfologik.fsa.MatchResult.EXACT_MATCH;
+import static morfologik.fsa.MatchResult.*;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -115,6 +115,8 @@ public class Speller {
 					"Dictionary metadata must not be null.");
 		}
 		
+		
+		/*
 		if (dictionaryMetadata.usesInfixes) {
             throw new IllegalArgumentException(
                     "The spelling dictionary cannot use infixes.");
@@ -124,6 +126,8 @@ public class Speller {
             throw new IllegalArgumentException(
                     "The spelling dictionary cannot use prefixes.");
         }
+        
+        */
 
 		try {
 			Charset charset = Charset.forName(dictionaryMetadata.encoding);
@@ -187,7 +191,7 @@ public class Speller {
 	 * @return - true if it is found.
 	 */
 	public boolean isInDictionary(CharSequence word) {
-
+	    final byte separator = dictionaryMetadata.separator;
 		// Encode word characters into bytes in the same encoding as the FSA's.
 		charBuffer.clear();
 		charBuffer = BufferUtils.ensureCapacity(charBuffer, word.length());
@@ -202,7 +206,9 @@ public class Speller {
 		final MatchResult match = matcher.match(matchResult,
 				byteBuffer.array(), 0, byteBuffer.remaining(), rootNode);
 
-		return (match.kind == EXACT_MATCH);
+		return (match.kind == EXACT_MATCH || 
+		        (match.kind == SEQUENCE_IS_A_PREFIX
+		        && fsa.getArc(match.node, separator) != 0));
 	}
 
 	/**
@@ -292,13 +298,11 @@ public class Speller {
 		return;
 	}
 
-	private boolean isBeforeSeparator(int arc) {
-		int arc1 = fsa.getEndNode(arc);
-		if (arc1 != 0 && !fsa.isArcTerminal(arc1)) {
-			return fsa.getArcLabel(arc1) == dictionaryMetadata.separator;
-		}
-		return false;
-	}
+    private boolean isBeforeSeparator(int arc) {
+        final int arc1 = fsa.getArc(fsa.getEndNode(arc),
+                dictionaryMetadata.separator);
+        return (arc1 != 0 && !fsa.isArcTerminal(arc1));
+    }
 
 	/**
 	 * Calculates edit distance.
