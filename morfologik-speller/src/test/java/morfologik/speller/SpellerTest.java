@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import morfologik.speller.Speller;
+import morfologik.speller.CharBasedSpeller;
 import morfologik.stemming.Dictionary;
 
 import org.junit.BeforeClass;
@@ -102,6 +103,16 @@ public class SpellerTest {
         //nothing for separator
         assertTrue(spell1.findReplacements("+").isEmpty());
 
+	}
+	
+	@Test
+    public void testFindReplacementsInUTF() throws IOException {
+	    final URL url = getClass().getResource("test-utf-spell.dict");     
+	    final CharBasedSpeller spell = new CharBasedSpeller(Dictionary.read(url));
+	    assertTrue(spell.findReplacements("gęslą").contains("gęślą"));
+	    assertTrue(spell.findReplacements("ćwikla").contains("ćwikła"));
+	    assertTrue(spell.findReplacements("Swierczewski").contains("Świerczewski"));
+	    assertTrue(spell.findReplacements("zółwiową").contains("żółwiową"));
 	}
 	
 	@Test
