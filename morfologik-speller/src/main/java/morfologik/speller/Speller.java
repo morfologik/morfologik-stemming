@@ -1,6 +1,7 @@
 package morfologik.speller;
 
-import static morfologik.fsa.MatchResult.*;
+import static morfologik.fsa.MatchResult.EXACT_MATCH;
+import static morfologik.fsa.MatchResult.SEQUENCE_IS_A_PREFIX;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -8,10 +9,10 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CoderResult;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,25 +36,30 @@ public class Speller {
 
 	public static int MAX_WORD_LENGTH = 120;
 
-	private byte[] candidate; /* current replacement */
+	private char[] candidate; /* current replacement */
 	private int candLen;
 	private int wordLen; /* length of word being processed */
-	private byte[] word_ff; /* word being processed */
-	private final List<CandidateData> candidates = new ArrayList<CandidateData>();
-
-	protected final char separatorChar;
+	private char[] word_ff; /* word being processed */
+	
+	/**
+	 * List of candidate strings, including same additional data such as 
+	 * edit distance from the original word.
+	 */
+	private final List<CandidateData> candidates = new ArrayList<CandidateData>();	
+	
+	private boolean containsSeparators = true;
 
 	/**
 	 * Internal reusable buffer for encoding words into byte arrays using
 	 * {@link #encoder}.
 	 */
-	private ByteBuffer byteBuffer = ByteBuffer.allocate(0);
-
+	private ByteBuffer byteBuffer = ByteBuffer.allocate(MAX_WORD_LENGTH);
+	
 	/**
 	 * Internal reusable buffer for encoding words into byte arrays using
 	 * {@link #encoder}.
 	 */
-	private CharBuffer charBuffer = CharBuffer.allocate(0);
+	private CharBuffer charBuffer = CharBuffer.allocate(MAX_WORD_LENGTH);
 
 	/**
 	 * Reusable match result.
@@ -96,10 +102,11 @@ public class Speller {
 		this(dictionary, editDistance, true);
 	}
 
-	public Speller(final Dictionary dictionary, final int editDistance, final boolean convertCase) {
-		this.editDistance = editDistance;
-		H = new HMatrix(editDistance, MAX_WORD_LENGTH);
+	public Speller(final Dictionary dictionary, final int editDistance, final boolean convertCase) {		
 
+	    this.editDistance = editDistance;
+        H = new HMatrix(editDistance, MAX_WORD_LENGTH);
+	    
 		this.dictionaryMetadata = dictionary.metadata;
 		this.rootNode = dictionary.fsa.getRootNode();
 		this.fsa = dictionary.fsa;
@@ -117,19 +124,19 @@ public class Speller {
 		
 		
 		try {
-			Charset charset = Charset.forName(dictionaryMetadata.encoding);
+			final Charset charset = Charset.forName(dictionaryMetadata.encoding);
 			encoder = charset.newEncoder();
 			decoder = charset.newDecoder()
 					.onMalformedInput(CodingErrorAction.REPORT)
 					.onUnmappableCharacter(CodingErrorAction.REPORT);
-		} catch (UnsupportedCharsetException e) {
+		} catch (final UnsupportedCharsetException e) {
 			throw new RuntimeException(
 					"FSA's encoding charset is not supported: "
 							+ dictionaryMetadata.encoding);
 		}
 
 		try {
-			CharBuffer decoded = decoder.decode(ByteBuffer
+			final CharBuffer decoded = decoder.decode(ByteBuffer
 					.wrap(new byte[] { dictionaryMetadata.separator }));
 			if (decoded.remaining() != 1) {
 				throw new RuntimeException(
@@ -139,22 +146,22 @@ public class Speller {
 								.toHexString(dictionaryMetadata.separator)
 								+ " using encoding "
 								+ dictionaryMetadata.encoding);
-			}
-			this.separatorChar = decoded.get();
-		} catch (CharacterCodingException e) {
+			}			
+		} catch (final CharacterCodingException e) {
 			throw new RuntimeException(
 					"FSA's separator character cannot be decoded from byte value 0x"
 							+ Integer.toHexString(dictionaryMetadata.separator)
 							+ " using encoding " + dictionaryMetadata.encoding,
 							e);
 		}
+				
 	}
 
 	/**
 	 * Encode a character sequence into a byte buffer, optionally expanding
 	 * buffer.
 	 */
-	private ByteBuffer charsToBytes(CharBuffer chars, ByteBuffer bytes) {
+	private ByteBuffer charsToBytes(final CharBuffer chars, ByteBuffer bytes) {
 		bytes.clear();
 		final int maxCapacity = (int) (chars.remaining() * encoder
 				.maxBytesPerChar());
@@ -172,30 +179,43 @@ public class Speller {
 		return bytes;
 	}
 
+	
+	private ByteBuffer CharSequenceToBytes(final CharSequence word) {
+	 // Encode word characters into bytes in the same encoding as the FSA's.
+        charBuffer.clear();
+        charBuffer = BufferUtils.ensureCapacity(charBuffer, word.length());
+        for (int i = 0; i < word.length(); i++) {
+            final char chr = word.charAt(i);
+            charBuffer.put(chr);
+        }
+        charBuffer.flip();
+        byteBuffer = charsToBytes(charBuffer, byteBuffer);
+        return byteBuffer;
+	}
+	
 	/**
 	 * Test whether the word is found in the dictionary. 
 	 * @param word - the word to be tested
 	 * @return - true if it is found.
 	 */
-	public boolean isInDictionary(CharSequence word) {
-	    final byte separator = dictionaryMetadata.separator;
-		// Encode word characters into bytes in the same encoding as the FSA's.
-		charBuffer.clear();
-		charBuffer = BufferUtils.ensureCapacity(charBuffer, word.length());
-		for (int i = 0; i < word.length(); i++) {
-			char chr = word.charAt(i);
-			charBuffer.put(chr);
-		}
-		charBuffer.flip();
-		byteBuffer = charsToBytes(charBuffer, byteBuffer);
-
+	public boolean isInDictionary(final CharSequence word) {
+	    
+	    byteBuffer = CharSequenceToBytes(word);
+	    	    	   
+	    
 		// Try to find a partial match in the dictionary.
 		final MatchResult match = matcher.match(matchResult,
 				byteBuffer.array(), 0, byteBuffer.remaining(), rootNode);
 
-		return (match.kind == EXACT_MATCH || 
-		        (match.kind == SEQUENCE_IS_A_PREFIX
-		        && fsa.getArc(match.node, separator) != 0));
+		if (match.kind == EXACT_MATCH) {
+		    containsSeparators = false;
+		    return true;
+		}
+		
+		final byte separator = dictionaryMetadata.separator;
+		
+		return (containsSeparators && match.kind == SEQUENCE_IS_A_PREFIX
+		        && fsa.getArc(match.node, separator) != 0);
 	}
 
 	/**
@@ -209,10 +229,10 @@ public class Speller {
 	public List<String> replaceRunOnWords(final String original) {
 		final List<String> candidates = new ArrayList<String>();
 		if (!isInDictionary(original)) {
-			CharSequence ch = original;
+			final CharSequence ch = original;
 			for (int i = 2; i < ch.length(); i++) {
 				// chop from left to right
-				CharSequence firstCh = ch.subSequence(0, i);
+				final CharSequence firstCh = ch.subSequence(0, i);
 				if (isInDictionary(firstCh)
 						&& isInDictionary(ch.subSequence(i, ch.length()))) {
 					candidates.add(firstCh + " "
@@ -232,68 +252,87 @@ public class Speller {
 	 * @return A list of suggested replacements.
 	 * @throws CharacterCodingException
 	 */
-	public List<String> findReplacements(final CharSequence word)
+	public List<String> findReplacements(final String word)
 			throws CharacterCodingException {
 		candidates.clear();
-		if (!isInDictionary(word)) {
-			CharBuffer ch = CharBuffer.allocate(word.length());
-			ch.put(CharBuffer.wrap(word));
-			ch.flip();
-			ByteBuffer bb1 = ByteBuffer.allocate(word.length());
-			bb1 = charsToBytes(ch, bb1);
-			word_ff = bb1.array();
+		if (!isInDictionary(word) && word.length() < MAX_WORD_LENGTH) {
+			word_ff = word.toCharArray();
 			wordLen = word_ff.length;
-			candidate = word_ff.clone();
+			candidate = new char[MAX_WORD_LENGTH];
 			candLen = candidate.length;
 			e_d = (wordLen <= editDistance ? (wordLen - 1) : editDistance);			
-			findRepl(0, fsa.getRootNode());
+			charBuffer = BufferUtils.ensureCapacity(charBuffer, MAX_WORD_LENGTH);
+			byteBuffer = BufferUtils.ensureCapacity(byteBuffer, MAX_WORD_LENGTH);
+			charBuffer.clear();
+			byteBuffer.clear();
+			final byte[] prevBytes = new byte[0];
+			findRepl(0, fsa.getRootNode(), prevBytes);
 		}
 		
 		Collections.sort(candidates);
-		List<String> candStringList = new ArrayList<String>(candidates.size());
-		for (CandidateData cd : candidates) {
+		final List<String> candStringList = new ArrayList<String>(candidates.size());
+		for (final CandidateData cd : candidates) {
 		    candStringList.add(cd.getWord());
 		}
 		return candStringList;
 	}
 
-	private void findRepl(final int depth, final int node)
-			throws CharacterCodingException {
-		int dist = 0; 
-		if (depth + 1 >= candLen) {
-			candidate = Arrays.copyOf(candidate, MAX_WORD_LENGTH);
-		}
-
-		for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
-			candidate[depth] = fsa.getArcLabel(arc);
-			if (cuted(depth) <= e_d) {
-				if (Math.abs(wordLen - 1 - depth) <= e_d
-						&& (dist = ed(wordLen - 1, depth)) <= e_d
-						&& (fsa.isArcFinal(arc) || isBeforeSeparator(arc))) {
-					    addCandidate(depth, dist);
-				}
-				if (!fsa.isArcTerminal(arc)) {
-				    findRepl(depth + 1, fsa.getEndNode(arc));
-				}
-			}
-		}
-		return;
+	private void findRepl(final int depth, final int node, final byte[] prevBytes)
+	        throws CharacterCodingException {
+	    int dist = 0; 	    		
+	    for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {	        
+	        byteBuffer = BufferUtils.ensureCapacity(byteBuffer, prevBytes.length + 1);
+	        byteBuffer.clear();
+	        byteBuffer.put(prevBytes);	        
+	        byteBuffer.put(fsa.getArcLabel(arc));
+	        final int bufPos = byteBuffer.position();
+	        byteBuffer.flip();	        
+	        decoder.reset();
+	        final CoderResult c = decoder.decode(byteBuffer, charBuffer, true);
+	        if (c.isMalformed()) { // assume that only valid 
+	                               // encodings are there	            
+	            final byte[] prev = new byte[bufPos];
+	            byteBuffer.position(0);	            
+	            byteBuffer.get(prev);	            	               
+	            if (!fsa.isArcTerminal(arc)) {	                    
+	                findRepl(depth, fsa.getEndNode(arc), prev); // note: depth is not incremented    
+	            }
+	            byteBuffer.clear();
+	        } else if (!c.isError()) { //unmappable characters are silently discarded
+	            charBuffer.flip();
+	            candidate[depth] = charBuffer.get();
+	            charBuffer.clear();                                 
+	            byteBuffer.clear();
+	                	             
+	        if (cuted(depth) <= e_d) {
+	            if (Math.abs(wordLen - 1 - depth) <= e_d  
+	                    && (dist = ed(wordLen - 1, depth)) <= e_d
+	                    && (fsa.isArcFinal(arc) || isBeforeSeparator(arc))) {
+	                addCandidate(depth, dist);	                    
+	            }
+	            if (!fsa.isArcTerminal(arc)) {
+	                findRepl(depth + 1, fsa.getEndNode(arc), new byte[0]);
+	            }
+	        }
+	        }
+	    }
+	    return;
 	}
 
-    private boolean isBeforeSeparator(int arc) {
-        final int arc1 = fsa.getArc(fsa.getEndNode(arc),
-                dictionaryMetadata.separator);
-        return (arc1 != 0 && !fsa.isArcTerminal(arc1));
+    private boolean isBeforeSeparator(final int arc) {
+        if (containsSeparators) {
+            final int arc1 = fsa.getArc(fsa.getEndNode(arc),
+                    dictionaryMetadata.separator);
+            return (arc1 != 0 && !fsa.isArcTerminal(arc1));
+        }
+        return false;
     }
     
     private void addCandidate(final int depth, final int dist) 
             throws CharacterCodingException {
-        ByteBuffer bb1 = ByteBuffer.allocate(MAX_WORD_LENGTH);
-        bb1.put(candidate);
-        bb1.limit(depth + 1);
-        bb1.flip();
-        CharBuffer ch = decoder.decode(bb1);
-        candidates.add(new CandidateData(ch.toString(), dist));
+        final StringBuilder sb = new StringBuilder(depth);
+        sb.append(candidate, 0, depth + 1);                    
+        candidates.add(new CandidateData(sb.toString(), dist));
     }
 
 	/**
@@ -339,15 +378,16 @@ public class Speller {
 	 * @return Cut-off edit distance. Remarks: See Oflazer.
 	 */
 	public int cuted(final int depth) {
-		int l = Math.max(0, depth - e_d); // min chars from word to consider - 1
-		int u = Math.min(wordLen - 1, depth + e_d); // max chars from word to
+		final int l = Math.max(0, depth - e_d); // min chars from word to consider - 1
+		final int u = Math.min(wordLen - 1, depth + e_d); // max chars from word to
 		                                            // consider - 1
 		int min_ed = e_d + 1; // what is to be computed
 		int d;
 
 		for (int i = l; i <= u; i++) {
-			if ((d = ed(i, depth)) < min_ed)
-				min_ed = d;
+			if ((d = ed(i, depth)) < min_ed) {
+                min_ed = d;
+            }
 		}
 		return min_ed;
 	}
@@ -363,25 +403,9 @@ public class Speller {
 	 * @param candidate - the second word used for edit distance calculation 
 	 */
 	public void setWordAndCandidate(final String word, final String candidate) {
-	    CharBuffer ch = CharBuffer.allocate(word.length());
-        ch.put(CharBuffer.wrap(word));
-        ch.flip();
-        ByteBuffer bb1 = ByteBuffer.allocate(word.length());
-        bb1 = charsToBytes(ch, bb1);
-        if (bb1.hasRemaining()) {
-            word_ff = bb1.array();
-        }
-        wordLen = word_ff.length;
-        
-        ch.clear();
-        ch = BufferUtils.ensureCapacity(ch, candidate.length());
-        ch.put(CharBuffer.wrap(candidate));
-        ch.flip();
-        bb1 = BufferUtils.ensureCapacity(bb1, candidate.length());
-        bb1 = charsToBytes(ch, bb1);
-        if (bb1.hasRemaining()) {
-            this.candidate = bb1.array();
-        }
+        word_ff = word.toCharArray();        
+        wordLen = word_ff.length;        
+        this.candidate = candidate.toCharArray();        
         candLen = this.candidate.length;
         e_d = (wordLen <= editDistance ? (wordLen - 1) : editDistance);	    
 	}
@@ -420,7 +444,8 @@ public class Speller {
 	        return distance;
 	    }
 
-        public int compareTo(CandidateData cd) {            
+        @Override
+        public int compareTo(final CandidateData cd) {            
             return ((cd.getDistance() > this.distance ? -1 :
                 (cd.getDistance() == this.distance ? 0 : 1)));
         }

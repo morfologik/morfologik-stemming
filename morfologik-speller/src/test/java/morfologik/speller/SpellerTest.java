@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import morfologik.speller.Speller;
-import morfologik.speller.CharBasedSpeller;
 import morfologik.stemming.Dictionary;
 
 import org.junit.BeforeClass;
@@ -48,7 +47,7 @@ public class SpellerTest {
 		assertTrue(spell1.replaceRunOnWords("Rzekunia").isEmpty());
 		assertTrue(spell1.replaceRunOnWords("RzekuniaRzeczypospolitej").
 				contains("Rzekunia Rzeczypospolitej"));				
-		assertTrue(spell1.replaceRunOnWords("RzekuniaRze").isEmpty());
+		assertTrue(spell1.replaceRunOnWords("RzekuniaRze").isEmpty()); //Rze is not found but is a prefix
 	}
 	
 	@Test
@@ -108,11 +107,13 @@ public class SpellerTest {
 	@Test
     public void testFindReplacementsInUTF() throws IOException {
 	    final URL url = getClass().getResource("test-utf-spell.dict");     
-	    final CharBasedSpeller spell = new CharBasedSpeller(Dictionary.read(url));
+	    final Speller spell = new Speller(Dictionary.read(url));
 	    assertTrue(spell.findReplacements("gęslą").contains("gęślą"));
 	    assertTrue(spell.findReplacements("ćwikla").contains("ćwikła"));
 	    assertTrue(spell.findReplacements("Swierczewski").contains("Świerczewski"));
 	    assertTrue(spell.findReplacements("zółwiową").contains("żółwiową"));
+	    assertTrue(spell.findReplacements("Żebrowsk").contains("Żebrowski"));
+	    assertTrue(spell.findReplacements("święto").contains("Święto"));
 	}
 	
 	@Test
