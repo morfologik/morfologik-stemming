@@ -1,6 +1,9 @@
-1.5.4-SNAPSHOT
+1.5.4
+          Replaced byte-based speller with CharBasedSpeller.
+
+          Warn about UTF-8 files with BOM.
          
-          (current)
+          Fixed a typo in package name (speller).
 
 1.5.3
           Initial release of spelling correction submodule.
