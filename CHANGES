@@ -1,3 +1,7 @@
+1.5.5-SNAPSHOT
+
+          (current)
+
 1.5.4
           Replaced byte-based speller with CharBasedSpeller.
 
