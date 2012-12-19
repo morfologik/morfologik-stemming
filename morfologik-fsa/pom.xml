@@ -20,8 +20,9 @@
 
   <dependencies>
     <dependency>
-        <groupId>com.carrotsearch</groupId>
-        <artifactId>hppc</artifactId>
+      <groupId>com.carrotsearch</groupId>
+      <artifactId>hppc</artifactId>
+      <optional>true</optional>
     </dependency>
 
     <dependency>

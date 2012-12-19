@@ -24,6 +24,11 @@
       <artifactId>morfologik-fsa</artifactId>
       <version>${project.version}</version>
     </dependency>
+    
+    <dependency>
+      <groupId>com.carrotsearch</groupId>
+      <artifactId>hppc</artifactId>
+    </dependency>    
 
     <dependency>
       <groupId>org.carrot2</groupId>
@@ -71,6 +76,7 @@
           <archive>
             <manifest>
               <mainClass>morfologik.tools.Launcher</mainClass>
+              <addClasspath>true</addClasspath>
             </manifest>
           </archive>
         </configuration>
@@ -125,15 +131,16 @@
           <outputDirectory>${project.build.directory}</outputDirectory>
           <proguardInclude>${basedir}/src/proguard/rules.pro</proguardInclude>
         </configuration>
-	<dependencies>
-	  <dependency>
-	    <groupId>net.sf.proguard</groupId>
-	    <artifactId>proguard</artifactId>
-	    <version>4.6-customized</version>
-	    <scope>system</scope>
-	    <systemPath>${project.basedir}/lib/proguard.jar</systemPath>
-	  </dependency>
-	</dependencies>
+
+        <dependencies>
+          <dependency>
+            <groupId>net.sf.proguard</groupId>
+            <artifactId>proguard</artifactId>
+            <version>4.6-customized</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/proguard.jar</systemPath>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>

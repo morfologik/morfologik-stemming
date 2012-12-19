@@ -1,6 +1,7 @@
-1.5.5-SNAPSHOT
-
-          (current)
+1.5.5
+          Made hppc an optional component of morfologik-fsa. It is required
+          for constructing FSA automata only and causes problems with javac.
+          http://stackoverflow.com/questions/3800462/can-i-prevent-javac-accessing-the-class-path-from-the-manifests-of-our-third-par
 
 1.5.4
           Replaced byte-based speller with CharBasedSpeller.
