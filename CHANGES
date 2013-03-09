@@ -1,6 +1,8 @@
 1.5.6-SNAPSHOT
           Update morfologik-polish date to Morfologik 2.0 PoliMorf (08.03.2013)
 
+          Moving code from SourceForge to github.
+
 1.5.5
           Made hppc an optional component of morfologik-fsa. It is required
           for constructing FSA automata only and causes problems with javac.
