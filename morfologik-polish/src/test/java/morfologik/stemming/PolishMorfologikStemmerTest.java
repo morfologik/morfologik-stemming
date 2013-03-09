@@ -68,7 +68,7 @@ public class PolishMorfologikStemmerTest {
         assertTrue(stems.contains("ligać"));
         assertTrue(stems.contains("liga"));
         assertTrue(tags.contains("subst:sg:nom:f"));
-        assertTrue(tags.contains("verb:fin:sg:ter:imperf"));
+        assertTrue(tags.contains("verb:fin:sg:ter:imperf:nonrefl+verb:fin:sg:ter:imperf:refl.nonrefl"));
 
         // Repeat to make sure we get the same values consistently.
         for (WordData wd : response) {
