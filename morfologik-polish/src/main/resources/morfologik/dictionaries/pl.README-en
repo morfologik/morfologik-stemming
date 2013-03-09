@@ -4,9 +4,13 @@ Morfologik is a project aiming at generating Polish morphosyntactic
 dictionaries (hence the name) used for part-of-speech tagging and
 part-of-speech synthesis.
 
+VERSION: 2.0 PoliMorf
+
+BUILD:  8 mar 2013 15:53:45
+
 LICENCE
 
-Copyright (c) 2012, Marcin Mi³kowski
+Copyright (c) 2013, Marcin Mi³kowski
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,7 +45,7 @@ fsa_morph program by Jan Daciuk
 usable also in LanguageTool grammar checker.
 
 3. polish_synth.dict is a binary file for grammatical synthesis, usable
-in fsa_morph and in LanguageTool. To get an inflected word, use the 
+by morfologik-stemming library. To get an inflected word, use the 
 following syntax in fsa_morph:
 
 <word>|<tag>
@@ -60,4 +64,4 @@ TAGSET
 The tagset used is roughly similar to IPI/NKJP corpus tagset, and described in more detail in the readme_pl.txt file.
 See also www.nkjp.pl.
 
-Morfologik, (c) 2007-2012 Marcin Mi³kowski.
+Morfologik, (c) 2007-2013 Marcin Mi³kowski. 
