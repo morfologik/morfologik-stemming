@@ -5,7 +5,7 @@ morfosyntaktycznego i syntezy gramatycznej.
 
 LICENCJA
 
-Copyright © 2012 Marcin Miłkowski
+Copyright © 2013 Marcin Miłkowski
 Wszelkie prawa zastrzeżone
 Redystrybucja i używanie, czy to w formie kodu źródłowego, czy w formie kodu wykonawczego, są dozwolone pod warunkiem spełnienia poniższych warunków:
 1.	Redystrybucja kodu źródłowego musi zawierać powyższą notę copyrightową, niniejszą listę warunków oraz poniższe oświadczenie o wyłączeniu odpowiedzialności.
@@ -138,4 +138,4 @@ Atrybuty podstawowych form:
 
 W znacznikach Morfologika nie występuje i nie będzie występować znacznik aglt, a to ze względu na inną zasadę segmentacji wyrazów.
 
-Morfologik, (c) 2007-2012 Marcin Miłkowski.
+Morfologik, (c) 2007-2013 Marcin Miłkowski.
