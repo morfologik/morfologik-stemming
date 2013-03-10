@@ -17,64 +17,29 @@ public final class PolishStemmer implements IStemmer, Iterable<WordData> {
 	private final List<DictionaryLookup> delegate = new ArrayList<DictionaryLookup>();
 
 	/**
-	 * The dictionary resource to load and use for the Polish stemmer.
+	 * The lexical resources have been unified into PoliMorf dictionaries. This enum
+	 * will be removed in the next version. 
 	 */
+	@Deprecated()
 	public static enum DICTIONARY {
-	    /**
-	     * Dictionary of forms from the Morfologik project.
-	     * @see "http://morfologik.blogspot.com/"
-	     */
         MORFOLOGIK,
-
-	    /**
-	     * Dictionary of forms cross-compiled from Morfeusz (MORFEUSZ).
-	     * @see "http://sgjp.pl/morfeusz/"
-	     */
 	    MORFEUSZ,
-
-	    /**
-	     * Both dictionaries, combined at runtime. {@link #MORFOLOGIK}
-	     * is checked first, then {@link #MORFEUSZ}. <b>If both dictionaries contain an entry
-	     * for a surface word, the lemmas are not combined. The first dictionary with the hit 
-	     * wins.</b>
-	     * 
-	     * <p>This may cause problems if morphosyntactic
-	     * annotations are to be used because they are not uniform across the two dictionaries.
-	     * But for lemmatisation things should work just fine.</p>
-	     */
 	    COMBINED;
 	}
 
-	/**
-	 * This constructor is initialized with {@link DICTIONARY#MORFOLOGIK} to preserve
-	 * backward compatibility. It will fail with a runtime exception if the dictionary 
-	 * is not available.
+	/*
+	 * 
 	 */
 	public PolishStemmer() {
-	    this(DICTIONARY.MORFOLOGIK);
+	    delegate.add(new DictionaryLookup(Dictionary.getForLanguage("pl")));
 	}
 
 	/**
-     * This constructor is initialized with a built-in dictionary or fails with
-     * a runtime exception if the dictionary is not available.
+     * @see PolishStemmer 
      */
+	@Deprecated
     public PolishStemmer(DICTIONARY dictionary) {
-        switch (dictionary) {
-            case MORFOLOGIK:
-                delegate.add(new DictionaryLookup(Dictionary.getForLanguage("pl")));
-                break;
-
-            case MORFEUSZ:
-                delegate.add(new DictionaryLookup(Dictionary.getForLanguage("pl-sgjp")));
-                break;
-
-            case COMBINED:
-                delegate.add(new DictionaryLookup(Dictionary.getForLanguage("pl")));
-                delegate.add(new DictionaryLookup(Dictionary.getForLanguage("pl-sgjp")));
-                break;
-            default:
-                throw new RuntimeException();
-        }
+        this();
     }
 
 	/**
