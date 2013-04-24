@@ -31,6 +31,43 @@ public final class DictionaryMetadata {
 	public final static String ATTR_NAME_USES_INFIXES = "fsa.dict.uses-infixes";
 
 	/**
+     * Attribute name for {@link #ignoreNumbers}.
+     */
+    public final static String ATTR_NAME_IGNORE_NUMBERS = "fsa.dict.speller.ignore-numbers";
+
+    /**
+     * Attribute name for {@link #dictionaryLocale}.
+     */
+    public final static String ATTR_NAME_LOCALE = "fsa.dict.speller.locale";    
+    
+    /**
+     * Attribute name for {@link #ignorePunctuation}.
+     */
+    public final static String ATTR_NAME_IGNORE_PUNCTUATION = "fsa.dict.speller.ignore-punctuation";    
+    
+    /**
+     * Attribute name for {@link #ignoreMixedCase}.
+     */
+    public final static String ATTR_NAME_IGNORE_MIXED_CASE = "fsa.dict.speller.ignore-mixed-case";
+    
+    /**
+     * Attribute name for {@link #ignoreDiacritics}.
+     */
+    public final static String ATTR_NAME_IGNORE_DIACRITICS = "fsa.dict.speller.ignore-diacritics";
+    
+    
+    /**
+     * Attribute name for {@link #convertCase}.
+     */
+    public final static String ATTR_NAME_CONVERT_CASE = "fsa.dict.speller.convert-case";
+    
+    /**
+     * Attribute name for {@link #runOnWords}.
+     */
+    public final static String ATTR_NAME_RUN_ON_WORDS = "fsa.dict.speller.runon-words";
+    
+    
+	/**
 	 * A separator character between fields (stem, lemma, form). The character
 	 * must be within byte range (FSA uses bytes internally).
 	 */
@@ -50,7 +87,45 @@ public final class DictionaryMetadata {
 	 * True if the dictionary was compiled with infix compression.
 	 */
 	public final boolean usesInfixes;
+	
+	/**
+	 * True if the spelling dictionary is supposed to ignore words containing digits. 
+	 */
+	public final boolean ignoreNumbers;
+	
+	/**
+     * Locale of the dictionary. 
+     */
+    public final Locale dictionaryLocale;
+    
+    /**
+     * True if the spelling dictionary is supposed to ignore punctuation. 
+     */
+    public final boolean ignorePunctuation;    
+    
+    /**
+     * True if the spelling dictionary is supposed to ignore punctuation. 
+     */
+    public final boolean ignoreMixedCase;    
+    
+    /**
+     * True if the spelling dictionary is supposed to ignore diacritics, so that
+     * 'a' would be treated as equivalent to 'ą'. 
+     */
+    public final boolean ignoreDiacritics;    
+    
+    
+    /**
+     * True if the spelling dictionary is supposed to treat upper and lower case
+     * as equivalent. 
+     */
+    public final boolean convertCase;    
 
+    /**
+     * True if the spelling dictionary is supposed to split runOnWords; 
+     */
+    public final boolean runOnWords;
+    
 	/**
 	 * Other meta data not included above.
 	 */
@@ -58,14 +133,23 @@ public final class DictionaryMetadata {
 
 	/**
 	 * Creates an immutable instance of {@link DictionaryMetadata}.
+	 *  
 	 */
 	public DictionaryMetadata(char separator, String encoding,
-	        boolean usesPrefixes, boolean usesInfixes,
-	        Map<String, String> metadata) {
+	        boolean usesPrefixes, boolean usesInfixes, boolean
+	        ignoreNumbers, boolean ignorePunctuation, boolean ignoreMixedCase,
+	        boolean ignoreDiacritics, boolean convertCase, boolean runOnWords, Locale locale, Map<String, String> metadata) {
 		this.encoding = encoding;
 		this.usesPrefixes = usesPrefixes;
 		this.usesInfixes = usesInfixes;
-
+		this.ignoreNumbers = ignoreNumbers;
+		this.dictionaryLocale = locale;
+		this.ignorePunctuation = ignorePunctuation;
+		this.ignoreMixedCase = ignoreMixedCase;
+		this.convertCase = convertCase;
+		this.runOnWords = runOnWords;
+		this.ignoreDiacritics = ignoreDiacritics;
+		
 		try {
 			final byte[] separatorBytes = new String(new char[] { separator })
 			        .getBytes(encoding);
@@ -115,12 +199,46 @@ public final class DictionaryMetadata {
 		        properties.getProperty(ATTR_NAME_USES_INFIXES, "false"))
 		        .booleanValue();
 
+		final boolean ignoreNumbers = Boolean.valueOf(
+                properties.getProperty(ATTR_NAME_IGNORE_NUMBERS, "true"))
+                .booleanValue();
+
+		final boolean ignorePunctuation = Boolean.valueOf(
+	                properties.getProperty(ATTR_NAME_IGNORE_PUNCTUATION, "true"))
+	                .booleanValue();
+		
+		final boolean ignoreMixedCase = Boolean.valueOf(
+                properties.getProperty(ATTR_NAME_IGNORE_MIXED_CASE, "true"))
+                .booleanValue();
+
+		final boolean ignoreDiacritics = Boolean.valueOf(
+                properties.getProperty(ATTR_NAME_IGNORE_DIACRITICS, "true"))
+                .booleanValue();
+		
+		final boolean runOnWords = Boolean.valueOf(
+	                properties.getProperty(ATTR_NAME_RUN_ON_WORDS, "true"))
+	                .booleanValue();
+	    
+		final boolean convertCase = Boolean.valueOf(
+                properties.getProperty(ATTR_NAME_CONVERT_CASE, "true"))
+                .booleanValue();
+	      
+
+		
+		Locale dLocale = Locale.getDefault();
+		
+		if (properties.containsKey(ATTR_NAME_LOCALE)) {		
+		dLocale = 
+		        Locale.forLanguageTag(properties.getProperty(ATTR_NAME_LOCALE));
+		} 
+		
 		final HashMap<String, String> metadata = new HashMap<String, String>();
 		for (Map.Entry<Object, Object> e : properties.entrySet()) {
 			metadata.put(e.getKey().toString(), e.getValue().toString());
 		}		
-		
+						
 		return new DictionaryMetadata(separator.charAt(0), encoding,
-		        usesPrefixes, usesInfixes, metadata);
+		        usesPrefixes, usesInfixes, ignoreNumbers, ignorePunctuation, 
+		        ignoreMixedCase, ignoreDiacritics, convertCase, runOnWords, dLocale, metadata);
 	}
 }

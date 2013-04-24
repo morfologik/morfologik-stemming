@@ -174,7 +174,7 @@ public class DictionaryLookupTest {
 
         final DictionaryLookup s = new DictionaryLookup(
                 new Dictionary(fsa, new DictionaryMetadata('+', "iso8859-1", true, true, 
-                        Collections.<String, String> emptyMap())));
+                        false, false, false, false, false, false, null, Collections.<String, String> emptyMap())));
 
         assertEquals(0, s.lookup("l+A").size()); 
     }

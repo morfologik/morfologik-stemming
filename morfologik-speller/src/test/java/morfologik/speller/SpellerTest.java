@@ -114,7 +114,28 @@ public class SpellerTest {
 	    assertTrue(spell.findReplacements("zółwiową").contains("żółwiową"));
 	    assertTrue(spell.findReplacements("Żebrowsk").contains("Żebrowski"));
 	    assertTrue(spell.findReplacements("święto").contains("Święto"));
+	    //note: no diacritics here, but we still get matches!
+	    assertTrue(spell.findReplacements("gesla").contains("gęślą"));
+	    assertTrue(spell.findReplacements("swieto").contains("Święto"));
+	    assertTrue(spell.findReplacements("zolwiowa").contains("żółwiową"));
 	}
+	
+	@Test
+    public void testisMisspelled() throws IOException {
+        final URL url = getClass().getResource("test-utf-spell.dict");     
+        final Speller spell = new Speller(Dictionary.read(url));
+        assertTrue(!spell.isMisspelled("Paragraf22"));  //ignorujemy liczby
+        assertTrue(!spell.isMisspelled("!"));  //ignorujemy znaki przestankowe        
+        assertTrue(spell.isMisspelled("dziekie"));  //test, czy znajdujemy błąd
+        // assertTrue(!spell.isMisspelled("SłowozGarbem"));  //ignorujemy słowa w stylu wielbłąda
+        assertTrue(!spell.isMisspelled("Ćwikła"));  //i małe litery
+        final Speller oldStyleSpell = new Speller(slownikDictionary, 1);
+        assertTrue(oldStyleSpell.isMisspelled("Paragraf22"));  // nie ignorujemy liczby
+        assertTrue(oldStyleSpell.isMisspelled("!"));  //nie ignorujemy znaków przestankowych
+        // assertTrue(oldStyleSpell.isMisspelled("SłowozGarbem"));  //ignorujemy słowa w stylu wielbłąda
+        assertTrue(oldStyleSpell.isMisspelled("Abaka"));  //i małe litery        
+    }
+    
 	
 	@Test
 	public void testEditDistanceCalculation() throws IOException {

@@ -12,9 +12,12 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.UnsupportedCharsetException;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSATraversal;
@@ -72,7 +75,7 @@ public class Speller {
 	 * @see DictionaryMetadata
 	 */
 	private final DictionaryMetadata dictionaryMetadata;
-
+		
 	/**
 	 * Charset encoder for the FSA.
 	 */
@@ -153,7 +156,7 @@ public class Speller {
 							+ Integer.toHexString(dictionaryMetadata.separator)
 							+ " using encoding " + dictionaryMetadata.encoding,
 							e);
-		}
+		}								
 				
 	}
 
@@ -193,6 +196,22 @@ public class Speller {
         return byteBuffer;
 	}
 	
+	public boolean isMisspelled(String word) {
+	      boolean isAlphabetic = true;
+	      if (word.length() == 1) { // dictionaries usually do not contain punctuation
+	        isAlphabetic = isAlphabetic(word.charAt(0));
+	      }
+	return word.length() > 0
+	      && (!dictionaryMetadata.ignorePunctuation || isAlphabetic)
+	      && (!dictionaryMetadata.ignoreNumbers || !containsDigit(word))	              
+          && !isInDictionary(word)	              
+          && (!dictionaryMetadata.convertCase || 
+          !(!isMixedCase(word) 
+            && isInDictionary(word.toLowerCase(dictionaryMetadata.dictionaryLocale)))); 
+	      
+	}
+
+	
 	/**
 	 * Test whether the word is found in the dictionary. 
 	 * @param word - the word to be tested
@@ -228,7 +247,7 @@ public class Speller {
 	 */
 	public List<String> replaceRunOnWords(final String original) {
 		final List<String> candidates = new ArrayList<String>();
-		if (!isInDictionary(original)) {
+		if (!isInDictionary(original) && dictionaryMetadata.runOnWords) {
 			final CharSequence ch = original;
 			for (int i = 2; i < ch.length(); i++) {
 				// chop from left to right
@@ -310,7 +329,8 @@ public class Speller {
 	                    && (fsa.isArcFinal(arc) || isBeforeSeparator(arc))) {
 	                addCandidate(depth, dist);	                    
 	            }
-	            if (!fsa.isArcTerminal(arc)) {
+	            if (!fsa.isArcTerminal(arc) && !(containsSeparators && 
+	                    candidate[depth] == (char) dictionaryMetadata.separator)) {
 	                findRepl(depth + 1, fsa.getEndNode(arc), new byte[0]);
 	            }
 	        }
@@ -348,7 +368,7 @@ public class Speller {
 		int result;
 		int a, b, c; // not really necessary
 
-		if (word_ff[i] == candidate[j]) {
+		if (areEqual(word_ff[i], candidate[j])) {
 			// last characters are the same
 			result = H.get(i, j);
 		} else if (i > 0 && j > 0 && word_ff[i] == candidate[j - 1]
@@ -369,7 +389,25 @@ public class Speller {
 		H.set(i + 1, j + 1, result);
 		return result;
 	}
-
+	   
+	 // by Jaume Ortola
+	  private boolean areEqual(char x, char y) {
+	    if (x == y) {
+	      return true;
+	    }
+	    if (dictionaryMetadata.ignoreDiacritics) {
+	        String xn = Normalizer.normalize(Character.toString(x), Form.NFD);
+	        String yn = Normalizer.normalize(Character.toString(y), Form.NFD);
+	        if (dictionaryMetadata.convertCase) {
+	            xn = xn.toLowerCase(dictionaryMetadata.dictionaryLocale);
+	            yn = yn.toLowerCase(dictionaryMetadata.dictionaryLocale);	        
+	        } 
+	        return xn.charAt(0) == yn.charAt(0); 
+	    }
+	    return false;
+	  }
+	
+	
 	/**
 	 * Calculates cut-off edit distance.
 	 * 
@@ -395,6 +433,81 @@ public class Speller {
 	private int min(final int a, final int b, final int c) {
 		return Math.min(a, Math.min(b, c));
 	}
+
+	/**
+	   * Mimicks Java 1.7 Character.isAlphabetic() (needed as we require only 1.6)
+	   *  
+	   * @param codePoint The input character.
+	   * @return True if the character is a Unicode alphabetic character.
+	   */
+	static boolean isAlphabetic(int codePoint) {
+	      return (((((1 << Character.UPPERCASE_LETTER) |
+	          (1 << Character.LOWERCASE_LETTER) |
+	          (1 << Character.TITLECASE_LETTER) |
+	          (1 << Character.MODIFIER_LETTER) |
+	          (1 << Character.OTHER_LETTER) |
+	          (1 << Character.LETTER_NUMBER)) >> Character.getType(codePoint)) & 1) != 0);
+	 }
+	
+	/**
+	 * Checks whether a string contains a digit. Used for ignoring words with
+	 * numbers
+	 * @param s Word to be checked.
+	 * @return True if there is a digit inside the word.
+	 */
+	
+	static boolean containsDigit(final String s) {
+	    for (int k = 0; k < s.length(); k++) {
+	      if (Character.isDigit(s.charAt(k))) {
+	        return true;
+	      }
+	    }
+	    return false;
+	  }
+	
+	  /**
+	   * Returns true if <code>str</code> is made up of all-uppercase characters
+	   * (ignoring characters for which no upper-/lowercase distinction exists).
+	   */
+	  boolean isAllUppercase(final String str) {
+	    return str.equals(str.toUpperCase(dictionaryMetadata.dictionaryLocale));
+	  }
+
+	  /**
+	   * @param str - input string
+	   */
+	  boolean isCapitalizedWord(final String str) {
+	    if (isEmpty(str)) {
+	      return false;
+	    }
+	    final char firstChar = str.charAt(0);
+	    if (Character.isUpperCase(firstChar)) {
+	      return str.substring(1).equals(str.substring(1).toLowerCase(dictionaryMetadata.dictionaryLocale));
+	    }
+	    return false;
+	  }
+	  
+	  /**
+	   * Helper method to replace calls to "".equals().
+	   * 
+	   * @param str
+	   *          String to check
+	   * @return true if string is empty OR null
+	   */
+	  static boolean isEmpty(final String str) {
+	    return str == null || str.length() == 0;
+	  }
+
+	  
+	/**
+	   * @param str - input str
+	   * Returns true if str is MixedCase.
+	   */
+	  boolean isMixedCase(final String str) {
+	    return !isAllUppercase(str)
+	    && !isCapitalizedWord(str)
+	    && !str.equals(str.toLowerCase(dictionaryMetadata.dictionaryLocale));
+	  }
 	
 	/**
 	 * Sets up the word and candidate.
