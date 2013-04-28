@@ -46,9 +46,15 @@ public final class DictionaryMetadata {
     public final static String ATTR_NAME_IGNORE_PUNCTUATION = "fsa.dict.speller.ignore-punctuation";    
     
     /**
-     * Attribute name for {@link #ignoreMixedCase}.
+     * Attribute name for {@link #ignoreCamelCase}.
      */
-    public final static String ATTR_NAME_IGNORE_MIXED_CASE = "fsa.dict.speller.ignore-mixed-case";
+    public final static String ATTR_NAME_IGNORE_CAMEL_CASE = "fsa.dict.speller.ignore-camel-case";
+    
+    /**
+     * Attribute name for {@link #ignoreAllUppercase}.
+     */
+    public final static String ATTR_NAME_IGNORE_ALL_UPPERCASE = "fsa.dict.speller.ignore-all-uppercase";
+    
     
     /**
      * Attribute name for {@link #ignoreDiacritics}.
@@ -65,6 +71,16 @@ public final class DictionaryMetadata {
      * Attribute name for {@link #runOnWords}.
      */
     public final static String ATTR_NAME_RUN_ON_WORDS = "fsa.dict.speller.runon-words";
+    
+    /**
+     * Attribute name for {@link #replacementPairs}.
+     */        
+    public final static String ATTR_NAME_REPLACEMENT_PAIRS = "fsa.dict.speller.replacement-pairs";
+    
+    /**
+     * Attribute name for {@link #equivalentChars}.
+     */        
+    public final static String ATTR_NAME_EQUIVALENT_CHARS = "fsa.dict.speller.equivalent-chars";
     
     
 	/**
@@ -104,9 +120,14 @@ public final class DictionaryMetadata {
     public final boolean ignorePunctuation;    
     
     /**
-     * True if the spelling dictionary is supposed to ignore punctuation. 
+     * True if the spelling dictionary is supposed to ignore CamelCase words. 
      */
-    public final boolean ignoreMixedCase;    
+    public final boolean ignoreCamelCase;
+    
+    /**
+     * True if the spelling dictionary is supposed to ignore ALL UPPERCASE words. 
+     */
+    public final boolean ignoreAllUppercase;
     
     /**
      * True if the spelling dictionary is supposed to ignore diacritics, so that
@@ -126,6 +147,19 @@ public final class DictionaryMetadata {
      */
     public final boolean runOnWords;
     
+    /**
+     * Replacement pairs for non-obvious candidate search in a speller dictionary.
+     */
+    public final Map<String, List<String>> replacementPairs;
+    
+    /**
+     * Equivalent characters (treated similarly as equivalent chars with and without
+     * diacritics). For example, Polish <tt>ł</tt> can be specified as equivalent to <tt>l</tt>.
+     * 
+     * This implements a feature similar to hunspell MAP in the affix file.
+     */
+    public final Map<Character, List<Character>> equivalentChars;
+    
 	/**
 	 * Other meta data not included above.
 	 */
@@ -137,18 +171,25 @@ public final class DictionaryMetadata {
 	 */
 	public DictionaryMetadata(char separator, String encoding,
 	        boolean usesPrefixes, boolean usesInfixes, boolean
-	        ignoreNumbers, boolean ignorePunctuation, boolean ignoreMixedCase,
-	        boolean ignoreDiacritics, boolean convertCase, boolean runOnWords, Locale locale, Map<String, String> metadata) {
+	        ignoreNumbers, boolean ignorePunctuation, boolean ignoreCamelCase,
+	        boolean ignoreAllUppercase,
+	        boolean ignoreDiacritics, boolean convertCase, boolean runOnWords, 
+	        Map<String, List<String>> replacementPairs, Map<Character, List<Character>>
+	        equivalentChars,
+	        Locale locale, Map<String, String> metadata) {
 		this.encoding = encoding;
 		this.usesPrefixes = usesPrefixes;
 		this.usesInfixes = usesInfixes;
 		this.ignoreNumbers = ignoreNumbers;
 		this.dictionaryLocale = locale;
 		this.ignorePunctuation = ignorePunctuation;
-		this.ignoreMixedCase = ignoreMixedCase;
+		this.ignoreCamelCase = ignoreCamelCase;
+		this.ignoreAllUppercase = ignoreAllUppercase;
 		this.convertCase = convertCase;
 		this.runOnWords = runOnWords;
 		this.ignoreDiacritics = ignoreDiacritics;
+		this.replacementPairs = replacementPairs;
+		this.equivalentChars = equivalentChars;
 		
 		try {
 			final byte[] separatorBytes = new String(new char[] { separator })
@@ -207,10 +248,14 @@ public final class DictionaryMetadata {
 	                properties.getProperty(ATTR_NAME_IGNORE_PUNCTUATION, "true"))
 	                .booleanValue();
 		
-		final boolean ignoreMixedCase = Boolean.valueOf(
-                properties.getProperty(ATTR_NAME_IGNORE_MIXED_CASE, "true"))
+		final boolean ignoreCamelCase = Boolean.valueOf(
+                properties.getProperty(ATTR_NAME_IGNORE_CAMEL_CASE, "true"))
                 .booleanValue();
 
+		final boolean ignoreAllUppercase = Boolean.valueOf(
+                properties.getProperty(ATTR_NAME_IGNORE_ALL_UPPERCASE, "true"))
+                .booleanValue();
+		
 		final boolean ignoreDiacritics = Boolean.valueOf(
                 properties.getProperty(ATTR_NAME_IGNORE_DIACRITICS, "true"))
                 .booleanValue();
@@ -223,7 +268,11 @@ public final class DictionaryMetadata {
                 properties.getProperty(ATTR_NAME_CONVERT_CASE, "true"))
                 .booleanValue();
 	      
-
+		final Map<String, List<String>> replacementPairs = getReplacementPairs(
+		        properties.getProperty(ATTR_NAME_REPLACEMENT_PAIRS));
+		
+		final Map<Character, List<Character>> equivalentChars = getEquivalentChars(
+                properties.getProperty(ATTR_NAME_EQUIVALENT_CHARS));
 		
 		Locale dLocale = Locale.getDefault();
 		
@@ -239,6 +288,66 @@ public final class DictionaryMetadata {
 						
 		return new DictionaryMetadata(separator.charAt(0), encoding,
 		        usesPrefixes, usesInfixes, ignoreNumbers, ignorePunctuation, 
-		        ignoreMixedCase, ignoreDiacritics, convertCase, runOnWords, dLocale, metadata);
+		        ignoreCamelCase, ignoreAllUppercase, ignoreDiacritics, 
+		        convertCase, runOnWords, replacementPairs, equivalentChars, dLocale, metadata);
 	}
+
+	
+    private static Map<Character, List<Character>> getEquivalentChars(
+            String property) throws IOException {
+        Map<Character, List<Character>> equivalentCharacters = 
+                new HashMap<Character, List<Character>>();
+        if (property != null && property.length() != 0) {
+            final String[] eqChars = property.split(", ?");
+            for (final String characterPair : eqChars) {
+                final String[] twoChars = characterPair.trim().split(" ");
+                if (twoChars.length == 2 
+                        && twoChars[0].length() == 1
+                        && twoChars[1].length() == 1) { // proper format
+                    if (!equivalentCharacters.containsKey(twoChars[0].charAt(0))) {
+                        List<Character> chList = new ArrayList<Character>();
+                        chList.add(twoChars[1].charAt(0));
+                        equivalentCharacters.put(twoChars[0].charAt(0),
+                                chList);
+                    } else {
+                        equivalentCharacters.get(twoChars[0].charAt(0)).
+                            add(twoChars[1].charAt(0));
+                    }
+                } else {
+                    throw new IOException("Attribute " + ATTR_NAME_EQUIVALENT_CHARS
+                            + " is not in the proper format. The map is " + twoChars.length +
+                            " characters long.");
+                }
+            }
+        }
+        return equivalentCharacters;
+    }
+
+    private static Map<String, List<String>> getReplacementPairs(String property) throws IOException {
+        Map<String, List<String>> replacementPairs = 
+                new HashMap<String, List<String>>();
+        if (property != null && property.length() != 0) {
+            final String[] replacements = property.split(", ?");
+            for (final String stringPair : replacements) {
+                final String[] twoStrings = stringPair.trim().split(" ");
+                if (twoStrings.length == 2) { // check format
+                    if (!replacementPairs.containsKey(twoStrings[0])) {
+                        List<String> strList = new ArrayList<String>();
+                        strList.add(twoStrings[1]);
+                        replacementPairs.put(twoStrings[0],
+                                strList);
+                    } else {
+                        replacementPairs.get(twoStrings[0]).
+                        add(twoStrings[1]);
+                    }
+                } else {
+                    throw new IOException("Attribute " + ATTR_NAME_REPLACEMENT_PAIRS
+                            + " is not in the proper format. The equivalence has " + 
+                            twoStrings.length +
+                            " strings.");
+                }
+            }
+        }
+        return replacementPairs;
+    }
 }

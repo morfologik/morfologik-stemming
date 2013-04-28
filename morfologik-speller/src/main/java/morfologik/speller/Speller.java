@@ -275,7 +275,19 @@ public class Speller {
 			throws CharacterCodingException {
 		candidates.clear();
 		if (!isInDictionary(word) && word.length() < MAX_WORD_LENGTH) {
-			word_ff = word.toCharArray();
+		    List<String> wordsToCheck = new ArrayList<String>();
+		    wordsToCheck.add(word);
+		    if (dictionaryMetadata.replacementPairs != null) {
+	            for (final String key : dictionaryMetadata.replacementPairs.keySet()) {
+	                if (word.contains(key)) {
+	                    for (final String rep : dictionaryMetadata.replacementPairs.get(key)) {
+	                        wordsToCheck.addAll(getAllReplacements(word, key, rep));
+	                    }
+	                }
+	            }
+		    }		    
+		    for (final String wordChecked : wordsToCheck) {
+			word_ff = wordChecked.toCharArray();
 			wordLen = word_ff.length;
 			candidate = new char[MAX_WORD_LENGTH];
 			candLen = candidate.length;
@@ -286,6 +298,7 @@ public class Speller {
 			byteBuffer.clear();
 			final byte[] prevBytes = new byte[0];
 			findRepl(0, fsa.getRootNode(), prevBytes);
+		    }
 		}
 		
 		Collections.sort(candidates);
@@ -394,6 +407,11 @@ public class Speller {
 	  private boolean areEqual(char x, char y) {
 	    if (x == y) {
 	      return true;
+	    }
+	    if (dictionaryMetadata.equivalentChars != null) {
+	        if (dictionaryMetadata.equivalentChars.containsKey(x) &&
+	            dictionaryMetadata.equivalentChars.get(x).contains(y))
+	            return true;
 	    }
 	    if (dictionaryMetadata.ignoreDiacritics) {
 	        String xn = Normalizer.normalize(Character.toString(x), Form.NFD);
@@ -509,6 +527,27 @@ public class Speller {
 	    && !str.equals(str.toLowerCase(dictionaryMetadata.dictionaryLocale));
 	  }
 	
+	/**
+	 * Returns a list of all possible replacements of a given string
+	 */
+	List<String> getAllReplacements(final String str, final String src, final String rep) {
+	    List<String> replaced = new ArrayList<String>();
+	    StringBuilder sb = new StringBuilder();
+	    sb.append(str);
+	    int index = 0;
+	    while (index != -1) {
+	        index = sb.indexOf(src, index);
+	        if (index != -1) {
+	            //TODO: we replace the strings one by one
+	            // e.g., "abcdabxyzab", key = ab, rep = eg => "egcdabxyzab", "egcdegxyzeg"
+	            // but we also need to have "abcdegxyzeg", "abcdegxyzab"...
+	            sb.replace(index, index + src.length(), rep);
+	            replaced.add(sb.toString());
+	        }	        
+	    }
+	    return replaced;
+	}
+	  
 	/**
 	 * Sets up the word and candidate.
 	 * Used only to test the edit distance in JUnit tests.

@@ -118,6 +118,12 @@ public class SpellerTest {
 	    assertTrue(spell.findReplacements("gesla").contains("gęślą"));
 	    assertTrue(spell.findReplacements("swieto").contains("Święto"));
 	    assertTrue(spell.findReplacements("zolwiowa").contains("żółwiową"));
+	    //using equivalent characters 'x' = 'ź'
+	    assertTrue(spell.findReplacements("jexn").contains("jaźń"));
+	    // 'u' = 'ó', so the edit distance is still small...
+	    assertTrue(spell.findReplacements("zażulv").contains("zażółć"));
+	    // 'rz' = 'ż', so the edit distance is still small, but with string replacements...
+	    assertTrue(spell.findReplacements("zarzulv").contains("zażółć"));
 	}
 	
 	@Test
@@ -135,7 +141,7 @@ public class SpellerTest {
         // assertTrue(oldStyleSpell.isMisspelled("SłowozGarbem"));  //ignorujemy słowa w stylu wielbłąda
         assertTrue(oldStyleSpell.isMisspelled("Abaka"));  //i małe litery        
     }
-    
+	
 	
 	@Test
 	public void testEditDistanceCalculation() throws IOException {
