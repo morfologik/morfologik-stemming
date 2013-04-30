@@ -12,4 +12,4 @@ fsa.dict.speller.locale=pl_PL
 fsa.dict.speller.ignore-diacritics=true
 #note: native2ascii has to be used here!
 fsa.dict.speller.equivalent-chars=x \u017a, l \u0142, u \u00f3, \u00f3 u
-fsa.dict.speller.replacement-pairs=rz \u017c, \u017c rz, ch h, h ch
+fsa.dict.speller.replacement-pairs=rz \u017c, \u017c rz, ch h, h ch, \u0119 en, en \u0119

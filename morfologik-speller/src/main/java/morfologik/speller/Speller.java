@@ -203,7 +203,9 @@ public class Speller {
 	      }
 	return word.length() > 0
 	      && (!dictionaryMetadata.ignorePunctuation || isAlphabetic)
-	      && (!dictionaryMetadata.ignoreNumbers || !containsDigit(word))	              
+	      && (!dictionaryMetadata.ignoreNumbers || !containsDigit(word))
+	      && !(dictionaryMetadata.ignoreCamelCase && isCamelCase(word))
+	      && !(dictionaryMetadata.ignoreAllUppercase && isAlphabetic && isAllUppercase(word))
           && !isInDictionary(word)	              
           && (!dictionaryMetadata.convertCase || 
           !(!isMixedCase(word) 
@@ -275,17 +277,22 @@ public class Speller {
 			throws CharacterCodingException {
 		candidates.clear();
 		if (!isInDictionary(word) && word.length() < MAX_WORD_LENGTH) {
-		    List<String> wordsToCheck = new ArrayList<String>();
-		    wordsToCheck.add(word);
+		    List<String> wordsToCheck = new ArrayList<String>();		    
 		    if (dictionaryMetadata.replacementPairs != null) {
-	            for (final String key : dictionaryMetadata.replacementPairs.keySet()) {
-	                if (word.contains(key)) {
-	                    for (final String rep : dictionaryMetadata.replacementPairs.get(key)) {
-	                        wordsToCheck.addAll(getAllReplacements(word, key, rep));
-	                    }
-	                }
+		        for (final String wordChecked : getAllReplacements(word, 0)) {
+		            if (isInDictionary(wordChecked)                  
+		            && dictionaryMetadata.convertCase && isMixedCase(wordChecked) 
+		              && isInDictionary(wordChecked.toLowerCase
+		                      (dictionaryMetadata.dictionaryLocale))) {
+		                candidates.add(new CandidateData(wordChecked,0));
+		              }
+		              else {
+		                wordsToCheck.add(wordChecked);
+		              }
 	            }
-		    }		    
+		    } else {
+		        wordsToCheck.add(word);
+		    }
 		    for (final String wordChecked : wordsToCheck) {
 			word_ff = wordChecked.toCharArray();
 			wordLen = word_ff.length;
@@ -517,7 +524,7 @@ public class Speller {
 	  }
 
 	  
-	/**
+	  /**
 	   * @param str - input str
 	   * Returns true if str is MixedCase.
 	   */
@@ -526,27 +533,51 @@ public class Speller {
 	    && !isCapitalizedWord(str)
 	    && !str.equals(str.toLowerCase(dictionaryMetadata.dictionaryLocale));
 	  }
-	
-	/**
-	 * Returns a list of all possible replacements of a given string
-	 */
-	List<String> getAllReplacements(final String str, final String src, final String rep) {
-	    List<String> replaced = new ArrayList<String>();
-	    StringBuilder sb = new StringBuilder();
-	    sb.append(str);
-	    int index = 0;
-	    while (index != -1) {
-	        index = sb.indexOf(src, index);
-	        if (index != -1) {
-	            //TODO: we replace the strings one by one
-	            // e.g., "abcdabxyzab", key = ab, rep = eg => "egcdabxyzab", "egcdegxyzeg"
-	            // but we also need to have "abcdegxyzeg", "abcdegxyzab"...
-	            sb.replace(index, index + src.length(), rep);
-	            replaced.add(sb.toString());
-	        }	        
-	    }
-	    return replaced;
-	}
+	  
+	  /**
+       * @param str - input str
+       * Returns true if str is MixedCase.
+       */
+	  public boolean isCamelCase(final String str) {
+	      return 
+	              !isEmpty(str)
+	              && !isAllUppercase(str)                
+	              && !isCapitalizedWord(str)
+	              && Character.isUpperCase(str.charAt(0))
+	              && (!(str.length() > 1) || Character.isLowerCase(str.charAt(1)))
+	              && !str.equals(str.toLowerCase(dictionaryMetadata.dictionaryLocale));
+	  }
+		
+      /**
+       * Returns a list of all possible replacements of a given string
+       */
+    public List<String> getAllReplacements(final String str, final int fromIndex) {
+      List<String> replaced = new ArrayList<String>();
+      StringBuilder sb = new StringBuilder();
+      sb.append(str);
+      int index = fromIndex;
+      boolean found=false;
+      for (final String key : dictionaryMetadata.replacementPairs.keySet()) {
+        index = sb.indexOf(key, fromIndex);
+        if (index != -1) {
+          for (final String rep : dictionaryMetadata.replacementPairs.get(key)) {
+            //avoid unnecessary replacements (ex. L <-> L·L)
+            if (rep.length()<=key.length() || sb.indexOf(rep)!=index) {
+              found = true;
+              replaced.addAll(getAllReplacements(str, index + key.length()));
+              sb.replace(index, index + key.length(), rep);
+              replaced.addAll(getAllReplacements(sb.toString(), index + rep.length()));
+              sb.setLength(0);
+              sb.append(str);
+            }
+          }
+        }
+      }
+      if (!found){
+        replaced.add(sb.toString());
+      }
+      return replaced;
+    }
 	  
 	/**
 	 * Sets up the word and candidate.

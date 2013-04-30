@@ -1,5 +1,6 @@
 package morfologik.speller;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -123,7 +124,10 @@ public class SpellerTest {
 	    // 'u' = 'ó', so the edit distance is still small...
 	    assertTrue(spell.findReplacements("zażulv").contains("zażółć"));
 	    // 'rz' = 'ż', so the edit distance is still small, but with string replacements...
-	    assertTrue(spell.findReplacements("zarzulv").contains("zażółć"));
+	    assertTrue(spell.findReplacements("zarzulv").contains("zażółć"));	    
+	    assertTrue(spell.findReplacements("Rzebrowski").contains("Żebrowski"));
+	    assertTrue(spell.findReplacements("rzółw").contains("żółw"));
+	    assertTrue(spell.findReplacements("Świento").contains("Święto"));
 	}
 	
 	@Test
@@ -133,15 +137,40 @@ public class SpellerTest {
         assertTrue(!spell.isMisspelled("Paragraf22"));  //ignorujemy liczby
         assertTrue(!spell.isMisspelled("!"));  //ignorujemy znaki przestankowe        
         assertTrue(spell.isMisspelled("dziekie"));  //test, czy znajdujemy błąd
-        // assertTrue(!spell.isMisspelled("SłowozGarbem"));  //ignorujemy słowa w stylu wielbłąda
+        assertTrue(!spell.isMisspelled("SłowozGarbem"));  //ignorujemy słowa w stylu wielbłąda
         assertTrue(!spell.isMisspelled("Ćwikła"));  //i małe litery
+        assertTrue(!spell.isMisspelled("TOJESTTEST"));  //i wielkie litery
         final Speller oldStyleSpell = new Speller(slownikDictionary, 1);
         assertTrue(oldStyleSpell.isMisspelled("Paragraf22"));  // nie ignorujemy liczby
         assertTrue(oldStyleSpell.isMisspelled("!"));  //nie ignorujemy znaków przestankowych
         // assertTrue(oldStyleSpell.isMisspelled("SłowozGarbem"));  //ignorujemy słowa w stylu wielbłąda
-        assertTrue(oldStyleSpell.isMisspelled("Abaka"));  //i małe litery        
+        assertTrue(oldStyleSpell.isMisspelled("Abaka"));  //i małe litery                
     }
 	
+	@Test
+	public void testCamelCase() {
+	    final Speller spell = new Speller(slownikDictionary, 1);
+	    assertTrue(spell.isCamelCase("CamelCase"));
+	    assertTrue(!spell.isCamelCase("Camel"));
+	    assertTrue(!spell.isCamelCase("CAMEL"));
+	    assertTrue(!spell.isCamelCase("camel"));
+	    assertTrue(!spell.isCamelCase("cAmel"));
+	    assertTrue(!spell.isCamelCase("CAmel"));
+	    assertTrue(!spell.isCamelCase(""));
+	    assertTrue(!spell.isCamelCase(null));
+	}
+	
+	@Test
+	public void testGetAllReplacements() throws IOException {
+	    final URL url = getClass().getResource("test-utf-spell.dict");     
+        final Speller spell = new Speller(Dictionary.read(url));
+        assertTrue(spell.isMisspelled("rzarzerzarzu"));
+        assertEquals("[rzarzerzarzu, rzarzerzażu, rzarzeżarzu, rzarzeżażu, " +
+                "rzażerzarzu, rzażerzażu, rzażeżarzu, rzażeżażu, " +
+                "żarzerzarzu, żarzerzażu, żarzeżarzu, żarzeżażu, " +
+                "żażerzarzu, żażerzażu, żażeżarzu, żażeżażu]", 
+                Arrays.toString(spell.getAllReplacements("rzarzerzarzu", 0).toArray()));
+	}
 	
 	@Test
 	public void testEditDistanceCalculation() throws IOException {
