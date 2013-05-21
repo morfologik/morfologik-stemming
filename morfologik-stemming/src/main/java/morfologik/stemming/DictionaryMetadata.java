@@ -275,11 +275,9 @@ public final class DictionaryMetadata {
                 properties.getProperty(ATTR_NAME_EQUIVALENT_CHARS));
 		
 		Locale dLocale = Locale.getDefault();
-		
-		if (properties.containsKey(ATTR_NAME_LOCALE)) {		
-		dLocale = 
-		        Locale.forLanguageTag(properties.getProperty(ATTR_NAME_LOCALE));
-		} 
+		if (properties.containsKey(ATTR_NAME_LOCALE)) {
+		    dLocale = new Locale(properties.getProperty(ATTR_NAME_LOCALE));
+		}
 		
 		final HashMap<String, String> metadata = new HashMap<String, String>();
 		for (Map.Entry<Object, Object> e : properties.entrySet()) {
