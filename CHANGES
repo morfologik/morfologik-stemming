@@ -1,6 +1,12 @@
 1.6.0
           Update morfologik-polish data to Morfologik 2.0 PoliMorf (08.03.2013).
           Deprecated DICTIONARY constants (unified dictionary only).
+          
+          Important! The format of encoding tags has changed and is now\
+          multiple-tags-per-lemma. The value returned from WordData#getTag
+          may be a number of tags concatenated with a "+" character. Previously
+          the same lamma/stem would be returned multiple times, each time with
+          a different tag.
 
           Moving code from SourceForge to github.
 
