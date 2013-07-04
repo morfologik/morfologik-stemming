@@ -123,7 +123,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 
 		decoder = dictionary.metadata.getDecoder();
 		encoder = dictionary.metadata.getEncoder();
-		separatorChar = dictionary.metadata.getFsaSeparatorAsChar();
+		separatorChar = dictionary.metadata.getSeparatorAsChar();
 	}
 
 	/**
@@ -132,7 +132,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 	 * to the dictionary's specification) and an optional tag data.
 	 */
 	public List<WordData> lookup(CharSequence word) {
-		final byte separator = dictionaryMetadata.separator;
+		final byte separator = dictionaryMetadata.getSeparator();
 		
 		// Reset the output list to zero length.
 		formsList.wrap(forms, 0, 0);
@@ -274,8 +274,8 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 		final int infLen = inflectedBuffer.remaining();
 		final int code0 = bytes[0] - 'A';
 
-		final boolean fsaPrefixes = metadata.usesPrefixes;
-		final boolean fsaInfixes = metadata.usesInfixes;
+		final boolean fsaPrefixes = metadata.isUsingPrefixes();
+		final boolean fsaInfixes = metadata.isUsingInfixes();
 
 		// Increase buffer size, if needed.
 		if (bb.capacity() < infLen + len) {

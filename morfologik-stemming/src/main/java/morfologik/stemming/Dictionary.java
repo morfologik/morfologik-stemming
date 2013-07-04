@@ -100,8 +100,12 @@ public final class Dictionary {
 			final Properties properties = new Properties();
 			properties.load(featuresData);
 
-			final DictionaryMetadata features = DictionaryMetadata
-			        .fromMap(properties);
+			Map<DictionaryAttribute, String> map = new HashMap<DictionaryAttribute, String>();
+			for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements();) {
+			    String key = (String) e.nextElement();
+			    map.put(DictionaryAttribute.fromPropertyName(key), properties.getProperty(key));
+			}
+			final DictionaryMetadata features = new DictionaryMetadata(map);
 			final FSA fsa = FSA.read(fsaData);
 
 			return new Dictionary(fsa, features);

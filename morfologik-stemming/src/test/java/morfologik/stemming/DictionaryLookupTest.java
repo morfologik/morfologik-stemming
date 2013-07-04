@@ -1,11 +1,16 @@
 package morfologik.stemming;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSABuilder;
@@ -114,13 +119,12 @@ public class DictionaryLookupTest {
 	/* */
 	@Test
 	public void testMultibyteEncodingUTF8() throws IOException {
-		final URL url = this.getClass()
-		        .getResource("test-diacritics-utf8.dict");
-		final IStemmer s = new DictionaryLookup(Dictionary.read(url));
+		final URL url = this.getClass().getResource("test-diacritics-utf8.dict");
+		Dictionary read = Dictionary.read(url);
+        final IStemmer s = new DictionaryLookup(read);
 
 		assertArrayEquals(new String[] { "merge", "001" }, stem(s, "mergeam"));
-		assertArrayEquals(new String[] { "merge", "002" },
-		        stem(s, "merseserăm"));
+		assertArrayEquals(new String[] { "merge", "002" }, stem(s, "merseserăm"));
 	}
 
 	/* */
@@ -168,18 +172,20 @@ public class DictionaryLookupTest {
     @Test
     public void testSeparatorInLookupTerm() throws IOException {
         FSA fsa = FSABuilder.build(toBytes("iso8859-1", new String [] {
-                "l+A+LW",
-                "l+A+NN1d",
+            "l+A+LW",
+            "l+A+NN1d",
         }));
 
-        final DictionaryLookup s = new DictionaryLookup(
-                new Dictionary(fsa, new DictionaryMetadata('+', "iso8859-1", true, true, 
-                        false, false, false, false, false, false, false, null, null, null, 
-                        Collections.<String, String> emptyMap())));
+        DictionaryMetadata metadata = new DictionaryMetadataBuilder()
+            .separator('+')
+            .encoding("iso8859-1")
+            .usesPrefixes()
+            .usesInfixes()
+            .build();
 
+        final DictionaryLookup s = new DictionaryLookup(new Dictionary(fsa, metadata));
         assertEquals(0, s.lookup("l+A").size()); 
     }
-    
 
     /* */
     @Test

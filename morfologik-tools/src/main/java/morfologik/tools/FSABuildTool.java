@@ -479,7 +479,8 @@ public final class FSABuildTool extends Tool {
 	/**
      * 
      */
-	private static OutputStream initializeOutput(CommandLine line)
+	@SuppressWarnings("resource")
+    private static OutputStream initializeOutput(CommandLine line)
 	        throws IOException, ParseException {
 		final OutputStream output;
 		final String opt = SharedOptions.outputFileOption.getOpt();
@@ -496,6 +497,7 @@ public final class FSABuildTool extends Tool {
 	/**
      * 
      */
+    @SuppressWarnings("resource")
 	private BufferedInputStream initializeInput(CommandLine line)
 	        throws IOException, ParseException {
 		final InputStream input;

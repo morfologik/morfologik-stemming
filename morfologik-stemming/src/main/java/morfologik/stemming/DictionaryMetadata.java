@@ -1,7 +1,5 @@
 package morfologik.stemming;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -10,13 +8,14 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
+
+import static morfologik.stemming.DictionaryAttribute.*;
 
 /**
  * Description of attributes, their types and default values.
@@ -25,212 +24,188 @@ import java.util.Properties;
  */
 public final class DictionaryMetadata {
 	/**
-	 * Attribute name for {@link #separator}.
-	 */
-	public final static String ATTR_NAME_SEPARATOR = "fsa.dict.separator";
-
-	/**
-	 * Attribute name for {@link #encoding}.
-	 */
-	public final static String ATTR_NAME_ENCODING = "fsa.dict.encoding";
-
-	/**
-	 * Attribute name for {@link #usesPrefixes}.
-	 */
-	public final static String ATTR_NAME_USES_PREFIXES = "fsa.dict.uses-prefixes";
-
-	/**
-	 * Attribute name for {@link #usesInfixes}.
-	 */
-	public final static String ATTR_NAME_USES_INFIXES = "fsa.dict.uses-infixes";
-
-	/**
-     * Attribute name for {@link #ignoreNumbers}.
-     */
-    public final static String ATTR_NAME_IGNORE_NUMBERS = "fsa.dict.speller.ignore-numbers";
-
-    /**
-     * Attribute name for {@link #dictionaryLocale}.
-     */
-    public final static String ATTR_NAME_LOCALE = "fsa.dict.speller.locale";    
-    
-    /**
-     * Attribute name for {@link #ignorePunctuation}.
-     */
-    public final static String ATTR_NAME_IGNORE_PUNCTUATION = "fsa.dict.speller.ignore-punctuation";    
-    
-    /**
-     * Attribute name for {@link #ignoreCamelCase}.
-     */
-    public final static String ATTR_NAME_IGNORE_CAMEL_CASE = "fsa.dict.speller.ignore-camel-case";
-    
-    /**
-     * Attribute name for {@link #ignoreAllUppercase}.
-     */
-    public final static String ATTR_NAME_IGNORE_ALL_UPPERCASE = "fsa.dict.speller.ignore-all-uppercase";
-    
-    
-    /**
-     * Attribute name for {@link #ignoreDiacritics}.
-     */
-    public final static String ATTR_NAME_IGNORE_DIACRITICS = "fsa.dict.speller.ignore-diacritics";
-    
-    
-    /**
-     * Attribute name for {@link #convertCase}.
-     */
-    public final static String ATTR_NAME_CONVERT_CASE = "fsa.dict.speller.convert-case";
-    
-    /**
-     * Attribute name for {@link #runOnWords}.
-     */
-    public final static String ATTR_NAME_RUN_ON_WORDS = "fsa.dict.speller.runon-words";
-    
-    /**
-     * Attribute name for {@link #replacementPairs}.
-     */        
-    public final static String ATTR_NAME_REPLACEMENT_PAIRS = "fsa.dict.speller.replacement-pairs";
-    
-    /**
-     * Attribute name for {@link #equivalentChars}.
-     */        
-    public final static String ATTR_NAME_EQUIVALENT_CHARS = "fsa.dict.speller.equivalent-chars";
-    
-    
-	/**
 	 * A separator character between fields (stem, lemma, form). The character
 	 * must be within byte range (FSA uses bytes internally).
 	 */
-	public final byte separator;
+	private byte separator;
+    private char separatorChar;
 
 	/**
 	 * Encoding used for converting bytes to characters and vice versa.
 	 */
-	public final String encoding;
+	private String encoding;
 
-	/**
-	 * True if the dictionary was compiled with prefix compression.
-	 */
-	public final boolean usesPrefixes;
+	private Charset charset;
+    private Locale locale = Locale.getDefault();
 
-	/**
-	 * True if the dictionary was compiled with infix compression.
-	 */
-	public final boolean usesInfixes;
-	
-	/**
-	 * True if the spelling dictionary is supposed to ignore words containing digits. 
-	 */
-	public final boolean ignoreNumbers;
-	
-	/**
-     * Locale of the dictionary. 
-     */
-    public final Locale dictionaryLocale;
-    
-    /**
-     * True if the spelling dictionary is supposed to ignore punctuation. 
-     */
-    public final boolean ignorePunctuation;    
-    
-    /**
-     * True if the spelling dictionary is supposed to ignore CamelCase words. 
-     */
-    public final boolean ignoreCamelCase;
-    
-    /**
-     * True if the spelling dictionary is supposed to ignore ALL UPPERCASE words. 
-     */
-    public final boolean ignoreAllUppercase;
-    
-    /**
-     * True if the spelling dictionary is supposed to ignore diacritics, so that
-     * 'a' would be treated as equivalent to 'ą'. 
-     */
-    public final boolean ignoreDiacritics;    
-    
-    
-    /**
-     * True if the spelling dictionary is supposed to treat upper and lower case
-     * as equivalent. 
-     */
-    public final boolean convertCase;    
-
-    /**
-     * True if the spelling dictionary is supposed to split runOnWords; 
-     */
-    public final boolean runOnWords;
+    private boolean usesPrefixes;
+    private boolean usesInfixes;
     
     /**
      * Replacement pairs for non-obvious candidate search in a speller dictionary.
      */
-    public final Map<String, List<String>> replacementPairs;
-    
+    private Map<String, List<String>> replacementPairs = Collections.emptyMap();
+
     /**
      * Equivalent characters (treated similarly as equivalent chars with and without
      * diacritics). For example, Polish <tt>ł</tt> can be specified as equivalent to <tt>l</tt>.
      * 
      * This implements a feature similar to hunspell MAP in the affix file.
      */
-    public final Map<Character, List<Character>> equivalentChars;
-    
+    private Map<Character, List<Character>> equivalentChars = Collections.emptyMap();
+
 	/**
-	 * Other meta data not included above.
+	 * All attributes.
 	 */
-	public final Map<String, String> metadata;
+    private final EnumMap<DictionaryAttribute, String> attributes;
+
+    /**
+     * All "enabled" boolean attributes.
+     */
+    private final EnumMap<DictionaryAttribute,Boolean> boolAttributes;
 
 	/**
-	 * Creates an immutable instance of {@link DictionaryMetadata}.
-	 *  
+	 * Return all attributes.
 	 */
-	public DictionaryMetadata(char separator, String encoding,
-	        boolean usesPrefixes, boolean usesInfixes, boolean
-	        ignoreNumbers, boolean ignorePunctuation, boolean ignoreCamelCase,
-	        boolean ignoreAllUppercase,
-	        boolean ignoreDiacritics, boolean convertCase, boolean runOnWords, 
-	        Map<String, List<String>> replacementPairs, Map<Character, List<Character>>
-	        equivalentChars,
-	        Locale locale, Map<String, String> metadata) {
-		this.encoding = encoding;
-		this.usesPrefixes = usesPrefixes;
-		this.usesInfixes = usesInfixes;
-		this.ignoreNumbers = ignoreNumbers;
-		this.dictionaryLocale = locale;
-		this.ignorePunctuation = ignorePunctuation;
-		this.ignoreCamelCase = ignoreCamelCase;
-		this.ignoreAllUppercase = ignoreAllUppercase;
-		this.convertCase = convertCase;
-		this.runOnWords = runOnWords;
-		this.ignoreDiacritics = ignoreDiacritics;
-		this.replacementPairs = replacementPairs;
-		this.equivalentChars = equivalentChars;
-		
-		try {
-			final byte[] separatorBytes = new String(new char[] { separator })
-			        .getBytes(encoding);
-			if (separatorBytes.length != 1) {
-				throw new RuntimeException(
-				        "Separator character '"
-				                + separator
-				                + "' must be a single byte after transformation with encoding: "
-				                + encoding);
-			}
-			this.separator = separatorBytes[0];
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException("Encoding not supported on this VM: "
-			        + encoding);
-		}
+    public Map<DictionaryAttribute, String> getAttributes() {
+        return Collections.unmodifiableMap(attributes);
+    }
 
-		this.metadata = Collections
-		        .unmodifiableMap(new HashMap<String, String>(metadata));
-	}
+	// Cached attrs.
+    public String getEncoding()      { return encoding; }
+    public byte getSeparator()       { return separator; }
+    public boolean isUsingPrefixes() { return usesPrefixes; }
+    public boolean isUsingInfixes()  { return usesInfixes; }
+    public Locale getLocale()        { return locale; }
 
-	/**
+    public Map<String, List<String>> getReplacementPairs() { return replacementPairs; }
+    public Map<Character, List<Character>> getEquivalentChars() { return equivalentChars; }
+
+    // Dynamically fetched.
+    public boolean isIgnoringPunctuation()  { return boolAttributes.get(IGNORE_PUNCTUATION); }
+    public boolean isIgnoringNumbers()      { return boolAttributes.get(IGNORE_NUMBERS); }
+    public boolean isIgnoringCamelCase()    { return boolAttributes.get(IGNORE_CAMEL_CASE); }
+    public boolean isIgnoringAllUppercase() { return boolAttributes.get(IGNORE_ALL_UPPERCASE); }
+    public boolean isIgnoringDiacritics()   { return boolAttributes.get(IGNORE_DIACRITICS); }
+    public boolean isConvertingCase()       { return boolAttributes.get(CONVERT_CASE); }
+    public boolean isSupportingRunOnWords() { return boolAttributes.get(RUN_ON_WORDS); }
+
+    /**
+     * Create an instance from an attribute map.
+     * 
+     * @see DictionaryMetadataBuilder
+     */
+    public DictionaryMetadata(Map<DictionaryAttribute, String> attributes) {
+        this.boolAttributes = new EnumMap<DictionaryAttribute,Boolean>(DictionaryAttribute.class);
+        for (DictionaryAttribute attr : EnumSet.of(
+            IGNORE_PUNCTUATION,
+            IGNORE_NUMBERS,
+            IGNORE_CAMEL_CASE,
+            IGNORE_ALL_UPPERCASE,
+            IGNORE_DIACRITICS,
+            CONVERT_CASE,
+            RUN_ON_WORDS)) {
+            boolAttributes.put(attr, true);
+        }
+
+	    this.attributes = new EnumMap<DictionaryAttribute, String>(DictionaryAttribute.class);
+	    this.attributes.putAll(attributes);
+
+        // Convert some attrs from the map to local fields for performance reasons.
+	    EnumSet<DictionaryAttribute> requiredAttributes = EnumSet.of(
+	            SEPARATOR,
+	            ENCODING);
+
+	    for (Map.Entry<DictionaryAttribute,String> e : attributes.entrySet()) {
+	        requiredAttributes.remove(e.getKey());
+
+	        // Run validation and conversion on all of them.
+	        Object value = e.getKey().fromString(e.getValue());
+	        switch (e.getKey()) {
+	            case ENCODING:
+	                this.encoding = e.getValue();
+	                if (!Charset.isSupported(encoding)) {
+	                    throw new IllegalArgumentException("Encoding not supported on this JVM: "
+	                            + encoding);
+	                }
+	                this.charset = (Charset) value;
+	                break;
+
+	            case SEPARATOR:
+	                this.separatorChar = (Character) value; 
+	                break;
+
+	            case LOCALE:
+	                this.locale = (Locale) value;
+	                break;
+	                
+	            case REPLACEMENT_PAIRS:
+                    {
+                        @SuppressWarnings("unchecked")
+	                    Map<String, List<String>> gvalue = (Map<String, List<String>>) value;
+	                    this.replacementPairs = gvalue; 
+                    }
+	                break;
+
+	            case EQUIVALENT_CHARS:
+                    {
+                        @SuppressWarnings("unchecked")
+                        Map<Character, List<Character>> gvalue = (Map<Character, List<Character>>) value;
+                        this.equivalentChars = gvalue; 
+                    }
+                    break;
+
+	            case USES_INFIXES:
+                    this.usesInfixes = (Boolean) value;
+                    this.boolAttributes.put(e.getKey(), (Boolean) value);
+                    break;
+
+                case USES_PREFIXES:
+                    this.usesPrefixes = (Boolean) value;
+                    this.boolAttributes.put(e.getKey(), (Boolean) value);
+                    break;
+
+	            case IGNORE_PUNCTUATION:
+	            case IGNORE_NUMBERS:
+	            case IGNORE_CAMEL_CASE:
+	            case IGNORE_ALL_UPPERCASE:
+	            case IGNORE_DIACRITICS:
+	            case CONVERT_CASE:
+	            case RUN_ON_WORDS:
+                    this.boolAttributes.put(e.getKey(), (Boolean) value);
+	                break;
+
+                default:
+                    // Just run validation.
+                    e.getKey().fromString(e.getValue());
+                    break;
+	        }
+	    }
+
+	    if (!requiredAttributes.isEmpty()) {
+	        throw new IllegalArgumentException("At least one the required attributes was not provided: "
+	                + requiredAttributes.toString());
+	    }
+
+	    CharsetEncoder encoder = getEncoder();
+	    try {
+            ByteBuffer encoded = encoder.encode(CharBuffer.wrap(new char [] { separatorChar }));
+            if (encoded.remaining() > 1) {
+                throw new IllegalArgumentException("Separator character is not a single byte in encoding "
+                        + encoding + ": " + separatorChar);
+            }
+            this.separator = encoded.get();
+        } catch (CharacterCodingException e) {
+            throw new IllegalArgumentException("Separator character cannot be converted to a byte in "
+                    + encoding + ": " + separatorChar, e);
+        }
+    }
+
+    /**
 	 * Returns a new {@link CharsetDecoder} for the {@link #encoding}.
 	 */
 	public CharsetDecoder getDecoder() {
         try {
-            Charset charset = Charset.forName(encoding);
             return charset.newDecoder().onMalformedInput(
                     CodingErrorAction.REPORT).onUnmappableCharacter(
                     CodingErrorAction.REPORT);
@@ -245,7 +220,6 @@ public final class DictionaryMetadata {
      */
     public CharsetEncoder getEncoder() {
         try {
-            Charset charset = Charset.forName(encoding);
             return charset.newEncoder();
         } catch (UnsupportedCharsetException e) {
             throw new RuntimeException(
@@ -258,161 +232,7 @@ public final class DictionaryMetadata {
 	 * a {@link RuntimeException} if this conversion is for some reason impossible
 	 * (the byte is a surrogate pair, FSA's {@link #encoding} is not available). 
 	 */
-    public char getFsaSeparatorAsChar() {
-        try {
-            CharsetDecoder decoder = getDecoder();
-            CharBuffer decoded = decoder.decode(ByteBuffer.wrap(new byte[] { separator }));
-            if (decoded.remaining() != 1) {
-                throw new RuntimeException(
-                        "FSA's separator byte takes more than one character after conversion "
-                                + " of byte 0x"
-                                + Integer.toHexString(separator)
-                                + " using encoding " + encoding);
-            }
-            return decoded.get();
-        } catch (CharacterCodingException e) {
-            throw new RuntimeException(
-                    "FSA's separator character cannot be decoded from byte value 0x"
-                            + Integer.toHexString(separator)
-                            + " using encoding " + encoding, e);
-        }
-    }
-
-	/**
-	 * Converts attributes in a {@link Map} to an instance of {@link Dictionary}
-	 * , validating attribute values.
-	 */
-	static DictionaryMetadata fromMap(Properties properties) throws IOException {
-		String separator = properties.getProperty(ATTR_NAME_SEPARATOR);
-		if (separator == null || separator.length() != 1) {
-            throw new IOException("Attribute " + ATTR_NAME_SEPARATOR
-                    + " must be " + "a single character.");
-        }
-		
-        if (separator.charAt(0) > 0xff) {
-            throw new IllegalArgumentException("Field separator not within byte range: " + (int) separator.charAt(0));
-        }
-                		
-		final String encoding = properties.getProperty(ATTR_NAME_ENCODING);
-		if (encoding == null || encoding.length() == 0) {
-			throw new IOException("Attribute " + ATTR_NAME_ENCODING
-			        + " must be " + "present and non-empty.");
-		}
-
-		final boolean usesPrefixes = Boolean.valueOf(
-		        properties.getProperty(ATTR_NAME_USES_PREFIXES, "false"))
-		        .booleanValue();
-
-		final boolean usesInfixes = Boolean.valueOf(
-		        properties.getProperty(ATTR_NAME_USES_INFIXES, "false"))
-		        .booleanValue();
-
-		final boolean ignoreNumbers = Boolean.valueOf(
-                properties.getProperty(ATTR_NAME_IGNORE_NUMBERS, "true"))
-                .booleanValue();
-
-		final boolean ignorePunctuation = Boolean.valueOf(
-	                properties.getProperty(ATTR_NAME_IGNORE_PUNCTUATION, "true"))
-	                .booleanValue();
-		
-		final boolean ignoreCamelCase = Boolean.valueOf(
-                properties.getProperty(ATTR_NAME_IGNORE_CAMEL_CASE, "true"))
-                .booleanValue();
-
-		final boolean ignoreAllUppercase = Boolean.valueOf(
-                properties.getProperty(ATTR_NAME_IGNORE_ALL_UPPERCASE, "true"))
-                .booleanValue();
-		
-		final boolean ignoreDiacritics = Boolean.valueOf(
-                properties.getProperty(ATTR_NAME_IGNORE_DIACRITICS, "true"))
-                .booleanValue();
-		
-		final boolean runOnWords = Boolean.valueOf(
-	                properties.getProperty(ATTR_NAME_RUN_ON_WORDS, "true"))
-	                .booleanValue();
-	    
-		final boolean convertCase = Boolean.valueOf(
-                properties.getProperty(ATTR_NAME_CONVERT_CASE, "true"))
-                .booleanValue();
-	      
-		final Map<String, List<String>> replacementPairs = getReplacementPairs(
-		        properties.getProperty(ATTR_NAME_REPLACEMENT_PAIRS));
-		
-		final Map<Character, List<Character>> equivalentChars = getEquivalentChars(
-                properties.getProperty(ATTR_NAME_EQUIVALENT_CHARS));
-		
-		Locale dLocale = Locale.getDefault();
-		if (properties.containsKey(ATTR_NAME_LOCALE)) {
-		    dLocale = new Locale(properties.getProperty(ATTR_NAME_LOCALE));
-		}
-		
-		final HashMap<String, String> metadata = new HashMap<String, String>();
-		for (Map.Entry<Object, Object> e : properties.entrySet()) {
-			metadata.put(e.getKey().toString(), e.getValue().toString());
-		}		
-						
-		return new DictionaryMetadata(separator.charAt(0), encoding,
-		        usesPrefixes, usesInfixes, ignoreNumbers, ignorePunctuation, 
-		        ignoreCamelCase, ignoreAllUppercase, ignoreDiacritics, 
-		        convertCase, runOnWords, replacementPairs, equivalentChars, dLocale, metadata);
-	}
-
-	
-    private static Map<Character, List<Character>> getEquivalentChars(
-            String property) throws IOException {
-        Map<Character, List<Character>> equivalentCharacters = 
-                new HashMap<Character, List<Character>>();
-        if (property != null && property.length() != 0) {
-            final String[] eqChars = property.split(", ?");
-            for (final String characterPair : eqChars) {
-                final String[] twoChars = characterPair.trim().split(" ");
-                if (twoChars.length == 2 
-                        && twoChars[0].length() == 1
-                        && twoChars[1].length() == 1) { // proper format
-                    if (!equivalentCharacters.containsKey(twoChars[0].charAt(0))) {
-                        List<Character> chList = new ArrayList<Character>();
-                        chList.add(twoChars[1].charAt(0));
-                        equivalentCharacters.put(twoChars[0].charAt(0),
-                                chList);
-                    } else {
-                        equivalentCharacters.get(twoChars[0].charAt(0)).
-                            add(twoChars[1].charAt(0));
-                    }
-                } else {
-                    throw new IOException("Attribute " + ATTR_NAME_EQUIVALENT_CHARS
-                            + " is not in the proper format. The map is " + twoChars.length +
-                            " characters long.");
-                }
-            }
-        }
-        return equivalentCharacters;
-    }
-
-    private static Map<String, List<String>> getReplacementPairs(String property) throws IOException {
-        Map<String, List<String>> replacementPairs = 
-                new HashMap<String, List<String>>();
-        if (property != null && property.length() != 0) {
-            final String[] replacements = property.split(", ?");
-            for (final String stringPair : replacements) {
-                final String[] twoStrings = stringPair.trim().split(" ");
-                if (twoStrings.length == 2) { // check format
-                    if (!replacementPairs.containsKey(twoStrings[0])) {
-                        List<String> strList = new ArrayList<String>();
-                        strList.add(twoStrings[1]);
-                        replacementPairs.put(twoStrings[0],
-                                strList);
-                    } else {
-                        replacementPairs.get(twoStrings[0]).
-                        add(twoStrings[1]);
-                    }
-                } else {
-                    throw new IOException("Attribute " + ATTR_NAME_REPLACEMENT_PAIRS
-                            + " is not in the proper format. The equivalence has " + 
-                            twoStrings.length +
-                            " strings.");
-                }
-            }
-        }
-        return replacementPairs;
+    public char getSeparatorAsChar() {
+        return separatorChar;
     }
 }

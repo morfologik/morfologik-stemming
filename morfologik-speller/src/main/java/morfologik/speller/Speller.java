@@ -124,7 +124,7 @@ public class Speller {
 		decoder = dictionaryMetadata.getDecoder();
 
 		// Multibyte separator will result in an exception here.
-		dictionaryMetadata.getFsaSeparatorAsChar();
+		dictionaryMetadata.getSeparatorAsChar();
 	}
 
 	/**
@@ -165,13 +165,13 @@ public class Speller {
       // dictionaries usually do not contain punctuation.
       boolean isAlphabetic = word.length() != 1 || isAlphabetic(word.charAt(0));
       return word.length() > 0
-          && (!dictionaryMetadata.ignorePunctuation || isAlphabetic)
-          && (!dictionaryMetadata.ignoreNumbers || !containsDigit(word))
-          && !(dictionaryMetadata.ignoreCamelCase && isCamelCase(word))
-          && !(dictionaryMetadata.ignoreAllUppercase && isAlphabetic && isAllUppercase(word))
+          && (!dictionaryMetadata.isIgnoringPunctuation() || isAlphabetic)
+          && (!dictionaryMetadata.isIgnoringNumbers() || !containsDigit(word))
+          && !(dictionaryMetadata.isIgnoringCamelCase() && isCamelCase(word))
+          && !(dictionaryMetadata.isIgnoringAllUppercase() && isAlphabetic && isAllUppercase(word))
           && !isInDictionary(word)	              
-          && (!dictionaryMetadata.convertCase || 
-              !(!isMixedCase(word) && isInDictionary(word.toLowerCase(dictionaryMetadata.dictionaryLocale)))); 
+          && (!dictionaryMetadata.isConvertingCase() || 
+              !(!isMixedCase(word) && isInDictionary(word.toLowerCase(dictionaryMetadata.getLocale())))); 
 	}
 
 	/**
@@ -193,7 +193,7 @@ public class Speller {
 		
 		return containsSeparators 
 		       && match.kind == SEQUENCE_IS_A_PREFIX
-		       && fsa.getArc(match.node, dictionaryMetadata.separator) != 0;
+		       && fsa.getArc(match.node, dictionaryMetadata.getSeparator()) != 0;
 	}
 
 	/**
@@ -205,7 +205,7 @@ public class Speller {
 	 */
 	public List<String> replaceRunOnWords(final String original) {
 		final List<String> candidates = new ArrayList<String>();
-		if (!isInDictionary(original) && dictionaryMetadata.runOnWords) {
+		if (!isInDictionary(original) && dictionaryMetadata.isSupportingRunOnWords()) {
 			final CharSequence ch = original;
 			for (int i = 2; i < ch.length(); i++) {
 				// chop from left to right
@@ -233,12 +233,12 @@ public class Speller {
 		candidates.clear();
 		if (!isInDictionary(word) && word.length() < MAX_WORD_LENGTH) {
 		    List<String> wordsToCheck = new ArrayList<String>();		    
-		    if (dictionaryMetadata.replacementPairs != null) {
+		    if (dictionaryMetadata.getReplacementPairs() != null) {
                 for (final String wordChecked : getAllReplacements(word, 0)) {
                     if (isInDictionary(wordChecked)
-                            && dictionaryMetadata.convertCase
+                            && dictionaryMetadata.isConvertingCase()
                             && isMixedCase(wordChecked)
-                            && isInDictionary(wordChecked.toLowerCase(dictionaryMetadata.dictionaryLocale))) {
+                            && isInDictionary(wordChecked.toLowerCase(dictionaryMetadata.getLocale()))) {
                         candidates.add(new CandidateData(wordChecked, 0));
                     } else {
                         wordsToCheck.add(wordChecked);
@@ -273,6 +273,7 @@ public class Speller {
 
 	private void findRepl(final int depth, final int node, final byte[] prevBytes)
 	        throws CharacterCodingException {
+	    char separatorChar = dictionaryMetadata.getSeparatorAsChar();
 	    int dist = 0; 	    		
 	    for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {	        
 	        byteBuffer = BufferUtils.ensureCapacity(byteBuffer, prevBytes.length + 1);
@@ -305,7 +306,7 @@ public class Speller {
                         addCandidate(depth, dist);
                     }
                     if (!fsa.isArcTerminal(arc)
-                            && !(containsSeparators && candidate[depth] == (char) dictionaryMetadata.separator)) {
+                            && !(containsSeparators && candidate[depth] == separatorChar)) {
                         findRepl(depth + 1, fsa.getEndNode(arc), new byte[0]);
                     }
                 }
@@ -316,8 +317,7 @@ public class Speller {
 
     private boolean isBeforeSeparator(final int arc) {
         if (containsSeparators) {
-            final int arc1 = fsa.getArc(fsa.getEndNode(arc),
-                    dictionaryMetadata.separator);
+            final int arc1 = fsa.getArc(fsa.getEndNode(arc), dictionaryMetadata.getSeparator());
             return (arc1 != 0 && !fsa.isArcTerminal(arc1));
         }
         return false;
@@ -368,17 +368,17 @@ public class Speller {
         if (x == y) {
             return true;
         }
-        if (dictionaryMetadata.equivalentChars != null) {
-            if (dictionaryMetadata.equivalentChars.containsKey(x)
-                    && dictionaryMetadata.equivalentChars.get(x).contains(y))
+        if (dictionaryMetadata.getEquivalentChars() != null) {
+            if (dictionaryMetadata.getEquivalentChars().containsKey(x)
+                    && dictionaryMetadata.getEquivalentChars().get(x).contains(y))
                 return true;
         }
-        if (dictionaryMetadata.ignoreDiacritics) {
+        if (dictionaryMetadata.isIgnoringDiacritics()) {
             String xn = Normalizer.normalize(Character.toString(x), Form.NFD);
             String yn = Normalizer.normalize(Character.toString(y), Form.NFD);
-            if (dictionaryMetadata.convertCase) {
-                xn = xn.toLowerCase(dictionaryMetadata.dictionaryLocale);
-                yn = yn.toLowerCase(dictionaryMetadata.dictionaryLocale);
+            if (dictionaryMetadata.isConvertingCase()) {
+                xn = xn.toLowerCase(dictionaryMetadata.getLocale());
+                yn = yn.toLowerCase(dictionaryMetadata.getLocale());
             }
             return xn.charAt(0) == yn.charAt(0);
         }
@@ -445,7 +445,7 @@ public class Speller {
      * (ignoring characters for which no upper-/lowercase distinction exists).
      */
     boolean isAllUppercase(final String str) {
-        return str.equals(str.toUpperCase(dictionaryMetadata.dictionaryLocale));
+        return str.equals(str.toUpperCase(dictionaryMetadata.getLocale()));
     }
 
     /**
@@ -455,7 +455,7 @@ public class Speller {
         if (!isEmpty(str)) {
             if (Character.isUpperCase(str.charAt(0))) {
                 String substring = str.substring(1);
-                return substring.equals(substring.toLowerCase(dictionaryMetadata.dictionaryLocale));
+                return substring.equals(substring.toLowerCase(dictionaryMetadata.getLocale()));
             }
         }
         return false;
@@ -479,7 +479,7 @@ public class Speller {
     boolean isMixedCase(final String str) {
         return !isAllUppercase(str)
                 && !isCapitalizedWord(str)
-                && !str.equals(str.toLowerCase(dictionaryMetadata.dictionaryLocale));
+                && !str.equals(str.toLowerCase(dictionaryMetadata.getLocale()));
     }
 
     /**
@@ -491,7 +491,7 @@ public class Speller {
                 && !isCapitalizedWord(str)
                 && Character.isUpperCase(str.charAt(0))
                 && (!(str.length() > 1) || Character.isLowerCase(str.charAt(1)))
-                && !str.equals(str.toLowerCase(dictionaryMetadata.dictionaryLocale));
+                && !str.equals(str.toLowerCase(dictionaryMetadata.getLocale()));
     }
 
     /**
@@ -503,10 +503,10 @@ public class Speller {
         sb.append(str);
         int index = fromIndex;
         boolean found = false;
-        for (final String key : dictionaryMetadata.replacementPairs.keySet()) {
+        for (final String key : dictionaryMetadata.getReplacementPairs().keySet()) {
             index = sb.indexOf(key, fromIndex);
             if (index != -1) {
-                for (final String rep : dictionaryMetadata.replacementPairs.get(key)) {
+                for (final String rep : dictionaryMetadata.getReplacementPairs().get(key)) {
                     // avoid unnecessary replacements (ex. L <-> L·L)
                     if (rep.length() <= key.length() || sb.indexOf(rep) != index) {
                         found = true;

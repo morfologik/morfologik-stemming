@@ -22,10 +22,7 @@ public class InflectionFramesTool {
 	public void inflectionFrames() throws IOException {
 		final Dictionary pl = Dictionary.getForLanguage("pl");
 		final DictionaryLookup dict = new DictionaryLookup(pl);
-
-		final CharsetDecoder decoder = Charset.forName(pl.metadata.encoding)
-		        .newDecoder().onMalformedInput(CodingErrorAction.REPORT)
-		        .onUnmappableCharacter(CodingErrorAction.REPORT);
+		final CharsetDecoder decoder = pl.metadata.getDecoder();
 
 		final HashMap<String, ArrayList<String>> forms = 
 			new HashMap<String, ArrayList<String>>();

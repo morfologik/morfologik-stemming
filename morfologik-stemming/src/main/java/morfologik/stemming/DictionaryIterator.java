@@ -27,7 +27,7 @@ public final class DictionaryIterator implements Iterator<WordData> {
 	public DictionaryIterator(Dictionary dictionary, CharsetDecoder decoder,
 	        boolean decodeStems) {
 		this.entriesIter = dictionary.fsa.iterator();
-		this.separator = dictionary.metadata.separator;
+		this.separator = dictionary.metadata.getSeparator();
 		this.dictionaryMetadata = dictionary.metadata;
 		this.decoder = decoder;
 		this.entry = new WordData(decoder);

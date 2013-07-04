@@ -1,13 +1,26 @@
 package morfologik.tools;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Map;
 
-import morfologik.fsa.*;
-import morfologik.stemming.*;
+import morfologik.fsa.FSA;
+import morfologik.fsa.FSA5;
+import morfologik.fsa.FSAInfo;
+import morfologik.fsa.FSAUtils;
+import morfologik.stemming.Dictionary;
+import morfologik.stemming.DictionaryAttribute;
+import morfologik.stemming.DictionaryLookup;
+import morfologik.stemming.WordData;
 import morfologik.util.FileUtils;
 
 import org.apache.commons.cli.CommandLine;
@@ -78,7 +91,7 @@ public final class FSADumpTool extends Tool {
 			dictionary = Dictionary.read(dictionaryFile);
 			fsa = dictionary.fsa;
 
-			final String encoding = dictionary.metadata.encoding;
+			final String encoding = dictionary.metadata.getEncoding();
 			if (!Charset.isSupported(encoding)) {
 				printWarning("Dictionary's charset is not supported "
 				        + "on this JVM: " + encoding);
@@ -117,25 +130,25 @@ public final class FSADumpTool extends Tool {
 		if (dictionary != null) {
 			printExtra("Dictionary metadata");
 			printExtra("--------------------");
-			printExtra("Encoding            : " + dictionary.metadata.encoding);
+			printExtra("Encoding            : " + dictionary.metadata.getEncoding());
 			printExtra("Separator byte      : 0x"
-			        + Integer.toHexString(dictionary.metadata.separator)
-			        + " ('" + decodeSeparator(dictionary) + "')");
+			        + Integer.toHexString(dictionary.metadata.getSeparator())
+			        + " ('" + dictionary.metadata.getSeparatorAsChar() + "')");
 			printExtra("Uses prefixes       : "
-			        + dictionary.metadata.usesPrefixes);
+			        + dictionary.metadata.isUsingPrefixes());
 			printExtra("Uses infixes        : "
-			        + dictionary.metadata.usesInfixes);
+			        + dictionary.metadata.isUsingInfixes());
 			printExtra("");
 
-			printExtra("Dictionary metadata (all keys)");
-			printExtra("---------------------------------");
-
-			for (Map.Entry<String, String> e : dictionary.metadata.metadata
-			        .entrySet()) {
-				printExtra(String
-				        .format("%-27s : %s", e.getKey(), e.getValue()));
-			}
-			printExtra("");
+			printExtra("Dictionary metadata (attributes dump)");
+            printExtra("-------------------------------------");
+            for (Map.Entry<DictionaryAttribute,String> e : dictionary.metadata.getAttributes().entrySet()) {
+                printExtra(String.format(Locale.ENGLISH, 
+                    "%-30s: %s",
+                    e.getKey().propertyName,
+                    e.getValue()));
+            }
+            printExtra("");
 		}
 
 		int sequences = 0;
@@ -150,8 +163,7 @@ public final class FSADumpTool extends Tool {
 
 			final DictionaryLookup dl = new DictionaryLookup(dictionary);
 			final StringBuilder builder = new StringBuilder();
-			final OutputStreamWriter osw = new OutputStreamWriter(os,
-			        dictionary.metadata.encoding);
+			final OutputStreamWriter osw = new OutputStreamWriter(os, dictionary.metadata.getEncoding());
 
 			CharSequence t;
 			for (WordData wd : dl) {
@@ -241,19 +253,6 @@ public final class FSADumpTool extends Tool {
      */
 	private void printWarning(String msg) {
 		System.err.println(msg);
-	}
-
-	/*
-     * 
-     */
-	private String decodeSeparator(Dictionary dictionary) {
-		try {
-			return new String(new byte[] { dictionary.metadata.separator },
-			        dictionary.metadata.encoding);
-		} catch (UnsupportedEncodingException e) {
-			return "<unsupported encoding: " + dictionary.metadata.encoding
-			        + ">";
-		}
 	}
 
 	/**

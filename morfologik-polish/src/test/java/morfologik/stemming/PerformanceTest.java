@@ -33,9 +33,9 @@ public class PerformanceTest extends AbstractBenchmark {
 		int i = 0;
 		for (ByteBuffer sequence : dict.fsa) {
 			testWords[i] = new String(sequence.array(), 0,
-			        sequence.remaining(), dict.metadata.encoding);
+			        sequence.remaining(), dict.metadata.getEncoding());
 			testWords[i] = testWords[i].substring(0, testWords[i]
-			        .indexOf(dict.metadata.separator));
+			        .indexOf(dict.metadata.getSeparator()));
 			i++;
 
 			if (i == testWords.length)
