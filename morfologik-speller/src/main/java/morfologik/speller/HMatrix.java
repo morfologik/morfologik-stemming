@@ -17,7 +17,7 @@ public class HMatrix {
 	 *        candidates;
 	 * @param maxLength (int) max length of words.
 	 * @return: Nothing. Remarks: See Oflazer. To save space, the matrix is
-	 *          stored as a vector. To save time, additional raws and
+	 *          stored as a vector. To save time, additional rows and
 	 *          columns are added. They are initialized to their distance in
 	 *          the matrix, so that no bound checking is necessary during
 	 *          access.

@@ -121,33 +121,9 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 			        "Dictionary metadata must not be null.");
 		}
 
-		try {
-			Charset charset = Charset.forName(dictionaryMetadata.encoding);
-			encoder = charset.newEncoder();
-			decoder = charset.newDecoder().onMalformedInput(
-			        CodingErrorAction.REPORT).onUnmappableCharacter(
-			        CodingErrorAction.REPORT);
-		} catch (UnsupportedCharsetException e) {
-			throw new RuntimeException(
-			        "FSA's encoding charset is not supported: "
-			                + dictionaryMetadata.encoding);
-		}
-
-		try {
-		    CharBuffer decoded = decoder.decode(ByteBuffer.wrap(new byte [] { dictionaryMetadata.separator }));
-		    if (decoded.remaining() != 1) {
-		        throw new RuntimeException("FSA's separator byte takes more than one character after conversion "
-		                + " of byte 0x" 
-		                + Integer.toHexString(dictionaryMetadata.separator) + " using encoding "
-		                + dictionaryMetadata.encoding);
-		    }
-		    this.separatorChar = decoded.get();
-		} catch (CharacterCodingException e) {
-		    throw new RuntimeException(
-		            "FSA's separator character cannot be decoded from byte value 0x"
-		            + Integer.toHexString(dictionaryMetadata.separator) + " using encoding "
-		            + dictionaryMetadata.encoding, e);
-		}
+		decoder = dictionary.metadata.getDecoder();
+		encoder = dictionary.metadata.getEncoder();
+		separatorChar = dictionary.metadata.getFsaSeparatorAsChar();
 	}
 
 	/**

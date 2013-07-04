@@ -2,7 +2,21 @@ package morfologik.stemming;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Description of attributes, their types and default values.
@@ -210,6 +224,59 @@ public final class DictionaryMetadata {
 		this.metadata = Collections
 		        .unmodifiableMap(new HashMap<String, String>(metadata));
 	}
+
+	/**
+	 * Returns a new {@link CharsetDecoder} for the {@link #encoding}.
+	 */
+	public CharsetDecoder getDecoder() {
+        try {
+            Charset charset = Charset.forName(encoding);
+            return charset.newDecoder().onMalformedInput(
+                    CodingErrorAction.REPORT).onUnmappableCharacter(
+                    CodingErrorAction.REPORT);
+        } catch (UnsupportedCharsetException e) {
+            throw new RuntimeException(
+                    "FSA's encoding charset is not supported: " + encoding);
+        }
+	}
+
+	/**
+     * Returns a new {@link CharsetEncoder} for the {@link #encoding}.
+     */
+    public CharsetEncoder getEncoder() {
+        try {
+            Charset charset = Charset.forName(encoding);
+            return charset.newEncoder();
+        } catch (UnsupportedCharsetException e) {
+            throw new RuntimeException(
+                    "FSA's encoding charset is not supported: " + encoding);
+        }
+    }
+
+	/**
+	 * Returns the {@link #separator} byte converted to a single <code>char</code>. Throws
+	 * a {@link RuntimeException} if this conversion is for some reason impossible
+	 * (the byte is a surrogate pair, FSA's {@link #encoding} is not available). 
+	 */
+    public char getFsaSeparatorAsChar() {
+        try {
+            CharsetDecoder decoder = getDecoder();
+            CharBuffer decoded = decoder.decode(ByteBuffer.wrap(new byte[] { separator }));
+            if (decoded.remaining() != 1) {
+                throw new RuntimeException(
+                        "FSA's separator byte takes more than one character after conversion "
+                                + " of byte 0x"
+                                + Integer.toHexString(separator)
+                                + " using encoding " + encoding);
+            }
+            return decoded.get();
+        } catch (CharacterCodingException e) {
+            throw new RuntimeException(
+                    "FSA's separator character cannot be decoded from byte value 0x"
+                            + Integer.toHexString(separator)
+                            + " using encoding " + encoding, e);
+        }
+    }
 
 	/**
 	 * Converts attributes in a {@link Map} to an instance of {@link Dictionary}
