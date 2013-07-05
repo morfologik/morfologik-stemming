@@ -179,8 +179,8 @@ public class DictionaryLookupTest {
         DictionaryMetadata metadata = new DictionaryMetadataBuilder()
             .separator('+')
             .encoding("iso8859-1")
-            .usesPrefixes()
-            .usesInfixes()
+            .usePrefixes()
+            .useInfixes()
             .build();
 
         final DictionaryLookup s = new DictionaryLookup(new Dictionary(fsa, metadata));

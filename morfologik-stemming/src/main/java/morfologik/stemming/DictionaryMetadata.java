@@ -23,6 +23,29 @@ import static morfologik.stemming.DictionaryAttribute.*;
  * @see Dictionary
  */
 public final class DictionaryMetadata {
+    /**
+     * Default attribute values.
+     */
+    private static Map<DictionaryAttribute, String> DEFAULT_ATTRIBUTES = new DictionaryMetadataBuilder()
+        .separator('+')
+        .ignorePunctuation()
+        .ignoreNumbers()
+        .ignoreCamelCase()
+        .ignoreAllUppercase()
+        .ignoreDiacritics()
+        .convertCase()
+        .supportRunOnWords()
+        .useInfixes(false)
+        .usePrefixes(false)
+        .toMap();
+
+    /**
+     * Required attributes.
+     */
+    private static EnumSet<DictionaryAttribute> REQUIRED_ATTRIBUTES = EnumSet.of(
+        SEPARATOR,
+        ENCODING);
+
 	/**
 	 * A separator character between fields (stem, lemma, form). The character
 	 * must be within byte range (FSA uses bytes internally).
@@ -95,28 +118,18 @@ public final class DictionaryMetadata {
      * 
      * @see DictionaryMetadataBuilder
      */
-    public DictionaryMetadata(Map<DictionaryAttribute, String> attributes) {
+    public DictionaryMetadata(Map<DictionaryAttribute, String> userAttrs) {
         this.boolAttributes = new EnumMap<DictionaryAttribute,Boolean>(DictionaryAttribute.class);
-        for (DictionaryAttribute attr : EnumSet.of(
-            IGNORE_PUNCTUATION,
-            IGNORE_NUMBERS,
-            IGNORE_CAMEL_CASE,
-            IGNORE_ALL_UPPERCASE,
-            IGNORE_DIACRITICS,
-            CONVERT_CASE,
-            RUN_ON_WORDS)) {
-            boolAttributes.put(attr, true);
-        }
+        this.attributes = new EnumMap<DictionaryAttribute, String>(DictionaryAttribute.class);
+        this.attributes.putAll(userAttrs);
 
-	    this.attributes = new EnumMap<DictionaryAttribute, String>(DictionaryAttribute.class);
-	    this.attributes.putAll(attributes);
+        EnumMap<DictionaryAttribute, String> attrs = new EnumMap<DictionaryAttribute, String>(DEFAULT_ATTRIBUTES);
+        attrs.putAll(userAttrs);
 
         // Convert some attrs from the map to local fields for performance reasons.
-	    EnumSet<DictionaryAttribute> requiredAttributes = EnumSet.of(
-	            SEPARATOR,
-	            ENCODING);
+	    EnumSet<DictionaryAttribute> requiredAttributes = EnumSet.copyOf(REQUIRED_ATTRIBUTES);
 
-	    for (Map.Entry<DictionaryAttribute,String> e : attributes.entrySet()) {
+	    for (Map.Entry<DictionaryAttribute,String> e : attrs.entrySet()) {
 	        requiredAttributes.remove(e.getKey());
 
 	        // Run validation and conversion on all of them.
@@ -156,15 +169,7 @@ public final class DictionaryMetadata {
                     break;
 
 	            case USES_INFIXES:
-                    this.usesInfixes = (Boolean) value;
-                    this.boolAttributes.put(e.getKey(), (Boolean) value);
-                    break;
-
                 case USES_PREFIXES:
-                    this.usesPrefixes = (Boolean) value;
-                    this.boolAttributes.put(e.getKey(), (Boolean) value);
-                    break;
-
 	            case IGNORE_PUNCTUATION:
 	            case IGNORE_NUMBERS:
 	            case IGNORE_CAMEL_CASE:
@@ -175,18 +180,28 @@ public final class DictionaryMetadata {
                     this.boolAttributes.put(e.getKey(), (Boolean) value);
 	                break;
 
-                default:
+	            case AUTHOR:
+	            case LICENSE:
+	            case CREATION_DATE:
                     // Just run validation.
                     e.getKey().fromString(e.getValue());
-                    break;
+	                break;
+
+                default:
+                    throw new RuntimeException("Unexpected code path (attribute should be handled but is not): " + e.getKey());
 	        }
 	    }
 
-	    if (!requiredAttributes.isEmpty()) {
-	        throw new IllegalArgumentException("At least one the required attributes was not provided: "
-	                + requiredAttributes.toString());
-	    }
+        if (!requiredAttributes.isEmpty()) {
+            throw new IllegalArgumentException("At least one the required attributes was not provided: "
+                    + requiredAttributes.toString());
+        }
 
+	    // Cache these for performance reasons.
+        this.usesInfixes = boolAttributes.get(USES_INFIXES);
+        this.usesPrefixes = boolAttributes.get(USES_PREFIXES);
+
+        // Sanity check.
 	    CharsetEncoder encoder = getEncoder();
 	    try {
             ByteBuffer encoded = encoder.encode(CharBuffer.wrap(new char [] { separatorChar }));
