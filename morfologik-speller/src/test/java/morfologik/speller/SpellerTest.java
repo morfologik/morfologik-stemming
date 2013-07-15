@@ -167,7 +167,7 @@ public class SpellerTest {
                 "rzażerzarzu, rzażerzażu, rzażeżarzu, rzażeżażu, " +
                 "żarzerzarzu, żarzerzażu, żarzeżarzu, żarzeżażu, " +
                 "żażerzarzu, żażerzażu, żażeżarzu, żażeżażu]", 
-                Arrays.toString(spell.getAllReplacements("rzarzerzarzu", 0).toArray()));
+                Arrays.toString(spell.getAllReplacements("rzarzerzarzu", 0, 0).toArray()));
 	}
 	
 	@Test

@@ -13,7 +13,9 @@ import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSATraversal;
@@ -234,7 +236,7 @@ public class Speller {
 		if (!isInDictionary(word) && word.length() < MAX_WORD_LENGTH) {
 		    List<String> wordsToCheck = new ArrayList<String>();		    
 		    if (dictionaryMetadata.getReplacementPairs() != null) {
-                for (final String wordChecked : getAllReplacements(word, 0)) {
+                for (final String wordChecked : getAllReplacements(word, 0, 0)) {
                     if (isInDictionary(wordChecked)
                             || dictionaryMetadata.isConvertingCase()
                             && isMixedCase(wordChecked)
@@ -248,26 +250,33 @@ public class Speller {
 		        wordsToCheck.add(word);
 		    }
 
-            for (final String wordChecked : wordsToCheck) {
-                word_ff = wordChecked.toCharArray();
-                wordLen = word_ff.length;
-                candidate = new char[MAX_WORD_LENGTH];
-                candLen = candidate.length;
-                e_d = (wordLen <= editDistance ? (wordLen - 1) : editDistance);
-                charBuffer = BufferUtils.ensureCapacity(charBuffer, MAX_WORD_LENGTH);
-                byteBuffer = BufferUtils.ensureCapacity(byteBuffer, MAX_WORD_LENGTH);
-                charBuffer.clear();
-                byteBuffer.clear();
-                final byte[] prevBytes = new byte[0];
-                findRepl(0, fsa.getRootNode(), prevBytes);
-            }
+		    //If at least one candidate was found with the replacement pairs (which are usual errors), 
+		    //probably there is no need for more candidates
+		    if (candidates.isEmpty()) { 		    
+		        for (final String wordChecked : wordsToCheck) {
+		            word_ff = wordChecked.toCharArray();
+		            wordLen = word_ff.length;
+		            candidate = new char[MAX_WORD_LENGTH];
+		            candLen = candidate.length;
+		            e_d = (wordLen <= editDistance ? (wordLen - 1) : editDistance);
+		            charBuffer = BufferUtils.ensureCapacity(charBuffer, MAX_WORD_LENGTH);
+		            byteBuffer = BufferUtils.ensureCapacity(byteBuffer, MAX_WORD_LENGTH);
+		            charBuffer.clear();
+		            byteBuffer.clear();
+		            final byte[] prevBytes = new byte[0];
+		            findRepl(0, fsa.getRootNode(), prevBytes);
+		        }
+		    }
 		}
 		
 		Collections.sort(candidates);
-		final List<String> candStringList = new ArrayList<String>(candidates.size());
-		for (final CandidateData cd : candidates) {
-		    candStringList.add(cd.getWord());
-		}
+	    //Use LinkedHashSet to avoid duplicates and keep the order
+	    final Set<String> candStringSet = new LinkedHashSet<String>();
+	    for (final CandidateData cd : candidates) {
+	      candStringSet.add(cd.getWord());
+	    }
+	    final List<String> candStringList = new ArrayList<String>(candStringSet.size());
+	    candStringList.addAll(candStringSet);
 		return candStringList;
 	}
 
@@ -497,33 +506,54 @@ public class Speller {
     /**
      * Returns a list of all possible replacements of a given string
      */
-    public List<String> getAllReplacements(final String str, final int fromIndex) {
-        List<String> replaced = new ArrayList<String>();
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        int index = fromIndex;
-        boolean found = false;
-        for (final String key : dictionaryMetadata.getReplacementPairs().keySet()) {
-            index = sb.indexOf(key, fromIndex);
-            if (index != -1) {
-                for (final String rep : dictionaryMetadata.getReplacementPairs().get(key)) {
-                    // avoid unnecessary replacements (ex. L <-> L·L)
-                    if (rep.length() <= key.length() || sb.indexOf(rep) != index) {
-                        found = true;
-                        replaced.addAll(getAllReplacements(str, index + key.length()));
-                        sb.replace(index, index + key.length(), rep);
-                        replaced.addAll(getAllReplacements(sb.toString(), index + rep.length()));
-                        sb.setLength(0);
-                        sb.append(str);
-                    }
-                }
-            }
-        }
-        if (!found) {
-            replaced.add(sb.toString());
-        }
+    /**
+     * Returns a list of all possible replacements of a given string
+     */
+    public List<String> getAllReplacements(final String str, final int fromIndex, final int level) {
+      List<String> replaced = new ArrayList<String>();
+      if (level>4) { // More than 4 substitutions in a word is almost impossible. Stop searching. 
         return replaced;
+      }
+      StringBuilder sb = new StringBuilder();
+      sb.append(str);
+      int index = MAX_WORD_LENGTH;
+      String key = "";
+      int keyLength=0;
+      boolean found = false;
+      // find first possible replacement after fromIndex position
+      for (final String auxKey : dictionaryMetadata.getReplacementPairs().keySet()) {
+        int auxIndex = sb.indexOf(auxKey, fromIndex);
+        if (auxIndex > -1 && auxIndex <= index) {
+          if (!(auxIndex == index && auxKey.length()<keyLength)) { //select the longest possible key
+            index = auxIndex;
+            key = auxKey;
+            keyLength = auxKey.length();
+          }
+        }
+      }
+      if (index < MAX_WORD_LENGTH) {
+        for (final String rep : dictionaryMetadata.getReplacementPairs().get(key)) {
+          // avoid unnecessary replacements (ex. L <-> L·L)
+          if (rep.length() <= key.length() || sb.indexOf(rep) != index) {
+            // start a branch without replacement (only once per key)
+            if (!found) {
+              replaced.addAll(getAllReplacements(str, index + key.length(), level + 1));
+              found = true;
+            }
+            // start a branch with replacement
+            sb.replace(index, index + key.length(), rep);
+            replaced.addAll(getAllReplacements(sb.toString(), index + rep.length(), level + 1));
+            sb.setLength(0);
+            sb.append(str);
+          }
+        }
+      }
+      if (!found) {
+        replaced.add(sb.toString());
+      }
+      return replaced;
     }
+
 
     /**
      * Sets up the word and candidate. Used only to test the edit distance in
@@ -577,7 +607,8 @@ public class Speller {
         @Override
         public int compareTo(final CandidateData cd) {
             // Assume no overflow.
-            return this.distance - cd.getDistance();
+            return ((cd.getDistance() > this.distance ? -1 :
+                (cd.getDistance() == this.distance ? 0 : 1)));
         }
     }
 }
