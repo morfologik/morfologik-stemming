@@ -503,68 +503,59 @@ public class Speller {
                 && !str.equals(str.toLowerCase(dictionaryMetadata.getLocale()));
     }
 
-    /**
-     * Returns a list of all possible replacements of a given string
-     */
-    public List<String> getAllReplacements(final String str, final int fromIndex, final int level)
-    {
-        List<String> replaced = new ArrayList<String>();
-        if (level > 4)
-        { 
-            // More than 4 substitutions in a word is almost impossible. Stop searching.
-            return replaced;
-        }
+	/**
+	 * Returns a list of all possible replacements of a given string
+	 */
+	public List<String> getAllReplacements(final String str,
+	        final int fromIndex, final int level) {
+		List<String> replaced = new ArrayList<String>();
+		if (level > 4) {
+			// More than 4 substitutions in a word is almost impossible. Stop
+			// searching.
+			return replaced;
+		}
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        int index = MAX_WORD_LENGTH;
-        String key = "";
-        int keyLength = 0;
-        boolean found = false;
+		StringBuilder sb = new StringBuilder(str);
+		int index = MAX_WORD_LENGTH;
+		String key = "";
+		int keyLength = 0;
+		boolean found = false;
 
-        // find first possible replacement after fromIndex position
-        for (final String auxKey : dictionaryMetadata.getReplacementPairs().keySet())
-        {
-            int auxIndex = sb.indexOf(auxKey, fromIndex);
-            if (auxIndex > -1 && auxIndex <= index)
-            {
-                if (!(auxIndex == index && auxKey.length() < keyLength))
-                { 
-                    // select the longest possible key
-                    index = auxIndex;
-                    key = auxKey;
-                    keyLength = auxKey.length();
-                }
-            }
-        }
+		// find first possible replacement after fromIndex position
+		for (final String auxKey : dictionaryMetadata.getReplacementPairs().keySet()) {
+			int auxIndex = sb.indexOf(auxKey, fromIndex);
+			if (auxIndex > -1 && auxIndex <= index) {
+				if (!(auxIndex == index && auxKey.length() < keyLength)) {
+					// select the longest possible key
+					index = auxIndex;
+					key = auxKey;
+					keyLength = auxKey.length();
+				}
+			}
+		}
 
-        if (index < MAX_WORD_LENGTH)
-        {
-            for (final String rep : dictionaryMetadata.getReplacementPairs().get(key))
-            {
-                // avoid unnecessary replacements (ex. L <-> L·L)
-                if (rep.length() <= key.length() || sb.indexOf(rep) != index)
-                {
-                    // start a branch without replacement (only once per key)
-                    if (!found)
-                    {
-                        replaced.addAll(getAllReplacements(str, index + key.length(), level + 1));
-                        found = true;
-                    }
-                    // start a branch with replacement
-                    sb.replace(index, index + key.length(), rep);
-                    replaced.addAll(getAllReplacements(sb.toString(), index + rep.length(), level + 1));
-                    sb.setLength(0);
-                    sb.append(str);
-                }
-            }
-        }
-        if (!found)
-        {
-            replaced.add(sb.toString());
-        }
-        return replaced;
-    }
+		if (index < MAX_WORD_LENGTH) {
+			for (final String rep : dictionaryMetadata.getReplacementPairs().get(key)) {
+				// avoid unnecessary replacements (ex. L <-> L·L)
+				if (rep.length() <= key.length() || sb.indexOf(rep) != index) {
+					// start a branch without replacement (only once per key)
+					if (!found) {
+						replaced.addAll(getAllReplacements(str, index + key.length(), level + 1));
+						found = true;
+					}
+					// start a branch with replacement
+					sb.replace(index, index + key.length(), rep);
+					replaced.addAll(getAllReplacements(sb.toString(), index + rep.length(), level + 1));
+					sb.setLength(0);
+					sb.append(str);
+				}
+			}
+		}
+		if (!found) {
+			replaced.add(sb.toString());
+		}
+		return replaced;
+	}
 
     /**
      * Sets up the word and candidate. Used only to test the edit distance in
