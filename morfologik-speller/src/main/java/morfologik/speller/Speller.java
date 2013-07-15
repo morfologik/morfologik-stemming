@@ -270,6 +270,7 @@ public class Speller {
 		}
 		
 		Collections.sort(candidates);
+		//FIXME: I'm an ugly hack
 	    //Use LinkedHashSet to avoid duplicates and keep the order
 	    final Set<String> candStringSet = new LinkedHashSet<String>();
 	    for (final CandidateData cd : candidates) {
