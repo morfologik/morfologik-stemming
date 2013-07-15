@@ -506,9 +506,6 @@ public class Speller {
     /**
      * Returns a list of all possible replacements of a given string
      */
-    /**
-     * Returns a list of all possible replacements of a given string
-     */
     public List<String> getAllReplacements(final String str, final int fromIndex, final int level) {
       List<String> replaced = new ArrayList<String>();
       if (level > 4) { // More than 4 substitutions in a word is almost impossible. Stop searching. 
@@ -553,7 +550,6 @@ public class Speller {
       }
       return replaced;
     }
-
 
     /**
      * Sets up the word and candidate. Used only to test the edit distance in
