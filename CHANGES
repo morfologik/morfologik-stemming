@@ -1,3 +1,6 @@
+1.7.1
+		 Fixed a couple of bugs in morfologik-speller, thanks to Jaume Ortolà i Font.		 
+
 1.7.0     
           Changed DictionaryMetadata API (access methods for encoder/decoder).
 
@@ -8,7 +11,7 @@
           certain attributes that may be unicode (and would be incorrectly dumped otherwise).
 
           Metadata *.info files can now be encoded in UTF-8 to support text 
-          attributes that otherwise would require text2ascii conversion
+          attributes that otherwise would require text2ascii conversion.
 
 1.6.0
           Update morfologik-polish data to Morfologik 2.0 PoliMorf (08.03.2013).

@@ -511,14 +511,14 @@ public class Speller {
      */
     public List<String> getAllReplacements(final String str, final int fromIndex, final int level) {
       List<String> replaced = new ArrayList<String>();
-      if (level>4) { // More than 4 substitutions in a word is almost impossible. Stop searching. 
+      if (level > 4) { // More than 4 substitutions in a word is almost impossible. Stop searching. 
         return replaced;
       }
       StringBuilder sb = new StringBuilder();
       sb.append(str);
       int index = MAX_WORD_LENGTH;
       String key = "";
-      int keyLength=0;
+      int keyLength = 0;
       boolean found = false;
       // find first possible replacement after fromIndex position
       for (final String auxKey : dictionaryMetadata.getReplacementPairs().keySet()) {
