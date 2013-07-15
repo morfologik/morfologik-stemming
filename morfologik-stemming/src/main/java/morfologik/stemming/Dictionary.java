@@ -69,8 +69,9 @@ public final class Dictionary {
 
 		FileUtils.assertExists(featuresFile, true, false);
 
-		return readAndClose(new FileInputStream(fsaFile), new FileInputStream(
-		        featuresFile));
+		return readAndClose(
+		        new FileInputStream(fsaFile), 
+		        new FileInputStream(featuresFile));
 	}
 
 	/**
@@ -86,19 +87,21 @@ public final class Dictionary {
 		final String fsa = fsaURL.toExternalForm();
 		final String features = getExpectedFeaturesName(fsa);
 
-		return readAndClose(ResourceUtils.openInputStream(fsa), ResourceUtils
-		        .openInputStream(features));
+		return readAndClose(
+		        ResourceUtils.openInputStream(fsa), 
+		        ResourceUtils.openInputStream(features));
 	}
 
 	/**
 	 * Attempts to load a dictionary from opened streams of FSA dictionary data
 	 * and associated metadata.
 	 */
-	public static Dictionary readAndClose(InputStream fsaData,
-	        InputStream featuresData) throws IOException {
+	public static Dictionary readAndClose(InputStream fsaData, InputStream featuresData) 
+	        throws IOException 
+	{
 		try {
 			final Properties properties = new Properties();
-			properties.load(featuresData);
+			properties.load(new InputStreamReader(featuresData, "UTF-8"));
 
 			Map<DictionaryAttribute, String> map = new HashMap<DictionaryAttribute, String>();
 			for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements();) {

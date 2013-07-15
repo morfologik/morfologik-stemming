@@ -3,6 +3,13 @@
 
           Initial version of morfologik-speller component.
 
+          Minor changes to the FSADumpTool: the header block is always UTF-8 encoded,
+          the default platform encoding does not matter. This is done to always support
+          certain attributes that may be unicode (and would be incorrectly dumped otherwise).
+
+          Metadata *.info files can now be encoded in UTF-8 to support text 
+          attributes that otherwise would require text2ascii conversion
+
 1.6.0
           Update morfologik-polish data to Morfologik 2.0 PoliMorf (08.03.2013).
           Deprecated DICTIONARY constants (unified dictionary only).

@@ -1,5 +1,6 @@
 #
 # Dictionary properties.
+# UTF-8 encoding or native2ascii has to be used for non-ASCII data.
 #
 
 fsa.dict.separator=+
@@ -10,6 +11,5 @@ fsa.dict.uses-infixes=false
 
 fsa.dict.speller.locale=pl_PL
 fsa.dict.speller.ignore-diacritics=true
-#note: native2ascii has to be used here!
-fsa.dict.speller.equivalent-chars=x \u017a, l \u0142, u \u00f3, \u00f3 u
-fsa.dict.speller.replacement-pairs=rz \u017c, \u017c rz, ch h, h ch, \u0119 en, en \u0119
+fsa.dict.speller.equivalent-chars=x ź, l ł, u ó, ó u
+fsa.dict.speller.replacement-pairs=rz ż, ż rz, ch h, h ch, ę en, en ę
