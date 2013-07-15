@@ -236,7 +236,7 @@ public class Speller {
 		    if (dictionaryMetadata.getReplacementPairs() != null) {
                 for (final String wordChecked : getAllReplacements(word, 0)) {
                     if (isInDictionary(wordChecked)
-                            && dictionaryMetadata.isConvertingCase()
+                            || dictionaryMetadata.isConvertingCase()
                             && isMixedCase(wordChecked)
                             && isInDictionary(wordChecked.toLowerCase(dictionaryMetadata.getLocale()))) {
                         candidates.add(new CandidateData(wordChecked, 0));
