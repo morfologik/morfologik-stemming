@@ -145,6 +145,9 @@ public enum DictionaryAttribute {
     
     /**
      * Replacement pairs for non-obvious candidate search in a speller dictionary.
+     * For example, Polish <tt>rz</tt> is phonetically equivalent to <tt>ż</tt>, 
+     * and this may be specified here to allow looking for replacements of <tt>rz</tt> with <tt>ż</tt> 
+     * and vice versa.
      */
     REPLACEMENT_PAIRS("fsa.dict.speller.replacement-pairs") {
         @Override
