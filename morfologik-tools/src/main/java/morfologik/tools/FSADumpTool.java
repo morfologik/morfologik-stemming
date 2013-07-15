@@ -10,8 +10,12 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSA5;
@@ -33,9 +37,14 @@ import org.apache.commons.cli.Options;
  */
 public final class FSADumpTool extends Tool {
 	/**
-	 * Writer used to print messages and dictionary dump.
+	 * Direct binary stream used for dictionary dumps.
 	 */
 	private OutputStream os;
+
+	/**
+     * A writer for messages and any text-based output.
+     */
+    private Writer w;
 
 	/**
 	 * Print raw data only, no headers.
@@ -86,6 +95,7 @@ public final class FSADumpTool extends Tool {
 		}
 
 		this.os = new BufferedOutputStream(System.out, 1024 * 32);
+		this.w =  new OutputStreamWriter(os, "UTF-8");
 
 		if (hasMetadata(dictionaryFile)) {
 			dictionary = Dictionary.read(dictionaryFile);
@@ -104,16 +114,15 @@ public final class FSADumpTool extends Tool {
 		}
 
 		printExtra("FSA properties");
-		printExtra("--------------------");
-		printExtra("FSA implementation  : " + fsa.getClass().getName());
-		printExtra("Compiled with flags : " + fsa.getFlags().toString());
+		printExtra("--------------");
+		printExtra("FSA implementation     : " + fsa.getClass().getName());
+		printExtra("Compiled with flags    : " + fsa.getFlags().toString());
 
 		if (!dataOnly) {
     		final FSAInfo info = new FSAInfo(fsa);
-    		printExtra("Number of arcs      : " 
-    				+ info.arcsCount + "/" + info.arcsCountTotal);
-    		printExtra("Number of nodes     : " + info.nodeCount);
-    		printExtra("Number of final st. : " + info.finalStatesCount);
+    		printExtra("Number of arcs         : " + info.arcsCount + "/" + info.arcsCountTotal);
+    		printExtra("Number of nodes        : " + info.nodeCount);
+    		printExtra("Number of final states : " + info.finalStatesCount);
     		printExtra("");
 		}
 
@@ -122,29 +131,25 @@ public final class FSADumpTool extends Tool {
 
 		if (fsa instanceof FSA5) {
 			printExtra("FSA5 properties");
-			printExtra("--------------------");
+			printExtra("---------------");
 			printFSA5((FSA5) fsa);			
 			printExtra("");
 		}
 
 		if (dictionary != null) {
 			printExtra("Dictionary metadata");
-			printExtra("--------------------");
-			printExtra("Encoding            : " + dictionary.metadata.getEncoding());
-			printExtra("Separator byte      : 0x"
-			        + Integer.toHexString(dictionary.metadata.getSeparator())
-			        + " ('" + dictionary.metadata.getSeparatorAsChar() + "')");
-			printExtra("Uses prefixes       : "
-			        + dictionary.metadata.isUsingPrefixes());
-			printExtra("Uses infixes        : "
-			        + dictionary.metadata.isUsingInfixes());
-			printExtra("");
+            printExtra("-------------------");
+            
+            Map<DictionaryAttribute,String> values =
+                new LinkedHashMap<DictionaryAttribute,String>(dictionary.metadata.getAttributes());
+            values.put(DictionaryAttribute.ENCODING, dictionary.metadata.getEncoding());
+            values.put(DictionaryAttribute.SEPARATOR, "0x"
+                + Integer.toHexString(dictionary.metadata.getSeparator())
+                + " ('" + dictionary.metadata.getSeparatorAsChar() + "')");
 
-			printExtra("Dictionary metadata (attributes dump)");
-            printExtra("-------------------------------------");
-            for (Map.Entry<DictionaryAttribute,String> e : dictionary.metadata.getAttributes().entrySet()) {
-                printExtra(String.format(Locale.ENGLISH, 
-                    "%-30s: %s",
+            for (Map.Entry<DictionaryAttribute,String> e : values.entrySet()) {
+                printExtra(String.format(Locale.ENGLISH,
+                    "%-40s: %s",
                     e.getKey().propertyName,
                     e.getValue()));
             }
@@ -189,7 +194,6 @@ public final class FSADumpTool extends Tool {
 			osw.flush();
 		} else {
 			if (dot) {
-				Writer w = new OutputStreamWriter(os);
 				FSAUtils.toDot(w, fsa, fsa.getRootNode());
 				w.flush();
 			} else {
@@ -221,10 +225,10 @@ public final class FSADumpTool extends Tool {
 	 * Print {@link FSA5}-specific stuff.
 	 */
 	private void printFSA5(FSA5 fsa) throws IOException {
-		printExtra("GTL                 : " + fsa.gtl);
-		printExtra("Node extra data     : " + fsa.nodeDataLength);
-		printExtra("Annotation separator: " + byteAsChar(fsa.annotation));
-		printExtra("Filler character    : " + byteAsChar(fsa.filler));
+		printExtra("GTL                    : " + fsa.gtl);
+		printExtra("Node extra data        : " + fsa.nodeDataLength);
+		printExtra("Annotation separator   : " + byteAsChar(fsa.annotation));
+		printExtra("Filler character       : " + byteAsChar(fsa.filler));
     }
 
 	/**
@@ -244,8 +248,9 @@ public final class FSADumpTool extends Tool {
 	private void printExtra(String msg) throws IOException {
 		if (dataOnly)
 			return;
-		os.write(msg.getBytes());
-		os.write(0x0a);
+		w.write(msg);
+		w.write('\n');
+		w.flush();
 	}
 
 	/*

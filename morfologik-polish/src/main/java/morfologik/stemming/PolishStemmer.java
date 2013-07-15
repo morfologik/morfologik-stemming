@@ -16,31 +16,12 @@ public final class PolishStemmer implements IStemmer, Iterable<WordData> {
 	 */
 	private final List<DictionaryLookup> delegate = new ArrayList<DictionaryLookup>();
 
-	/**
-	 * The lexical resources have been unified into PoliMorf dictionaries. This enum
-	 * will be removed in the next version. 
-	 */
-	@Deprecated()
-	public static enum DICTIONARY {
-        MORFOLOGIK,
-	    MORFEUSZ,
-	    COMBINED;
-	}
-
 	/*
 	 * 
 	 */
 	public PolishStemmer() {
 	    delegate.add(new DictionaryLookup(Dictionary.getForLanguage("pl")));
 	}
-
-	/**
-     * @see PolishStemmer 
-     */
-	@Deprecated
-    public PolishStemmer(DICTIONARY dictionary) {
-        this();
-    }
 
 	/**
 	 * {@inheritDoc}
