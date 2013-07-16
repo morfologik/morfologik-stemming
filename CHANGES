@@ -1,5 +1,5 @@
 1.7.1
-		 Fixed a couple of bugs in morfologik-speller, thanks to Jaume Ortolà i Font.		 
+          Fixed a couple of bugs in morfologik-speller, thanks to Jaume Ortolà i Font.
 
 1.7.0     
           Changed DictionaryMetadata API (access methods for encoder/decoder).
