@@ -509,7 +509,8 @@ public class Speller {
      */
     public List<String> getAllReplacements(final String str, final int fromIndex, final int level) {
       List<String> replaced = new ArrayList<String>();
-      if (level > 4) { // More than 4 substitutions in a word is almost impossible. Stop searching. 
+      if (level > 6) { // Stop searching at some point 
+    	replaced.add(str);  
         return replaced;
       }
       StringBuilder sb = new StringBuilder();
