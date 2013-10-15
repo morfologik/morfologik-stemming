@@ -43,7 +43,6 @@ public class MorphEncodingToolTest {
 		Assert.assertEquals("passagère+Eer+tag", testOutput.readLine());
 		Assert.assertEquals("nieduży+Iduży+test", testOutput.readLine());
 		Assert.assertEquals("abcd+B+xyz", testOutput.readLine());
-
 		testOutput.close();
 
 		// prefix

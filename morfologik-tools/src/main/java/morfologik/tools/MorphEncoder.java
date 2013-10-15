@@ -1,7 +1,5 @@
 package morfologik.tools;
 
-import java.io.UnsupportedEncodingException;
-
 import morfologik.fsa.FSA5;
 
 /**
@@ -18,8 +16,6 @@ public final class MorphEncoder {
 
 	private static final int MAX_PREFIX_LEN = 3;
 	private static final int MAX_INFIX_LEN = 3;
-
-	private static final String UTF8 = "UTF-8";	
 
 	public MorphEncoder() {
 		this(FSA5.DEFAULT_ANNOTATION);
@@ -67,7 +63,6 @@ public final class MorphEncoder {
 	 * where '+' is a separator, K is a character that specifies how many
 	 * characters should be deleted from the end of the inflected form to
 	 * produce the lexeme by concatenating the stripped string with the ending.
-	 * 
 	 */
 	public byte[] standardEncode(final byte[] wordForm,
 	        final byte[] wordLemma, final byte[] wordTag) {
@@ -84,10 +79,10 @@ public final class MorphEncoder {
 		pos += copyTo(bytes, pos, wordForm);
 		pos += copyTo(bytes, pos, annotationSeparator);
 		if (prefix == 0) {
-			pos += copyTo(bytes, pos, (byte) ((l1 + 65) & 0xff));
+			pos += copyTo(bytes, pos, (byte) ((l1 + 'A') & 0xff));
 			pos += copyTo(bytes, pos, wordLemma);
 		} else {
-			pos += copyTo(bytes, pos, (byte) ((l1 - prefix + 65) & 0xff));
+			pos += copyTo(bytes, pos, (byte) ((l1 - prefix + 'A') & 0xff));
 			pos += copyTo(bytes, pos, subsequence(wordLemma, prefix));
 		}
 		pos += copyTo(bytes, pos, annotationSeparator);
@@ -151,8 +146,7 @@ public final class MorphEncoder {
 				pos += copyTo(bytes, pos, wordLemma);
 			} else {
 				pos += copyTo(bytes, pos, (byte) ((prefixFound + 65) & 0xff));
-				pos += copyTo(bytes, pos,
-				        (byte) ((l1 - prefixFound - prefix1 + 65) & 0xff));
+				pos += copyTo(bytes, pos, (byte) ((l1 - prefixFound - prefix1 + 65) & 0xff));
 				pos += copyTo(bytes, pos, subsequence(wordLemma, prefix1));
 			}
 		} else {
@@ -295,105 +289,5 @@ public final class MorphEncoder {
 		final byte[] finalArray = new byte[pos];
 		System.arraycopy(bytes, 0, finalArray, 0, pos);
 		return finalArray;
-	}
-
-	/**
-	 * Converts a byte array to a given encoding.
-	 * 
-	 * @param str
-	 *            Byte-array to be converted.
-	 * @return Java String. If decoding is unsuccessful, the string is empty.
-	 */
-	protected static String asString(final byte[] str, final String encoding) {
-		try {
-	        return new String(str, encoding);
-        } catch (UnsupportedEncodingException e) {
-	        return "";
-        }
-	}
-
-	/**
-	 * A UTF-8 variant of {@link #standardEncode(byte[], byte[], byte[])} This
-	 * method converts the wordForm, wordLemma and tag to the form:
-	 * 
-	 * <pre>
-	 * wordForm + Kending + tags
-	 * </pre>
-	 * 
-	 * where '+' is a separator, K is a character that specifies how many
-	 * characters should be deleted from the end of the inflected form to
-	 * produce the lexeme by concatenating the stripped string with the ending.
-	 * 
-	 * @throws UnsupportedEncodingException
-	 */
-	public String standardEncodeUTF8(final String wordForm,
-	        final String wordLemma, final String wordTag)
-	        throws UnsupportedEncodingException {
-		return asString(standardEncode(wordForm.getBytes(UTF8), wordLemma
-		        .getBytes(UTF8), wordTag.getBytes(UTF8)), UTF8);
-	}
-
-	/**
-	 * A UTF-8 variant of {@link #prefixEncode(byte[], byte[], byte[])} This
-	 * method converts wordform, wordLemma and the tag to the form:
-	 * <pre>
-	 * inflected_form + LKending + tags
-	 * </pre>
-	 * <p>
-	 * where '+' is a separator, L is the number of characters to be deleted
-	 * from the beginning of the word ("A" means none, "B" means one, "C" - 2,
-	 * etc.), K is a character that specifies how many characters should be
-	 * deleted from the end of the inflected form to produce the lexeme by
-	 * concatenating the stripped string with the ending ("A" means none,
-	 * "B' - 1, "C" - 2, and so on).
-	 * 
-	 * @param wordForm
-	 *            - inflected word form
-	 * @param wordLemma
-	 *            - canonical form
-	 * @param wordTag
-	 *            - tag
-	 * @return the encoded string
-	 * @throws UnsupportedEncodingException
-	 */
-	public String prefixEncodeUTF8(final String wordForm,
-	        final String wordLemma, final String wordTag)
-	        throws UnsupportedEncodingException {
-		return asString(prefixEncode(wordForm.getBytes(UTF8), wordLemma
-		        .getBytes(UTF8), wordTag.getBytes(UTF8)), UTF8);
-	}
-
-	/**
-	 * A UTF-8 variant of {@link #infixEncode(byte[], byte[], byte[])}.
-	 * 
-	 * This method converts wordform, wordLemma and the tag to the form:
-	 * <pre>
-	 * inflected_form + MLKending + tags
-	 * </pre>
-	 * <p>
-	 * where '+' is a separator, M is the position of characters to be deleted
-	 * towards the beginning of the inflected form ("A" means from the
-	 * beginning, "B" from the second character, "C" - from the third one, and
-	 * so on), L is the number of characters to be deleted from the position
-	 * specified by M ("A" means none, "B" means one, "C" - 2, etc.), K is a
-	 * character that specifies how many characters should be deleted from the
-	 * end of the inflected form to produce the lexeme by concatenating the
-	 * stripped string with the ending ("A" means none, "B' - 1, "C" - 2, and so
-	 * on).
-	 * 
-	 * @param wordForm
-	 *            - inflected word form
-	 * @param wordLemma
-	 *            - canonical form
-	 * @param wordTag
-	 *            - tag
-	 * @return the encoded string
-	 * @throws UnsupportedEncodingException
-	 */
-	public String infixEncodeUTF8(final String wordForm,
-	        final String wordLemma, final String wordTag)
-	        throws UnsupportedEncodingException {
-		return asString(infixEncode(wordForm.getBytes(UTF8), wordLemma
-		        .getBytes(UTF8), wordTag.getBytes(UTF8)), UTF8);
 	}
 }
