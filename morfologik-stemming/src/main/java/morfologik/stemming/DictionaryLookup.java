@@ -272,7 +272,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 		// Determine inflected string's length in bytes, in the same encoding.
 		final byte[] infBytes = inflectedBuffer.array();
 		final int infLen = inflectedBuffer.remaining();
-		final int code0 = bytes[0] - 'A';
+		final int code0 = (bytes[0] - 'A') & 0xFF;
 
 		final boolean fsaPrefixes = metadata.isUsingPrefixes();
 		final boolean fsaInfixes = metadata.isUsingInfixes();
