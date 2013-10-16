@@ -1,5 +1,9 @@
 package morfologik.tools;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+
 import morfologik.fsa.FSA5;
 
 /**
@@ -17,6 +21,11 @@ public final class MorphEncoder {
 	private static final int MAX_PREFIX_LEN = 3;
 	private static final int MAX_INFIX_LEN = 3;
 
+	/**
+	 * Private shared buffer for concatenating stuff.
+	 */
+    private final ByteArrayOutputStream buf = new ByteArrayOutputStream();
+
 	public MorphEncoder() {
 		this(FSA5.DEFAULT_ANNOTATION);
 	}
@@ -25,14 +34,15 @@ public final class MorphEncoder {
 		this.annotationSeparator = annotationSeparator;
 	}
 	
-	public static int commonPrefix(final byte[] s1, final byte[] s2) {
-		final int maxLen = Math.min(s1.length, s2.length);
-		for (int i = 0; i < maxLen; i++) {
-	        if (s1[i] != s2[i]) {
-	            return i;
-            }
-        }
-		return maxLen;
+	/**
+	 * Compute the number of prefix bytes in common.
+	 */
+	static int commonPrefix(final byte[] s1, final byte[] s2) {
+	    int i = 0, max = Math.min(s1.length, s2.length);
+		while (i < max && s1[i] == s2[i]) {
+		    i++;
+		}
+		return i;
 	}
 
 	private static byte[] subsequence(final byte[] bytes, final int start) {
@@ -64,32 +74,32 @@ public final class MorphEncoder {
 	 * characters should be deleted from the end of the inflected form to
 	 * produce the lexeme by concatenating the stripped string with the ending.
 	 */
-	public byte[] standardEncode(final byte[] wordForm,
-	        final byte[] wordLemma, final byte[] wordTag) {
-		final int l1 = wordForm.length;
-		final int prefix = commonPrefix(wordForm, wordLemma);
-		final int len = wordLemma.length - prefix;
-		int pos = 0;		
-		// 3 = 2 separators and K character
-		int arrayLen = l1 + len + 3;		
-		if (wordTag != null) { //wordTag may be empty for stemming
-			arrayLen += wordTag.length;
-		}		
-		final byte[] bytes = new byte[arrayLen]; 
-		pos += copyTo(bytes, pos, wordForm);
-		pos += copyTo(bytes, pos, annotationSeparator);
-		if (prefix == 0) {
-			pos += copyTo(bytes, pos, (byte) ((l1 + 'A') & 0xff));
-			pos += copyTo(bytes, pos, wordLemma);
-		} else {
-			pos += copyTo(bytes, pos, (byte) ((l1 - prefix + 'A') & 0xff));
-			pos += copyTo(bytes, pos, subsequence(wordLemma, prefix));
-		}
-		pos += copyTo(bytes, pos, annotationSeparator);
-		if (wordTag != null) {
-			pos += copyTo(bytes, pos, wordTag);
-		}
-		return bytes;
+	public byte[] standardEncode(byte[] wordForm, byte[] wordLemma, byte[] wordTag) throws IOException {
+        final int prefixLength = commonPrefix(wordForm, wordLemma);
+
+        // Check boundary condition.
+        final int suffixStripLength = wordForm.length - prefixLength; 
+        if (suffixStripLength > 255) {
+            throw new IOException("Diverging suffix to be removed from wordForm is too long (cannot be encoded): " +
+                suffixStripLength +
+                ", wordForm: " + Arrays.toString(wordForm) + 
+                ", wordLemma: " + Arrays.toString(wordLemma));
+        }
+
+        buf.reset();
+
+        buf.write(wordForm);
+        buf.write(annotationSeparator & 0xFF);
+
+        buf.write((suffixStripLength + 'A') & 0xff);
+        buf.write(wordLemma, prefixLength, wordLemma.length - prefixLength);
+        buf.write(annotationSeparator & 0xFF);
+
+        if (wordTag != null) {
+            buf.write(wordTag);
+        }
+
+        return buf.toByteArray();
 	}
 
 	/**

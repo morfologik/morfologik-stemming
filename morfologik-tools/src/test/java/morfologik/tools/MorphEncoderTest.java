@@ -1,15 +1,22 @@
 package morfologik.tools;
 
+import static morfologik.tools.MorphEncoder.commonPrefix;
 import static org.junit.Assert.assertEquals;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
-import morfologik.tools.MorphEncoder;
+import morfologik.fsa.FSA5;
+import morfologik.stemming.DictionaryLookup;
+import morfologik.stemming.DictionaryMetadata;
+import morfologik.stemming.DictionaryMetadataBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import static morfologik.tools.MorphEncoder.*;
+import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
 
 /*
  * 
@@ -30,7 +37,7 @@ public class MorphEncoderTest {
 	}
 
 	@Test
-	public void testStandardEncode() throws UnsupportedEncodingException {
+	public void testStandardEncode() throws Exception {
 		assertEquals("abc+Ad+tag", 
 				asString(encoder.standardEncode(
 						"abc".getBytes("UTF-8"), 
@@ -42,7 +49,7 @@ public class MorphEncoderTest {
 	}
 
 	@Test
-	public void testSeparatorChange() throws UnsupportedEncodingException {
+	public void testSeparatorChange() throws Exception {
 		assertEquals("abc+Ad+tag", 
 			asString(encoder.standardEncode(
 					"abc".getBytes("UTF-8"), 
@@ -107,7 +114,7 @@ public class MorphEncoderTest {
 	}
 
 	@Test
-	public void testUTF8Boundary() throws UnsupportedEncodingException {
+	public void testUTF8Boundary() throws Exception {
 		assertEquals("passagère+Eer+tag", standardEncodeUTF8("passagère", "passager", "tag"));
 		assertEquals("passagère+AAEer+tag", infixEncodeUTF8("passagère", "passager", "tag"));
 		assertEquals("passagère+AEer+tag", prefixEncodeUTF8("passagère", "passager", "tag"));
@@ -117,7 +124,42 @@ public class MorphEncoderTest {
 	public void testAsString() throws UnsupportedEncodingException {
 		assertEquals("passagère", asString("passagère".getBytes("UTF-8"), "UTF-8"));
 	}
-	
+
+    @Test
+    public void testSufixEncodingLimits() throws Exception {
+        for (int i = 0; i <= 255; i++) {
+            String wordForm  = "" + Strings.padEnd("", i, 'Z');
+            String wordLemma = "Y";
+            byte [] encoded = encoder.standardEncode(wordForm.getBytes(UTF8), wordLemma.getBytes(UTF8), null);
+            int firstSeparatorPos = indexOf(encoded, 0, FSA5.DEFAULT_ANNOTATION);
+            int secondSeparatorPos = indexOf(encoded, firstSeparatorPos + 1, FSA5.DEFAULT_ANNOTATION);
+            System.out.println(new String(encoded, UTF8));
+
+            ByteBuffer decodedStem = DictionaryLookup.decodeBaseForm(
+                ByteBuffer.allocate(0),
+                encoded, firstSeparatorPos,
+                ByteBuffer.wrap(encoded, firstSeparatorPos + 1, secondSeparatorPos - (firstSeparatorPos + 1)),
+                new DictionaryMetadataBuilder()
+                    .encoding(Charsets.UTF_8)
+                    .build());
+
+            decodedStem.flip();
+            byte [] result = new byte [decodedStem.remaining()];
+            decodedStem.get(result);
+            System.out.println(new String(result, UTF8));
+        }
+    }
+
+    private static int indexOf(byte[] array, int i, byte b) {
+        for (; i < array.length; i++) {
+            if (array[i] == b) {
+                return i;
+            }
+        }
+        throw new RuntimeException("Expected the element to exist in array: "
+            + "0x" + Integer.toHexString(b) + ", array: " + Arrays.toString(array));
+    }
+
     /**
      * Converts a byte array to a given encoding.
      * 
@@ -149,7 +191,7 @@ public class MorphEncoderTest {
      */
     String standardEncodeUTF8(final String wordForm,
             final String wordLemma, final String wordTag)
-            throws UnsupportedEncodingException {
+            throws Exception {
         return asString(
             encoder.standardEncode(
                 wordForm.getBytes(UTF8), 
