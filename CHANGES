@@ -1,3 +1,8 @@
+1.7.2
+          A quick fix for incorrect decoding of certain suffixes (long suffixes).
+
+          Increased max. recursion level in Speller to 6 from 4. (Jaume Ortolà)
+
 1.7.1
           Fixed a couple of bugs in morfologik-speller, thanks to Jaume Ortolà i Font.
 
