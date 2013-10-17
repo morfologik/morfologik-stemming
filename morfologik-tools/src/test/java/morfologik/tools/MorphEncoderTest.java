@@ -9,7 +9,6 @@ import java.util.Arrays;
 
 import morfologik.fsa.FSA5;
 import morfologik.stemming.DictionaryLookup;
-import morfologik.stemming.DictionaryMetadata;
 import morfologik.stemming.DictionaryMetadataBuilder;
 
 import org.junit.Before;
