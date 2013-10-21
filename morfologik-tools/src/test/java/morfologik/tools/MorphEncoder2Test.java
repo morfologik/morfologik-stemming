@@ -23,7 +23,10 @@ public class MorphEncoder2Test extends RandomizedTest {
 
     @ParametersFactory
     public static List<Object[]> testFactory() {
-        return Arrays.asList($$($(new MorphEncoder2.TrimSuffixEncoder())));
+        return Arrays.asList($$(
+            $(new MorphEncoder2.TrimSuffixEncoder()),
+            $(new MorphEncoder2.TrimPrefixAndSuffixEncoder())
+        ));
     }
 
     @Test

@@ -49,7 +49,7 @@ public final class MorphEncoder2 {
         
         @Override
         public String toString() {
-            return "TrimSuffixEncoder";
+            return getClass().getSimpleName();
         }
     }
 
@@ -58,11 +58,13 @@ public final class MorphEncoder2 {
      */
     public static class TrimPrefixAndSuffixEncoder implements IEncoder {
         public ByteArrayList encode(ByteArrayList src, ByteArrayList dst, ByteArrayList encoded) {
-            // Search for the maximum matching subsequence that is encodable. 
+            // Search for the maximum matching subsequence that can be encoded. 
             int maxSubsequenceLength = 0;
             int maxSubsequenceIndex = 0;
             for (int i = 0; i < src.size(); i++) {
+                // prefix at i => shared subsequence (infix)
                 int sharedPrefix = sharedPrefixLength(src, i, dst, 0);
+                // Only update maxSubsequenceLength if we will be able to encode it.
                 if (sharedPrefix > maxSubsequenceLength
                         && i < REMOVE_EVERYTHING
                         && (src.size() - (i + sharedPrefix)) < REMOVE_EVERYTHING) {
@@ -71,9 +73,9 @@ public final class MorphEncoder2 {
                 }
             }
 
+            // Determine how much to remove (and where) from src to get a prefix of dst.
             int truncatePrefixBytes = maxSubsequenceIndex;
             int truncateSuffixBytes = (src.size() - (maxSubsequenceIndex + maxSubsequenceLength));
-
             if (truncatePrefixBytes >= REMOVE_EVERYTHING ||
                 truncateSuffixBytes >= REMOVE_EVERYTHING) {
                 maxSubsequenceIndex = maxSubsequenceLength = 0;
@@ -88,9 +90,25 @@ public final class MorphEncoder2 {
         }
 
         public ByteArrayList decode(ByteArrayList src, ByteArrayList encoded, ByteArrayList dst) {
-            // TODO: write me.
+            int truncatePrefixBytes = (encoded.get(0) - 'A') & 0xFF;
+            int truncateSuffixBytes = (encoded.get(1) - 'A') & 0xFF;
+
+            if (truncatePrefixBytes == REMOVE_EVERYTHING ||
+                truncateSuffixBytes == REMOVE_EVERYTHING) {
+                truncatePrefixBytes = src.size();
+                truncateSuffixBytes = 0;
+            }
+
+            dst.add(src.buffer, truncatePrefixBytes, src.size() - (truncateSuffixBytes + truncatePrefixBytes));
+            dst.add(encoded.buffer, 2, encoded.size() - 2);
+
             return dst;
         }
+        
+        @Override
+        public String toString() {
+            return getClass().getSimpleName();
+        }        
     }
 
     /**
