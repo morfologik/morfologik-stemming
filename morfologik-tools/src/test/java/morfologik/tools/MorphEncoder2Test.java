@@ -11,6 +11,7 @@ import com.carrotsearch.hppc.ByteArrayList;
 import com.carrotsearch.randomizedtesting.RandomizedTest;
 import com.carrotsearch.randomizedtesting.annotations.Name;
 import com.carrotsearch.randomizedtesting.annotations.ParametersFactory;
+import com.google.common.base.Charsets;
 
 public class MorphEncoder2Test extends RandomizedTest {
     
@@ -25,14 +26,15 @@ public class MorphEncoder2Test extends RandomizedTest {
     public static List<Object[]> testFactory() {
         return Arrays.asList($$(
             $(new MorphEncoder2.TrimSuffixEncoder()),
-            $(new MorphEncoder2.TrimPrefixAndSuffixEncoder())
+            $(new MorphEncoder2.TrimPrefixAndSuffixEncoder()),
+            $(new MorphEncoder2.TrimInfixAndSuffixEncoder())
         ));
     }
 
     @Test
     public void testEncodeSuffixOnRandomSequences() {
         for (int i = 0; i < 10000; i++) {
-            assertEncodeSuffix(
+            assertRoundtripEncode(
                 randomAsciiOfLengthBetween(0, 500),
                 randomAsciiOfLengthBetween(0, 500));
         }
@@ -40,14 +42,18 @@ public class MorphEncoder2Test extends RandomizedTest {
 
     @Test
     public void testEncodeSuffixOnSimpleCases() {
-        assertEncodeSuffix("", "");
-        assertEncodeSuffix("abc", "ab");
-        assertEncodeSuffix("abc", "abx");
-        assertEncodeSuffix("ab", "abc");
-        assertEncodeSuffix("xabc", "abc");
+        assertRoundtripEncode("", "");
+        assertRoundtripEncode("abc", "ab");
+        assertRoundtripEncode("abc", "abx");
+        assertRoundtripEncode("ab", "abc");
+        assertRoundtripEncode("xabc", "abc");
+        assertRoundtripEncode("axbc", "abc");
+        assertRoundtripEncode("axybc", "abc");
+        assertRoundtripEncode("axybc", "abc");
+        assertRoundtripEncode("azbc", "abcxy");
     }
 
-    private void assertEncodeSuffix(String srcString, String dstString)
+    private void assertRoundtripEncode(String srcString, String dstString)
     {
         ByteArrayList src = ByteArrayList.from(srcString.getBytes(UTF8));
         ByteArrayList dst = ByteArrayList.from(dstString.getBytes(UTF8));
@@ -57,16 +63,23 @@ public class MorphEncoder2Test extends RandomizedTest {
         coder.encode(src, dst, encoded);
         coder.decode(src, encoded, decoded);
 
+        if (!dst.equals(decoded)) {
+            System.out.println("src: " + new String(src.toArray(), Charsets.UTF_8));
+            System.out.println("dst: " + new String(dst.toArray(), Charsets.UTF_8));
+            System.out.println("enc: " + new String(encoded.toArray(), Charsets.UTF_8));
+            System.out.println("dec: " + new String(decoded.toArray(), Charsets.UTF_8));
+        }
+        
         assertEquals(dst, decoded);
     }
 
     public static void main(String [] args) {
         //ByteBuffer src = ByteBuffer.wrap("x123foo45abc".getBytes(UTF_8));
         //ByteBuffer dst = ByteBuffer.wrap("12345def".getBytes(UTF_8));
-        ByteArrayList src = ByteArrayList.from("0123123456789".getBytes(UTF_8));
+        ByteArrayList src = ByteArrayList.from("1a2345678Y".getBytes(UTF_8));
         ByteArrayList dst = ByteArrayList.from("123456789X".getBytes(UTF_8));
 
-        MorphEncoder2.IEncoder coder = new MorphEncoder2.TrimPrefixAndSuffixEncoder();
+        MorphEncoder2.IEncoder coder = new MorphEncoder2.TrimInfixAndSuffixEncoder();
         ByteArrayList out = coder.encode(src, dst, ByteArrayList.newInstance());
         System.out.println(new String(out.toArray()));
         System.out.println(new String(coder.decode(src, out, ByteArrayList.newInstance()).toArray()));

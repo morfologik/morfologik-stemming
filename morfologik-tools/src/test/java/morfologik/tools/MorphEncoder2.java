@@ -112,6 +112,85 @@ public final class MorphEncoder2 {
     }
 
     /**
+     * TODO: add javadoc on encoding format.
+     */
+    public static class TrimInfixAndSuffixEncoder implements IEncoder {
+        ByteArrayList scratch = new ByteArrayList();
+
+        public ByteArrayList encode(ByteArrayList src, ByteArrayList dst, ByteArrayList encoded) {
+            // Search for the infix that can we can encode and remove from src
+            // to get a maximum-length prefix of dst. This could be done more efficiently
+            // by running a smarter longest-common-subsequence algorithm and some pruning (?).
+
+            // For now, naive loop should do.
+
+            int maxInfixIndex = 0;
+            int maxInfixLength = 0;
+            int maxSubsequenceLength = 0;
+            for (int i = 0; i < src.size(); i++) {
+                // TODO: (opt) if current prefix length < i we can break immediately. 
+
+                for (int j = 0; j < src.size() - i; j++) {
+                    // Compute temporary src with the infix removed.
+                    scratch.clear();
+                    scratch.add(src.buffer, 0, i);
+                    scratch.add(src.buffer, i + j, src.size() - (i + j));
+
+                    int sharedPrefix = sharedPrefixLength(scratch, dst);
+
+                    // Only update maxSubsequenceLength if we will be able to encode it.
+                    if (sharedPrefix > maxSubsequenceLength
+                            && i < REMOVE_EVERYTHING
+                            && j < REMOVE_EVERYTHING) {
+                        maxSubsequenceLength = sharedPrefix;
+                        maxInfixIndex = i;
+                        maxInfixLength = j;
+                    }
+                }
+            }
+
+            int truncateSuffixBytes = src.size() - (maxInfixLength + maxSubsequenceLength);
+            if (maxInfixIndex >= REMOVE_EVERYTHING ||
+                maxInfixLength >= REMOVE_EVERYTHING ||
+                truncateSuffixBytes >= REMOVE_EVERYTHING) {
+                maxInfixIndex = maxSubsequenceLength = 0;
+                maxInfixLength = truncateSuffixBytes = REMOVE_EVERYTHING;
+            }
+
+            encoded.add((byte) ((maxInfixIndex       + 'A') & 0xFF));
+            encoded.add((byte) ((maxInfixLength      + 'A') & 0xFF));
+            encoded.add((byte) ((truncateSuffixBytes + 'A') & 0xFF));
+            encoded.add(dst.buffer, maxSubsequenceLength, dst.size() - maxSubsequenceLength);
+
+            return encoded;
+        }
+
+        public ByteArrayList decode(ByteArrayList src, ByteArrayList encoded, ByteArrayList dst) {
+            int infixIndex  = (encoded.get(0) - 'A') & 0xFF;
+            int infixLength = (encoded.get(1) - 'A') & 0xFF;
+            int truncateSuffixBytes = (encoded.get(2) - 'A') & 0xFF;
+
+            if (infixLength == REMOVE_EVERYTHING ||
+                truncateSuffixBytes == REMOVE_EVERYTHING) {
+                infixIndex = 0;
+                infixLength = src.size();
+                truncateSuffixBytes = 0;
+            }
+
+            dst.add(src.buffer, 0, infixIndex);
+            dst.add(src.buffer, infixIndex + infixLength, src.size() - (infixIndex + infixLength + truncateSuffixBytes));
+            dst.add(encoded.buffer, 3, encoded.size() - 3);
+
+            return dst;
+        }
+        
+        @Override
+        public String toString() {
+            return getClass().getSimpleName();
+        }        
+    }
+
+    /**
      * Compute the length of the shared prefix between two byte sequences.
      */
     private static int sharedPrefixLength(ByteArrayList a, ByteArrayList b) {
