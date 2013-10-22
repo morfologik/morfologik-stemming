@@ -124,28 +124,28 @@ public final class MorphEncoder2 {
             //
             // For now, naive loop should do.
 
-            // Initial infix is the max. prefix.
-            int maxInfixIndex = 0;
-            int maxInfixLength = 0;
-            int maxSubsequenceLength = sharedPrefixLength(src, dst);
-
             // There can be only two positions for the infix to delete:
             // 1) we remove leading bytes, even if they are partially matching (but a longer match
             //    exists somewhere later on).
             // 2) we leave max. matching prefix and remove non-matching bytes that follow. 
+            int maxInfixIndex = 0;
+            int maxSubsequenceLength = sharedPrefixLength(src, dst);
+            int maxInfixLength = 0;
             for (int i : new int [] {0, maxSubsequenceLength}) {
-                for (int j = 0; j < src.size() - i; j++) {
+                for (int j = 1; j <= src.size() - i; j++) {
                     // Compute temporary src with the infix removed.
+                    // TODO: we could just compare directly instead of using scratch here?
                     scratch.clear();
                     scratch.add(src.buffer, 0, i);
                     scratch.add(src.buffer, i + j, src.size() - (i + j));
     
                     int sharedPrefix = sharedPrefixLength(scratch, dst);
-    
+
                     // Only update maxSubsequenceLength if we will be able to encode it.
-                    if (sharedPrefix > maxSubsequenceLength
-                            && i < REMOVE_EVERYTHING
-                            && j < REMOVE_EVERYTHING) {
+                    if (sharedPrefix > 0 && 
+                        sharedPrefix > maxSubsequenceLength &&
+                        i < REMOVE_EVERYTHING &&
+                        j < REMOVE_EVERYTHING) {
                         maxSubsequenceLength = sharedPrefix;
                         maxInfixIndex = i;
                         maxInfixLength = j;
@@ -153,8 +153,17 @@ public final class MorphEncoder2 {
                 }
             }
             
-
             int truncateSuffixBytes = src.size() - (maxInfixLength + maxSubsequenceLength);
+            
+            // Special case: if we're removing the suffix in the infix code, move it
+            // to the suffix code instead.
+            if (truncateSuffixBytes == 0 &&
+                maxInfixIndex + maxInfixLength == src.size()) {
+                truncateSuffixBytes = maxInfixLength;
+                maxInfixIndex = maxInfixLength = 0;
+            }
+                
+            
             if (maxInfixIndex >= REMOVE_EVERYTHING ||
                 maxInfixLength >= REMOVE_EVERYTHING ||
                 truncateSuffixBytes >= REMOVE_EVERYTHING) {
@@ -206,7 +215,20 @@ public final class MorphEncoder2 {
         }
         return i;
     }
-    
+
+    /**
+     * Compute the length of the shared suffix between two byte sequences.
+     */
+    private static int sharedSuffixLength(ByteArrayList a, ByteArrayList b) {
+        int ia = a.size();
+        int ib = b.size();
+        int i = 0;
+        while (--ia >= 0 && --ib >= 0 && a.get(ia) == b.get(ib)) {
+            i++;
+        }
+        return i;
+    }
+
     /**
      * Compute the length of the shared prefix between two byte sequences.
      */

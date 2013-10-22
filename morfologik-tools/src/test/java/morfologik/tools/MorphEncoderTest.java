@@ -88,7 +88,8 @@ public class MorphEncoderTest {
 
 	@Test
 	public void testInfixEncode() throws UnsupportedEncodingException {
-        assertEquals("laquelle+AGAquel+D f s", infixEncodeUTF8("laquelle", "lequel", "D f s"));
+        assertEquals("ayz+AACbc+tag", infixEncodeUTF8("ayz", "abc", "tag"));
+	    assertEquals("xyz+AADabc+tag", infixEncodeUTF8("xyz", "abc", "tag"));
 
 		assertEquals("abc+AAAd+tag", infixEncodeUTF8("abc", "abcd", "tag"));
 		assertEquals("abcd+AAB+tag", infixEncodeUTF8("abcd", "abc", "tag"));
@@ -104,7 +105,7 @@ public class MorphEncoderTest {
 		// real infix cases
 		assertEquals("kcal+ABA+xyz", infixEncodeUTF8("kcal", "cal", "xyz"));
 		assertEquals("aillent+BBCr+xyz", infixEncodeUTF8("aillent", "aller", "xyz"));
-		assertEquals("laquelle+AGAquel+D f s", infixEncodeUTF8("laquelle", "lequel", "D f s"));
+        assertEquals("laquelle+AGAquel+D f s", infixEncodeUTF8("laquelle", "lequel", "D f s"));
 		assertEquals("ccal+ABA+test", infixEncodeUTF8("ccal", "cal", "test"));
 		assertEquals("ccal+ABA+test", infixEncodeUTF8("ccal", "cal", "test"));
 	}
