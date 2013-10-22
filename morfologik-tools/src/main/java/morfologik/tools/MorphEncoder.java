@@ -1,8 +1,8 @@
 package morfologik.tools;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
+
+import com.carrotsearch.hppc.ByteArrayList;
 
 import morfologik.fsa.FSA5;
 
@@ -18,13 +18,13 @@ import morfologik.fsa.FSA5;
 public final class MorphEncoder {
 	private final byte annotationSeparator;
 
-	private static final int MAX_PREFIX_LEN = 3;
-	private static final int MAX_INFIX_LEN = 3;
+	private final MorphEncoder2.IEncoder infixEncoder = new MorphEncoder2.TrimInfixAndSuffixEncoder();
+	private final MorphEncoder2.IEncoder suffixEncoder = new MorphEncoder2.TrimSuffixEncoder();
+	private final MorphEncoder2.IEncoder prefixEncoder = new MorphEncoder2.TrimPrefixAndSuffixEncoder();
 
-	/**
-	 * Private shared buffer for concatenating stuff.
-	 */
-    private final ByteArrayOutputStream buf = new ByteArrayOutputStream();
+	private final ByteArrayList src = new ByteArrayList();
+	private final ByteArrayList dst = new ByteArrayList();
+	private final ByteArrayList tmp = new ByteArrayList();
 
 	public MorphEncoder() {
 		this(FSA5.DEFAULT_ANNOTATION);
@@ -33,36 +33,7 @@ public final class MorphEncoder {
 	public MorphEncoder(byte annotationSeparator) {
 		this.annotationSeparator = annotationSeparator;
 	}
-	
-	/**
-	 * Compute the number of prefix bytes in common.
-	 */
-	static int commonPrefix(final byte[] s1, final byte[] s2) {
-	    int i = 0, max = Math.min(s1.length, s2.length);
-		while (i < max && s1[i] == s2[i]) {
-		    i++;
-		}
-		return i;
-	}
 
-	private static byte[] subsequence(final byte[] bytes, final int start) {
-		final byte[] newArray = new byte[bytes.length - start];
-		System.arraycopy(bytes, start, newArray, 0, bytes.length - start);
-		return newArray;
-	}
-
-	private static int copyTo(byte[] dst, final int pos, final byte[] src) {
-		System.arraycopy(src, 0, dst, pos, src.length);
-		return src.length;
-	}
-	
-	private static int copyTo(byte[] dst, final int pos, final byte src) {
-		byte[] single = new byte[1];
-		single[0] = src;
-		System.arraycopy(single, 0, dst, pos, 1);
-		return 1;
-	}
-	
 	/**
 	 * This method converts the wordForm, wordLemma and tag to the form:
 	 * 
@@ -75,34 +46,10 @@ public final class MorphEncoder {
 	 * produce the lexeme by concatenating the stripped string with the ending.
 	 */
 	public byte[] standardEncode(byte[] wordForm, byte[] wordLemma, byte[] wordTag) throws IOException {
-        final int prefixLength = commonPrefix(wordForm, wordLemma);
-
-        // Check boundary condition.
-        final int suffixStripLength = wordForm.length - prefixLength; 
-        if (suffixStripLength > 255) {
-            throw new IOException("Diverging suffix to be removed from wordForm is too long (cannot be encoded): " +
-                suffixStripLength +
-                ", wordForm: " + Arrays.toString(wordForm) + 
-                ", wordLemma: " + Arrays.toString(wordLemma));
-        }
-
-        buf.reset();
-
-        buf.write(wordForm);
-        buf.write(annotationSeparator & 0xFF);
-
-        buf.write((suffixStripLength + 'A') & 0xff);
-        buf.write(wordLemma, prefixLength, wordLemma.length - prefixLength);
-        buf.write(annotationSeparator & 0xFF);
-
-        if (wordTag != null) {
-            buf.write(wordTag);
-        }
-
-        return buf.toByteArray();
+	    return encodeWith(suffixEncoder, wordForm, wordLemma, wordTag);
 	}
 
-	/**
+    /**
 	 * This method converts wordform, wordLemma and the tag to the form:
 	 * <p>
 	 * 
@@ -125,52 +72,8 @@ public final class MorphEncoder {
 	 *            - tag
 	 * @return the encoded string
 	 */
-	public byte[] prefixEncode(final byte[] wordForm,
-	        final byte[] wordLemma, final byte[] wordTag) {
-		final int l1 = wordForm.length;
-		final int prefix = commonPrefix(wordForm, wordLemma);
-		
-		// 4 = 2 separators + LK characters
-		int arrayLen = l1 + wordLemma.length + 4;
-		if (wordTag != null) {
-			arrayLen += wordTag.length;
-		}
-		final byte[] bytes = new byte[arrayLen]; 
-		int pos = 0;
-		pos += copyTo(bytes, pos, wordForm);
-		pos += copyTo(bytes, pos, annotationSeparator);
-		if (prefix == 0) {
-			int prefixFound = 0;
-			int prefix1 = 0;
-			final int max = Math.min(wordForm.length, MAX_PREFIX_LEN);
-			for (int i = 1; i <= max; i++) {
-				prefix1 = commonPrefix(subsequence(wordForm, i), wordLemma);
-				if (prefix1 > 2) {
-					prefixFound = i;
-					break;
-				}
-			}
-			if (prefixFound == 0) {
-				pos += copyTo(bytes, pos, (byte) 'A');
-				pos += copyTo(bytes, pos, (byte) ((l1 + 65) & 0xff));
-				pos += copyTo(bytes, pos, wordLemma);
-			} else {
-				pos += copyTo(bytes, pos, (byte) ((prefixFound + 65) & 0xff));
-				pos += copyTo(bytes, pos, (byte) ((l1 - prefixFound - prefix1 + 65) & 0xff));
-				pos += copyTo(bytes, pos, subsequence(wordLemma, prefix1));
-			}
-		} else {
-			pos += copyTo(bytes, pos, (byte) 'A');
-			pos += copyTo(bytes, pos, (byte) ((l1 - prefix + 65) & 0xff));
-			pos += copyTo(bytes, pos, subsequence(wordLemma, prefix));
-		}
-		pos += copyTo(bytes, pos, annotationSeparator);
-		if (wordTag != null) {
-			pos += copyTo(bytes, pos, wordTag);
-		}
-		final byte[] finalArray = new byte[pos];
-		System.arraycopy(bytes, 0, finalArray, 0, pos);
-		return finalArray;
+	public byte[] prefixEncode(byte[] wordForm, byte[] wordLemma, byte[] wordTag) {
+        return encodeWith(prefixEncoder, wordForm, wordLemma, wordTag);
 	}
 
 	/**
@@ -197,107 +100,29 @@ public final class MorphEncoder {
 	 *            - tag
 	 * @return the encoded string
 	 */
-	public byte[] infixEncode(final byte[] wordForm,
-	        final byte[] wordLemma, final byte[] wordTag) {
-		final int l1 = wordForm.length;
-		int prefixFound = 0;
-		int prefix1 = 0;
-		final int prefix = commonPrefix(wordForm, wordLemma);
-		final int max = Math.min(l1, MAX_INFIX_LEN);
-
-		// 5 = 2 separators + MLK characters		
-		int arrayLen = l1 + wordLemma.length + 5;
-		if (wordTag != null) {
-			arrayLen += wordTag.length;
-		}
-		final byte[] bytes = new byte[arrayLen];
-		int pos = 0;
-		pos += copyTo(bytes, pos, wordForm);
-		pos += copyTo(bytes, pos, annotationSeparator);
-		if (prefix == 0) {
-			// we may have a prefix
-			for (int i = 1; i <= max; i++) {
-				prefix1 = commonPrefix(subsequence(wordForm, i), wordLemma);
-				if (prefix1 > 2) {
-					prefixFound = i;
-					break;
-				}
-			}
-			if (prefixFound == 0) {
-				pos += copyTo(bytes, pos, (byte) 'A');
-				pos += copyTo(bytes, pos, (byte) 'A');
-				pos += copyTo(bytes, pos, (byte) ((l1 + 65) & 0xff));
-				pos += copyTo(bytes, pos, wordLemma);
-			} else {
-				pos += copyTo(bytes, pos, (byte) 'A');
-				pos += copyTo(bytes, pos, (byte) ((prefixFound + 65) & 0xff));
-				pos += copyTo(bytes, pos,
-				        (byte) ((l1 - prefixFound - prefix1 + 65) & 0xff));
-				pos += copyTo(bytes, pos, subsequence(wordLemma, prefix1));
-			}
-		} else { // prefix found but we have to check the infix
-
-			for (int i = 1; i <= max; i++) {
-				prefix1 = commonPrefix(subsequence(wordForm, i), wordLemma);
-				if (prefix1 > 2) {
-					prefixFound = i;
-					break;
-				}
-			}
-			int prefix2 = 0;
-			int infixFound = 0;
-			final int max2 = Math.min(l1 - prefix, MAX_INFIX_LEN);
-			for (int i = 1; i <= max2; i++) {
-				prefix2 = commonPrefix(subsequence(wordForm, prefix + i),
-				        subsequence(wordLemma, prefix));
-				if (prefix2 > 2) {
-					infixFound = i;
-					break;
-				}
-			}
-
-			if (prefixFound > infixFound) {
-				if (prefixFound > 0 && (prefix1 > prefix)) {
-					pos += copyTo(bytes, pos, (byte) 'A');
-					pos += copyTo(bytes, pos,
-					        (byte) ((prefixFound + 65) & 0xff));
-					pos += copyTo(bytes, pos, (byte) ((l1 - prefixFound
-					        - prefix1 + 65) & 0xff));
-					pos += copyTo(bytes, pos, subsequence(wordLemma, prefix1));
-				} else {
-					// infixFound == 0 && prefixFound == 0
-					pos += copyTo(bytes, pos, (byte) 'A');
-					pos += copyTo(bytes, pos, (byte) 'A');
-					pos += copyTo(bytes, pos,
-					        (byte) ((l1 - prefix + 65) & 0xff));
-					pos += copyTo(bytes, pos, subsequence(wordLemma, prefix));
-				}
-			} else if (infixFound > 0 && prefix2 > 0) {
-				// we have an infix, , and if there seems to be a prefix,
-				// the infix is longer
-				pos += copyTo(bytes, pos, (byte) ((prefix + 65) & 0xff));
-				pos += copyTo(bytes, pos, (byte) ((infixFound + 65) & 0xff));
-				pos += copyTo(bytes, pos, (byte) ((l1 - prefix - prefix2
-				        - infixFound + 65) & 0xff));
-				pos += copyTo(bytes, pos,
-				        subsequence(wordLemma, prefix + prefix2));
-			} else {
-				// we have an infix, and if there seems to be a prefix,
-				// the infix is longer
-				// but the common prefix of two words is longer
-				pos += copyTo(bytes, pos, (byte) 'A');
-				pos += copyTo(bytes, pos, (byte) 'A');
-				pos += copyTo(bytes, pos, (byte) ((l1 - prefix + 65) & 0xff));
-				pos += copyTo(bytes, pos, subsequence(wordLemma, prefix));
-			}
-
-		}
-		pos += copyTo(bytes, pos, annotationSeparator);
-		if (wordTag != null) {
-			pos += copyTo(bytes, pos, wordTag);
-		}
-		final byte[] finalArray = new byte[pos];
-		System.arraycopy(bytes, 0, finalArray, 0, pos);
-		return finalArray;
+	public byte[] infixEncode(byte[] wordForm, byte[] wordLemma, byte[] wordTag) {
+        return encodeWith(infixEncoder, wordForm, wordLemma, wordTag);
 	}
+
+    private byte [] encodeWith(MorphEncoder2.IEncoder encoder, 
+        byte [] wordForm, byte [] wordLemma, byte [] wordTag)
+    {
+        src.clear(); 
+        dst.clear(); 
+        tmp.clear();
+    
+        tmp.add(wordForm);
+        tmp.add(annotationSeparator);
+        
+        src.add(wordForm);
+        dst.add(wordLemma);
+        encoder.encode(src, dst, tmp);
+
+        tmp.add(annotationSeparator);
+        if (wordTag != null) {
+    	    tmp.add(wordTag);
+        }
+    
+        return tmp.toArray();
+    }
 }

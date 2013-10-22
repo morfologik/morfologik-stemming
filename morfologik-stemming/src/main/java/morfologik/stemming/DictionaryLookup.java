@@ -266,9 +266,6 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 	        int encodedBaseFormLength,
 	        ByteBuffer inflectedForm, 
 	        DictionaryMetadata metadata) {
-	    // At least the suffix strip length code.
-	    assert encodedBaseFormLength > 1;
-
 	    // Prepare the buffer.
 	    output.clear();
 

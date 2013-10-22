@@ -67,7 +67,7 @@ public class MorphEncodingToolTest {
 
 		testOutput = new BufferedReader(new InputStreamReader(
 				new FileInputStream(output.getAbsolutePath()), "UTF-8"));
-		Assert.assertEquals("passagère+AAEer+tag", testOutput.readLine());
+		Assert.assertEquals("passagère+GDAr+tag", testOutput.readLine());
 		Assert.assertEquals("nieduży+ADA+test", testOutput.readLine());
 		Assert.assertEquals("abcd+AAB+xyz", testOutput.readLine());
 
@@ -82,12 +82,11 @@ public class MorphEncodingToolTest {
 
         testOutput = new BufferedReader(new InputStreamReader(
                 new FileInputStream(output.getAbsolutePath()), "UTF-8"));
-        Assert.assertEquals("passagère\tAAEer\ttag", testOutput.readLine());
+        Assert.assertEquals("passagère\tGDAr\ttag", testOutput.readLine());
         Assert.assertEquals("nieduży\tADA\ttest", testOutput.readLine());
         Assert.assertEquals("abcd\tAAB\txyz", testOutput.readLine());
 
         testOutput.close();
-		
 	}
 
 	/* */

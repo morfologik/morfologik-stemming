@@ -1,5 +1,14 @@
 1.8.0
           [not released]
+          
+          Prefix encoder examples:
+
+          postmodernizm|modernizm|xyz => [before] postmodernizm+ANmodernizm+xyz
+                                      => [after ] postmodernizm+EA+xyz
+          
+          Infix encoder examples:                            
+          laquelle|lequel|D f s       => [before] laquelle+AAHequel+D f s
+                                      => [after ] laquelle+AGAquel+D f s
 
 1.7.1
           Fixed a couple of bugs in morfologik-speller, thanks to Jaume Ortolà i Font.

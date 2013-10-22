@@ -1,41 +1,35 @@
 package morfologik.tools;
 
-import static morfologik.tools.MorphEncoder.commonPrefix;
 import static org.junit.Assert.assertEquals;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 
-import morfologik.fsa.FSA5;
-import morfologik.stemming.DictionaryLookup;
-import morfologik.stemming.DictionaryMetadataBuilder;
-
-import org.junit.Before;
 import org.junit.Test;
-
-import com.google.common.base.Charsets;
-import com.google.common.base.Strings;
 
 /*
  * 
  */
 public class MorphEncoderTest {
     private static final String UTF8 = "UTF-8"; 
-	private MorphEncoder encoder; 
-
-	@Before
-	public void setUp() {
-		encoder = new MorphEncoder();
-	}
 	
+    private MorphEncoder encoder = new MorphEncoder();
+
 	@Test
 	public void testCommonPrefix() {
 		assertEquals(3, commonPrefix("abc".getBytes(), "abcd".getBytes()));
 		assertEquals(0, commonPrefix("abc".getBytes(), "cba".getBytes()));
 	}
 
-	@Test
+	private Object commonPrefix(byte [] a, byte [] b)
+    {
+	    int max = Math.min(a.length, b.length);
+	    for (int i = 0; i < max; i++) {
+	        if (a[i] != b[i]) return i;
+	    }
+        return max;
+    }
+
+    @Test
 	public void testStandardEncode() throws Exception {
 		assertEquals("abc+Ad+tag", 
 				asString(encoder.standardEncode(
@@ -89,7 +83,7 @@ public class MorphEncoderTest {
 		assertEquals("postmodernizm+AAu+xyz", prefixEncodeUTF8("postmodernizm", "postmodernizmu", "xyz"));
 		assertEquals("postmodernizmu+AB+xyz", prefixEncodeUTF8("postmodernizmu", "postmodernizm", "xyz"));
 		assertEquals("nieduży+DA+adj", prefixEncodeUTF8("nieduży", "duży", "adj"));
-		assertEquals("postmodernizm+ANmodernizm+xyz", prefixEncodeUTF8("postmodernizm", "modernizm", "xyz"));
+		assertEquals("postmodernizm+EA+xyz", prefixEncodeUTF8("postmodernizm", "modernizm", "xyz"));
 	}
 
 	@Test
@@ -108,14 +102,14 @@ public class MorphEncoderTest {
 		// real infix cases
 		assertEquals("kcal+ABA+xyz", infixEncodeUTF8("kcal", "cal", "xyz"));
 		assertEquals("aillent+BBCr+xyz", infixEncodeUTF8("aillent", "aller", "xyz"));
-		assertEquals("laquelle+AAHequel+D f s", infixEncodeUTF8("laquelle", "lequel", "D f s"));
+		assertEquals("laquelle+AGAquel+D f s", infixEncodeUTF8("laquelle", "lequel", "D f s"));
 		assertEquals("ccal+ABA+test", infixEncodeUTF8("ccal", "cal", "test"));
 	}
 
 	@Test
 	public void testUTF8Boundary() throws Exception {
 		assertEquals("passagère+Eer+tag", standardEncodeUTF8("passagère", "passager", "tag"));
-		assertEquals("passagère+AAEer+tag", infixEncodeUTF8("passagère", "passager", "tag"));
+		assertEquals("passagère+GDAr+tag", infixEncodeUTF8("passagère", "passager", "tag"));
 		assertEquals("passagère+AEer+tag", prefixEncodeUTF8("passagère", "passager", "tag"));
 	}
 
@@ -123,41 +117,6 @@ public class MorphEncoderTest {
 	public void testAsString() throws UnsupportedEncodingException {
 		assertEquals("passagère", asString("passagère".getBytes("UTF-8"), "UTF-8"));
 	}
-
-    @Test
-    public void testSufixEncodingLimits() throws Exception {
-        for (int i = 0; i <= 255; i++) {
-            String wordForm  = "" + Strings.padEnd("", i, 'Z');
-            String wordLemma = "Y";
-            byte [] encoded = encoder.standardEncode(wordForm.getBytes(UTF8), wordLemma.getBytes(UTF8), null);
-            int firstSeparatorPos = indexOf(encoded, 0, FSA5.DEFAULT_ANNOTATION);
-            int secondSeparatorPos = indexOf(encoded, firstSeparatorPos + 1, FSA5.DEFAULT_ANNOTATION);
-            System.out.println(new String(encoded, UTF8));
-
-            ByteBuffer decodedStem = DictionaryLookup.decodeBaseForm(
-                ByteBuffer.allocate(0),
-                encoded, firstSeparatorPos,
-                ByteBuffer.wrap(encoded, firstSeparatorPos + 1, secondSeparatorPos - (firstSeparatorPos + 1)),
-                new DictionaryMetadataBuilder()
-                    .encoding(Charsets.UTF_8)
-                    .build());
-
-            decodedStem.flip();
-            byte [] result = new byte [decodedStem.remaining()];
-            decodedStem.get(result);
-            System.out.println(new String(result, UTF8));
-        }
-    }
-
-    private static int indexOf(byte[] array, int i, byte b) {
-        for (; i < array.length; i++) {
-            if (array[i] == b) {
-                return i;
-            }
-        }
-        throw new RuntimeException("Expected the element to exist in array: "
-            + "0x" + Integer.toHexString(b) + ", array: " + Arrays.toString(array));
-    }
 
     /**
      * Converts a byte array to a given encoding.

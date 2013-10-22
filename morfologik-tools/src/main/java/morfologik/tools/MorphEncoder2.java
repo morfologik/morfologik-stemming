@@ -128,8 +128,6 @@ public final class MorphEncoder2 {
             int maxInfixLength = 0;
             int maxSubsequenceLength = 0;
             for (int i = 0; i < src.size(); i++) {
-                // TODO: (opt) if current prefix length < i we can break immediately. 
-
                 for (int j = 0; j < src.size() - i; j++) {
                     // Compute temporary src with the infix removed.
                     scratch.clear();
