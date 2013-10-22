@@ -121,21 +121,27 @@ public final class MorphEncoder2 {
             // Search for the infix that can we can encode and remove from src
             // to get a maximum-length prefix of dst. This could be done more efficiently
             // by running a smarter longest-common-subsequence algorithm and some pruning (?).
-
+            //
             // For now, naive loop should do.
 
+            // Initial infix is the max. prefix.
             int maxInfixIndex = 0;
             int maxInfixLength = 0;
-            int maxSubsequenceLength = 0;
-            for (int i = 0; i < src.size(); i++) {
+            int maxSubsequenceLength = sharedPrefixLength(src, dst);
+
+            // There can be only two positions for the infix to delete:
+            // 1) we remove leading bytes, even if they are partially matching (but a longer match
+            //    exists somewhere later on).
+            // 2) we leave max. matching prefix and remove non-matching bytes that follow. 
+            for (int i : new int [] {0, maxSubsequenceLength}) {
                 for (int j = 0; j < src.size() - i; j++) {
                     // Compute temporary src with the infix removed.
                     scratch.clear();
                     scratch.add(src.buffer, 0, i);
                     scratch.add(src.buffer, i + j, src.size() - (i + j));
-
+    
                     int sharedPrefix = sharedPrefixLength(scratch, dst);
-
+    
                     // Only update maxSubsequenceLength if we will be able to encode it.
                     if (sharedPrefix > maxSubsequenceLength
                             && i < REMOVE_EVERYTHING
@@ -146,6 +152,7 @@ public final class MorphEncoder2 {
                     }
                 }
             }
+            
 
             int truncateSuffixBytes = src.size() - (maxInfixLength + maxSubsequenceLength);
             if (maxInfixIndex >= REMOVE_EVERYTHING ||

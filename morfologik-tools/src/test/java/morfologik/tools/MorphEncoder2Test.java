@@ -3,7 +3,6 @@ package morfologik.tools;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.carrotsearch.hppc.ByteArrayList;
@@ -12,9 +11,7 @@ import com.carrotsearch.randomizedtesting.annotations.Name;
 import com.carrotsearch.randomizedtesting.annotations.ParametersFactory;
 import com.google.common.base.Charsets;
 
-@Ignore
 public class MorphEncoder2Test extends RandomizedTest {
-    
     private final MorphEncoder2.IEncoder coder;
 
     public MorphEncoder2Test(@Name("coder") MorphEncoder2.IEncoder coder)
@@ -41,7 +38,7 @@ public class MorphEncoder2Test extends RandomizedTest {
     }
 
     @Test
-    public void testEncodeSuffixOnSimpleCases() {
+    public void testEncodeSamples() {
         assertRoundtripEncode("", "");
         assertRoundtripEncode("abc", "ab");
         assertRoundtripEncode("abc", "abx");
@@ -51,6 +48,9 @@ public class MorphEncoder2Test extends RandomizedTest {
         assertRoundtripEncode("axybc", "abc");
         assertRoundtripEncode("axybc", "abc");
         assertRoundtripEncode("azbc", "abcxy");
+
+        assertRoundtripEncode("Niemcami", "Niemiec");
+        assertRoundtripEncode("Niemiec", "Niemcami");
     }
 
     private void assertRoundtripEncode(String srcString, String dstString)
