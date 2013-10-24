@@ -1,14 +1,23 @@
 1.8.0
           [not released]
-          
-          Prefix encoder examples:
 
+          * Rewritten implementation of tab-separated data files (tab2morph tool).
+          The output should yield smaller files, especially for prefix encoding
+          and infix encoding. This does *not* necessarily mean smaller automata
+          but we're working on getting these as well.
+
+          Example output before and after refactoring:
+
+          Prefix coder:
           postmodernizm|modernizm|xyz => [before] postmodernizm+ANmodernizm+xyz
                                       => [after ] postmodernizm+EA+xyz
-          
-          Infix encoder examples:                            
+
+          Infix coder:
           laquelle|lequel|D f s       => [before] laquelle+AAHequel+D f s
                                       => [after ] laquelle+AGAquel+D f s
+
+          * Changed the default format of the Polish dictionary from infix
+          encoded to prefix encoded (smaller output size).
 
 1.7.1
           Fixed a couple of bugs in morfologik-speller, thanks to Jaume Ortolà i Font.
