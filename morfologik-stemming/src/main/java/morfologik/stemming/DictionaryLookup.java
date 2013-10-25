@@ -26,6 +26,8 @@ import morfologik.util.BufferUtils;
  *      site</a>
  */
 public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
+    private static final int REMOVE_EVERYTHING = 255;
+
 	/** An FSA used for lookups. */
 	private final FSATraversal matcher;
 
@@ -251,10 +253,10 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 	 * @param inflectedForm
 	 *            Inflected form's bytes (decoded properly).
 	 * 
-	 * @param encodedBaseForm
+	 * @param encoded
 	 *            Bytes of the encoded base form, starting at 0 index.
 	 * 
-	 * @param encodedBaseFormLength
+	 * @param encodedLen
 	 *            Length of the encode base form.
 	 * 
 	 * @return Returns either <code>bb</code> or a new buffer whose capacity is
@@ -262,65 +264,58 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 	 */
 	public static ByteBuffer decodeBaseForm(
 	        ByteBuffer output, 
-	        byte[] encodedBaseForm, 
-	        int encodedBaseFormLength,
+	        byte[] encoded, 
+	        int encodedLen,
 	        ByteBuffer inflectedForm, 
 	        DictionaryMetadata metadata) {
 	    // Prepare the buffer.
 	    output.clear();
 
-        final boolean fsaPrefixes = metadata.isUsingPrefixes();
-        final boolean fsaInfixes = metadata.isUsingInfixes();
+        assert inflectedForm.position() == 0;
+        assert (metadata.isUsingInfixes()   && !metadata.isUsingPrefixes()) ||
+               (metadata.isUsingPrefixes()  && !metadata.isUsingInfixes())  ||
+               (!metadata.isUsingPrefixes() && !metadata.isUsingInfixes());
 
-		// Determine inflected string's length in bytes, in the same encoding.
-        // assert inflectedBuffer.position() == 0;
-		final byte[] infBytes = inflectedForm.array();
-		final int infLen = inflectedForm.remaining();
-		final int code0 = encodedBaseForm[0] - 'A';
+		// Increase buffer size (overallocating), if needed.
+        final byte[] src = inflectedForm.array();
+        final int srcLen = inflectedForm.remaining();
+        if (output.capacity() < srcLen + encodedLen) {
+            output = ByteBuffer.allocate(srcLen + encodedLen);
+        }
 
-		// Increase buffer size, if needed.
-		if (output.capacity() < infLen + encodedBaseFormLength) {
-			output = ByteBuffer.allocate(infLen + encodedBaseFormLength);
+		if (metadata.isUsingInfixes()) {
+            int infixIndex  = (encoded[0] - 'A') & 0xFF;
+            int infixLength = (encoded[1] - 'A') & 0xFF;
+            int truncateSuffixBytes = (encoded[2] - 'A') & 0xFF;
+            if (infixLength == REMOVE_EVERYTHING ||
+                truncateSuffixBytes == REMOVE_EVERYTHING) {
+                infixIndex = 0;
+                infixLength = srcLen;
+                truncateSuffixBytes = 0;
+            }
+            output.put(src, 0, infixIndex);
+            output.put(src, infixIndex + infixLength, srcLen - (infixIndex + infixLength + truncateSuffixBytes));
+            output.put(encoded, 3, encodedLen - 3);
+		} else if (metadata.isUsingPrefixes()) {
+            int truncatePrefixBytes = (encoded[0] - 'A') & 0xFF;
+            int truncateSuffixBytes = (encoded[1] - 'A') & 0xFF;
+            if (truncatePrefixBytes == REMOVE_EVERYTHING ||
+                truncateSuffixBytes == REMOVE_EVERYTHING) {
+                truncatePrefixBytes = srcLen;
+                truncateSuffixBytes = 0;
+            }
+            output.put(src, truncatePrefixBytes, srcLen - (truncateSuffixBytes + truncatePrefixBytes));
+            output.put(encoded, 2, encodedLen - 2);
+		} else {
+            int suffixTrimCode = encoded[0];
+            int truncateBytes = (suffixTrimCode - 'A') & 0xFF;
+            if (truncateBytes == REMOVE_EVERYTHING) {
+                truncateBytes = srcLen;
+            }
+            output.put(src, 0, srcLen - truncateBytes);
+            output.put(encoded, 1, encodedLen - 1);
 		}
-
-		if (code0 >= 0) {
-			if (!fsaPrefixes && !fsaInfixes) {
-				if (code0 <= infLen) {
-					output.put(infBytes, 0, infLen - code0);
-					output.put(encodedBaseForm, 1, encodedBaseFormLength - 1);
-					return output;
-				}
-			} else if (fsaPrefixes && !fsaInfixes) {
-				if (encodedBaseFormLength > 1) {
-					final int stripAtEnd = encodedBaseForm[1] - 'A' + code0;
-					if (stripAtEnd <= infLen) {
-						output.put(infBytes, code0, infLen - stripAtEnd);
-						output.put(encodedBaseForm, 2, encodedBaseFormLength - 2);
-						return output;
-					}
-				}
-			} else if (fsaInfixes) {
-				// Note: Prefixes are silently assumed here.
-				if (encodedBaseFormLength > 2) {
-					final int stripAtBeginning = encodedBaseForm[1] - 'A' + code0;
-					final int stripAtEnd = encodedBaseForm[2] - 'A' + stripAtBeginning;
-					if (stripAtEnd <= infLen) {
-						output.put(infBytes, 0, code0);
-						output.put(infBytes, stripAtBeginning, infLen - stripAtEnd);
-						output.put(encodedBaseForm, 3, encodedBaseFormLength - 3);
-						return output;
-					}
-				}
-			}
-		}
-
-		/*
-		 * This is a fallback in case some junk is detected above. Return the
-		 * base form only if this is the case.
-		 */
-		output.clear();
-		output.put(encodedBaseForm, 0, encodedBaseFormLength);
-		return output;
+        return output;
 	}
 
 	/**

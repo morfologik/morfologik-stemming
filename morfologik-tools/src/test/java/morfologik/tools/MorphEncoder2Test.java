@@ -1,7 +1,11 @@
 package morfologik.tools;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
+
+import morfologik.stemming.DictionaryLookup;
+import morfologik.stemming.DictionaryMetadataBuilder;
 
 import org.junit.Test;
 
@@ -55,8 +59,6 @@ public class MorphEncoder2Test extends RandomizedTest {
 
     private void assertRoundtripEncode(String srcString, String dstString)
     {
-        // TODO: add DictionaryLookup.decodeBaseForm decoding testing
-
         ByteArrayList src = ByteArrayList.from(srcString.getBytes(UTF8));
         ByteArrayList dst = ByteArrayList.from(dstString.getBytes(UTF8));
         ByteArrayList encoded = ByteArrayList.newInstance();
@@ -73,6 +75,33 @@ public class MorphEncoder2Test extends RandomizedTest {
         }
         
         assertEquals(dst, decoded);
+        
+        // TODO: add DictionaryLookup.decodeBaseForm decoding testing
+        DictionaryMetadataBuilder builder = new DictionaryMetadataBuilder();
+        builder.encoding(Charsets.UTF_8);
+        builder.useInfixes(coder instanceof MorphEncoder2.TrimInfixAndSuffixEncoder);
+        builder.usePrefixes(coder instanceof MorphEncoder2.TrimPrefixAndSuffixEncoder);
+            
+        ByteBuffer bb = DictionaryLookup.decodeBaseForm(
+            ByteBuffer.allocate(0),
+            encoded.toArray(), 
+            encoded.size(), 
+            ByteBuffer.wrap(src.toArray()), builder.build());
+        
+        ByteArrayList decoded2 = ByteArrayList.newInstance();
+        bb.flip();
+        while (bb.hasRemaining()) decoded2.add(bb.get());
+
+        if (!dst.equals(decoded2)) {
+            System.out.println("DictionaryLookup.decodeBaseForm incorrect, coder: " + coder);
+            System.out.println("src : " + new String(src.toArray(), Charsets.UTF_8));
+            System.out.println("dst : " + new String(dst.toArray(), Charsets.UTF_8));
+            System.out.println("enc : " + new String(encoded.toArray(), Charsets.UTF_8));
+            System.out.println("dec : " + new String(decoded.toArray(), Charsets.UTF_8));
+            System.out.println("dec2: " + new String(decoded2.toArray(), Charsets.UTF_8));
+        }
+
+        assertEquals(dst, decoded2);       
     }
 
     public static void main(String [] args) {

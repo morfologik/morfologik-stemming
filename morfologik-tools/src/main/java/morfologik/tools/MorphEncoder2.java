@@ -217,19 +217,6 @@ public final class MorphEncoder2 {
     }
 
     /**
-     * Compute the length of the shared suffix between two byte sequences.
-     */
-    private static int sharedSuffixLength(ByteArrayList a, ByteArrayList b) {
-        int ia = a.size();
-        int ib = b.size();
-        int i = 0;
-        while (--ia >= 0 && --ib >= 0 && a.get(ia) == b.get(ib)) {
-            i++;
-        }
-        return i;
-    }
-
-    /**
      * Compute the length of the shared prefix between two byte sequences.
      */
     private static int sharedPrefixLength(ByteArrayList a, int aStart, ByteArrayList b, int bStart) {
