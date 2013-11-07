@@ -28,6 +28,7 @@ public final class DictionaryMetadata {
      */
     private static Map<DictionaryAttribute, String> DEFAULT_ATTRIBUTES = new DictionaryMetadataBuilder()
         .separator('+')
+        .encoder(EncoderType.SUFFIX)
         .ignorePunctuation()
         .ignoreNumbers()
         .ignoreCamelCase()
@@ -35,9 +36,6 @@ public final class DictionaryMetadata {
         .ignoreDiacritics()
         .convertCase()
         .supportRunOnWords()
-        .useInfixes(false)
-        .usePrefixes(false)
-        .useSuffixes(true)
         .toMap();
 
     /**
@@ -61,10 +59,6 @@ public final class DictionaryMetadata {
 
 	private Charset charset;
     private Locale locale = Locale.getDefault();
-
-    private boolean usesPrefixes;
-    private boolean usesInfixes;
-    private boolean usesSuffixes;
     
     /**
      * Replacement pairs for non-obvious candidate search in a speller dictionary.
@@ -89,6 +83,11 @@ public final class DictionaryMetadata {
      */
     private final EnumMap<DictionaryAttribute,Boolean> boolAttributes;
 
+    /**
+     * Sequence encoder.
+     */
+    private EncoderType encoderType;
+
 	/**
 	 * Return all attributes.
 	 */
@@ -99,9 +98,6 @@ public final class DictionaryMetadata {
 	// Cached attrs.
     public String getEncoding()      { return encoding; }
     public byte getSeparator()       { return separator; }
-    public boolean isUsingPrefixes() { return usesPrefixes; }
-    public boolean isUsingInfixes()  { return usesInfixes; }
-    public boolean isUsingSuffixes()  { return usesSuffixes; }
     public Locale getLocale()        { return locale; }
 
     public Map<String, List<String>> getReplacementPairs() { return replacementPairs; }
@@ -155,6 +151,10 @@ public final class DictionaryMetadata {
 	                this.locale = (Locale) value;
 	                break;
 	                
+	            case ENCODER:
+	                this.encoderType = (EncoderType) value;
+	                break;
+
 	            case REPLACEMENT_PAIRS:
                     {
                         @SuppressWarnings("unchecked")
@@ -171,9 +171,6 @@ public final class DictionaryMetadata {
                     }
                     break;
 
-	            case USES_SUFFIXES:
-	            case USES_INFIXES:
-                case USES_PREFIXES:
 	            case IGNORE_PUNCTUATION:
 	            case IGNORE_NUMBERS:
 	            case IGNORE_CAMEL_CASE:
@@ -200,11 +197,6 @@ public final class DictionaryMetadata {
             throw new IllegalArgumentException("At least one the required attributes was not provided: "
                     + requiredAttributes.toString());
         }
-
-	    // Cache these for performance reasons.
-        this.usesInfixes = boolAttributes.get(USES_INFIXES);
-        this.usesPrefixes = boolAttributes.get(USES_PREFIXES);
-        this.usesSuffixes = boolAttributes.get(USES_SUFFIXES);
 
         // Sanity check.
 	    CharsetEncoder encoder = getEncoder();
@@ -245,6 +237,13 @@ public final class DictionaryMetadata {
             throw new RuntimeException(
                     "FSA's encoding charset is not supported: " + encoding);
         }
+    }
+
+    /**
+     * Return sequence encoder type.
+     */
+    public EncoderType getEncoderType() {
+        return encoderType;
     }
 
 	/**

@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import morfologik.fsa.FSA5;
-import morfologik.tools.SequenceEncoders.IEncoder;
+import morfologik.stemming.EncoderType;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -26,18 +26,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 class MorphEncodingTool extends Tool {
 	private boolean noWarn = false;
 	private SequenceAssembler encoder;
-
-	enum EncoderType {
-	    SUFFIX (new SequenceEncoders.TrimSuffixEncoder()),
-	    PREFIX (new SequenceEncoders.TrimPrefixAndSuffixEncoder()),
-	    INFIX  (new SequenceEncoders.TrimInfixAndSuffixEncoder());
-
-	    final SequenceEncoders.IEncoder encoder;
-
-	    private EncoderType(IEncoder encoder) {
-	        this.encoder = encoder;
-        }
-	}
 
 	/**
      * 
@@ -73,7 +61,7 @@ class MorphEncodingTool extends Tool {
 			FSABuildTool.checkSingleByte(Character.toString(separator));
 		}
 		
-        encoder = new SequenceAssembler(encType.encoder, (byte) separator);
+        encoder = new SequenceAssembler(SequenceEncoders.forType(encType), (byte) separator);
 
 		// Determine input and output streams.
 		final DataInputStream input = initializeInput(line);

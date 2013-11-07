@@ -184,8 +184,7 @@ public class DictionaryLookupTest {
         DictionaryMetadata metadata = new DictionaryMetadataBuilder()
             .separator('+')
             .encoding("iso8859-1")
-            .usePrefixes()
-            .useInfixes()
+            .encoder(EncoderType.INFIX)
             .build();
 
         final DictionaryLookup s = new DictionaryLookup(new Dictionary(fsa, metadata));
@@ -202,8 +201,7 @@ public class DictionaryLookupTest {
 
 	private static byte[][] toBytes(String charset, String[] strings) {
 	    byte [][] out = new byte [strings.length][];
-	    for (int i = 0; i < strings.length; i++)
-	    {
+	    for (int i = 0; i < strings.length; i++) {
 	        try {
                 out[i] = strings[i].getBytes(charset);
             } catch (UnsupportedEncodingException e) {

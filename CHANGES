@@ -1,5 +1,10 @@
 1.8.0
           [not released]
+          
+          * Dictionary .info files can specify the sequence decoder explicitly:
+          suffix, prefix, infix, none are supported. For backwards compatibility,
+          fsa.dict.uses-prefixes, fsa.dict.uses-infixes and fsa.dict.uses-suffixes
+          are still supported, but will be removed in the next major version.
 
           * Command-line option changes to MorphEncodingTool - it now accepts an explicit
           name of the sequence encoder, not infix/suffix/prefix booleans.  

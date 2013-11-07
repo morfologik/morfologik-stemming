@@ -76,11 +76,10 @@ public class SequenceEncodersRandomizedTest extends RandomizedTest {
         
         assertEquals(dst, decoded);
         
-        // TODO: add DictionaryLookup.decodeBaseForm decoding testing
+        // DictionaryLookup.decodeBaseForm decoding testing
         DictionaryMetadataBuilder builder = new DictionaryMetadataBuilder();
         builder.encoding(Charsets.UTF_8);
-        builder.useInfixes(coder instanceof SequenceEncoders.TrimInfixAndSuffixEncoder);
-        builder.usePrefixes(coder instanceof SequenceEncoders.TrimPrefixAndSuffixEncoder);
+        builder.encoder(coder.type());
             
         ByteBuffer bb = DictionaryLookup.decodeBaseForm(
             ByteBuffer.allocate(0),

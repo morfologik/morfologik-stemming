@@ -42,36 +42,6 @@ public enum DictionaryAttribute {
             return Charset.forName(charsetName);
         }        
     },
-    
-    /** 
-     * If the dictionary was compiled with prefix compression. 
-     */
-    USES_PREFIXES("fsa.dict.uses-prefixes") {
-        @Override
-        public Boolean fromString(String value) {
-            return booleanValue(value);
-        }
-    },
-
-    /** 
-     * If the dictionary was compiled with infix compression.
-     */
-    USES_INFIXES("fsa.dict.uses-infixes") {
-        @Override
-        public Boolean fromString(String value) {
-            return booleanValue(value);
-        }
-    },
-
-    /** 
-     * If the dictionary was compiled with suffix compression. 
-     */
-    USES_SUFFIXES("fsa.dict.uses-suffixes") {
-        @Override
-        public Boolean fromString(String value) {
-            return booleanValue(value);
-        }
-    },
 
     /** 
      * If the spelling dictionary is supposed to ignore words containing digits 
@@ -152,7 +122,15 @@ public enum DictionaryAttribute {
             return new Locale(value);
         }
     },
-    
+
+    /** Locale associated with the dictionary. */
+    ENCODER("fsa.dict.encoder") {
+        @Override
+        public EncoderType fromString(String value) {
+            return EncoderType.valueOf(value.toUpperCase(Locale.ROOT));
+        }
+    },
+
     /**
      * Replacement pairs for non-obvious candidate search in a speller dictionary.
      * For example, Polish <tt>rz</tt> is phonetically equivalent to <tt>ż</tt>, 

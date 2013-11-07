@@ -1,5 +1,7 @@
 package morfologik.tools;
 
+import morfologik.stemming.EncoderType;
+
 import com.carrotsearch.hppc.ByteArrayList;
 
 /**
@@ -16,6 +18,7 @@ public final class SequenceEncoders {
     public static interface IEncoder {
         public ByteArrayList encode(ByteArrayList src, ByteArrayList derived, ByteArrayList encodedBuffer);
         public ByteArrayList decode(ByteArrayList src, ByteArrayList encoded, ByteArrayList derivedBuffer);
+        public EncoderType type();
     }
 
     /**
@@ -69,6 +72,11 @@ public final class SequenceEncoders {
             dst.add(encoded.buffer, 1, encoded.size() - 1);
 
             return dst;
+        }
+        
+        @Override
+        public EncoderType type() {
+            return EncoderType.SUFFIX;
         }
         
         @Override
@@ -150,6 +158,11 @@ public final class SequenceEncoders {
             dst.add(encoded.buffer, 2, encoded.size() - 2);
 
             return dst;
+        }
+        
+        @Override
+        public EncoderType type() {
+            return EncoderType.PREFIX;
         }
         
         @Override
@@ -268,7 +281,12 @@ public final class SequenceEncoders {
 
             return dst;
         }
-        
+
+        @Override
+        public EncoderType type() {
+            return EncoderType.INFIX;
+        }
+
         @Override
         public String toString() {
             return getClass().getSimpleName();
@@ -299,5 +317,15 @@ public final class SequenceEncoders {
             i++;
         }
         return i;
+    }
+
+    public static IEncoder forType(EncoderType encType)
+    {
+        switch (encType) {
+            case INFIX:  return new TrimInfixAndSuffixEncoder();
+            case PREFIX: return new TrimPrefixAndSuffixEncoder();
+            case SUFFIX: return new TrimSuffixEncoder();
+        }
+        throw new RuntimeException("Unknown encoder: " + encType); 
     }
 }

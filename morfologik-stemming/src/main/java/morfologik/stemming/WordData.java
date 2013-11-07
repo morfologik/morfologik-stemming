@@ -238,8 +238,7 @@ public final class WordData implements Cloneable {
 	 */
 	private CharBuffer decode(ByteBuffer bytes, CharBuffer chars) {
 		chars.clear();
-		final int maxCapacity = (int) (bytes.remaining() * decoder
-		        .maxCharsPerByte());
+		final int maxCapacity = (int) (bytes.remaining() * decoder.maxCharsPerByte());
 		if (chars.capacity() <= maxCapacity) {
 			chars = CharBuffer.allocate(maxCapacity);
 		}

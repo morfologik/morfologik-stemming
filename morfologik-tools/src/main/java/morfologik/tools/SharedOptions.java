@@ -3,6 +3,8 @@ package morfologik.tools;
 import java.io.File;
 import java.util.Arrays;
 
+import morfologik.stemming.EncoderType;
+
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 
@@ -116,7 +118,7 @@ final class SharedOptions {
 
 	public final static Option encoder = OptionBuilder
 	    .withDescription("Encoder used for compressing inflected forms. Any of: "
-	        + Arrays.toString(MorphEncodingTool.EncoderType.values()))
+	        + Arrays.toString(EncoderType.values()))
 	    .withLongOpt("encoder")
         .hasArg(true)
 	    .withArgName("name")

@@ -272,9 +272,6 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 	    output.clear();
 
         assert inflectedForm.position() == 0;
-        assert (metadata.isUsingInfixes()   && !metadata.isUsingPrefixes()) ||
-               (metadata.isUsingPrefixes()  && !metadata.isUsingInfixes())  ||
-               (!metadata.isUsingPrefixes() && !metadata.isUsingInfixes());
 
 		// Increase buffer size (overallocating), if needed.
         final byte[] src = inflectedForm.array();
@@ -283,40 +280,52 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
             output = ByteBuffer.allocate(srcLen + encodedLen);
         }
 
-		if (metadata.isUsingInfixes()) {
-            int infixIndex  = (encoded[0] - 'A') & 0xFF;
-            int infixLength = (encoded[1] - 'A') & 0xFF;
-            int truncateSuffixBytes = (encoded[2] - 'A') & 0xFF;
-            if (infixLength == REMOVE_EVERYTHING ||
-                truncateSuffixBytes == REMOVE_EVERYTHING) {
-                infixIndex = 0;
-                infixLength = srcLen;
-                truncateSuffixBytes = 0;
-            }
-            output.put(src, 0, infixIndex);
-            output.put(src, infixIndex + infixLength, srcLen - (infixIndex + infixLength + truncateSuffixBytes));
-            output.put(encoded, 3, encodedLen - 3);
-		} else if (metadata.isUsingPrefixes()) {
-            int truncatePrefixBytes = (encoded[0] - 'A') & 0xFF;
-            int truncateSuffixBytes = (encoded[1] - 'A') & 0xFF;
-            if (truncatePrefixBytes == REMOVE_EVERYTHING ||
-                truncateSuffixBytes == REMOVE_EVERYTHING) {
-                truncatePrefixBytes = srcLen;
-                truncateSuffixBytes = 0;
-            }
-            output.put(src, truncatePrefixBytes, srcLen - (truncateSuffixBytes + truncatePrefixBytes));
-            output.put(encoded, 2, encodedLen - 2);
-		} else if (metadata.isUsingSuffixes()) {
-            int suffixTrimCode = encoded[0];
-            int truncateBytes = (suffixTrimCode - 'A') & 0xFF;
-            if (truncateBytes == REMOVE_EVERYTHING) {
-                truncateBytes = srcLen;
-            }
-            output.put(src, 0, srcLen - truncateBytes);
-            output.put(encoded, 1, encodedLen - 1);
-		} else {
-            output.put(encoded, 0, encodedLen);
-		}
+        switch (metadata.getEncoderType()) {
+            case SUFFIX:
+                int suffixTrimCode = encoded[0];
+                int truncateBytes = (suffixTrimCode - 'A') & 0xFF;
+                if (truncateBytes == REMOVE_EVERYTHING) {
+                    truncateBytes = srcLen;
+                }
+                output.put(src, 0, srcLen - truncateBytes);
+                output.put(encoded, 1, encodedLen - 1);
+                break;
+
+            case PREFIX:
+                int truncatePrefixBytes = (encoded[0] - 'A') & 0xFF;
+                int truncateSuffixBytes = (encoded[1] - 'A') & 0xFF;
+                if (truncatePrefixBytes == REMOVE_EVERYTHING ||
+                    truncateSuffixBytes == REMOVE_EVERYTHING) {
+                    truncatePrefixBytes = srcLen;
+                    truncateSuffixBytes = 0;
+                }
+                output.put(src, truncatePrefixBytes, srcLen - (truncateSuffixBytes + truncatePrefixBytes));
+                output.put(encoded, 2, encodedLen - 2);
+                break;
+
+            case INFIX:
+                int infixIndex  = (encoded[0] - 'A') & 0xFF;
+                int infixLength = (encoded[1] - 'A') & 0xFF;
+                truncateSuffixBytes = (encoded[2] - 'A') & 0xFF;
+                if (infixLength == REMOVE_EVERYTHING ||
+                    truncateSuffixBytes == REMOVE_EVERYTHING) {
+                    infixIndex = 0;
+                    infixLength = srcLen;
+                    truncateSuffixBytes = 0;
+                }
+                output.put(src, 0, infixIndex);
+                output.put(src, infixIndex + infixLength, srcLen - (infixIndex + infixLength + truncateSuffixBytes));
+                output.put(encoded, 3, encodedLen - 3);
+                break;
+
+            case NONE:
+                output.put(encoded, 0, encodedLen);
+                break;
+
+            default:
+                throw new RuntimeException("Unhandled switch/case: " + metadata.getEncoderType());
+        }
+
         return output;
 	}
 

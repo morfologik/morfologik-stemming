@@ -100,10 +100,31 @@ public final class Dictionary {
 	        throws IOException 
 	{
 		try {
+            Map<DictionaryAttribute, String> map = new HashMap<DictionaryAttribute, String>();
 			final Properties properties = new Properties();
 			properties.load(new InputStreamReader(featuresData, "UTF-8"));
 
-			Map<DictionaryAttribute, String> map = new HashMap<DictionaryAttribute, String>();
+			// Handle back-compatibility for encoder specification.
+			if (!properties.containsKey(DictionaryAttribute.ENCODER.propertyName)) {
+			    boolean usesSuffixes = Boolean.valueOf(properties.getProperty("fsa.dict.uses-suffixes", "true"));
+			    boolean usesPrefixes = Boolean.valueOf(properties.getProperty("fsa.dict.uses-prefixes", "false"));
+			    boolean usesInfixes  = Boolean.valueOf(properties.getProperty("fsa.dict.uses-infixes",  "false"));
+
+			    if (usesInfixes) {
+			        map.put(DictionaryAttribute.ENCODER, EncoderType.INFIX.name());
+			    } else if (usesPrefixes) {
+			        map.put(DictionaryAttribute.ENCODER, EncoderType.PREFIX.name());
+			    } else if (usesSuffixes) {
+			        map.put(DictionaryAttribute.ENCODER, EncoderType.SUFFIX.name());
+			    } else {
+			        map.put(DictionaryAttribute.ENCODER, EncoderType.NONE.name());
+			    }
+			    
+			    properties.remove("fsa.dict.uses-suffixes");
+			    properties.remove("fsa.dict.uses-prefixes");
+			    properties.remove("fsa.dict.uses-infixes");
+			}
+
 			for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements();) {
 			    String key = (String) e.nextElement();
 			    map.put(DictionaryAttribute.fromPropertyName(key), properties.getProperty(key));
