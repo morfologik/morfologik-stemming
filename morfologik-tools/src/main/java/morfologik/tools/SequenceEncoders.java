@@ -292,6 +292,35 @@ public final class SequenceEncoders {
             return getClass().getSimpleName();
         }        
     }
+    
+    /**
+     * 
+     */
+    public static class CopyEncoder implements IEncoder {
+        @Override
+        public ByteArrayList encode(ByteArrayList src, ByteArrayList derived, ByteArrayList encodedBuffer)
+        {
+            encodedBuffer.add(derived.buffer, 0, derived.size());
+            return encodedBuffer;
+        }
+        
+        @Override
+        public ByteArrayList decode(ByteArrayList src, ByteArrayList encoded, ByteArrayList derivedBuffer)
+        {
+            derivedBuffer.add(encoded.buffer, 0, encoded.size());
+            return derivedBuffer;
+        }
+        
+        @Override
+        public EncoderType type() {
+            return EncoderType.NONE;
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName();
+        }        
+    }
 
     /**
      * Compute the length of the shared prefix between two byte sequences.
@@ -325,6 +354,7 @@ public final class SequenceEncoders {
             case INFIX:  return new TrimInfixAndSuffixEncoder();
             case PREFIX: return new TrimPrefixAndSuffixEncoder();
             case SUFFIX: return new TrimSuffixEncoder();
+            case NONE:   return new CopyEncoder();
         }
         throw new RuntimeException("Unknown encoder: " + encType); 
     }

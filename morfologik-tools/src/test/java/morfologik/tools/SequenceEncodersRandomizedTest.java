@@ -1,11 +1,11 @@
 package morfologik.tools;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.List;
 
 import morfologik.stemming.DictionaryLookup;
 import morfologik.stemming.DictionaryMetadataBuilder;
+import morfologik.stemming.EncoderType;
 
 import org.junit.Test;
 
@@ -14,6 +14,7 @@ import com.carrotsearch.randomizedtesting.RandomizedTest;
 import com.carrotsearch.randomizedtesting.annotations.Name;
 import com.carrotsearch.randomizedtesting.annotations.ParametersFactory;
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 
 public class SequenceEncodersRandomizedTest extends RandomizedTest {
     private final SequenceEncoders.IEncoder coder;
@@ -25,11 +26,11 @@ public class SequenceEncodersRandomizedTest extends RandomizedTest {
 
     @ParametersFactory
     public static List<Object[]> testFactory() {
-        return Arrays.asList($$(
-            $(new SequenceEncoders.TrimSuffixEncoder()),
-            $(new SequenceEncoders.TrimPrefixAndSuffixEncoder()),
-            $(new SequenceEncoders.TrimInfixAndSuffixEncoder())
-        ));
+        List<Object[]> encoders = Lists.newArrayList();
+        for (EncoderType t : EncoderType.values()) {
+            encoders.add(new Object [] {SequenceEncoders.forType(t)});
+        }
+        return encoders;
     }
 
     @Test

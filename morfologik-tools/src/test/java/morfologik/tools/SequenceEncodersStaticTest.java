@@ -1,9 +1,11 @@
 package morfologik.tools;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+
+import morfologik.stemming.EncoderType;
 
 import org.junit.Test;
 
@@ -73,6 +75,13 @@ public class SequenceEncodersStaticTest {
 		assertEquals("passagère+Eer+tag", encode(suffix, "passagère", "passager", "tag"));
 		assertEquals("passagère+GDAr+tag", encode(infix, "passagère", "passager", "tag"));
 		assertEquals("passagère+AEer+tag", encode(prefix, "passagère", "passager", "tag"));
+	}
+	
+	@Test
+	public void testAllEncodersHaveImplementations() {
+	    for (EncoderType t : EncoderType.values()) {
+	        assertNotNull(null != SequenceEncoders.forType(t));
+	    }
 	}
 
     private String encode(SequenceAssembler assembler, String wordForm,
