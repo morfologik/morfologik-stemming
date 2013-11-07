@@ -30,10 +30,10 @@ niebabińscy     niebabiński     adj:pl:nom.voc:m1.p1:pos
 niebabińska     niebabiński     adj:sg:nom.voc:f:pos
 niebabiński     niebabiński     adj:sg:acc:m3:pos
 
-2) The above tab-delimited input needs to be preprocessed
-   to mark shared affixes:
+2) The above tab-delimited input can be preprocessed
+   to conflate shared affixes (helps in subsequent FSA compression):
 
-java -jar morfologik-tools-*-standalone.jar tab2morph -pre -suf -inf --input ~/tmp/input.txt > intermediate.txt
+java -jar morfologik-tools-*-standalone.jar tab2morph --coder INFIX --input ~/tmp/input.txt > intermediate.txt
 
 3) Compile FSA from the intermediate format:
 
