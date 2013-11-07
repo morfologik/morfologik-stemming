@@ -27,12 +27,6 @@ public final class DictionaryMetadataBuilder {
         return this;
     }
 
-    public DictionaryMetadataBuilder usePrefixes()          { return usePrefixes(true); }
-    public DictionaryMetadataBuilder usePrefixes(boolean v) { this.attrs.put(DictionaryAttribute.USES_PREFIXES, Boolean.valueOf(v).toString()); return this; }
-
-    public DictionaryMetadataBuilder useInfixes()           { return useInfixes(true); }
-    public DictionaryMetadataBuilder useInfixes(boolean v)  { this.attrs.put(DictionaryAttribute.USES_INFIXES, Boolean.valueOf(v).toString()); return this; }
-    
     public DictionaryMetadataBuilder ignorePunctuation()    { return ignorePunctuation(true); }
     public DictionaryMetadataBuilder ignorePunctuation(boolean v)  { this.attrs.put(DictionaryAttribute.IGNORE_PUNCTUATION, Boolean.valueOf(v).toString()); return this; }
     
@@ -53,6 +47,11 @@ public final class DictionaryMetadataBuilder {
     
     public DictionaryMetadataBuilder supportRunOnWords()    { return supportRunOnWords(true); }
     public DictionaryMetadataBuilder supportRunOnWords(boolean v)  { this.attrs.put(DictionaryAttribute.RUN_ON_WORDS, Boolean.valueOf(v).toString()); return this; }
+
+    public DictionaryMetadataBuilder encoder(EncoderType type) {
+        this.attrs.put(DictionaryAttribute.ENCODER, type.name());
+        return this;
+    }
 
     public DictionaryMetadataBuilder locale(Locale locale) {
         return locale(locale.toString());

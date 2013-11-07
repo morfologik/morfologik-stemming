@@ -26,6 +26,8 @@ import morfologik.util.BufferUtils;
  *      site</a>
  */
 public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
+    private static final int REMOVE_EVERYTHING = 255;
+
 	/** An FSA used for lookups. */
 	private final FSATraversal matcher;
 
@@ -206,7 +208,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 					 * Decode the stem into stem buffer.
 					 */
 					wordData.stemBuffer.clear();
-					wordData.stemBuffer = decodeStem(wordData.stemBuffer, ba,
+					wordData.stemBuffer = decodeBaseForm(wordData.stemBuffer, ba,
 					        sepPos, byteBuffer, dictionaryMetadata);
 					wordData.stemBuffer.flip();
 
@@ -242,84 +244,89 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 	 * Decode the base form of an inflected word and save its decoded form into
 	 * a byte buffer.
 	 * 
-	 * @param bb
+	 * @param output
 	 *            The byte buffer to save the result to. A new buffer may be
 	 *            allocated if the capacity of <code>bb</code> is not large
 	 *            enough to store the result. The buffer is not flipped upon
 	 *            return.
 	 * 
-	 * @param inflectedBuffer
+	 * @param inflectedForm
 	 *            Inflected form's bytes (decoded properly).
 	 * 
-	 * @param bytes
+	 * @param encoded
 	 *            Bytes of the encoded base form, starting at 0 index.
 	 * 
-	 * @param len
+	 * @param encodedLen
 	 *            Length of the encode base form.
 	 * 
 	 * @return Returns either <code>bb</code> or a new buffer whose capacity is
 	 *         large enough to store the output of the decoded data.
 	 */
-	public static ByteBuffer decodeStem(ByteBuffer bb, byte[] bytes, int len,
-	        ByteBuffer inflectedBuffer, DictionaryMetadata metadata) {
-		bb.clear();
+	public static ByteBuffer decodeBaseForm(
+	        ByteBuffer output, 
+	        byte[] encoded, 
+	        int encodedLen,
+	        ByteBuffer inflectedForm, 
+	        DictionaryMetadata metadata) {
+	    // Prepare the buffer.
+	    output.clear();
 
-		// Empty length? Weird, but return an empty buffer.
-		if (len == 0) {
-			return bb;
-		}
+        assert inflectedForm.position() == 0;
 
-		// Determine inflected string's length in bytes, in the same encoding.
-		final byte[] infBytes = inflectedBuffer.array();
-		final int infLen = inflectedBuffer.remaining();
-		final int code0 = (bytes[0] - 'A') & 0xFF;
+		// Increase buffer size (overallocating), if needed.
+        final byte[] src = inflectedForm.array();
+        final int srcLen = inflectedForm.remaining();
+        if (output.capacity() < srcLen + encodedLen) {
+            output = ByteBuffer.allocate(srcLen + encodedLen);
+        }
 
-		final boolean fsaPrefixes = metadata.isUsingPrefixes();
-		final boolean fsaInfixes = metadata.isUsingInfixes();
+        switch (metadata.getEncoderType()) {
+            case SUFFIX:
+                int suffixTrimCode = encoded[0];
+                int truncateBytes = (suffixTrimCode - 'A') & 0xFF;
+                if (truncateBytes == REMOVE_EVERYTHING) {
+                    truncateBytes = srcLen;
+                }
+                output.put(src, 0, srcLen - truncateBytes);
+                output.put(encoded, 1, encodedLen - 1);
+                break;
 
-		// Increase buffer size, if needed.
-		if (bb.capacity() < infLen + len) {
-			bb = ByteBuffer.allocate(infLen + len);
-		}
+            case PREFIX:
+                int truncatePrefixBytes = (encoded[0] - 'A') & 0xFF;
+                int truncateSuffixBytes = (encoded[1] - 'A') & 0xFF;
+                if (truncatePrefixBytes == REMOVE_EVERYTHING ||
+                    truncateSuffixBytes == REMOVE_EVERYTHING) {
+                    truncatePrefixBytes = srcLen;
+                    truncateSuffixBytes = 0;
+                }
+                output.put(src, truncatePrefixBytes, srcLen - (truncateSuffixBytes + truncatePrefixBytes));
+                output.put(encoded, 2, encodedLen - 2);
+                break;
 
-		if (code0 >= 0) {
-			if (!fsaPrefixes && !fsaInfixes) {
-				if (code0 <= infLen) {
-					bb.put(infBytes, 0, infLen - code0);
-					bb.put(bytes, 1, len - 1);
-					return bb;
-				}
-			} else if (fsaPrefixes && !fsaInfixes) {
-				if (len > 1) {
-					final int stripAtEnd = bytes[1] - 'A' + code0;
-					if (stripAtEnd <= infLen) {
-						bb.put(infBytes, code0, infLen - stripAtEnd);
-						bb.put(bytes, 2, len - 2);
-						return bb;
-					}
-				}
-			} else if (fsaInfixes) {
-				// Note: Prefixes are silently assumed here.
-				if (len > 2) {
-					final int stripAtBeginning = bytes[1] - 'A' + code0;
-					final int stripAtEnd = bytes[2] - 'A' + stripAtBeginning;
-					if (stripAtEnd <= infLen) {
-						bb.put(infBytes, 0, code0);
-						bb.put(infBytes, stripAtBeginning, infLen - stripAtEnd);
-						bb.put(bytes, 3, len - 3);
-						return bb;
-					}
-				}
-			}
-		}
+            case INFIX:
+                int infixIndex  = (encoded[0] - 'A') & 0xFF;
+                int infixLength = (encoded[1] - 'A') & 0xFF;
+                truncateSuffixBytes = (encoded[2] - 'A') & 0xFF;
+                if (infixLength == REMOVE_EVERYTHING ||
+                    truncateSuffixBytes == REMOVE_EVERYTHING) {
+                    infixIndex = 0;
+                    infixLength = srcLen;
+                    truncateSuffixBytes = 0;
+                }
+                output.put(src, 0, infixIndex);
+                output.put(src, infixIndex + infixLength, srcLen - (infixIndex + infixLength + truncateSuffixBytes));
+                output.put(encoded, 3, encodedLen - 3);
+                break;
 
-		/*
-		 * This is a fallback in case some junk is detected above. Return the
-		 * base form only if this is the case.
-		 */
-		bb.clear();
-		bb.put(bytes, 0, len);
-		return bb;
+            case NONE:
+                output.put(encoded, 0, encodedLen);
+                break;
+
+            default:
+                throw new RuntimeException("Unhandled switch/case: " + metadata.getEncoderType());
+        }
+
+        return output;
 	}
 
 	/**
@@ -336,8 +343,8 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 
 		chars.mark();
 		encoder.reset();		
-		if (encoder.encode(chars, bytes, true).
-		        isError()) { // remove everything, we don't want to accept malformed intput
+		if (encoder.encode(chars, bytes, true).isError()) {
+		    // remove everything, we don't want to accept malformed input
 		    bytes.clear();
 		}
 		bytes.flip();

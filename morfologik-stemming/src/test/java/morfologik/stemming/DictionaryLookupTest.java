@@ -14,6 +14,7 @@ import java.util.HashSet;
 
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSABuilder;
+import morfologik.fsa.FSAUtils;
 
 import org.junit.Test;
 
@@ -122,6 +123,10 @@ public class DictionaryLookupTest {
 		final URL url = this.getClass().getResource("test-diacritics-utf8.dict");
 		Dictionary read = Dictionary.read(url);
         final IStemmer s = new DictionaryLookup(read);
+        
+        for (byte[] ba : FSAUtils.rightLanguage(read.fsa, read.fsa.getRootNode())) {
+            System.out.println(new String(ba, "UTF-8"));
+        }
 
 		assertArrayEquals(new String[] { "merge", "001" }, stem(s, "mergeam"));
 		assertArrayEquals(new String[] { "merge", "002" }, stem(s, "merseserăm"));
@@ -179,8 +184,7 @@ public class DictionaryLookupTest {
         DictionaryMetadata metadata = new DictionaryMetadataBuilder()
             .separator('+')
             .encoding("iso8859-1")
-            .usePrefixes()
-            .useInfixes()
+            .encoder(EncoderType.INFIX)
             .build();
 
         final DictionaryLookup s = new DictionaryLookup(new Dictionary(fsa, metadata));
@@ -197,8 +201,7 @@ public class DictionaryLookupTest {
 
 	private static byte[][] toBytes(String charset, String[] strings) {
 	    byte [][] out = new byte [strings.length][];
-	    for (int i = 0; i < strings.length; i++)
-	    {
+	    for (int i = 0; i < strings.length; i++) {
 	        try {
                 out[i] = strings[i].getBytes(charset);
             } catch (UnsupportedEncodingException e) {

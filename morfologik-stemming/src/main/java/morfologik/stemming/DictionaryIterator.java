@@ -92,11 +92,10 @@ public final class DictionaryIterator implements Iterator<WordData> {
 		 */
 		entry.stemBuffer.clear();
 		if (decodeStems) {
-			entry.stemBuffer = DictionaryLookup.decodeStem(entry.stemBuffer,
+			entry.stemBuffer = DictionaryLookup.decodeBaseForm(entry.stemBuffer,
 			        ba, sepPos, inflectedBuffer, dictionaryMetadata);
 		} else {
-			entry.stemBuffer = BufferUtils.ensureCapacity(entry.stemBuffer,
-			        sepPos);
+			entry.stemBuffer = BufferUtils.ensureCapacity(entry.stemBuffer, sepPos);
 			entry.stemBuffer.put(ba, 0, sepPos);
 		}
 		entry.stemBuffer.flip();

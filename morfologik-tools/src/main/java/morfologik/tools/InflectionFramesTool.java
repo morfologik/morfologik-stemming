@@ -49,7 +49,7 @@ public class InflectionFramesTool {
 			stemBuffer.clear();
 			stemBuffer = wd.getStemBytes(stemBuffer);
 
-			stemDecoded = DictionaryLookup.decodeStem(stemDecoded, stemBuffer
+			stemDecoded = DictionaryLookup.decodeBaseForm(stemDecoded, stemBuffer
 			        .array(), stemBuffer.remaining(), inflBuffer, pl.metadata);
 			stemDecoded.flip();
 

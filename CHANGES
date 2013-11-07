@@ -1,5 +1,32 @@
 1.8.0
           [not released]
+          
+          * Dictionary .info files can specify the sequence decoder explicitly:
+          suffix, prefix, infix, none are supported. For backwards compatibility,
+          fsa.dict.uses-prefixes, fsa.dict.uses-infixes and fsa.dict.uses-suffixes
+          are still supported, but will be removed in the next major version.
+
+          * Command-line option changes to MorphEncodingTool - it now accepts an explicit
+          name of the sequence encoder, not infix/suffix/prefix booleans.  
+
+          * Rewritten implementation of tab-separated data files (tab2morph tool).
+          The output should yield smaller files, especially for prefix encoding
+          and infix encoding. This does *not* necessarily mean smaller automata
+          but we're working on getting these as well.
+
+          Example output before and after refactoring:
+
+          Prefix coder:
+          postmodernizm|modernizm|xyz => [before] postmodernizm+ANmodernizm+xyz
+                                      => [after ] postmodernizm+EA+xyz
+
+          Infix coder:
+          laquelle|lequel|D f s       => [before] laquelle+AAHequel+D f s
+                                      => [after ] laquelle+AGAquel+D f s
+
+          * Changed the default format of the Polish dictionary from infix
+          encoded to prefix encoded (smaller output size).
+          
 1.7.2
           A quick fix for incorrect decoding of certain suffixes (long suffixes).
 
