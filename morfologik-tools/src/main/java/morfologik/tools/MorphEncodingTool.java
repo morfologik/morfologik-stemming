@@ -8,8 +8,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import morfologik.fsa.FSA5;
+import morfologik.tools.SequenceEncoders.IEncoder;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -22,21 +24,36 @@ import org.apache.commons.lang.StringEscapeUtils;
  * the Perl and AWK scripts from the original FSA package. 
  */
 class MorphEncodingTool extends Tool {
-	private boolean prefixes = false;
-	private boolean infixes = false;
 	private boolean noWarn = false;
+	private SequenceAssembler encoder;
 
-	private MorphEncoder encoder;
+	enum EncoderType {
+	    SUFFIX (new SequenceEncoders.TrimSuffixEncoder()),
+	    PREFIX (new SequenceEncoders.TrimPrefixAndSuffixEncoder()),
+	    INFIX  (new SequenceEncoders.TrimInfixAndSuffixEncoder());
+
+	    final SequenceEncoders.IEncoder encoder;
+
+	    private EncoderType(IEncoder encoder) {
+	        this.encoder = encoder;
+        }
+	}
 
 	/**
      * 
      */
 	protected void go(final CommandLine line) throws Exception {
 		noWarn = line.hasOption(SharedOptions.noWarnIfTwoFields.getOpt());
-		infixes = line.hasOption(SharedOptions.infixEncoding.getOpt());
-
-		if (!infixes) {
-			prefixes = line.hasOption(SharedOptions.prefixEncoding.getOpt());
+	
+		EncoderType encType = EncoderType.SUFFIX;
+		if (line.hasOption(SharedOptions.encoder.getOpt())) {
+		    String encValue = line.getOptionValue(SharedOptions.encoder.getOpt());
+		    try {
+		        encType = EncoderType.valueOf(encValue.toUpperCase());
+		    } catch (IllegalArgumentException e) {
+		        throw new IllegalArgumentException("Invalid encoder: " + encValue + ", "
+		            + "allowed values: " + Arrays.toString(EncoderType.values()));
+		    }
 		}
 
 		char separator = FSA5.DEFAULT_ANNOTATION;
@@ -55,7 +72,8 @@ class MorphEncodingTool extends Tool {
 
 			FSABuildTool.checkSingleByte(Character.toString(separator));
 		}
-		encoder = new MorphEncoder((byte) separator);
+		
+        encoder = new SequenceAssembler(encType.encoder, (byte) separator);
 
 		// Determine input and output streams.
 		final DataInputStream input = initializeInput(line);
@@ -131,14 +149,7 @@ class MorphEncodingTool extends Tool {
 						}
 					}
 
-					if (infixes) {
-						output.write(encoder.infixEncode(words[0], words[1], words[2]));
-					} else if (prefixes) {
-						output.write(encoder.prefixEncode(words[0], words[1], words[2]));
-					} else {
-						output.write(encoder.standardEncode(words[0], words[1], words[2]));
-					}
-
+					output.write(encoder.encode(words[0], words[1], words[2]));
 					output.writeByte('\n'); // Unix line end only.
 					bufPos = 0;
 				} else {
@@ -158,9 +169,7 @@ class MorphEncodingTool extends Tool {
 	protected void initializeOptions(Options options) {
 		options.addOption(SharedOptions.inputFileOption);		
 		options.addOption(SharedOptions.outputFileOption);
-		options.addOption(SharedOptions.standardEncoding);
-		options.addOption(SharedOptions.prefixEncoding);
-		options.addOption(SharedOptions.infixEncoding);		
+		options.addOption(SharedOptions.encoder);
 		options.addOption(SharedOptions.noWarnIfTwoFields);
 		options.addOption(SharedOptions.annotationSeparatorCharacterOption);
 	}

@@ -15,10 +15,10 @@ import com.carrotsearch.randomizedtesting.annotations.Name;
 import com.carrotsearch.randomizedtesting.annotations.ParametersFactory;
 import com.google.common.base.Charsets;
 
-public class MorphEncoder2Test extends RandomizedTest {
-    private final MorphEncoder2.IEncoder coder;
+public class SequenceEncodersRandomizedTest extends RandomizedTest {
+    private final SequenceEncoders.IEncoder coder;
 
-    public MorphEncoder2Test(@Name("coder") MorphEncoder2.IEncoder coder)
+    public SequenceEncodersRandomizedTest(@Name("coder") SequenceEncoders.IEncoder coder)
     {
         this.coder = coder;
     }
@@ -26,9 +26,9 @@ public class MorphEncoder2Test extends RandomizedTest {
     @ParametersFactory
     public static List<Object[]> testFactory() {
         return Arrays.asList($$(
-            $(new MorphEncoder2.TrimSuffixEncoder()),
-            $(new MorphEncoder2.TrimPrefixAndSuffixEncoder()),
-            $(new MorphEncoder2.TrimInfixAndSuffixEncoder())
+            $(new SequenceEncoders.TrimSuffixEncoder()),
+            $(new SequenceEncoders.TrimPrefixAndSuffixEncoder()),
+            $(new SequenceEncoders.TrimInfixAndSuffixEncoder())
         ));
     }
 
@@ -79,8 +79,8 @@ public class MorphEncoder2Test extends RandomizedTest {
         // TODO: add DictionaryLookup.decodeBaseForm decoding testing
         DictionaryMetadataBuilder builder = new DictionaryMetadataBuilder();
         builder.encoding(Charsets.UTF_8);
-        builder.useInfixes(coder instanceof MorphEncoder2.TrimInfixAndSuffixEncoder);
-        builder.usePrefixes(coder instanceof MorphEncoder2.TrimPrefixAndSuffixEncoder);
+        builder.useInfixes(coder instanceof SequenceEncoders.TrimInfixAndSuffixEncoder);
+        builder.usePrefixes(coder instanceof SequenceEncoders.TrimPrefixAndSuffixEncoder);
             
         ByteBuffer bb = DictionaryLookup.decodeBaseForm(
             ByteBuffer.allocate(0),
@@ -103,16 +103,4 @@ public class MorphEncoder2Test extends RandomizedTest {
 
         assertEquals(dst, decoded2);       
     }
-
-    public static void main(String [] args) {
-        /*
-        ByteArrayList src = ByteArrayList.from("1a2345678Y".getBytes(UTF_8));
-        ByteArrayList dst = ByteArrayList.from("123456789X".getBytes(UTF_8));
-
-        MorphEncoder2.IEncoder coder = new MorphEncoder2.TrimInfixAndSuffixEncoder();
-        ByteArrayList out = coder.encode(src, dst, ByteArrayList.newInstance());
-        System.out.println(new String(out.toArray()));
-        System.out.println(new String(coder.decode(src, out, ByteArrayList.newInstance()).toArray()));
-        */
-    }    
 }

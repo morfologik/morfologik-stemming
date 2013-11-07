@@ -2,8 +2,11 @@ package morfologik.tools;
 
 import com.carrotsearch.hppc.ByteArrayList;
 
-public final class MorphEncoder2 {
-    private MorphEncoder2() {}
+/**
+ * Container class for sequence encoders.
+ */
+public final class SequenceEncoders {
+    private SequenceEncoders() {}
 
     /**
      * Maximum encodable single-byte code.
@@ -16,7 +19,28 @@ public final class MorphEncoder2 {
     }
 
     /**
-     * TODO: add javadoc on encoding format.
+     * Encodes <code>dst</code> relative to <code>src</code> by trimming 
+     * whatever non-equal suffix <code>src</code> has. The output code is (bytes):
+     * <pre>
+     * {K}{suffix}
+     * </pre>
+     * where (<code>K</code> - 'A') bytes should be trimmed from the end of <code>src</code> 
+     * and then the <code>suffix</code> should be appended to the resulting byte sequence.
+     * 
+     * <p>Examples:</p>
+     * <pre>
+     * src: foo
+     * dst: foobar
+     * encoded: Abar
+     * 
+     * src: foo
+     * dst: bar
+     * encoded: Dbar
+     * </pre>
+     * 
+     * <p><strong>Note:</strong> The code length is a single byte. If equal to 
+     * {@link SequenceEncoders#REMOVE_EVERYTHING} the entire <code>src</code> sequence
+     * should be discarded.</p>
      */
     public static class TrimSuffixEncoder implements IEncoder {
         public ByteArrayList encode(ByteArrayList src, ByteArrayList dst, ByteArrayList encoded) {
@@ -54,7 +78,30 @@ public final class MorphEncoder2 {
     }
 
     /**
-     * TODO: add javadoc on encoding format.
+     * Encodes <code>dst</code> relative to <code>src</code> by trimming 
+     * whatever non-equal suffix and prefix <code>src</code> and <code>dst</code> have. 
+     * The output code is (bytes):
+     * <pre>
+     * {P}{K}{suffix}
+     * </pre>
+     * where (<code>P</code> - 'A') bytes should be trimmed from the start of <code>src</code>,
+     *  (<code>K</code> - 'A') bytes should be trimmed from the end of <code>src</code>
+     * and then the <code>suffix</code> should be appended to the resulting byte sequence.
+     * 
+     * <p>Examples:</p>
+     * <pre>
+     * src: abc
+     * dst: abcd
+     * encoded: AAd
+     * 
+     * src: abc
+     * dst: xyz
+     * encoded: ADxyz
+     * </pre>
+     * 
+     * <p><strong>Note:</strong> Each code's length is a single byte. If any is equal to 
+     * {@link SequenceEncoders#REMOVE_EVERYTHING} the entire <code>src</code> sequence
+     * should be discarded.</p>
      */
     public static class TrimPrefixAndSuffixEncoder implements IEncoder {
         public ByteArrayList encode(ByteArrayList src, ByteArrayList dst, ByteArrayList encoded) {
@@ -112,7 +159,31 @@ public final class MorphEncoder2 {
     }
 
     /**
-     * TODO: add javadoc on encoding format.
+     * Encodes <code>dst</code> relative to <code>src</code> by trimming 
+     * whatever non-equal suffix and infix <code>src</code> and <code>dst</code> have. 
+     * The output code is (bytes):
+     * <pre>
+     * {X}{L}{K}{suffix}
+     * </pre>
+     * where <code>src's</code> infix at position (<code>X</code> - 'A') and of length
+     * (<code>L</code> - 'A') should be removed, then (<code>K</code> - 'A') bytes 
+     * should be trimmed from the end
+     * and then the <code>suffix</code> should be appended to the resulting byte sequence.
+     * 
+     * <p>Examples:</p>
+     * <pre>
+     * src: ayz
+     * dst: abc
+     * encoded: AACbc
+     * 
+     * src: aillent
+     * dst: aller
+     * encoded: BBCr
+     * </pre>
+     * 
+     * <p><strong>Note:</strong> Each code's length is a single byte. If any is equal to 
+     * {@link SequenceEncoders#REMOVE_EVERYTHING} the entire <code>src</code> sequence
+     * should be discarded.</p>
      */
     public static class TrimInfixAndSuffixEncoder implements IEncoder {
         ByteArrayList scratch = new ByteArrayList();

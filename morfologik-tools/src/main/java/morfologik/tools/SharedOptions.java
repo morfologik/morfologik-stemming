@@ -114,23 +114,14 @@ final class SharedOptions {
         .withLongOpt("sorted")
         .create();
 
-	public final static Option standardEncoding = OptionBuilder
-	    .withDescription("Encode suffix forms in a standard way")
-	    .withLongOpt("suffix")
+	public final static Option encoder = OptionBuilder
+	    .withDescription("Encoder used for compressing inflected forms. Any of: "
+	        + Arrays.toString(MorphEncodingTool.EncoderType.values()))
+	    .withLongOpt("encoder")
+        .hasArg(true)
+	    .withArgName("name")
 	    .isRequired(false)
-	    .create("suf");
-
-	public final static Option prefixEncoding = OptionBuilder
-	    .withDescription("Encode suffix forms in a prefix way")
-	    .withLongOpt("prefix")
-	    .isRequired(false)
-	    .create("pre");
-
-	public final static Option infixEncoding = OptionBuilder
-	    .withDescription("Encode suffix forms in an infix way")
-	    .withLongOpt("infix")
-	    .isRequired(false)
-	    .create("inf");
+	    .create("e");
 
 	public final static Option noWarnIfTwoFields = OptionBuilder
 	    .withDescription("Suppress warning for lines with only two fields (for stemming dictionaries)")

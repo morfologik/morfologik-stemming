@@ -31,6 +31,7 @@ public class DictionaryMetadataBuilderTest {
             .supportRunOnWords()
             .useInfixes()
             .usePrefixes()
+            .useSuffixes()
             .withEquivalentChars(Collections.<Character,List<Character>>emptyMap())
             .withReplacementPairs(Collections.<String,List<String>>emptyMap())
             .locale(Locale.getDefault())

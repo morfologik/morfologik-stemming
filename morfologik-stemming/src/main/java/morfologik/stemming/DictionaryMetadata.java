@@ -37,6 +37,7 @@ public final class DictionaryMetadata {
         .supportRunOnWords()
         .useInfixes(false)
         .usePrefixes(false)
+        .useSuffixes(true)
         .toMap();
 
     /**
@@ -63,6 +64,7 @@ public final class DictionaryMetadata {
 
     private boolean usesPrefixes;
     private boolean usesInfixes;
+    private boolean usesSuffixes;
     
     /**
      * Replacement pairs for non-obvious candidate search in a speller dictionary.
@@ -99,6 +101,7 @@ public final class DictionaryMetadata {
     public byte getSeparator()       { return separator; }
     public boolean isUsingPrefixes() { return usesPrefixes; }
     public boolean isUsingInfixes()  { return usesInfixes; }
+    public boolean isUsingSuffixes()  { return usesSuffixes; }
     public Locale getLocale()        { return locale; }
 
     public Map<String, List<String>> getReplacementPairs() { return replacementPairs; }
@@ -168,6 +171,7 @@ public final class DictionaryMetadata {
                     }
                     break;
 
+	            case USES_SUFFIXES:
 	            case USES_INFIXES:
                 case USES_PREFIXES:
 	            case IGNORE_PUNCTUATION:
@@ -200,6 +204,7 @@ public final class DictionaryMetadata {
 	    // Cache these for performance reasons.
         this.usesInfixes = boolAttributes.get(USES_INFIXES);
         this.usesPrefixes = boolAttributes.get(USES_PREFIXES);
+        this.usesSuffixes = boolAttributes.get(USES_SUFFIXES);
 
         // Sanity check.
 	    CharsetEncoder encoder = getEncoder();

@@ -36,7 +36,7 @@ public class MorphEncodingToolTest {
 		MorphEncodingTool.main(new String[] { 
 				"--input", input.getAbsolutePath(), 
 				"--output", output.getAbsolutePath(), 
-				"-suf" });
+				"--encoder", "suffix" });
 
 		BufferedReader testOutput = new BufferedReader(new InputStreamReader(
 				new FileInputStream(output.getAbsolutePath()), "UTF-8"));
@@ -49,7 +49,7 @@ public class MorphEncodingToolTest {
 		MorphEncodingTool.main(new String[] { 
 				"--input", input.getAbsolutePath(), 
 				"--output", output.getAbsolutePath(), 
-				"-pre" });
+				"--encoder", "prefix" });
 
 		testOutput = new BufferedReader(new InputStreamReader(
 				new FileInputStream(output.getAbsolutePath()), "UTF-8"));
@@ -63,7 +63,7 @@ public class MorphEncodingToolTest {
 		MorphEncodingTool.main(new String[] { 
 				"--input", input.getAbsolutePath(), 
 				"--output", output.getAbsolutePath(), 
-				"-inf" });
+				"--encoder", "infix" });
 
 		testOutput = new BufferedReader(new InputStreamReader(
 				new FileInputStream(output.getAbsolutePath()), "UTF-8"));
@@ -78,7 +78,7 @@ public class MorphEncodingToolTest {
                 "--annotation", "\t",
                 "--input", input.getAbsolutePath(), 
                 "--output", output.getAbsolutePath(), 
-                "-inf" });
+                "--encoder", "infix" });
 
         testOutput = new BufferedReader(new InputStreamReader(
                 new FileInputStream(output.getAbsolutePath()), "UTF-8"));
@@ -108,9 +108,10 @@ public class MorphEncodingToolTest {
 		w.println("abcd\tabc");
 		w.close();
 
-		MorphEncodingTool.main(new String[] { "--input",
-				input.getAbsolutePath(), "--output", output.getAbsolutePath(),
-		"-suf" });
+		MorphEncodingTool.main(new String[] { 
+		    "--input", input.getAbsolutePath(), 
+		    "--output", output.getAbsolutePath(),
+		    "-e", "suffix" });
 
 		BufferedReader testOutput = new BufferedReader(new InputStreamReader(
 				new FileInputStream(output.getAbsolutePath()), "UTF-8"));

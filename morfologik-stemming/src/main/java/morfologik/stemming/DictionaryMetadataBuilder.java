@@ -30,6 +30,9 @@ public final class DictionaryMetadataBuilder {
     public DictionaryMetadataBuilder usePrefixes()          { return usePrefixes(true); }
     public DictionaryMetadataBuilder usePrefixes(boolean v) { this.attrs.put(DictionaryAttribute.USES_PREFIXES, Boolean.valueOf(v).toString()); return this; }
 
+    public DictionaryMetadataBuilder useSuffixes()          { return useSuffixes(true); }
+    public DictionaryMetadataBuilder useSuffixes(boolean v) { this.attrs.put(DictionaryAttribute.USES_SUFFIXES, Boolean.valueOf(v).toString()); return this; }
+
     public DictionaryMetadataBuilder useInfixes()           { return useInfixes(true); }
     public DictionaryMetadataBuilder useInfixes(boolean v)  { this.attrs.put(DictionaryAttribute.USES_INFIXES, Boolean.valueOf(v).toString()); return this; }
     

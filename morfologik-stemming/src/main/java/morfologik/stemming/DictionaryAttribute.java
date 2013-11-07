@@ -64,6 +64,16 @@ public enum DictionaryAttribute {
     },
 
     /** 
+     * If the dictionary was compiled with suffix compression. 
+     */
+    USES_SUFFIXES("fsa.dict.uses-suffixes") {
+        @Override
+        public Boolean fromString(String value) {
+            return booleanValue(value);
+        }
+    },
+
+    /** 
      * If the spelling dictionary is supposed to ignore words containing digits 
      */
     IGNORE_NUMBERS("fsa.dict.speller.ignore-numbers") {

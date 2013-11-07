@@ -306,7 +306,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
             }
             output.put(src, truncatePrefixBytes, srcLen - (truncateSuffixBytes + truncatePrefixBytes));
             output.put(encoded, 2, encodedLen - 2);
-		} else {
+		} else if (metadata.isUsingSuffixes()) {
             int suffixTrimCode = encoded[0];
             int truncateBytes = (suffixTrimCode - 'A') & 0xFF;
             if (truncateBytes == REMOVE_EVERYTHING) {
@@ -314,6 +314,8 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
             }
             output.put(src, 0, srcLen - truncateBytes);
             output.put(encoded, 1, encodedLen - 1);
+		} else {
+            output.put(encoded, 0, encodedLen);
 		}
         return output;
 	}
