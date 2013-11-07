@@ -1,6 +1,9 @@
 1.8.0
           [not released]
 
+          * Command-line option changes to MorphEncodingTool - it now accepts an explicit
+          name of the sequence encoder, not infix/suffix/prefix booleans.  
+
           * Rewritten implementation of tab-separated data files (tab2morph tool).
           The output should yield smaller files, especially for prefix encoding
           and infix encoding. This does *not* necessarily mean smaller automata
