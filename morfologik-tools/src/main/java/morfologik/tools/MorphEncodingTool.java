@@ -8,7 +8,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 
 import morfologik.fsa.FSA5;
 import morfologik.stemming.EncoderType;
@@ -17,6 +19,9 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringEscapeUtils;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 
 /**
  * This utility converts the dictionary in a text (tabbed) format into 
@@ -76,34 +81,6 @@ class MorphEncodingTool extends Tool {
 			output.close();
 		}
 	}
-
-	/**
-	 * Split fields
-	 * @param line 
-	 * 			byte input buffer
-	 * @param pos
-	 * 			current offset in the file
-	 * @return
-	 * 			an array of three byte arrays; if there are less
-	 * 			than three fields, one of byte arrays is null. If the
-	 * 			line contains more than three fields, they are ignored. 
-	 */
-	private static byte[][] splitFields(final byte[] line, final int pos) {
-		byte[][] outputArray = new byte[3][];
-		int i = 0;
-		int prevPos = 0;
-		int arrayInd = 0;
-		while (i < pos) {			
-			if (line[i] == (byte)'\t') { //tab
-				outputArray[arrayInd] = new byte[i - prevPos];
-				System.arraycopy(line, prevPos, outputArray[arrayInd], 0, i - prevPos);
-				prevPos = i + 1;
-				arrayInd++;
-			}
-			i++;
-		}
-		return outputArray;
-	}
 	
 	/**
 	 * Process input stream, writing to output stream.
@@ -114,44 +91,74 @@ class MorphEncodingTool extends Tool {
 		long lnumber = 0;
 		try {
 			int bufPos = 0;
-			byte[] buf = new byte[0xfffff]; // assumed that line is shorter than
-											// 64K chars
-			int dataByte = -1; // not declared within while loop
-			byte[][] words;
-			while ((dataByte = input.read()) != -1) {				
-				if (dataByte == (byte) '\n') {
-					lnumber++;
-					buf[bufPos++] = 9;
-					words = splitFields(buf, bufPos);					
-					for (int i = 0; i < words.length; i++) {
-						if (i < 1 && words[i] == null) {
-							throw new IllegalArgumentException(
-							        "The input file has less than 2 tab-separated fields in line "
-							                + lnumber + ": " 
-							                + new String(buf, 0, bufPos, "iso8859-1"));
-						} 
-						if (words[i] == null && !noWarn) {	
-							System.err.println("Line number " + lnumber 
-							    + " has less than 3 tab-separated fields: "
-							    + new String(buf, 0, bufPos, "iso8859-1"));
-						}
-					}
+			byte[] buf = new byte[0];
+			ArrayList<byte[]> columns = Lists.newArrayList();
+			int dataByte;
+			while ((dataByte = input.read()) != -1) {
+			    switch (dataByte) {
+			        case '\r':
+			            // Ignore CR
+			            continue;
 
-					output.write(encoder.encode(words[0], words[1], words[2]));
-					output.writeByte('\n'); // Unix line end only.
-					bufPos = 0;
-				} else {
-					if (dataByte != (byte) '\r') { 
-						buf[bufPos++] = (byte) dataByte;
-					}
-				}
+			        case '\t':
+			            columns.add(Arrays.copyOf(buf, bufPos));
+			            bufPos = 0;
+			            break;
+
+			        case '\n':
+			            columns.add(Arrays.copyOf(buf, bufPos));
+                        lnumber++;
+
+                        if (columns.size() < 2 || columns.size() > 3) {
+                            throw new IllegalArgumentException(
+                                String.format(Locale.ROOT, "Every \\n-delimited 'line' must contain 2 or 3 columns, line %d has %d. US-ASCII version of this line: %s",
+                                    lnumber,
+                                    columns.size(),
+                                    toAscii(columns)));
+                        }
+
+                        if (columns.size() == 2 && !noWarn) {
+                            System.err.println(String.format(Locale.ROOT, 
+                                "Line %d has %d columns. US-ASCII version of this line: %s",
+                                lnumber,
+                                columns.size(),
+                                toAscii(columns)));
+                        }
+
+                        output.write(encoder.encode(
+                            columns.get(0), 
+                            columns.get(1), 
+                            columns.size() > 2 ? columns.get(2) : null));
+
+                        output.writeByte('\n');
+
+                        bufPos = 0;
+                        columns.clear();
+			            break;
+
+		            default:
+	                    if (bufPos >= buf.length) {
+	                        buf = Arrays.copyOf(buf, buf.length + 1024);
+	                    }
+	                    buf[bufPos++] = (byte) dataByte;
+			    }
 			}			
 		} finally {
 			input.close();
 		}
 	}
 
-	/**
+	private String toAscii(ArrayList<byte []> columns)
+    {
+	    StringBuilder b = new StringBuilder();
+	    for (int i = 0; i < columns.size(); i++) {
+            if (i > 0) b.append("\t");
+	        b.append(new String(columns.get(i), Charsets.US_ASCII));
+	    }
+        return b.toString();
+    }
+
+    /**
 	 * Command line options for the tool.
 	 */
 	protected void initializeOptions(Options options) {
