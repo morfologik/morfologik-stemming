@@ -1,3 +1,2 @@
 - cleanup DictionaryLookup.decodeBaseForm -> this should be really inlined where it's actually
- used and use the proper encoder.decode method.
-- rewrite fixed buffer in MorphEncodingTool.process
+ used and use the proper encoder.decode method?
