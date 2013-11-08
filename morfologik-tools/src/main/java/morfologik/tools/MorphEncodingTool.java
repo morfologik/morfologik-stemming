@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
@@ -20,8 +21,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringEscapeUtils;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
 
 /**
  * This utility converts the dictionary in a text (tabbed) format into 
@@ -29,6 +28,7 @@ import com.google.common.collect.Lists;
  * the Perl and AWK scripts from the original FSA package. 
  */
 class MorphEncodingTool extends Tool {
+    private static Charset US_ASCII = Charset.forName("US-ASCII"); 
 	private boolean noWarn = false;
 	private SequenceAssembler encoder;
 
@@ -92,7 +92,7 @@ class MorphEncodingTool extends Tool {
 		try {
 			int bufPos = 0;
 			byte[] buf = new byte[0];
-			ArrayList<byte[]> columns = Lists.newArrayList();
+			ArrayList<byte[]> columns = new ArrayList<byte[]>();
 			int dataByte;
 			while ((dataByte = input.read()) != -1) {
 			    switch (dataByte) {
@@ -153,7 +153,7 @@ class MorphEncodingTool extends Tool {
 	    StringBuilder b = new StringBuilder();
 	    for (int i = 0; i < columns.size(); i++) {
             if (i > 0) b.append("\t");
-	        b.append(new String(columns.get(i), Charsets.US_ASCII));
+	        b.append(new String(columns.get(i), US_ASCII));
 	    }
         return b.toString();
     }
