@@ -29,7 +29,7 @@ public class MorphEncodingToolTest {
 				new FileOutputStream(input), "UTF-8"));
 		w.println("passagère\tpassager\ttag");
 		w.println("nieduży\tduży\ttest");
-		w.println("abcd\tabc\txyz");
+		w.print("abcd\tabc\txyz");
 		w.close();
 
 		// suffix
@@ -105,6 +105,7 @@ public class MorphEncodingToolTest {
 				new FileOutputStream(input), "UTF-8"));
 		w.println("passagère\tpassager");
 		w.println("nieduży\tduży");
+		w.println();
 		w.println("abcd\tabc");
 		w.close();
 

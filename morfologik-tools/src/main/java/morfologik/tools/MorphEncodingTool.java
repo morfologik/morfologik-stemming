@@ -94,7 +94,8 @@ class MorphEncodingTool extends Tool {
 			byte[] buf = new byte[0];
 			ArrayList<byte[]> columns = new ArrayList<byte[]>();
 			int dataByte;
-			while ((dataByte = input.read()) != -1) {
+			do  {
+			    dataByte = input.read();
 			    switch (dataByte) {
 			        case '\r':
 			            // Ignore CR
@@ -105,9 +106,20 @@ class MorphEncodingTool extends Tool {
 			            bufPos = 0;
 			            break;
 
+			        case -1:
+			            // Process EOF as if we encountered \n. fall-through.
+
 			        case '\n':
-			            columns.add(Arrays.copyOf(buf, bufPos));
                         lnumber++;
+                        if (bufPos == 0 && columns.isEmpty()) {
+                            if (dataByte != -1) {
+                                System.err.println(String.format(Locale.ROOT, 
+                                    "Ignoring empty line %d.", lnumber));
+                            }
+                            break;
+	                    }
+
+			            columns.add(Arrays.copyOf(buf, bufPos));
 
                         if (columns.size() < 2 || columns.size() > 3) {
                             throw new IllegalArgumentException(
@@ -142,7 +154,7 @@ class MorphEncodingTool extends Tool {
 	                    }
 	                    buf[bufPos++] = (byte) dataByte;
 			    }
-			}			
+			} while (dataByte != -1);		
 		} finally {
 			input.close();
 		}
