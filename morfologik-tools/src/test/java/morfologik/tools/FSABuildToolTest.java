@@ -5,9 +5,9 @@ import java.io.File;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 
+import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.internal.matchers.StringContains;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;

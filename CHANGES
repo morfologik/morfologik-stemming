@@ -11,6 +11,8 @@ Changes in backwards compatibility policy
 * Command-line option changes to MorphEncodingTool - it now accepts an explicit
   name of the sequence encoder, not infix/suffix/prefix booleans.  
 
+* Updating dependencies to their newest versions.
+
 New Features
 
 * Dictionary .info files can specify the sequence decoder explicitly:

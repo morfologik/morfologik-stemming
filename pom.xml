@@ -5,6 +5,10 @@
 
   <modelVersion>4.0.0</modelVersion>
 
+  <prerequisites>
+    <maven>3.0.2</maven>
+  </prerequisites>
+
   <!-- We use SonaType for publishing artefacts. Parent POM makes things easier here. -->
   <parent>
     <groupId>org.sonatype.oss</groupId>
@@ -69,6 +73,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <skip.deployment>false</skip.deployment>
+    <gpg.passphrase></gpg.passphrase>
   </properties>
 
   <!-- Add snapshots from SonaType -->
@@ -102,19 +107,19 @@
       <dependency>
         <groupId>com.carrotsearch</groupId>
         <artifactId>hppc</artifactId>
-        <version>0.4.3</version>
+        <version>0.5.3</version>
       </dependency>
 
       <dependency>
         <groupId>com.carrotsearch</groupId>
         <artifactId>junit-benchmarks</artifactId>
-        <version>0.3.0</version>
+        <version>0.7.2</version>
       </dependency>
 
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.10</version>
+        <version>4.11</version>
       </dependency>
 
       <dependency>
@@ -132,7 +137,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>13.0.1</version>
+        <version>15.0</version>
       </dependency>
       
       <dependency>
@@ -145,7 +150,7 @@
       <dependency>
         <groupId>com.carrotsearch.randomizedtesting</groupId>
         <artifactId>randomizedtesting-runner</artifactId>
-        <version>2.0.11</version>
+        <version>2.0.13</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -168,13 +173,13 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>2.1.2</version>
+          <version>2.2.1</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.8</version>
+          <version>2.9</version>
         </plugin>
 
         <plugin>
@@ -186,7 +191,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>2.2.1</version>
+          <version>2.4</version>
         </plugin>
 
         <plugin>
@@ -198,25 +203,25 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
-          <version>2.3.1</version>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>2.5</version>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-dependency-plugin</artifactId>
           <version>2.4</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.6</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>2.7</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-eclipse-plugin</artifactId>
-          <version>2.8</version>
+          <version>2.9</version>
           <configuration>
             <outputDirectory>${basedir}/.eclipse/classes</outputDirectory>
             <buildcommands>
@@ -237,7 +242,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.12</version>
+          <version>2.12.4</version>
         </plugin>
 
         <plugin>
