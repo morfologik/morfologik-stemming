@@ -1,274 +1,341 @@
-1.8.0
-          [not released]
+
+Morfologik-stemming Change Log
+
+For an up-to-date CHANGES file see 
+https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
+
+======================= morfologik-stemming 1.8.0 =======================
+
+Changes in backwards compatibility policy
+
+* Command-line option changes to MorphEncodingTool - it now accepts an explicit
+  name of the sequence encoder, not infix/suffix/prefix booleans.  
+
+New Features
+
+* Dictionary .info files can specify the sequence decoder explicitly:
+  suffix, prefix, infix, none are supported. For backwards compatibility,
+  fsa.dict.uses-prefixes, fsa.dict.uses-infixes and fsa.dict.uses-suffixes
+  are still supported, but will be removed in the next major version.
+
+* Command-line option changes to MorphEncodingTool - it now accepts an explicit
+  name of the sequence encoder, not infix/suffix/prefix booleans.  
+
+* Rewritten implementation of tab-separated data files (tab2morph tool).
+  The output should yield smaller files, especially for prefix encoding
+  and infix encoding. This does *not* necessarily mean smaller automata
+  but we're working on getting these as well.
+
+  Example output before and after refactoring:
+  
+  Prefix coder:
+  postmodernizm|modernizm|xyz => [before] postmodernizm+ANmodernizm+xyz
+                              => [after ] postmodernizm+EA+xyz
+  
+  Infix coder:
+  laquelle|lequel|D f s       => [before] laquelle+AAHequel+D f s
+                              => [after ] laquelle+AGAquel+D f s
+
+* Changed the default format of the Polish dictionary from infix
+  encoded to prefix encoded (smaller output size).
+
+Optimizations
+
+* A number of internal implementation cleanups and refactorings.
+
+======================= morfologik-stemming 1.7.2 =======================
+
+* A quick fix for incorrect decoding of certain suffixes (long suffixes).
+
+* Increased max. recursion level in Speller to 6 from 4. (Jaume Ortolà)
+
+======================= morfologik-stemming 1.7.1 =======================
+
+* Fixed a couple of bugs in morfologik-speller (Jaume Ortolà).
+
+======================= morfologik-stemming 1.7.0 =======================
+
+* Changed DictionaryMetadata API (access methods for encoder/decoder).
+
+* Initial version of morfologik-speller component.
+
+* Minor changes to the FSADumpTool: the header block is always UTF-8 
+  encoded, the default platform encoding does not matter. This is done to 
+  always support certain attributes that may be unicode (and would be 
+  incorrectly dumped otherwise).
+
+* Metadata *.info files can now be encoded in UTF-8 to support text 
+  attributes that otherwise would require text2ascii conversion.
+
+======================= morfologik-stemming 1.6.0 =======================
+
+* Update morfologik-polish data to Morfologik 2.0 PoliMorf (08.03.2013). 
+  Deprecated DICTIONARY constants (unified dictionary only).
           
-          * Dictionary .info files can specify the sequence decoder explicitly:
-          suffix, prefix, infix, none are supported. For backwards compatibility,
-          fsa.dict.uses-prefixes, fsa.dict.uses-infixes and fsa.dict.uses-suffixes
-          are still supported, but will be removed in the next major version.
+* Important! The format of encoding tags has changed and is now 
+  multiple-tags-per-lemma. The value returned from WordData#getTag 
+  may be a number of tags concatenated with a "+" character. Previously
+  the same lamma/stem would be returned multiple times, each time with 
+  a different tag.
 
-          * Command-line option changes to MorphEncodingTool - it now accepts an explicit
-          name of the sequence encoder, not infix/suffix/prefix booleans.  
+* Moving code from SourceForge to github.
 
-          * Rewritten implementation of tab-separated data files (tab2morph tool).
-          The output should yield smaller files, especially for prefix encoding
-          and infix encoding. This does *not* necessarily mean smaller automata
-          but we're working on getting these as well.
+======================= morfologik-stemming 1.5.5 =======================
 
-          Example output before and after refactoring:
+* Made hppc an optional component of morfologik-fsa. It is required
+  for constructing FSA automata only and causes problems with javac.
+  http://stackoverflow.com/questions/3800462/can-i-prevent-javac-accessing-the-class-path-from-the-manifests-of-our-third-par
 
-          Prefix coder:
-          postmodernizm|modernizm|xyz => [before] postmodernizm+ANmodernizm+xyz
-                                      => [after ] postmodernizm+EA+xyz
+======================= morfologik-stemming 1.5.4 =======================
 
-          Infix coder:
-          laquelle|lequel|D f s       => [before] laquelle+AAHequel+D f s
-                                      => [after ] laquelle+AGAquel+D f s
+* Replaced byte-based speller with CharBasedSpeller.
 
-          * Changed the default format of the Polish dictionary from infix
-          encoded to prefix encoded (smaller output size).
+* Warn about UTF-8 files with BOM.
+ 
+* Fixed a typo in package name (speller).
+
+======================= morfologik-stemming 1.5.3 =======================
+
+* Initial release of spelling correction submodule.
+
+* Updated morfologik-polish data to morfologik 1.9 [12.06.2012]
+
+* Updated morfologik-polish licensing info to BSD (yay).
+
+======================= morfologik-stemming 1.5.2 =======================
+
+* An alternative Polish dictionary added (BSD licensed): SGJP (Morfeusz). 
+  PolishStemmer can now take an enum switching between the dictionary to 
+  be used or combine both.
+
+* Project split into modules. A single jar version (no external 
+  dependencies) added by transforming via proguard.
+
+* Enabled use of escaped special characters in the tab2morph tool.
+
+* Added guards against the input term having separator character 
+  somewhere (this will now return an empty list of matches). Added 
+  getSeparatorChar to DictionaryLookup so that one can check for this 
+  condition manually, if needed.
+
+======================= morfologik-stemming 1.5.1 =======================
+
+* Build system switch to Maven (tested with Maven2).
+
+======================= morfologik-stemming 1.5.0 =======================
+
+* Major size saving improvements in CFSA2. Built in Polish dictionary 
+  size decreased from 2,811,345 to 1,806,661 (CFSA2 format).
+
+* FSABuilder returns a ready-to-be-used FSA (ConstantArcSizeFSA). 
+  Construction overhead for this automaton is a round zero (it is 
+  immediately serialized in-memory).
+
+* Polish dictionary updated to Morfologik 1.7. [19.11.2010]
+
+* Added an option to serialize automaton to CFSA2 or FSA5 directly from 
+  fsa_build.
+
+* CFSA is now deprecated for serialization (the code still reads CFSA 
+  automata, but will no be able to serialize them). Use CFSA2.
+
+* Added immediate state interning. Speedup in automaton construction by 
+  about 30%, memory use decreased significantly (did not perform exact 
+  measurements, but incremental construction from presorted data should 
+  consume way less memory).
+
+* Added an option to build FSA from already sorted data (--sorted). 
+  Avoids in-memory sorting. Pipe the input through shell sort if 
+  building FSA from large data.
+
+* Changed the default ordering from Java signed-byte to C-like unsigned 
+  byte value. This lets one use GNU sort to sort the input using 
+  'export LC_ALL=C; sort input'.  
+
+* Added traversal routines to calculate perfect hashing based on 
+  FSA with NUMBERS.
+
+* Changed the order of serialized arcs in the binary serializer for FSA5 
+  to lexicographic  (consistent with the input). Depth-first traversal 
+  recreates the input, in other words.
+
+* Removed character-based automata.
+
+* Incompatible API changes to FSA builders (moved to morfologik.fsa).
+
+* Incompatible API changes to FSATraversalHelper. Cleaned up match 
+  types, added unit tests. 
+
+* An external dependency HPPC (high performance primitive collections) 
+  is now required
+
+======================= morfologik-stemming 1.4.1 =======================
+
+* Upgrade of the built-in Morfologik dictionary for Polish (in CFSA 
+  format).
+
+* Added options to define custom FILLER and ANNOT_SEPARATOR bytes in the 
+  fsa_build tool.
+
+* Corrected an inconsistency with the C fsa package -- FILLER and 
+  ANNOT_SEPARATOR characters are now identical with the C version.
           
-1.7.2
-          A quick fix for incorrect decoding of certain suffixes (long suffixes).
+* Cleanups to the tools' launcher -- will complain about missing JARs, 
+  if any.
 
-          Increased max. recursion level in Speller to 6 from 4. (Jaume Ortolà)
+======================= morfologik-stemming 1.4.0 =======================
 
-1.7.1
-          Fixed a couple of bugs in morfologik-speller, thanks to Jaume Ortolà i Font.
+* Added FSA5 construction in Java (on byte sequences). Added preliminary 
+  support for character sequences. Added a command line tool for FSA5
+  construction from unsorted data (sorting is done in-memory).
 
-1.7.0     
-          Changed DictionaryMetadata API (access methods for encoder/decoder).
+* Added a tool to encode tab-delimited dictionaries to the format 
+  accepted by fsa_build and FSA5 construction tool.
 
-          Initial version of morfologik-speller component.
+* Added a new version of Morfologik dictionary for Polish (in CFSA format).
 
-          Minor changes to the FSADumpTool: the header block is always UTF-8 encoded,
-          the default platform encoding does not matter. This is done to always support
-          certain attributes that may be unicode (and would be incorrectly dumped otherwise).
+======================= morfologik-stemming 1.3.0 =======================
 
-          Metadata *.info files can now be encoded in UTF-8 to support text 
-          attributes that otherwise would require text2ascii conversion.
+* Added runtime checking for tools availability so that unavailable tools 
+  don't show up in the list.
 
-1.6.0
-          Update morfologik-polish data to Morfologik 2.0 PoliMorf (08.03.2013).
-          Deprecated DICTIONARY constants (unified dictionary only).
+* Recompressed the built-in Polish dictionary to CFSA. 
+
+* Cleaned up FSA/Dictionary separation. FSAs don't store encoding any more 
+  (because it does not make sense for them to do so). The FSA is a purely 
+  abstract class pushing functionality to sub-classes. Input stream 
+  reading cleaned up.
+
+* Added initial code for CFSA (compressed FSA). Reduces automata size 
+  about 10%. 
+
+* Changes in the public API. Implementation classes renamed (FSAVer5Impl 
+  into FSA5). Major tweaks and tunes to the API.
+
+* Added support for version 5 automata built with NUMBERS flag (an extra 
+  field stored for each node).
+
+======================= morfologik-stemming 1.2.2 =======================
+
+* License switch to plain BSD (removed the patent clause which did not 
+  make much sense anyway).
+
+* The build ZIP now includes licenses for individual JARs (prevents 
+  confusion). 
+
+======================= morfologik-stemming 1.2.1 =======================
+
+* Fixed tool launching routines.
+
+======================= morfologik-stemming 1.2.0 =======================
+
+* Package hierarchy reorganized.
+
+* Removed stempel (heuristic stemmer for Polish).
+
+* Code updated to Java 1.5. 
+
+* The API has changed in many places (enums instead of constants, 
+  generics, iterables, removed explicit Arc and Node classes and replaced 
+  by int pointers).
+
+* FSA traversal in version 1.2 is implemented on top of primitive data 
+  structures (int pointers) to keep memory usage minimal. The speed 
+  boost gained from this is enormous and justifies less readable code. We
+  strongly advise to use the provided iterators and helper functions 
+  for matching state sequences in the FSA.
+
+* Tools updated. Dumping existing FSAs is much, much faster now.        
+
+======================= morfologik-stemming 1.1.4 =======================
+
+* Fixed a bug that caused UTF-8 dictionaries to be garbled. Now it 
+  should be relatively safe to use UTF-8 dictionaries (note: separators 
+  cannot be multibyte UTF-8 characters, yet this is probably a very 
+  rare case).
+
+======================= morfologik-stemming 1.1.3 =======================
+
+* Fixed a bug causing NPE when the library is called with null context 
+  class loader  (happens when JVM is invoked from an JNI-attached 
+  thread). Thanks to Patrick Luby for report and detailed analysis.
+
+* Updated the built-in dictionary to the newest version available. 
+
+======================= morfologik-stemming 1.1.2 =======================
+
+* Fixed a bug causing JAR file locking (by implementing a workaround).
+
+* Fixed the build script (manifest file was broken).
+
+======================= morfologik-stemming 1.1.1 =======================
+
+* Distribution script fixes. The final JAR does not contain test classes 
+  and resources. Size trimmed almost twice compared to release 1.1.
+
+* Updated the dump tool to accept dictionary metadata files.
+
+======================= morfologik-stemming 1.1 =========================
+
+* Introduced an auxiliary "meta" information files about compressed 
+  dictionaries. Such information include delimiter symbol, encoding 
+  and infix/prefix/postfix decoding info.
+
+* The API has changed (repackaging). Some deprecated methods have been 
+  removed. This is a major redesign/ upgrade, you will have to adjust 
+  your source code.
+
+* Cleaned up APIs and interfaces.
+
+* Added infrastructure for command-line tool launching.
+
+* Cleaned up tests.
+
+* Changed project name to morfologik-stemmers and ownership to 
+  (c) Morfologik.
+
+======================= morfologik-stemming 1.0.7 =======================
+
+* Removed one bug in fsa 'compression' decoding.
+
+======================= morfologik-stemming 1.0.6 =======================
+
+* Customized version of stempel replaced with a standard distribution.
+
+* Removed deprecated methods and classes.
           
-          Important! The format of encoding tags has changed and is now
-          multiple-tags-per-lemma. The value returned from WordData#getTag
-          may be a number of tags concatenated with a "+" character. Previously
-          the same lamma/stem would be returned multiple times, each time with
-          a different tag.
+* Added infix and prefix encoding support for fsa dictionaries.
 
-          Moving code from SourceForge to github.
+======================= morfologik-stemming 1.0.5 =======================
 
-1.5.5
-          Made hppc an optional component of morfologik-fsa. It is required
-          for constructing FSA automata only and causes problems with javac.
-          http://stackoverflow.com/questions/3800462/can-i-prevent-javac-accessing-the-class-path-from-the-manifests-of-our-third-par
-
-1.5.4
-          Replaced byte-based speller with CharBasedSpeller.
-
-          Warn about UTF-8 files with BOM.
-         
-          Fixed a typo in package name (speller).
-
-1.5.3
-          Initial release of spelling correction submodule.
-
-          Updated morfologik-polish data to morfologik 1.9 [12.06.2012]
-
-          Updated morfologik-polish licensing info to BSD (yay).
-
-1.5.2
-          An alternative Polish dictionary added (BSD licensed): SGJP (Morfeusz). PolishStemmer
-          can now take an enum switching between the dictionary to be used or combine both.
-
-          Project split into modules. A single jar version (no external dependencies)
-          added by transforming via proguard.
-
-          Enabled use of escaped special characters in the tab2morph tool.
-
-          Added guards against the input term having separator character somewhere (this will now
-          return an empty list of matches). Added getSeparatorChar to DictionaryLookup so that
-          one can check for this condition manually, if needed.
-
-1.5.1     
-          Build system switch to Maven (tested with Maven2).
-
-1.5.0
-          Major size saving improvements in CFSA2. Built in Polish dictionary size decreased from
-          2,811,345 to 1,806,661 (CFSA2 format).
-
-          FSABuilder returns a ready-to-be-used FSA (ConstantArcSizeFSA). Construction overhead
-          for this automaton is a round zero (it is immediately serialized in-memory).
-
-          Polish dictionary updated to Morfologik 1.7. [19.11.2010]
-
-          Added an option to serialize automaton to CFSA2 or FSA5 directly from fsa_build.
-
-          CFSA is now deprecated for serialization (the code still reads CFSA automata, but will
-          no be able to serialize them). Use CFSA2.
-
-          Added immediate state interning. 
-          Speedup in automaton construction by about 30%, memory use 
-          decreased significantly (did not perform exact measurements, but incremental 
-          construction from presorted data should consume way less memory).
-
-          Added an option to build FSA from already sorted data (--sorted). Avoids in-memory sorting. 
-          Pipe the input through shell sort if building FSA from large data.
-
-          Changed the default ordering from Java signed-byte to C-like unsigned byte value.
-          This lets one use GNU sort to sort the input using 'export LC_ALL=C; sort input'.  
-
-          Added traversal routines to calculate perfect hashing based on FSA with NUMBERS.
-
-          Changed the order of serialized arcs in the binary serializer for FSA5 to lexicographic 
-          (consistent with the input). Depth-first traversal recreates the input, in other words.
-
-          Removed character-based automata.
-
-          Incompatible API changes to FSA builders (moved to morfologik.fsa).
-
-          Incompatible API changes to FSATraversalHelper. Cleaned up match types, added
-          unit tests. 
-
-          ################################################################
-          - Incompatible API changes have been made in release 1.5.0. See above.
-          - An external dependency HPPC (high performance primitive collections) is now required
-              for compiling FSAs (it is optional for traversals).
-          ################################################################
-
-1.4.1
-          Upgrade of the built-in Morfologik dictionary for Polish (in CFSA format).
-
-          Added options to define custom FILLER and ANNOT_SEPARATOR bytes in the fsa_build
-          tool.
-
-          Corrected an inconsistency with the C fsa package -- FILLER and ANNOT_SEPARATOR
-          characters are now identical with the C version.
+* Added filler and separator char dumps to FSADump.
           
-          Cleanups to the tools' launcher -- will complain about missing JARs, if any.
-
-1.4.0
-          Added FSA5 construction in Java (on byte sequences). Added preliminary support for
-          character sequences. Added a command line tool for FSA5 
-          construction from unsorted data (sorting is done in-memory).
-
-          Added a tool to encode tab-delimited dictionaries to the format accepted by
-          fsa_build and FSA5 construction tool.
-
-          Added a new version of Morfologik dictionary for Polish (in CFSA format).
-
-1.3.0      
-          Added runtime checking for tools availability so that unavailable
-          tools don't show up in the list.
-
-          Recompressed the built-in Polish dictionary to CFSA. 
-
-          Cleaned up FSA/Dictionary separation. FSAs don't store encoding any more (because
-          it does not make sense for them to do so). The FSA is a purely abstract class
-          pushing functionality to sub-classes. Input stream reading cleaned up.
-
-          Added initial code for CFSA (compressed FSA). Reduces automata size about 10%. 
-
-          Changes in the public API. Implementation classes renamed 
-          (FSAVer5Impl into FSA5). Major tweaks and tunes to the API.
-
-          Added support for version 5 automata built with NUMBERS flag (an extra field
-          stored for each node).
-
-          ################################################################
-          Incompatible API changes have been made in release 1.3.0.
-          ################################################################
-
-1.2.2     License switch to plain BSD (removed the patent clause which did not make much sense 
-          anyway).
-
-          The build ZIP now includes licenses for individual JARs (prevents confusion). 
-
-1.2.1     Fixed tool launching routines.
-
-1.2       Package hierarchy reorganized.
-
-          Removed stempel (heuristic stemmer for Polish).
-
-          Code updated to Java 1.5. 
-
-          The API has changed in many places (enums instead of constants, 
-          generics, iterables, removed explicit Arc and Node classes and replaced
-          by int pointers).
-
-          FSA traversal in version 1.2 is implemented on top of primitive
-          data structures (int pointers) to keep memory usage minimal. The speed
-          boost gained from this is enormous and justifies less readable code. We
-          strongly advise to use the provided iterators and helper functions
-          for matching state sequences in the FSA.
-
-          Tools updated. Dumping existing FSAs is much, much faster now.        
-
-          ################################################################
-          Incompatible API changes have been made in release 1.2.
-          Java 1.5 or later is required from this version on.
-          ################################################################
-
-1.1.4     * Fixed a bug that caused UTF-8 dictionaries to be garbled. Now it should be relatively
-          safe to use UTF-8 dictionaries (note: separators cannot be multibyte UTF-8 characters,
-          yet this is probably a very rare case).
-
-1.1.3     * Fixed a bug causing NPE when the library is called with null context class loader 
-          (happens when JVM is invoked from an JNI-attached thread). Thanks to
-          Patrick Luby for report and detailed analysis.
-
-          Updated the built-in dictionary to the newest version available. 
-
-1.1.2     * Fixed a bug causing JAR file locking (by implementing a workaround).
-
-          Fixed the build script (manifest file was broken).
-
-1.1.1     Distribution script fixes. The final JAR does not contain test classes and resources. Size
-          trimmed almost twice compared to release 1.1.
-
-          Updated the dump tool to accept dictionary metadata files.
-
-1.1       Introduced an auxiliary "meta" information files about compressed dictionaries.
-          Such information include delimiter symbol, encoding and infix/prefix/postfix
-          decoding info.
+* A major bug in automaton traversal corrected. Upgrade when possible.
           
-          The API has changed (repackaging). Some deprecated methods have been removed.
-          This is a major redesign/ upgrade, you will have to adjust your source code.
-          
-          Cleaned up APIs and interfaces.
+* Certain API changes were introduced; older methods are now deprecated
+  and will be removed in the future.
 
-          Added infrastructure for command-line tool launching.
+======================= morfologik-stemming 1.0.4 =======================
 
-          Cleaned up tests.
+* Licenses for full and no-dict versions.
 
-          Changed project name to morfologik-stemmers and ownership to (c) Morfologik.
+======================= morfologik-stemming 1.0.3 =======================
 
-1.0.7     Removed one bug in fsa 'compression' decoding.
+* Project code moved to SourceForge (subproject of Morfologik).
+  LICENSE CHANGED FROM PUBLIC DOMAIN TO BSD (doesn't change much, but 
+  clarifies legal issues).
 
-1.0.6     Customized version of stempel replaced with a standard distribution.
+======================= morfologik-stemming 1.0.2 =======================
 
-          Removed deprecated methods and classes.
-          
-          Added infix and prefix encoding support for fsa dictionaries.
+* Added a Lametyzator constructor which allows custom dictionary stream, 
+  field delimiters and encoding. Added an option for building stand-alone 
+  JAR that does not include the default polish dictionary.
 
-1.0.5     Added filler and separator char dumps to FSADump.
-          
-          * A major bug in automaton traversal corrected. Upgrade when possible.
-          
-          Certain API changes were introduced; older methods are now deprecated
-          and will be removed in the future.
+======================= morfologik-stemming 1.0.1 =======================
 
-1.0.4     Licenses for full and no-dict versions.
+* Code cleanups. Added a method that returns the third automaton's column
+  (form).
 
-1.0.3     Project code moved to SourceForge (subproject of Morfologik).
-          LICENSE CHANGED FROM PUBLIC DOMAIN TO BSD (doesn't change much, but clarifies
-          legal issues).
+======================= morfologik-stemming 1.0 =========================
 
-1.0.2     Added a Lametyzator constructor which allows custom dictionary stream, field
-          delimiters and encoding. Added an option for building stand-alone 
-          JAR that does not include the default polish dictionary.
-
-1.0.1     Code cleanups. Added a method that returns the third automaton's column (form).
-
-1.0       Initial release
+* Initial release
