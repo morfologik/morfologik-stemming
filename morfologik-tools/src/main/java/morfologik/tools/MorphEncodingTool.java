@@ -228,7 +228,7 @@ class MorphEncodingTool extends Tool {
 	/**
 	 * Command line entry point.
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String... args) throws Exception {
 		final MorphEncodingTool tool = new MorphEncodingTool();
 		tool.go(args);
 	}
