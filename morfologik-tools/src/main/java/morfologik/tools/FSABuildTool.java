@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Locale;
@@ -347,17 +348,18 @@ public final class FSABuildTool extends Tool {
 	    }
         serializer = format.getSerializer();
 
+        Charset defaultCharset = Charset.defaultCharset();
 		opt = SharedOptions.fillerCharacterOption.getLongOpt();
 		if (line.hasOption(opt) && requiredCapability(opt, FSAFlags.SEPARATORS)) {
 			String chr = StringEscapeUtils.unescapeJava(line.getOptionValue(opt));
-			checkSingleByte(chr);
+			checkSingleByte(chr, defaultCharset);
 			serializer.withFiller(chr.getBytes()[0]);
 		}
 
 		opt = SharedOptions.annotationSeparatorCharacterOption.getLongOpt();
 		if (line.hasOption(opt) && requiredCapability(opt, FSAFlags.SEPARATORS)) {
 			String chr = StringEscapeUtils.unescapeJava(line.getOptionValue(opt));
-			checkSingleByte(chr);
+			checkSingleByte(chr, defaultCharset);
 			serializer.withAnnotationSeparator(chr.getBytes()[0]);
 		}
 
@@ -393,9 +395,10 @@ public final class FSABuildTool extends Tool {
 	 * Check if the argument is a single byte after conversion using platform-default
 	 * encoding. 
 	 */
-	public static void checkSingleByte(String chr) {
-		if (chr.getBytes().length == 1)
-			return;
+	public static byte checkSingleByte(String chr, Charset charset) {
+	    byte bytes [] = chr.getBytes(charset); 
+		if (bytes.length == 1)
+			return bytes[0];
 
 		throw new IllegalArgumentException("Filler and annotation characters must be single" +
 				"-byte values, " + chr + " has " + chr.getBytes().length + " bytes."); 

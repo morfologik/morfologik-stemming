@@ -47,9 +47,8 @@ public final class Launcher {
 		}
 
 		if (args.length == 0) {
-			System.out
-			        .println("Provide tool name and its command-line options. "
-			                + "Available tools:");
+			System.out.println("Provide tool name and its command-line options. "
+			    + "Available tools:");
 			for (String key : tools.keySet()) {
 				final ToolInfo toolInfo = tools.get(key);
 				System.out.println(String.format("  %-10s - %s", key,

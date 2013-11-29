@@ -31,6 +31,8 @@ class MorphEncodingTool extends Tool {
     private static Charset US_ASCII = Charset.forName("US-ASCII"); 
 	private boolean noWarn = false;
 	private SequenceAssembler encoder;
+    private byte separatorByte;
+    private char separator; 
 
 	/**
      * 
@@ -49,7 +51,7 @@ class MorphEncodingTool extends Tool {
 		    }
 		}
 
-		char separator = FSA5.DEFAULT_ANNOTATION;
+		separator = FSA5.DEFAULT_ANNOTATION;
 		if (line.hasOption(SharedOptions.annotationSeparatorCharacterOption.getLongOpt())) {
 			String sep = line.getOptionValue(SharedOptions.annotationSeparatorCharacterOption.getLongOpt());
 
@@ -62,8 +64,7 @@ class MorphEncodingTool extends Tool {
 			    throw new IllegalArgumentException("Field separator not within byte range: " + (int) sep.charAt(0));
 			}
             separator = sep.charAt(0);
-
-			FSABuildTool.checkSingleByte(Character.toString(separator));
+			separatorByte = FSABuildTool.checkSingleByte(Character.toString(separator), Charset.defaultCharset());
 		}
 		
         encoder = new SequenceAssembler(SequenceEncoders.forType(encType), (byte) separator);
@@ -137,9 +138,21 @@ class MorphEncodingTool extends Tool {
                                 toAscii(columns)));
                         }
 
+                        byte [] wordForm = columns.get(0);
+                        byte [] wordLemma = columns.get(1);
+                        if (contains(wordForm, separatorByte) ||
+                            contains(wordLemma, separatorByte)) {
+                            throw new IllegalArgumentException(
+                                String.format(Locale.ROOT,
+                                    "Either word or lemma in line %d contain the annotation byte '%s': %s",
+                                    lnumber,
+                                    separator,
+                                    toAscii(columns)));
+                        }
+
                         output.write(encoder.encode(
-                            columns.get(0), 
-                            columns.get(1), 
+                            wordForm, 
+                            wordLemma, 
                             columns.size() > 2 ? columns.get(2) : null));
 
                         output.writeByte('\n');
@@ -160,7 +173,14 @@ class MorphEncodingTool extends Tool {
 		}
 	}
 
-	private String toAscii(ArrayList<byte []> columns)
+	private boolean contains(byte [] seq, byte b) {
+        for (int i = 0; i < seq.length; i++) {
+            if (seq[i] == b) return true;
+        }
+        return false;
+    }
+
+    private String toAscii(ArrayList<byte []> columns)
     {
 	    StringBuilder b = new StringBuilder();
 	    for (int i = 0; i < columns.size(); i++) {
