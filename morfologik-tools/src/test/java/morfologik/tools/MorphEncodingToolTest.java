@@ -1,12 +1,14 @@
 package morfologik.tools;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -194,6 +196,40 @@ public class MorphEncodingToolTest extends RandomizedTest {
         checkEntry(dl, "passagère", "passager", "TAG1");
         checkEntry(dl, "nieduży", "duży", "TAG2");
         checkEntry(dl, "abcd", "abc", "TAG3");
+    }
+
+    /* */
+    @Test
+    public void testAnnotationCharacterInBaseOrDerivedWord() throws Exception {
+        // Create a simple plain text file.
+        File input = newTempFile();
+        File output = newTempFile();
+
+        // Populate the file with data.
+        PrintWriter w = 
+            new PrintWriter(
+                new OutputStreamWriter(
+                    closer.register(new FileOutputStream(input)), "UTF-8"));
+        w.println("foo+\tbar-\tTAG1");
+        w.close();
+
+        PrintStream err = System.err;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        
+        try {
+            System.setErr(new PrintStream(baos, true, "UTF-8"));
+            MorphEncodingTool.main(new String[] { 
+                "--input", input.getAbsolutePath(), 
+                "--output", output.getAbsolutePath(),
+                "-e", "suffix",
+                "--annotation", "+"});
+        } finally {
+            System.err.flush();
+            System.setErr(err);
+        }
+
+        Assertions.assertThat(new String(baos.toByteArray(), Charsets.UTF_8))
+            .contains("contain the annotation byte");
     }
 
     private void checkEntry(DictionaryLookup dl, String word, String base, String tag) {

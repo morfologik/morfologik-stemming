@@ -4,6 +4,15 @@ Morfologik-stemming Change Log
 For an up-to-date CHANGES file see 
 https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
+======================= morfologik-stemming 1.8.1 =======================
+
+Changes in backwards compatibility policy
+
+* MorphEncodingTool will *fail* if it detects data/lines that contain the 
+  separator annotation byte. This is because such lines get encoded into
+  something that the decoder cannot process. You can use \u0000 as the 
+  annotation byte to avoid clashes with any existing data.
+
 ======================= morfologik-stemming 1.8.0 =======================
 
 Changes in backwards compatibility policy
