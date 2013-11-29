@@ -280,7 +280,7 @@ public final class FSADumpTool extends Tool {
 	/**
 	 * Command line entry point.
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String... args) throws Exception {
 		final FSADumpTool fsaDump = new FSADumpTool();
 		fsaDump.go(args);
 	}

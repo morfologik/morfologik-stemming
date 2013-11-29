@@ -4,29 +4,50 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.List;
 
+import morfologik.fsa.FSA;
+import morfologik.stemming.Dictionary;
+import morfologik.stemming.DictionaryLookup;
+import morfologik.stemming.DictionaryMetadataBuilder;
+import morfologik.stemming.EncoderType;
+import morfologik.stemming.WordData;
+
+import org.fest.assertions.api.Assertions;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.carrotsearch.randomizedtesting.RandomizedTest;
+import com.google.common.base.Charsets;
+import com.google.common.io.Closer;
 
 /*
  * 
  */
-public class MorphEncodingToolTest {
+public class MorphEncodingToolTest extends RandomizedTest {
+    private Closer closer = Closer.create();
 
+    @After
+    public void cleanup() throws IOException {
+        closer.close();
+    }
+    
 	@Test
 	public void testTool() throws Exception {
 		// Create a simple plain text file.
-		File input = File.createTempFile("input", "in");
-		File output = File.createTempFile("output", "fsa.txt");
-		input.deleteOnExit();
-		output.deleteOnExit();
+		File input = super.newTempFile();
+		File output = super.newTempFile();
 
 		// Populate the file with data.
-		PrintWriter w = new PrintWriter(new OutputStreamWriter(
-				new FileOutputStream(input), "UTF-8"));
+		PrintWriter w = 
+		    new PrintWriter(
+		        new OutputStreamWriter(
+		            closer.register(new FileOutputStream(input)), "UTF-8"));
 		w.println("passagère\tpassager\ttag");
 		w.println("nieduży\tduży\ttest");
 		w.print("abcd\tabc\txyz");
@@ -38,12 +59,13 @@ public class MorphEncodingToolTest {
 				"--output", output.getAbsolutePath(), 
 				"--encoder", "suffix" });
 
-		BufferedReader testOutput = new BufferedReader(new InputStreamReader(
-				new FileInputStream(output.getAbsolutePath()), "UTF-8"));
+		BufferedReader testOutput = 
+		    new BufferedReader(
+		        new InputStreamReader(
+		            closer.register(new FileInputStream(output.getAbsolutePath())), "UTF-8"));
 		Assert.assertEquals("passagère+Eer+tag", testOutput.readLine());
 		Assert.assertEquals("nieduży+Iduży+test", testOutput.readLine());
 		Assert.assertEquals("abcd+B+xyz", testOutput.readLine());
-		testOutput.close();
 
 		// prefix
 		MorphEncodingTool.main(new String[] { 
@@ -51,13 +73,13 @@ public class MorphEncodingToolTest {
 				"--output", output.getAbsolutePath(), 
 				"--encoder", "prefix" });
 
-		testOutput = new BufferedReader(new InputStreamReader(
-				new FileInputStream(output.getAbsolutePath()), "UTF-8"));
+		testOutput = 
+		    new BufferedReader(
+		        new InputStreamReader(
+		            closer.register(new FileInputStream(output.getAbsolutePath())), "UTF-8"));
 		Assert.assertEquals("passagère+AEer+tag", testOutput.readLine());
 		Assert.assertEquals("nieduży+DA+test", testOutput.readLine());
 		Assert.assertEquals("abcd+AB+xyz", testOutput.readLine());
-
-		testOutput.close();
 
 		// infix
 		MorphEncodingTool.main(new String[] { 
@@ -65,13 +87,13 @@ public class MorphEncodingToolTest {
 				"--output", output.getAbsolutePath(), 
 				"--encoder", "infix" });
 
-		testOutput = new BufferedReader(new InputStreamReader(
-				new FileInputStream(output.getAbsolutePath()), "UTF-8"));
+		testOutput = 
+		    new BufferedReader(
+		        new InputStreamReader(
+		            closer.register(new FileInputStream(output.getAbsolutePath())), "UTF-8"));
 		Assert.assertEquals("passagère+GDAr+tag", testOutput.readLine());
 		Assert.assertEquals("nieduży+ADA+test", testOutput.readLine());
 		Assert.assertEquals("abcd+AAB+xyz", testOutput.readLine());
-
-		testOutput.close();
 
 		// custom annotation - test tabs
         MorphEncodingTool.main(new String[] {
@@ -80,29 +102,26 @@ public class MorphEncodingToolTest {
                 "--output", output.getAbsolutePath(), 
                 "--encoder", "infix" });
 
-        testOutput = new BufferedReader(new InputStreamReader(
-                new FileInputStream(output.getAbsolutePath()), "UTF-8"));
+        testOutput = 
+            new BufferedReader(
+                new InputStreamReader(
+                    closer.register(new FileInputStream(output.getAbsolutePath())), "UTF-8"));
         Assert.assertEquals("passagère\tGDAr\ttag", testOutput.readLine());
         Assert.assertEquals("nieduży\tADA\ttest", testOutput.readLine());
         Assert.assertEquals("abcd\tAAB\txyz", testOutput.readLine());
-
-        testOutput.close();
 	}
 
 	/* */
 	@Test
 	public void testStemmingFile() throws Exception {
 		// Create a simple plain text file.
-		File input = File.createTempFile("input", "in");
-		File output = File.createTempFile("output", "fsa.txt");
-		input.deleteOnExit();
-		output.deleteOnExit();
+		File input = super.newTempFile();
+		File output = super.newTempFile();
 
-		// Populate the file with data.
-		
-		// stemming only
-		PrintWriter w = new PrintWriter(new OutputStreamWriter(
-				new FileOutputStream(input), "UTF-8"));
+		PrintWriter w = 
+		    new PrintWriter(
+		        new OutputStreamWriter(
+		            closer.register(new FileOutputStream(input)), "UTF-8"));
 		w.println("passagère\tpassager");
 		w.println("nieduży\tduży");
 		w.println();
@@ -114,12 +133,75 @@ public class MorphEncodingToolTest {
 		    "--output", output.getAbsolutePath(),
 		    "-e", "suffix" });
 
-		BufferedReader testOutput = new BufferedReader(new InputStreamReader(
-				new FileInputStream(output.getAbsolutePath()), "UTF-8"));
+		BufferedReader testOutput = 
+		    new BufferedReader(
+		        new InputStreamReader(
+		            closer.register(new FileInputStream(output.getAbsolutePath())), "UTF-8"));
 		Assert.assertEquals("passagère+Eer+", testOutput.readLine());
 		Assert.assertEquals("nieduży+Iduży+", testOutput.readLine());
 		Assert.assertEquals("abcd+B+", testOutput.readLine());
 
 		testOutput.close();
 	}
+
+    /* */
+    @Test
+    public void testZeroByteSeparator() throws Exception {
+        // Create a simple plain text file.
+        File input = newTempFile();
+        File output = newTempFile();
+
+        // Populate the file with data.
+        PrintWriter w = 
+            new PrintWriter(
+                new OutputStreamWriter(
+                    closer.register(new FileOutputStream(input)), "UTF-8"));
+        w.println("passagère\tpassager\tTAG1");
+        w.println("nieduży\tduży\tTAG2");
+        w.println("abcd\tabc\tTAG3");
+        w.close();
+
+        MorphEncodingTool.main(new String[] { 
+            "--input", input.getAbsolutePath(), 
+            "--output", output.getAbsolutePath(),
+            "-e", "suffix",
+            "--annotation", "\u0000"});
+
+        BufferedReader testOutput = 
+            new BufferedReader(
+                new InputStreamReader(
+                    closer.register(new FileInputStream(output.getAbsolutePath())), "UTF-8"));
+
+        Assert.assertEquals("passagère\u0000Eer\u0000TAG1", testOutput.readLine());
+        Assert.assertEquals("nieduży\u0000Iduży\u0000TAG2", testOutput.readLine());
+        Assert.assertEquals("abcd\u0000B\u0000TAG3", testOutput.readLine());
+ 
+        File fsaFile = newTempFile();
+        FSABuildTool.main(
+            "--input", output.getAbsolutePath(),
+            "--output", fsaFile.getAbsolutePath());
+
+        FSA fsa = FSA.read(fsaFile);
+        DictionaryLookup dl = new DictionaryLookup(
+            new Dictionary(
+                fsa, 
+                new DictionaryMetadataBuilder()
+                    .separator((char) 0)
+                    .encoding(Charsets.UTF_8)
+                    .encoder(EncoderType.SUFFIX)
+                    .build()));
+
+        checkEntry(dl, "passagère", "passager", "TAG1");
+        checkEntry(dl, "nieduży", "duży", "TAG2");
+        checkEntry(dl, "abcd", "abc", "TAG3");
+    }
+
+    private void checkEntry(DictionaryLookup dl, String word, String base, String tag) {
+        List<WordData> lookup = dl.lookup(word);
+        Assertions.assertThat(lookup.size()).isEqualTo(1);
+        WordData wordData = lookup.get(0);
+        Assertions.assertThat(wordData.getWord().toString()).isEqualTo(word);
+        Assertions.assertThat(wordData.getStem().toString()).isEqualTo(base);
+        Assertions.assertThat(wordData.getTag().toString()).isEqualTo(tag);
+    }
 }
