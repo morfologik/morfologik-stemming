@@ -150,8 +150,9 @@ public final class FSABuildTool extends Tool {
         logger = new WriterMessageLogger(new PrintWriter(System.err));
         this.serializer.withLogger(logger);
 
+        BufferedInputStream inputStream = null;
 		try {
-		    BufferedInputStream inputStream = initializeInput(line);
+		    inputStream = initializeInput(line);
 
             if (inputSorted) {
                 logger.log("Assuming input is already sorted");
@@ -214,6 +215,10 @@ public final class FSABuildTool extends Tool {
 			logger.endPart();
 		} catch (OutOfMemoryError e) {
 		    logger.log("Error: Out of memory. Pass -Xmx1024m argument (or more) to java.");
+		} finally {
+		    if (inputStream != System.in && inputStream != null) {
+		        inputStream.close();
+		    }
 		}
 	}
 
@@ -526,7 +531,7 @@ public final class FSABuildTool extends Tool {
 	/**
 	 * Command line entry point.
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String... args) throws Exception {
 		final FSABuildTool tool = new FSABuildTool();
 		tool.go(args);
 	}
