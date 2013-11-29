@@ -1,8 +1,15 @@
 package morfologik.fsa;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * This is a top abstract class for handling finite state automata. These
@@ -266,5 +273,14 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 
         throw new IOException("Unsupported automaton version: "
                 + header.version);
+    }
+
+    public static FSA read(File fsa) throws IOException {
+        InputStream is = new BufferedInputStream(new FileInputStream(fsa));
+        try {
+            return read(is);
+        } finally {
+            is.close();
+        }
     }
 }
