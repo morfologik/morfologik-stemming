@@ -218,10 +218,12 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 					/*
 					 * Decode the tag data.
 					 */
-					final int tagSize = bbSize - sepPos;
+					
+					// If the frequency data is included the last byte is ignored.
+					final int tagSize = bbSize - sepPos - (dictionaryMetadata.isFrequencyIncluded() ? 1 : 0);
 					if (tagSize > 0) {
-                        wordData.tagBuffer = BufferUtils.ensureCapacity(
-    					        wordData.tagBuffer, tagSize);
+              wordData.tagBuffer = BufferUtils.ensureCapacity(
+                  wordData.tagBuffer, tagSize);
     					wordData.tagBuffer.clear();
     					wordData.tagBuffer.put(ba, sepPos, tagSize);
     					wordData.tagBuffer.flip();

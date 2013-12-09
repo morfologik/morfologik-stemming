@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import morfologik.fsa.FSA;
+import morfologik.fsa.FSAFinalStatesIterator;
 import morfologik.fsa.FSATraversal;
 import morfologik.fsa.MatchResult;
 import morfologik.stemming.Dictionary;
@@ -31,6 +32,8 @@ import morfologik.util.BufferUtils;
  */
 public class Speller {
     public static int MAX_WORD_LENGTH = 120;
+    final static int FREQ_RANGES = 10;
+    final static int FIRST_RANGE_CODE = 65; // character 'A', less frequent words
 
 	private final int editDistance;
 	private int e_d; // effective edit distance
@@ -94,6 +97,9 @@ public class Speller {
 	 * The FSA we are using.
 	 */
 	protected final FSA fsa;
+	
+	 /** An iterator for walking along the final states of {@link #fsa}. */
+  private final FSAFinalStatesIterator finalStatesIterator;
 
 	public Speller(final Dictionary dictionary) {
 		this(dictionary, 1);
@@ -111,6 +117,7 @@ public class Speller {
 		this.rootNode = dictionary.fsa.getRootNode();
 		this.fsa = dictionary.fsa;
 		this.matcher = new FSATraversal(fsa);
+		this.finalStatesIterator = new FSAFinalStatesIterator(fsa, rootNode);
 		
 		if (rootNode == 0) {
 			throw new IllegalArgumentException(
@@ -197,7 +204,58 @@ public class Speller {
 		       && match.kind == SEQUENCE_IS_A_PREFIX
 		       && fsa.getArc(match.node, dictionaryMetadata.getSeparator()) != 0;
 	}
-
+	
+	/**
+	 * Get the frequency value for a word form. 
+	 * It is taken from the first entry with this word form.
+   * @param word the word to be tested
+   * @return frequency value in range: 0..FREQ_RANGE-1 (0: less frequent).
+	 */
+	
+  public int getFrequency(final CharSequence word) {
+    if (!dictionaryMetadata.isFrequencyIncluded()) {
+      return 0;
+    }
+    final byte separator = dictionaryMetadata.getSeparator();
+    byteBuffer = charSequenceToBytes(word);
+    final MatchResult match = matcher.match(matchResult, byteBuffer.array(), 0,
+        byteBuffer.remaining(), rootNode);
+    if (match.kind == SEQUENCE_IS_A_PREFIX) {
+      final int arc = fsa.getArc(match.node, separator);
+      if (arc != 0 && !fsa.isArcFinal(arc)) {
+        finalStatesIterator.restartFrom(fsa.getEndNode(arc));
+        if (finalStatesIterator.hasNext()) {
+          final ByteBuffer bb = finalStatesIterator.next();
+          final byte[] ba = bb.array();
+          final int bbSize = bb.remaining();
+          //the last byte contains the frequency
+          return ba[bbSize - 1] - FIRST_RANGE_CODE;
+        }
+      }
+    }
+    return 0;
+  }
+	
+	/* 
+	 * Another way to do it. But it is not useful for candidates found by replacements:
+	 * 
+	  public int getFrequency(final int arc) {
+    if (!dictionaryMetadata.isFrequencyIncluded()) {
+      return 0;
+    }
+    if (arc != 0 && !fsa.isArcFinal(arc)) {
+      finalStatesIterator.restartFrom(fsa.getEndNode(arc));
+      if (finalStatesIterator.hasNext()) {
+        final ByteBuffer bb = finalStatesIterator.next();
+        final byte[] ba = bb.array();
+        final int bbSize = bb.remaining();
+        //the last byte contains the frequency
+        return ba[bbSize - 1] - FIRST_RANGE_CODE;
+      }
+    }
+    return 0;
+  }*/
+	
 	/**
 	 * Propose suggestions for misspelled run-on words. This algorithm is inspired by
 	 * spell.cc in s_fsa package by Jan Daciuk.
@@ -585,13 +643,13 @@ public class Speller {
      * according to their frequency in the future.
      * 
      */
-    private static class CandidateData implements Comparable<CandidateData> {
+    private class CandidateData implements Comparable<CandidateData> {
         private final String word;
         private final int distance;
 
         CandidateData(final String word, final int distance) {
             this.word = word;
-            this.distance = distance;
+            this.distance = distance*FREQ_RANGES + FREQ_RANGES - getFrequency(word) - 1;
         }
 
         final String getWord() {

@@ -29,6 +29,7 @@ public final class DictionaryMetadata {
     private static Map<DictionaryAttribute, String> DEFAULT_ATTRIBUTES = new DictionaryMetadataBuilder()
         .separator('+')
         .encoder(EncoderType.SUFFIX)
+        .frequencyIncluded()
         .ignorePunctuation()
         .ignoreNumbers()
         .ignoreCamelCase()
@@ -104,6 +105,7 @@ public final class DictionaryMetadata {
     public Map<Character, List<Character>> getEquivalentChars() { return equivalentChars; }
 
     // Dynamically fetched.
+    public boolean isFrequencyIncluded()  { return boolAttributes.get(FREQUENCY_INCLUDED); }
     public boolean isIgnoringPunctuation()  { return boolAttributes.get(IGNORE_PUNCTUATION); }
     public boolean isIgnoringNumbers()      { return boolAttributes.get(IGNORE_NUMBERS); }
     public boolean isIgnoringCamelCase()    { return boolAttributes.get(IGNORE_CAMEL_CASE); }
@@ -178,6 +180,7 @@ public final class DictionaryMetadata {
 	            case IGNORE_DIACRITICS:
 	            case CONVERT_CASE:
 	            case RUN_ON_WORDS:
+	            case FREQUENCY_INCLUDED:
                     this.boolAttributes.put(e.getKey(), (Boolean) value);
 	                break;
 
