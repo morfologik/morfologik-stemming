@@ -22,6 +22,7 @@ public class DictionaryMetadataBuilderTest {
             .convertCase()
             .encoding(Charset.defaultCharset())
             .encoding("UTF-8")
+            .frequencyIncluded()
             .ignoreAllUppercase()
             .ignoreCamelCase()
             .ignoreDiacritics()

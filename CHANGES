@@ -6,6 +6,14 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
 ======================= morfologik-stemming 1.8.2 =======================
 
+New Features
+
+* Added the option of using frequencies of words for sorting spelling 
+  replacements. It can be used in both spelling and tagging dictionaries.
+  'fsa.dict.frequency-included=true' must be added to the .info file.
+  For building the dictionary, add at the end of each entry a separator and 
+  a character between A and Z (A: less frequently used words; 
+  Z: more frequently used words). (Jaume Ortolà)
 
 ======================= morfologik-stemming 1.8.1 =======================
 
