@@ -32,8 +32,8 @@ import morfologik.util.BufferUtils;
  */
 public class Speller {
     public static int MAX_WORD_LENGTH = 120;
-    final static int FREQ_RANGES = 26; // A-Z
-    final static int FIRST_RANGE_CODE = 65; // character 'A', less frequent words
+    final static int FREQ_RANGES = 'Z' - 'A' + 1;
+    final static int FIRST_RANGE_CODE = 'A'; // less frequent words
 
 	private final int editDistance;
 	private int e_d; // effective edit distance
