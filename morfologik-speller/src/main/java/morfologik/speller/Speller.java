@@ -32,7 +32,7 @@ import morfologik.util.BufferUtils;
  */
 public class Speller {
     public static int MAX_WORD_LENGTH = 120;
-    final static int FREQ_RANGES = 10;
+    final static int FREQ_RANGES = 26; // A-Z
     final static int FIRST_RANGE_CODE = 65; // character 'A', less frequent words
 
 	private final int editDistance;
@@ -228,33 +228,13 @@ public class Speller {
           final ByteBuffer bb = finalStatesIterator.next();
           final byte[] ba = bb.array();
           final int bbSize = bb.remaining();
-          //the last byte contains the frequency
+          //the last byte contains the frequency after a separator
           return ba[bbSize - 1] - FIRST_RANGE_CODE;
         }
       }
     }
     return 0;
   }
-	
-	/* 
-	 * Another way to do it. But it is not useful for candidates found by replacements:
-	 * 
-	  public int getFrequency(final int arc) {
-    if (!dictionaryMetadata.isFrequencyIncluded()) {
-      return 0;
-    }
-    if (arc != 0 && !fsa.isArcFinal(arc)) {
-      finalStatesIterator.restartFrom(fsa.getEndNode(arc));
-      if (finalStatesIterator.hasNext()) {
-        final ByteBuffer bb = finalStatesIterator.next();
-        final byte[] ba = bb.array();
-        final int bbSize = bb.remaining();
-        //the last byte contains the frequency
-        return ba[bbSize - 1] - FIRST_RANGE_CODE;
-      }
-    }
-    return 0;
-  }*/
 	
 	/**
 	 * Propose suggestions for misspelled run-on words. This algorithm is inspired by
