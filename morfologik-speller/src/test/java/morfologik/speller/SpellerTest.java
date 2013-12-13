@@ -139,13 +139,13 @@ public class SpellerTest {
 	         assertTrue(spell.isInDictionary(word));
 	     }
 	     // get replacements ordered by frequency
-	     reps.get(0).equals("just");
-	     reps.get(1).equals("list");
-	     reps.get(2).equals("fist");
-	     reps.get(3).equals("mist");
-	     reps.get(4).equals("jest");
-	     reps.get(5).equals("dist");
-	     reps.get(5).equals("gist");
+	     assertTrue(reps.get(0).equals("just"));
+	     assertTrue(reps.get(1).equals("list"));
+	     assertTrue(reps.get(2).equals("fist"));
+	     assertTrue(reps.get(3).equals("mist"));
+	     assertTrue(reps.get(4).equals("jest"));
+	     assertTrue(reps.get(5).equals("dist"));
+	     assertTrue(reps.get(6).equals("gist"));
 	  }
 
 	@Test
