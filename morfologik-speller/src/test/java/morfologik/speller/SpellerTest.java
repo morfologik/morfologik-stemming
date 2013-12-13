@@ -127,6 +127,26 @@ public class SpellerTest {
 	    assertTrue(spell.findReplacements("rzółw").contains("żółw"));
 	    assertTrue(spell.findReplacements("Świento").contains("Święto"));
 	}
+	
+	 @Test
+	  public void testFindReplacementsUsingFrequency() throws IOException {
+	     final URL url = getClass().getResource("dict-with-freq.dict");
+	     final Speller spell = new Speller(Dictionary.read(url));
+
+	     //check if we get only dictionary words...
+	     List<String> reps = spell.findReplacements("jist");
+	     for (final String word: reps) {
+	         assertTrue(spell.isInDictionary(word));
+	     }
+	     // get replacements ordered by frequency
+	     reps.get(0).equals("just");
+	     reps.get(1).equals("list");
+	     reps.get(2).equals("fist");
+	     reps.get(3).equals("mist");
+	     reps.get(4).equals("jest");
+	     reps.get(5).equals("dist");
+	     reps.get(5).equals("gist");
+	  }
 
 	@Test
     public void testIsMisspelled() throws IOException {
