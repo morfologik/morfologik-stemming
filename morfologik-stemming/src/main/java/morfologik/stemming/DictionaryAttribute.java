@@ -43,6 +43,16 @@ public enum DictionaryAttribute {
         }        
     },
 
+    /**
+     * If the FSA dictionary includes frequency data.
+     */
+    FREQUENCY_INCLUDED("fsa.dict.frequency-included") {
+        @Override
+        public Boolean fromString(String value) {
+            return booleanValue(value);
+        }
+    },
+
     /** 
      * If the spelling dictionary is supposed to ignore words containing digits 
      */

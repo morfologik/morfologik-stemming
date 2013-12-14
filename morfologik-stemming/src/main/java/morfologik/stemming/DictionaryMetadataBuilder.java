@@ -27,6 +27,9 @@ public final class DictionaryMetadataBuilder {
         return this;
     }
 
+    public DictionaryMetadataBuilder frequencyIncluded()    { return frequencyIncluded(false); }
+    public DictionaryMetadataBuilder frequencyIncluded(boolean v)  { this.attrs.put(DictionaryAttribute.FREQUENCY_INCLUDED, Boolean.valueOf(v).toString()); return this; }
+    
     public DictionaryMetadataBuilder ignorePunctuation()    { return ignorePunctuation(true); }
     public DictionaryMetadataBuilder ignorePunctuation(boolean v)  { this.attrs.put(DictionaryAttribute.IGNORE_PUNCTUATION, Boolean.valueOf(v).toString()); return this; }
     
