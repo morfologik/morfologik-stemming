@@ -35,6 +35,10 @@ public class Speller {
   final static int FREQ_RANGES = 'Z' - 'A' + 1;
   final static int FIRST_RANGE_CODE = 'A'; // less frequent words
 
+  //FIXME: this is an upper limit for replacement searches, we need
+  //proper tree traversal instead of generation of all possible candidates
+  final static int UPPER_SEARCH_LIMIT = 15;
+
   private final int editDistance;
   private int e_d; // effective edit distance
 
@@ -292,7 +296,12 @@ public class Speller {
       //If at least one candidate was found with the replacement pairs (which are usual errors),
       //probably there is no need for more candidates
       if (candidates.isEmpty()) {
+        int i = 1;
         for (final String wordChecked : wordsToCheck) {
+          i++;
+          if (i > UPPER_SEARCH_LIMIT) { // for performance reasons, do not search too deeply
+            break;
+          }
           word_ff = wordChecked.toCharArray();
           wordLen = word_ff.length;
           candidate = new char[MAX_WORD_LENGTH];
