@@ -11,10 +11,6 @@ Changes in backwards compatibility policy
 New Features
 
 Bug Fixes
-* Fixed a bug for spelling dictionaries in non-UTF encodings with 
-  separators: strings with non-encodable characters might have been 
-  accepted as spelled correctly even if they were missing in the 
-  dictionary.
 
 Optimizations
 
