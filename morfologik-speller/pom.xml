@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.carrot2</groupId>
     <artifactId>morfologik-parent</artifactId>
-    <version>1.8.3-SNAPSHOT</version>
+    <version>1.8.3</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
