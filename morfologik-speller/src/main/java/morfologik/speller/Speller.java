@@ -174,17 +174,22 @@ public class Speller {
     return byteBuffer;
   }
 
-  public boolean isMisspelled(String word) {
-    // dictionaries usually do not contain punctuation.
-    boolean isAlphabetic = word.length() != 1 || isAlphabetic(word.charAt(0));
-    return word.length() > 0
+  public boolean isMisspelled(final String word) {
+    // dictionaries usually do not contain punctuation
+    String wordToCheck = word;
+    if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
+      wordToCheck = Dictionary.convertText(word,
+          dictionaryMetadata.getInputConversionPairs()).toString();
+    }
+    boolean isAlphabetic = wordToCheck.length() != 1 || isAlphabetic(wordToCheck.charAt(0));
+    return wordToCheck.length() > 0
         && (!dictionaryMetadata.isIgnoringPunctuation() || isAlphabetic)
-        && (!dictionaryMetadata.isIgnoringNumbers() || !containsDigit(word))
-        && !(dictionaryMetadata.isIgnoringCamelCase() && isCamelCase(word))
-        && !(dictionaryMetadata.isIgnoringAllUppercase() && isAlphabetic && isAllUppercase(word))
-        && !isInDictionary(word)
+        && (!dictionaryMetadata.isIgnoringNumbers() || !containsDigit(wordToCheck))
+        && !(dictionaryMetadata.isIgnoringCamelCase() && isCamelCase(wordToCheck))
+        && !(dictionaryMetadata.isIgnoringAllUppercase() && isAlphabetic && isAllUppercase(wordToCheck))
+        && !isInDictionary(wordToCheck)
         && (!dictionaryMetadata.isConvertingCase() ||
-            !(!isMixedCase(word) && isInDictionary(word.toLowerCase(dictionaryMetadata.getLocale()))));
+            !(!isMixedCase(wordToCheck) && isInDictionary(wordToCheck.toLowerCase(dictionaryMetadata.getLocale()))));
   }
 
   /**
@@ -250,14 +255,23 @@ public class Speller {
    */
   public List<String> replaceRunOnWords(final String original) {
     final List<String> candidates = new ArrayList<String>();
-    if (!isInDictionary(original) && dictionaryMetadata.isSupportingRunOnWords()) {
+    if (!isInDictionary(Dictionary.convertText(original,
+        dictionaryMetadata.getInputConversionPairs()).toString())
+        && dictionaryMetadata.isSupportingRunOnWords()) {
       final CharSequence ch = original;
       for (int i = 2; i < ch.length(); i++) {
         // chop from left to right
         final CharSequence firstCh = ch.subSequence(0, i);
         if (isInDictionary(firstCh) &&
             isInDictionary(ch.subSequence(i, ch.length()))) {
-          candidates.add(firstCh + " " + ch.subSequence(i, ch.length()));
+          if (!dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
+            candidates.add(firstCh + " " + ch.subSequence(i, ch.length()));
+          } else {
+            candidates.add(
+                Dictionary.convertText(firstCh + " " + ch.subSequence(i, ch.length()),
+                    dictionaryMetadata.getOutputConversionPairs()).toString()
+                );
+          }
         }
       }
     }
@@ -273,8 +287,13 @@ public class Speller {
    * @return A list of suggested replacements.
    * @throws CharacterCodingException
    */
-  public List<String> findReplacements(final String word)
+  public List<String> findReplacements(final String w)
       throws CharacterCodingException {
+    String word = w;
+    if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
+      word = Dictionary.convertText(w,
+          dictionaryMetadata.getInputConversionPairs()).toString();
+    }
     candidates.clear();
     if (!isInDictionary(word) && word.length() < MAX_WORD_LENGTH) {
       List<String> wordsToCheck = new ArrayList<String>();
@@ -322,7 +341,8 @@ public class Speller {
     //Use LinkedHashSet to avoid duplicates and keep the order
     final Set<String> candStringSet = new LinkedHashSet<String>();
     for (final CandidateData cd : candidates) {
-      candStringSet.add(cd.getWord());
+      candStringSet.add(Dictionary.convertText(cd.getWord(),
+          dictionaryMetadata.getOutputConversionPairs()).toString());
     }
     final List<String> candStringList = new ArrayList<String>(candStringSet.size());
     candStringList.addAll(candStringSet);
@@ -600,6 +620,7 @@ public class Speller {
     }
     return replaced;
   }
+
 
   /**
    * Sets up the word and candidate. Used only to test the edit distance in

@@ -10,6 +10,13 @@ Changes in backwards compatibility policy
 
 New Features
 
+* Added capability to normalize input and output strings for dictionaries.
+  This is useful for dictionaries that do not support ligatures, for example.
+  To specify input conversion, use the property 'fsa.dict.input-conversion'
+  in the .info file. The output conversion (for example, to use ligatures)
+  is specified by 'fsa.dict.output-conversion'. Note that lengthy 
+  conversion tables may negatively affect performance.
+
 Bug Fixes
 
 Optimizations

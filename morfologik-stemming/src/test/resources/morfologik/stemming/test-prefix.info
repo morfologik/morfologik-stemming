@@ -7,3 +7,5 @@ fsa.dict.encoding=iso-8859-2
 
 fsa.dict.uses-prefixes=true
 fsa.dict.uses-infixes=false
+
+fsa.dict.input-conversion=\\a ą, krowa Rzecz
