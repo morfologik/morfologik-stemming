@@ -145,7 +145,7 @@ public enum DictionaryAttribute {
    * Input conversion pairs to replace non-standard characters before search in a speller dictionary.
    * For example, common ligatures can be replaced here.
    */
-  INPUT_CONVERSION ("fsa.dict.input-conversion") {
+  INPUT_CONVERSION("fsa.dict.input-conversion") {
     @Override
     public Map<String, String> fromString(String value) throws IllegalArgumentException {
       Map<String, String> conversionPairs = new HashMap<String, String>();
