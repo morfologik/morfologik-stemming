@@ -276,7 +276,7 @@ public class Speller {
   public List<String> findReplacements(final String word)
       throws CharacterCodingException {
     candidates.clear();
-    if (!isInDictionary(word) && word.length() < MAX_WORD_LENGTH) {
+    if (!isInDictionary(word) && word.length() < MAX_WORD_LENGTH && word.length()>0) {
       List<String> wordsToCheck = new ArrayList<String>();
       if (dictionaryMetadata.getReplacementPairs() != null) {
         for (final String wordChecked : getAllReplacements(word, 0, 0)) {
@@ -295,6 +295,13 @@ public class Speller {
             if (isInDictionary(upperWord)) {
               candidates.add(new CandidateData(upperWord, 0));
               found = true;
+            }
+            if (lowerWord.length() > 1) {
+              String firstupperWord = Character.toUpperCase(lowerWord.charAt(0)) + lowerWord.substring(1);
+              if (isInDictionary(firstupperWord)) {
+                candidates.add(new CandidateData(firstupperWord, 0));
+                found = true;
+              }
             }
           }
           if (!found) {
