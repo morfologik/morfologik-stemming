@@ -133,6 +133,8 @@ public class SpellerTest {
     assertTrue(spell.findReplacements("Rzebrowski").contains("Żebrowski"));
     assertTrue(spell.findReplacements("rzółw").contains("żółw"));
     assertTrue(spell.findReplacements("Świento").contains("Święto"));
+    // avoid mixed-case words as suggestions when using replacements ('rz' = 'ż')
+    assertTrue(spell.findReplacements("zArzółć").get(0).equals("zażółć"));
   }
 
   @Test
