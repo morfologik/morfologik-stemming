@@ -611,7 +611,7 @@ public class Speller {
     for (final String auxKey : dictionaryMetadata.getReplacementPairs().keySet()) {
       int auxIndex = sb.indexOf(auxKey, fromIndex);
       if (auxIndex > -1 && auxIndex <= index) {
-        if (!(auxIndex == index && auxKey.length()<keyLength)) { //select the longest possible key
+        if (!(auxIndex == index && auxKey.length() < keyLength)) { //select the longest possible key
           index = auxIndex;
           key = auxKey;
           keyLength = auxKey.length();
@@ -629,7 +629,8 @@ public class Speller {
           }
           // start a branch with replacement
           sb.replace(index, index + key.length(), rep);
-          replaced.addAll(getAllReplacements(sb.toString(), index + rep.length(), level + 1));
+          replaced.addAll(getAllReplacements(sb.toString(), index + rep.length(),
+              level + 1));
           sb.setLength(0);
           sb.append(str);
         }
@@ -680,7 +681,7 @@ public class Speller {
 
     CandidateData(final String word, final int distance) {
       this.word = word;
-      this.distance = distance*FREQ_RANGES + FREQ_RANGES - getFrequency(word) - 1;
+      this.distance = distance * FREQ_RANGES + FREQ_RANGES - getFrequency(word) - 1;
     }
 
     final String getWord() {
