@@ -295,17 +295,17 @@ public class Speller {
           dictionaryMetadata.getInputConversionPairs()).toString();
     }
     candidates.clear();
-    if (!isInDictionary(word) && word.length() < MAX_WORD_LENGTH && word.length()>0) {
+    if (word.length() > 0 && word.length() < MAX_WORD_LENGTH && !isInDictionary(word)) {
       List<String> wordsToCheck = new ArrayList<String>();
       if (dictionaryMetadata.getReplacementPairs() != null) {
         for (final String wordChecked : getAllReplacements(word, 0, 0)) {
-          boolean found=false;
+          boolean found = false;
           if (isInDictionary(wordChecked)) {
             candidates.add(new CandidateData(wordChecked, 0));
-            found=true;
+            found = true;
           } else if (dictionaryMetadata.isConvertingCase()) {
-            String lowerWord=wordChecked.toLowerCase(dictionaryMetadata.getLocale());
-            String upperWord=wordChecked.toUpperCase(dictionaryMetadata.getLocale());
+            String lowerWord = wordChecked.toLowerCase(dictionaryMetadata.getLocale());
+            String upperWord = wordChecked.toUpperCase(dictionaryMetadata.getLocale());
             if (isInDictionary(lowerWord)) {
               //add the word as it is in the dictionary, not mixed-case versions of it
               candidates.add(new CandidateData(lowerWord, 0));
@@ -316,7 +316,8 @@ public class Speller {
               found = true;
             }
             if (lowerWord.length() > 1) {
-              String firstupperWord = Character.toUpperCase(lowerWord.charAt(0)) + lowerWord.substring(1);
+              String firstupperWord = Character.toUpperCase(lowerWord.charAt(0))
+                  + lowerWord.substring(1);
               if (isInDictionary(firstupperWord)) {
                 candidates.add(new CandidateData(firstupperWord, 0));
                 found = true;
