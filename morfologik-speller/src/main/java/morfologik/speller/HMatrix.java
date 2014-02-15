@@ -16,7 +16,8 @@ public class HMatrix {
 	 * @param distance (int) max edit distance allowed for
 	 *        candidates;
 	 * @param maxLength (int) max length of words.
-	 * @return: Nothing. Remarks: See Oflazer. To save space, the matrix is
+	 *
+     *          Remarks: See Oflazer. To save space, the matrix is
 	 *          stored as a vector. To save time, additional rows and
 	 *          columns are added. They are initialized to their distance in
 	 *          the matrix, so that no bound checking is necessary during
@@ -89,7 +90,6 @@ public class HMatrix {
 	 *            - (int) column number;
 	 * @param val
 	 *            - (int) value to put there.
-	 * @return: Nothing.
 	 * 
 	 *          No checking for i & j is done. They must be correct.
 	 */

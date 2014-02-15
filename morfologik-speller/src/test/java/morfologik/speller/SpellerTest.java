@@ -170,6 +170,12 @@ public class SpellerTest {
     assertTrue(oldStyleSpell.isMisspelled("!"));  //nie ignorujemy znaków przestankowych
     // assertTrue(oldStyleSpell.isMisspelled("SłowozGarbem"));  //ignorujemy słowa w stylu wielbłąda
     assertTrue(oldStyleSpell.isMisspelled("Abaka"));  //i małe litery
+    final URL url1 = getClass().getResource("test-infix.dict");
+    final Speller spell1 = new Speller(Dictionary.read(url1));
+    assertTrue(!spell1.isMisspelled("Rzekunia"));
+    assertTrue(spell1.isAllUppercase("RZEKUNIA"));
+    assertTrue(spell1.isMisspelled("RZEKUNIAA")); // finds a typo here
+    assertTrue(!spell1.isMisspelled("RZEKUNIA")); // but not here
   }
 
   @Test
