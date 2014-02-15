@@ -350,6 +350,9 @@ public class Speller {
           }
           wordProcessed = wordChecked.toCharArray();
           wordLen = wordProcessed.length;
+          if (wordLen < MIN_WORD_LENGTH) { // three-letter replacements make little sense anyway
+              break;
+          }
           candidate = new char[MAX_WORD_LENGTH];
           candLen = candidate.length;
           effectEditDistance = wordLen <= editDistance ? wordLen - 1 : editDistance;
@@ -480,8 +483,17 @@ public class Speller {
           return true;
       }
       if (dictionaryMetadata.isConvertingCase()) {
-        xn = xn.toLowerCase(dictionaryMetadata.getLocale());
-        yn = yn.toLowerCase(dictionaryMetadata.getLocale());
+          //again case conversion only when needed -- we
+          // do not need String.lowercase because we only check
+          // single characters, so a cheaper method is enough
+          if (Character.isLetter(xn.charAt(0))){
+            boolean testNeeded = Character.isLowerCase(xn.charAt(0))
+                      != Character.isLowerCase(yn.charAt(0));
+            if (testNeeded) {
+            return Character.toLowerCase(xn.charAt(0)) ==
+                  Character.toLowerCase(yn.charAt(0));
+          }
+        }
       }
       return xn.charAt(0) == yn.charAt(0);
     }
