@@ -11,11 +11,7 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSAFinalStatesIterator;
@@ -50,6 +46,10 @@ public class Speller {
   private int candLen;
   private int wordLen; /* length of word being processed */
   private char[] wordProcessed; /* word being processed */
+
+  private Map<Character, List<char[]>> replacementsAnyToOne = new HashMap<Character, List<char[]>>();
+  private Map<String, List<char[]>> replacementsAnyToTwo = new HashMap<String, List<char[]>>();
+  private Map<String, List<String>> replacementsTheRest = new HashMap<String, List<String>>();
 
   /**
    * List of candidate strings, including same additional data such as
@@ -136,9 +136,51 @@ public class Speller {
 
     // Multibyte separator will result in an exception here.
     dictionaryMetadata.getSeparatorAsChar();
+
+    this.createReplacementsMaps();
   }
 
-  /**
+  private void createReplacementsMaps() {
+    for (Map.Entry<String, List<String>> entry : dictionaryMetadata
+        .getReplacementPairs().entrySet()) {
+      for (String s : entry.getValue()) {
+        // replacements any to one
+        // the new key is the target of the replacement pair
+        if (s.length() == 1) {
+          if (!replacementsAnyToOne.containsKey(s.charAt(0))) {
+            List<char[]> charList = new ArrayList<char[]>();
+            charList.add(entry.getKey().toCharArray());
+            replacementsAnyToOne.put(s.charAt(0), charList);
+          } else {
+            replacementsAnyToOne.get(s.charAt(0)).add(
+                entry.getKey().toCharArray());
+          }
+        }
+        // replacements any to two
+        // the new key is the target of the replacement pair
+        else if (s.length() == 2) {
+          if (!replacementsAnyToTwo.containsKey(s)) {
+            List<char[]> charList = new ArrayList<char[]>();
+            charList.add(entry.getKey().toCharArray());
+            replacementsAnyToTwo.put(s, charList);
+          } else {
+            replacementsAnyToTwo.get(s).add(entry.getKey().toCharArray());
+          }
+        } else {
+          if (!replacementsTheRest.containsKey(entry.getKey())) {
+            List<String> charList = new ArrayList<String>();
+            charList.add(s);
+            replacementsTheRest.put(entry.getKey(), charList);
+          } else {
+            replacementsTheRest.get(entry.getKey()).add(s);
+          }
+        }
+      }
+    }
+  }
+
+
+    /**
    * Encode a character sequence into a byte buffer, optionally expanding
    * buffer.
    */
@@ -302,7 +344,7 @@ public class Speller {
     candidates.clear();
     if (word.length() > 0 && word.length() < MAX_WORD_LENGTH && !isInDictionary(word)) {
       List<String> wordsToCheck = new ArrayList<String>();
-      if (dictionaryMetadata.getReplacementPairs() != null
+      if (replacementsTheRest != null
           && word.length() > MIN_WORD_LENGTH) {
         for (final String wordChecked : getAllReplacements(word, 0, 0)) {
           boolean found = false;
@@ -349,7 +391,7 @@ public class Speller {
           }
           wordProcessed = wordChecked.toCharArray();
           wordLen = wordProcessed.length;
-          if (wordLen < MIN_WORD_LENGTH) { // three-letter replacements make little sense anyway
+          if (wordLen < MIN_WORD_LENGTH && i > 2) { // three-letter replacements make little sense anyway
               break;
           }
           candidate = new char[MAX_WORD_LENGTH];
@@ -360,7 +402,7 @@ public class Speller {
           charBuffer.clear();
           byteBuffer.clear();
           final byte[] prevBytes = new byte[0];
-          findRepl(0, fsa.getRootNode(), prevBytes);
+          findRepl(0, fsa.getRootNode(), prevBytes, 0, 0);
         }
       }
     }
@@ -378,9 +420,10 @@ public class Speller {
     return candStringList;
   }
 
-  private void findRepl(final int depth, final int node, final byte[] prevBytes) {
-    char separatorChar = dictionaryMetadata.getSeparatorAsChar();
-    int dist;
+  private void findRepl(final int depth, final int node, final byte[] prevBytes,
+                        final int word_index, final int cand_index) {
+    // char separatorChar = dictionaryMetadata.getSeparatorAsChar();
+    int dist = 0;
     for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
       byteBuffer = BufferUtils.ensureCapacity(byteBuffer, prevBytes.length + 1);
       byteBuffer.clear();
@@ -396,28 +439,70 @@ public class Speller {
         byteBuffer.position(0);
         byteBuffer.get(prev);
         if (!fsa.isArcTerminal(arc)) {
-          findRepl(depth, fsa.getEndNode(arc), prev); // note: depth is not incremented
+          findRepl(depth, fsa.getEndNode(arc), prev, word_index, cand_index); // note: depth is not incremented
         }
         byteBuffer.clear();
       } else if (!c.isError()) { // unmappable characters are silently discarded
         charBuffer.flip();
-        candidate[depth] = charBuffer.get();
+        candidate[cand_index] = charBuffer.get();
         charBuffer.clear();
         byteBuffer.clear();
 
-        if (cuted(depth) <= effectEditDistance) {
-          if (Math.abs(wordLen - 1 - depth) <= effectEditDistance
-              && (dist = ed(wordLen - 1, depth)) <= effectEditDistance
-              && (fsa.isArcFinal(arc) || isBeforeSeparator(arc))) {
-            addCandidate(depth, dist);
+        int lengthReplacement = 0;
+        // replacement "any to two"
+        if ((lengthReplacement = matchAnyToTwo(word_index, cand_index)) > 0) {
+          if (isEndOfCandidate(arc, word_index)) { //the replacement takes place at the end of the candidate
+            if (Math.abs(wordLen - 1 - (word_index + lengthReplacement - 2)) > 0) { // there is an extra letter in the word after the replacement
+              dist++;
+            }
+            addCandidate(cand_index, dist);
+
           }
-          if (!fsa.isArcTerminal(arc)
-              && !(containsSeparators && candidate[depth] == separatorChar)) {
-            findRepl(depth + 1, fsa.getEndNode(arc), new byte[0]);
+          if (isArcNotTerminal(arc, cand_index)) {
+            int x = hMatrix.get(depth, depth);
+            hMatrix.set(depth, depth, hMatrix.get(depth - 1, depth - 1));
+            findRepl(Math.max(0, depth), fsa.getEndNode(arc), new byte[0], word_index + lengthReplacement - 1, cand_index + 1);
+            hMatrix.set(depth, depth, x);
+
           }
         }
+        //replacement "any to one"
+        if ((lengthReplacement = matchAnyToOne(word_index, cand_index)) > 0) {
+          if (isEndOfCandidate(arc, word_index)) { //the replacement takes place at the end of the candidate
+            if (Math.abs(wordLen - 1 - (word_index + lengthReplacement - 1)) > 0) { // there is an extra letter in the word after the replacement
+              dist++;
+            }
+            addCandidate(cand_index, dist);
+          }
+          if (isArcNotTerminal(arc,cand_index)) {
+            findRepl(depth, fsa.getEndNode(arc), new byte[0], word_index + lengthReplacement, cand_index + 1);
+          }
+        }
+        //general
+        if (cuted(depth, word_index, cand_index) <= effectEditDistance) {
+          if ((isEndOfCandidate(arc, word_index))
+              && (dist = ed(wordLen - 1 - (word_index - depth), depth, wordLen - 1, cand_index))
+                <= effectEditDistance) {
+            addCandidate(cand_index, dist);
+          }
+          if (isArcNotTerminal(arc,cand_index)) {
+            findRepl(depth + 1, fsa.getEndNode(arc), new byte[0], word_index + 1, cand_index + 1);
+          }
+        }
+
       }
     }
+  }
+
+  private boolean isArcNotTerminal(final int arc, final int cand_index) {
+    return !fsa.isArcTerminal(arc)
+        && !(containsSeparators && candidate[cand_index] == dictionaryMetadata.getSeparatorAsChar());
+  }
+
+  private boolean isEndOfCandidate(final int arc, final int word_index) {
+    return (fsa.isArcFinal(arc) || isBeforeSeparator(arc))
+        //candidate has proper length
+        && (Math.abs(wordLen - 1 - (word_index)) <= effectEditDistance);
   }
 
   private boolean isBeforeSeparator(final int arc) {
@@ -439,15 +524,16 @@ public class Speller {
    * @param j length of second word (here: candidate) - 1.
    * @return Edit distance between the two words. Remarks: See Oflazer.
    */
-  public int ed(final int i, final int j) {
+  public int ed(final int i, final int j,
+            final int word_index, final int cand_index) {
     int result;
     int a, b, c;
 
-    if (areEqual(wordProcessed[i], candidate[j])) {
+    if (areEqual(wordProcessed[word_index], candidate[cand_index])) {
       // last characters are the same
       result = hMatrix.get(i, j);
-    } else if (i > 0 && j > 0 && wordProcessed[i] == candidate[j - 1]
-        && wordProcessed[i - 1] == candidate[j]) {
+    } else if (word_index > 0 && cand_index > 0 && wordProcessed[word_index] == candidate[cand_index - 1]
+                && wordProcessed[word_index - 1] == candidate[cand_index]) {
       // last two characters are transposed
       a = hMatrix.get(i - 1, j - 1); // transposition, e.g. ababab, ababba
       b = hMatrix.get(i + 1, j); // deletion, e.g. abab, aba
@@ -505,20 +591,66 @@ public class Speller {
    * @param depth current length of candidates.
    * @return Cut-off edit distance. Remarks: See Oflazer.
    */
-  public int cuted(final int depth) {
+
+  public int cuted(final int depth, final int word_index, final int cand_index) {
     final int l = Math.max(0, depth - effectEditDistance); // min chars from word to consider - 1
-    final int u = Math.min(wordLen - 1, depth + effectEditDistance); // max chars from word to
+    final int u = Math.min(wordLen - 1 - (word_index - depth), depth + effectEditDistance); // max chars from word to
     // consider - 1
     int minEd = effectEditDistance + 1; // what is to be computed
+    int wi = word_index + l - depth;
     int d;
 
-    for (int i = l; i <= u; i++) {
-      if ((d = ed(i, depth)) < minEd) {
+     for (int i = l; i <= u; i++, wi++) {
+                if ((d = ed(i, depth, wi, cand_index)) < minEd) {
         minEd = d;
       }
     }
     return minEd;
   }
+
+  // Match the last letter of the candidate against two or more letters of the word.
+  private int matchAnyToOne(final int word_index, final int cand_index) {
+    if (replacementsAnyToOne.containsKey(candidate[cand_index])) {
+      for (final char[] rep : replacementsAnyToOne.get(candidate[cand_index])) {
+        int i = 0;
+        while (i < rep.length && (word_index + i) < wordLen
+            && rep[i] == wordProcessed[word_index + i]) {
+          i++;
+        }
+        if (i==rep.length) {
+          return i;
+        }
+      }
+    }
+    return 0;
+  }
+
+  private int matchAnyToTwo(final int word_index, final int cand_index) {
+    if (cand_index > 0 && cand_index < candidate.length
+        && word_index > 0) {
+      char[] twoChar = {candidate[cand_index - 1],candidate[cand_index]};
+      String sTwoChar= new String(twoChar);
+      if (replacementsAnyToTwo.containsKey(sTwoChar)) {
+        for (final char[] rep : replacementsAnyToTwo.get(sTwoChar)) {
+          if (rep.length == 2 && word_index < wordLen
+              && candidate[cand_index - 1] == wordProcessed[word_index - 1]
+              && candidate[cand_index] == wordProcessed[word_index]) {
+            return 0; //unnecessary replacements
+          }
+          int i = 0;
+          while (i < rep.length && (word_index - 1 + i) < wordLen
+              && rep[i] == wordProcessed[word_index - 1 + i] ) {
+            i++;
+          }
+          if (i==rep.length) {
+            return i;
+          }
+        }
+      }
+    }
+    return 0;
+  }
+
 
   private static int min(final int a, final int b, final int c) {
     return Math.min(a, Math.min(b, c));
@@ -593,8 +725,9 @@ public class Speller {
                   return true;
               }
           }
+          return false;
       }
-    return false;
+    return true;
   }
 
   /**
@@ -646,7 +779,7 @@ public class Speller {
     int keyLength = 0;
     boolean found = false;
     // find first possible replacement after fromIndex position
-    for (final String auxKey : dictionaryMetadata.getReplacementPairs().keySet()) {
+    for (final String auxKey : replacementsTheRest.keySet()) {
       int auxIndex = sb.indexOf(auxKey, fromIndex);
       if (auxIndex > -1 && auxIndex <= index) {
         if (!(auxIndex == index && auxKey.length() < keyLength)) { //select the longest possible key
@@ -657,21 +790,25 @@ public class Speller {
       }
     }
     if (index < MAX_WORD_LENGTH) {
-      for (final String rep : dictionaryMetadata.getReplacementPairs().get(key)) {
-        // avoid unnecessary replacements (ex. L <-> L·L)
-        if (rep.length() <= key.length() || sb.indexOf(rep) != index) {
-          // start a branch without replacement (only once per key)
-          if (!found) {
-            replaced.addAll(getAllReplacements(str, index + key.length(), level + 1));
-            found = true;
-          }
-          // start a branch with replacement
-          sb.replace(index, index + key.length(), rep);
-          replaced.addAll(getAllReplacements(sb.toString(), index + rep.length(),
+      for (final String rep : replacementsTheRest.get(key)) {
+                // start a branch without replacement (only once per key)
+                    if (!found) {
+                    replaced.addAll(getAllReplacements(str, index + key.length(),
               level + 1));
-          sb.setLength(0);
-          sb.append(str);
-        }
+        found = true;
+       }
+                // avoid unnecessary replacements (ex. don't replace L by L·L when L·L already present)
+                    int ind = sb.indexOf(rep, fromIndex - rep.length() + 1);
+                if (rep.length() > key.length() && ind > -1
+                        && (ind == index || ind == index - rep.length() + 1)) {
+                    continue;
+                  }
+                // start a branch with replacement
+                    sb.replace(index, index + key.length(), rep);
+                replaced.addAll(getAllReplacements(sb.toString(), index + rep.length(),
+                        level + 1));
+                sb.setLength(0);
+                sb.append(str);
       }
     }
     if (!found) {
