@@ -21,6 +21,12 @@ Bug Fixes
 
 Optimizations
 
+ * The suggestion search for the speller is now performed directly by traversing
+   the dictionary automaton, which makes it much more time-efficient (thanks
+   to Jaume Ortolà).
+
+ * Suggestions are generated faster by avoiding unnecessary case conversions.
+
 ======================= morfologik-stemming 1.8.3 =======================
 
 Bug Fixes
