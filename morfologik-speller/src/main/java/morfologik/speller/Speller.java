@@ -17,7 +17,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.sun.istack.internal.NotNull;
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSAFinalStatesIterator;
 import morfologik.fsa.FSATraversal;
@@ -732,7 +731,7 @@ public class Speller {
     }
 
     @Override
-    public int compareTo(@NotNull final CandidateData cd) {
+    public int compareTo(final CandidateData cd) {
       // Assume no overflow.
       return cd.getDistance() > this.distance ? -1 :
         cd.getDistance() == this.distance ? 0 : 1;
