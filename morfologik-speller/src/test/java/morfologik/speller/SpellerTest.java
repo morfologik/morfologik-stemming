@@ -210,11 +210,6 @@ public class SpellerTest {
     final URL url = getClass().getResource("test-utf-spell.dict");
     final Speller spell = new Speller(Dictionary.read(url));
     assertTrue(spell.isMisspelled("rzarzerzarzu"));
-    /*assertEquals("[rzarzerzarzu, rzarzerzażu, rzarzeżarzu, rzarzeżażu, " +
-        "rzażerzarzu, rzażerzażu, rzażeżarzu, rzażeżażu, " +
-        "żarzerzarzu, żarzerzażu, żarzeżarzu, żarzeżażu, " +
-        "żażerzarzu, żażerzażu, żażeżarzu, żażeżażu]",
-        Arrays.toString(spell.getAllReplacements("rzarzerzarzu", 0, 0).toArray()));*/
     assertEquals("[rzarzerzarzu]",
         Arrays.toString(spell.getAllReplacements("rzarzerzarzu", 0, 0).toArray()));
   }
