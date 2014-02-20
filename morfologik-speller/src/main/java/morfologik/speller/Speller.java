@@ -222,20 +222,20 @@ public class Speller {
    * Checks whether the word is misspelled, by performing a series of checks according to
    * properties of the dictionary.
    *
-   * If the flag <pre>fsa.dict.speller.ignore-punctuation</pre> is set, then all non-alphabetic
+   * If the flag <code>fsa.dict.speller.ignore-punctuation</code> is set, then all non-alphabetic
    * characters are considered to be correctly spelled.
    *
-   * If the flag <pre>fsa.dict.speller.ignore-numbers</pre> is set, then all words containing decimal
+   * If the flag <code>fsa.dict.speller.ignore-numbers</code> is set, then all words containing decimal
    * digits are considered to be correctly spelled.
    *
-   * If the flag <pre>fsa.dict.speller.ignore-camel-case</pre> is set, then all CamelCase words are
+   * If the flag <code>fsa.dict.speller.ignore-camel-case</code> is set, then all CamelCase words are
    * considered to be correctly spelled.
    *
-   * If the flag <pre>fsa.dict.speller.ignore-all-uppercase</pre> is set, then all alphabetic words composed
+   * If the flag <code>fsa.dict.speller.ignore-all-uppercase</code> is set, then all alphabetic words composed
    * of only uppercase characters are considered to be correctly spelled.
    *
    * Otherwise, the word is checked in the dictionary. If the test fails, and the dictionary does not
-   * perform any case conversions (as set by <pre>fsa.dict.speller.convert-case</pre> flag), then the method
+   * perform any case conversions (as set by <code>fsa.dict.speller.convert-case</code> flag), then the method
    * returns false. In case of case conversions, it is checked whether a non-mixed case word is found in its
    * lowercase version in the dictionary, and for all-uppercase words, whether the word is found in the dictionary
    * with the initial uppercase letter.
