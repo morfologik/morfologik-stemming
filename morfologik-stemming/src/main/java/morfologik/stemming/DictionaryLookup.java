@@ -284,6 +284,12 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
       int encodedLen,
       ByteBuffer inflectedForm,
       DictionaryMetadata metadata) {
+    
+    // FIXME: We should eventually get rid of this method and use 
+    // each encoder's #decode method. The problem is that we'd have to include
+    // HPPC or roundtrip via HPPC to a ByteBuffer, which would slow things down.
+    // Since this is performance-crucial routine, I leave it for now.
+              
     // Prepare the buffer.
     output.clear();
 

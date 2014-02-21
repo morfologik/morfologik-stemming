@@ -1,2 +1,0 @@
-- cleanup DictionaryLookup.decodeBaseForm -> this should be really inlined where it's actually
- used and use the proper encoder.decode method?
