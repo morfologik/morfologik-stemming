@@ -792,6 +792,18 @@ public class Speller {
         && isNotAllLowercase(str);
   }
 
+
+  /**
+   * Used to determine whether the dictionary supports case conversions.
+   * @return boolean value that answers this question in a deep and meaningful way.
+   *
+   * @since 1.9
+   *
+   */
+  public boolean convertsCase() {
+    return dictionaryMetadata.isConvertingCase();
+  }
+
   /**
    * @param str The string to find the replacements for.
    * @param fromIndex The index from which replacements are found.
