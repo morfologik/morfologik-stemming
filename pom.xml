@@ -19,7 +19,7 @@
   <!-- Project info. -->
   <groupId>org.carrot2</groupId>
   <artifactId>morfologik-parent</artifactId>
-  <version>1.9.0-SNAPSHOT</version>
+  <version>1.9.0</version>
   <packaging>pom</packaging>
 
   <name>Morfologik (parent POM)</name>
