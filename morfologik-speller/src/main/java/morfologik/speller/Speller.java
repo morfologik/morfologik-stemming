@@ -437,8 +437,8 @@ public class Speller {
     }
 
     Collections.sort(candidates);
-    //FIXME: I'm an ugly hack
-    //Use LinkedHashSet to avoid duplicates and keep the order
+
+    // Use a linked set to avoid duplicates and preserve the ordering of candidates.
     final Set<String> candStringSet = new LinkedHashSet<String>();
     for (final CandidateData cd : candidates) {
       candStringSet.add(Dictionary.convertText(cd.getWord(),

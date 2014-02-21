@@ -40,9 +40,9 @@ public class HMatrix {
 		// |i - j|
 		for (int j = 0; j < 2 * distance + 1; j++) {
 			p[j * rowLength] = distance + 1 - j; // H(i=0..distance+1,0)=i
-			//FIXME: dla distance == 2 tu mamy wykroczenie poza rozmiar tablicy
+			// FIXME: fordistance == 2 we exceed the array size here.
+            // there's a bug in spell.cc, Jan Daciuk has been notified about it.
 			p[Math.min(p.length - 1, (j + distance + 1) * rowLength + j)] = j; // H(0,j=0..distance+1)=j
-			//w spell.cc jest tutaj błąd, Jaś już wie...
 		}
 	}
 

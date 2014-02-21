@@ -218,7 +218,7 @@ public final class SequenceEncoders {
             for (int i : new int [] {0, maxSubsequenceLength}) {
                 for (int j = 1; j <= src.size() - i; j++) {
                     // Compute temporary src with the infix removed.
-                    // TODO: we could just compare directly instead of using scratch here?
+                    // Concatenate in scratch space for simplicity.
                     scratch.clear();
                     scratch.add(src.buffer, 0, i);
                     scratch.add(src.buffer, i + j, src.size() - (i + j));
