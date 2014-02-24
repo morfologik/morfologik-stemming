@@ -6,13 +6,9 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
 ======================= morfologik-stemming 1.9.1 =======================
 
-Changes in backwards compatibility policy
-
-New Features
-
 Bug Fixes
-
-Optimizations
+* Re-release of 1.9.0, with morfologik-parent pushed to Maven Central
+  (for some reason it didn't propagate).
 
 ======================= morfologik-stemming 1.9.0 =======================
 
