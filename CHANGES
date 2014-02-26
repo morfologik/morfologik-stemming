@@ -22,6 +22,10 @@ New Features
 
 Bug Fixes
 
+ * Now only the longest replacement key is selected when using replacement
+   pairs (thanks to Jaume Ortolà). This fixes a subtle regression
+   introduced in 1.9.0.
+
 Optimizations
 
 ======================= morfologik-stemming 1.9.0 =======================
