@@ -158,6 +158,18 @@ public class SpellerTest {
   }
 
   @Test
+  public void testConcurrentReplacements() throws IOException {
+    final URL url = getClass().getResource("dict-with-freq.dict");
+    final Speller spell = new Speller(Dictionary.read(url));
+    //only the longest key is selected in replacement pairs
+    List<String> reps = spell.getAllReplacements("teached", 0, 0);
+    assertTrue(reps.contains("teached"));
+    assertTrue(reps.contains("taught"));
+    assertTrue(!reps.contains("tgheached"));
+  }
+  
+
+  @Test
   public void testIsMisspelled() throws IOException {
     final URL url = getClass().getResource("test-utf-spell.dict");
     final Speller spell = new Speller(Dictionary.read(url));
