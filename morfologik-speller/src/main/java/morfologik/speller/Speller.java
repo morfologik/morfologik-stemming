@@ -22,8 +22,8 @@ import morfologik.stemming.DictionaryMetadata;
 import morfologik.util.BufferUtils;
 
 /**
- * Finds spelling suggestions. Implements
- * <a href="http://acl.ldc.upenn.edu/J/J96/J96-1003.pdf">K. Oflazer's algorithm</a>.
+ * Finds spelling suggestions. Implements K. Oflazer's algorithm as described in:
+ * Oflazer, Kemal. 1996. “Error-Tolerant Finite-State Recognition with Applications to Morphological Analysis and Spelling Correction.” <i><Computational Linguistics/i> 22 (1): 73–89.
  * See Jan Daciuk's <code>s_fsa</code> package.
  */
 public class Speller {
