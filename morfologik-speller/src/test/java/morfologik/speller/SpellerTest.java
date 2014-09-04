@@ -249,12 +249,46 @@ public class SpellerTest {
     assertTrue(getCutOffDistance(spell2, "reporter", "reporter") == 0);
   }
 
+  @Test
+  public void testReplacementsAndDistance2() throws Exception {
+    /*File infoFile = new File("/tmp/morfologik.info");
+    FileWriter fw1 = new FileWriter(infoFile);
+    fw1.write("fsa.dict.separator=+\n");
+    fw1.write("fsa.dict.encoding=utf-8\n");
+    fw1.write("fsa.dict.speller.replacement-pairs=s ss,t d,R Rh\n");
+    fw1.close();
+
+    File inputFile = new File("/tmp/morfologik.txt");
+    FileWriter fw2 = new FileWriter(inputFile);
+    fw2.write("Mitmuss\n");
+    fw2.write("Rhythmus\n");
+    fw2.write("Wald\n");
+    fw2.write("Band\n");
+    fw2.close();
+
+    File dictFile = new File("/tmp/morfologik.dict");
+    String[] buildToolOptions =
+            {"-i", inputFile.getAbsolutePath(), "-o", dictFile.getAbsolutePath()};
+    FSABuildTool.main(buildToolOptions);
+    Dictionary dictionary = Dictionary.read(dictFile);
+    Speller speller = new Speller(dictionary, 2);*/
+    
+    final URL url = getClass().getResource("reps_dist2.dict");
+    final Speller speller = new Speller(Dictionary.read(url), 2);
+    
+    List<String> reps = speller.findReplacements("Rytmus");
+    assertTrue(reps.get(0).equals("Rhythmus"));
+    assertTrue(reps.get(1).equals("Mitmuss"));
+    reps = speller.findReplacements("Walt");
+    assertTrue(reps.get(0).equals("Wald"));
+    assertTrue(reps.get(1).equals("Band"));
+  }
+
   private int getCutOffDistance(final Speller spell, final String word, final String candidate) {
     // assuming there is no pair-replacement 
     spell.setWordAndCandidate(word, candidate);
     final int [] ced = new int[spell.getCandLen() - spell.getWordLen()];
     for (int i = 0; i < spell.getCandLen() - spell.getWordLen(); i++) {
-      
       ced[i] = spell.cuted(spell.getWordLen() + i, spell.getWordLen() + i, spell.getWordLen() + i);
     }
     Arrays.sort(ced);
@@ -281,4 +315,5 @@ public class SpellerTest {
     }
     return ed;
   }
+  
 }
