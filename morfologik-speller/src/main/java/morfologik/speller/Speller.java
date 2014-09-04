@@ -480,8 +480,12 @@ public class Speller {
         int lengthReplacement;
         // replacement "any to two"
         if ((lengthReplacement = matchAnyToTwo(wordIndex, candIndex)) > 0) {
-          if (isEndOfCandidate(arc, wordIndex)) { //the replacement takes place at the end of the candidate
-            if (Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 2)) > 0) { // there is an extra letter in the word after the replacement
+          // the replacement takes place at the end of the candidate
+          if (isEndOfCandidate(arc, wordIndex)
+              && (dist = hMatrix.get(wordLen - 1 - (wordIndex - depth) - 1,
+                  depth - 2)) <= effectEditDistance) {
+            if (Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 2)) > 0) {
+              // there is an extra letter in the word after the replacement
               dist++;
             }
             addCandidate(candIndex, dist);
@@ -497,7 +501,10 @@ public class Speller {
         }
         //replacement "any to one"
         if ((lengthReplacement = matchAnyToOne(wordIndex, candIndex)) > 0) {
-          if (isEndOfCandidate(arc, wordIndex)) { //the replacement takes place at the end of the candidate
+          // the replacement takes place at the end of the candidate
+          if (isEndOfCandidate(arc, wordIndex)
+              && (dist = hMatrix.get(wordLen - 1 - (wordIndex - depth) - 1,
+                  depth - 1)) <= effectEditDistance) {
             if (Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 1)) > 0) { // there is an extra letter in the word after the replacement
               dist++;
             }
