@@ -335,7 +335,7 @@ public class Speller {
     if (!isInDictionary(Dictionary.convertText(original,
         dictionaryMetadata.getInputConversionPairs()).toString())
         && dictionaryMetadata.isSupportingRunOnWords()) {
-        for (int i = 2; i < original.length(); i++) {
+        for (int i = 1; i < original.length(); i++) {
         // chop from left to right
         final CharSequence firstCh = original.subSequence(0, i);
         if (isInDictionary(firstCh) &&
