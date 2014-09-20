@@ -1,0 +1,14 @@
+#
+# Dictionary properties.
+#
+
+fsa.dict.separator=+
+fsa.dict.encoding=Cp1250
+
+fsa.dict.uses-prefixes=false
+fsa.dict.uses-infixes=false
+
+fsa.dict.speller.ignore-diacritics=false
+fsa.dict.speller.ignore-numbers=false
+fsa.dict.speller.convert-case=false
+fsa.dict.speller.ignore-punctuation=false

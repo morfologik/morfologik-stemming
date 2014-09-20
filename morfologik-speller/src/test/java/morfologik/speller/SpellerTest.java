@@ -46,6 +46,14 @@ public class SpellerTest {
     assertTrue(spell1.replaceRunOnWords("Rzekunia").isEmpty());
     assertTrue(spell1.replaceRunOnWords("RzekuniaRzeczypospolitej").contains("Rzekunia Rzeczypospolitej"));
     assertTrue(spell1.replaceRunOnWords("RzekuniaRze").isEmpty()); //Rze is not found but is a prefix
+
+    final URL url2 = getClass().getResource("single-char-word.dict");
+    final Speller spell2 = new Speller(Dictionary.read(url2));
+    assertTrue(spell2.replaceRunOnWords("alot").contains("a lot"));
+    assertTrue(spell2.replaceRunOnWords("aalot").contains("aa lot"));
+    assertTrue(spell2.replaceRunOnWords("aamusement").contains("a amusement"));
+    assertTrue(spell2.replaceRunOnWords("clot").isEmpty());
+    assertTrue(spell2.replaceRunOnWords("foobar").isEmpty());
   }
 
   @Test
