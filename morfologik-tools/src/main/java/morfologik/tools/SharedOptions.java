@@ -23,7 +23,7 @@ final class SharedOptions {
         .create("d");
 
 	public final static Option decode = OptionBuilder
-	    .withDescription("Decode prefix/ infix/ suffix forms (if available).")
+	    .withDescription("Decode prefix/ infix/ suffix forms.")
 	    .withLongOpt("decode")
 	    .isRequired(false)
 	    .create("x");
