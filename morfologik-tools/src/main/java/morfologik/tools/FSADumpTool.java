@@ -107,7 +107,8 @@ public final class FSADumpTool extends Tool {
 		} else {
 			dictionary = null;
 			fsa = FSA.read(new FileInputStream(dictionaryFile));
-			printWarning("Warning: FSA automaton without metadata file.");
+			printWarning("Warning: FSA automaton without metadata *.info file. The *.info file is" +
+			             " expected in the same directory as the *.dict file.");
 		}
 
 		printExtra("FSA properties");
