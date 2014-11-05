@@ -94,7 +94,10 @@ public final class FSADumpTool extends Tool {
 		this.os = new BufferedOutputStream(System.out, 1024 * 32);
 		this.w =  new OutputStreamWriter(os, "UTF-8");
 
-		if (hasMetadata(dictionaryFile)) {
+		File metadataFile = expectedMetadataFile(dictionaryFile).getAbsoluteFile();
+		if (metadataFile.exists() &&
+		    metadataFile.isFile() &&
+		    metadataFile.canRead()) {
 			dictionary = Dictionary.read(dictionaryFile);
 			fsa = dictionary.fsa;
 
@@ -107,8 +110,8 @@ public final class FSADumpTool extends Tool {
 		} else {
 			dictionary = null;
 			fsa = FSA.read(new FileInputStream(dictionaryFile));
-			printWarning("Warning: FSA automaton without metadata *.info file. The *.info file is" +
-			             " expected in the same directory as the *.dict file.");
+			printWarning("Warning: FSA automaton without metadata *.info file. The metadata file was" +
+			             " expected at: " + metadataFile);
 		}
 
 		printExtra("FSA properties");
@@ -261,11 +264,8 @@ public final class FSADumpTool extends Tool {
 	/**
 	 * Check if there is a metadata file for the given FSA automaton.
 	 */
-	private static boolean hasMetadata(File fsaFile) {
-		final File featuresFile = new File(fsaFile.getParent(), Dictionary
-		        .getExpectedFeaturesName(fsaFile.getName()));
-
-		return featuresFile.canRead();
+	private static File expectedMetadataFile(File fsaFile) {
+		return new File(fsaFile.getParent(), Dictionary.getExpectedFeaturesName(fsaFile.getName()));
 	}
 
 	/**
