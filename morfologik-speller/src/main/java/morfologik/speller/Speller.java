@@ -482,8 +482,7 @@ public class Speller {
         if ((lengthReplacement = matchAnyToTwo(wordIndex, candIndex)) > 0) {
           // the replacement takes place at the end of the candidate
           if (isEndOfCandidate(arc, wordIndex)
-              && (dist = hMatrix.get(depth - 1, //wordLen - 1 - (wordIndex - depth),
-                  depth - 1)) <= effectEditDistance) {
+              && (dist = hMatrix.get(depth - 1, depth - 1)) <= effectEditDistance) {
             if (Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 2)) > 0) {
               // there are extra letters in the word after the replacement
               dist = dist + Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 2));
@@ -503,8 +502,7 @@ public class Speller {
         if ((lengthReplacement = matchAnyToOne(wordIndex, candIndex)) > 0) {
           // the replacement takes place at the end of the candidate
           if (isEndOfCandidate(arc, wordIndex)
-              && (dist = hMatrix.get(depth, //wordLen - 1 - (wordIndex + lengthReplacement - 1 - depth),
-                  depth)) <= effectEditDistance) {
+              && (dist = hMatrix.get(depth, depth)) <= effectEditDistance) {
             if (Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 1)) > 0) {
            // there are extra letters in the word after the replacement
               dist = dist + Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 1));
