@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
-import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 
 public class FSABuildToolTest
@@ -30,7 +29,7 @@ public class FSABuildToolTest
         // Emit UTF-8 BOM prefixed list of three strings.
         baos.write(new byte [] {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF});
         baos.write(Joiner.on('\n').join("abc", "def", "xyz").getBytes(Charsets.UTF_8));
-        Files.copy(ByteStreams.newInputStreamSupplier(baos.toByteArray()), input);
+        Files.write(baos.toByteArray(), input);
 
         baos.reset();
         PrintStream prev = System.err;
