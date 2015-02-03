@@ -482,33 +482,34 @@ public class Speller {
         if ((lengthReplacement = matchAnyToTwo(wordIndex, candIndex)) > 0) {
           // the replacement takes place at the end of the candidate
           if (isEndOfCandidate(arc, wordIndex)
-              && (dist = hMatrix.get(wordLen - 1 - (wordIndex - depth) - 1,
-                  depth - 2)) <= effectEditDistance) {
+              && (dist = hMatrix.get(depth - 1, depth - 1)) <= effectEditDistance) {
             if (Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 2)) > 0) {
-              // there is an extra letter in the word after the replacement
-              dist++;
+              // there are extra letters in the word after the replacement
+              dist = dist + Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 2));
             }
-            addCandidate(candIndex, dist);
-
+            if (dist <= effectEditDistance) {
+              addCandidate(candIndex, dist);
+            }
           }
           if (isArcNotTerminal(arc, candIndex)) {
             int x = hMatrix.get(depth, depth);
             hMatrix.set(depth, depth, hMatrix.get(depth - 1, depth - 1));
             findRepl(Math.max(0, depth), fsa.getEndNode(arc), new byte[0], wordIndex + lengthReplacement - 1, candIndex + 1);
             hMatrix.set(depth, depth, x);
-
           }
         }
         //replacement "any to one"
         if ((lengthReplacement = matchAnyToOne(wordIndex, candIndex)) > 0) {
           // the replacement takes place at the end of the candidate
           if (isEndOfCandidate(arc, wordIndex)
-              && (dist = hMatrix.get(wordLen - 1 - (wordIndex - depth) - 1,
-                  depth - 1)) <= effectEditDistance) {
-            if (Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 1)) > 0) { // there is an extra letter in the word after the replacement
-              dist++;
+              && (dist = hMatrix.get(depth, depth)) <= effectEditDistance) {
+            if (Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 1)) > 0) {
+           // there are extra letters in the word after the replacement
+              dist = dist + Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 1));
             }
-            addCandidate(candIndex, dist);
+            if (dist <= effectEditDistance) {
+              addCandidate(candIndex, dist);
+            }
           }
           if (isArcNotTerminal(arc,candIndex)) {
             findRepl(depth, fsa.getEndNode(arc), new byte[0], wordIndex + lengthReplacement, candIndex + 1);
