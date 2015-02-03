@@ -9,8 +9,16 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 Changes in backwards compatibility policy
 
 New Features
+ 
+ * Added OSGi support (Michal Hlavac)
 
 Bug Fixes
+
+ * GH-32: make replaceRunOnWords return "a lot" for "alot", etc. 
+   (Daniel Naber)
+
+ * GH-34: ArrayIndexOutOfBoundsException with replacement-pairs. 
+   (Jaume Ortolà, Daniel Naber)
 
 Optimizations
 
