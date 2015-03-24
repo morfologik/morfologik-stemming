@@ -833,8 +833,8 @@ public class Speller {
     // find first possible replacement after fromIndex position
     for (final String auxKey : replacementsTheRest.keySet()) {
       int auxIndex = sb.indexOf(auxKey, fromIndex);
-      if (auxIndex > -1 && auxIndex <= index &&
-          !(auxKey.length() < keyLength)) { //select the longest possible key
+      if (auxIndex > -1 && (auxIndex < index ||
+          (auxIndex == index && !(auxKey.length() < keyLength)))) { //select the longest possible key
         index = auxIndex;
         key = auxKey;
         keyLength = auxKey.length();
