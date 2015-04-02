@@ -78,8 +78,11 @@ public final class FSADumpTool extends Tool {
 	/**
 	 * Dumps the content of a dictionary to a file.
 	 */
-	private void dump(File dictionaryFile)
+	public String dump(File dictionaryFile)
 	        throws UnsupportedEncodingException, IOException {
+		
+		String dictAsString = "";
+		
 		final long start = System.currentTimeMillis();
 
 		final Dictionary dictionary;
@@ -188,8 +191,9 @@ public final class FSADumpTool extends Tool {
 					t = "";
 				builder.append(t);
 				builder.append('\n');
-
-				osw.write(builder.toString());
+				
+				dictAsString = builder.toString();
+				osw.write(dictAsString);
 				sequences++;
 			}
 			osw.flush();
@@ -220,6 +224,7 @@ public final class FSADumpTool extends Tool {
 		                (int) (sequences / (millis / 1000.0))));
 
 		os.flush();
+		return dictAsString;
 	}
 
 	/**
