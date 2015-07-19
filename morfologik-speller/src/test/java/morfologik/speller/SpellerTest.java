@@ -109,7 +109,13 @@ public class SpellerTest {
     assertTrue(spell1.findReplacements("+").isEmpty());
 
   }
-
+  @Test
+  public void textreplaceSeparateWords() throws IOException{
+	  final URL url = getClass().getResource("/resources/morfologik/speller/test-utf-spell.dict");
+	  final Speller spell = new Speller(Dictionary.read(url));
+	  //assertTrue(spell.replaceSeparateWords("a").contains("a"));
+	  assertTrue(spell.replaceSeparateWords("a"+" "+"bc").contains("abc"));
+  }
   @Test
   public void testFrequencyNonUTFDictionary() throws IOException {
     final URL url1 = getClass().getResource("test_freq_iso.dict");
