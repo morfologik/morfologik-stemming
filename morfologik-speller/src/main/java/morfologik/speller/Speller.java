@@ -408,7 +408,45 @@ public class Speller {
       } else {
         wordsToCheck.add(word);
       }
+       
+  public List<String> replaceSeparateWords(final String word) {
+		final List<String> candidates = new ArrayList<String>();
+		// 检查把一个单词错写成两个单词，例如把together错写成to gether
+		// 存放传递来的单词
+		String[] words = word.split(" ");
+		if (words.length == 2) {
+			final String preWord = words[0];
+			final String nextWord = words[1];
+			if (!preWord.isEmpty()) {
+				if (!isInDictionary(Dictionary.convertText(preWord,
+						dictionaryMetadata.getInputConversionPairs())
+						.toString())
+						|| !isInDictionary(Dictionary.convertText(nextWord,
+								dictionaryMetadata.getInputConversionPairs())
+								.toString())) {
+					final String newWord = preWord + nextWord;
 
+					// for (int i = 1; i < word.length(); i++) {
+					// chop from left to right
+					// final CharSequence firstCh = word.subSequence(0, i);
+					if (isInDictionary(newWord)) {
+						if (!dictionaryMetadata.getOutputConversionPairs()
+								.isEmpty()) {
+							candidates.add(newWord);
+						} else {
+							candidates.add(Dictionary.convertText(
+									newWord,
+									dictionaryMetadata
+											.getOutputConversionPairs())
+									.toString());
+						}
+					}
+				}
+
+			}
+		}
+		return candidates;
+	}
       //If at least one candidate was found with the replacement pairs (which are usual errors),
       //probably there is no need for more candidates
       if (candidates.isEmpty()) {
