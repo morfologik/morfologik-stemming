@@ -10,6 +10,7 @@ import static morfologik.stemming.DictionaryAttribute.IGNORE_NUMBERS;
 import static morfologik.stemming.DictionaryAttribute.IGNORE_PUNCTUATION;
 import static morfologik.stemming.DictionaryAttribute.RUN_ON_WORDS;
 import static morfologik.stemming.DictionaryAttribute.SEPARATOR;
+import static morfologik.stemming.DictionaryAttribute.JOIN_WORDS;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -135,6 +136,7 @@ public final class DictionaryMetadata {
   public boolean isIgnoringDiacritics()   { return boolAttributes.get(IGNORE_DIACRITICS); }
   public boolean isConvertingCase()       { return boolAttributes.get(CONVERT_CASE); }
   public boolean isSupportingRunOnWords() { return boolAttributes.get(RUN_ON_WORDS); }
+  public boolean isSupportingJoinWords() { return boolAttributes.get(JOIN_WORDS); }
 
   /**
    * Create an instance from an attribute map.
@@ -219,6 +221,7 @@ public final class DictionaryMetadata {
       case CONVERT_CASE:
       case RUN_ON_WORDS:
       case FREQUENCY_INCLUDED:
+      case JOIN_WORDS:
         this.boolAttributes.put(e.getKey(), (Boolean) value);
         break;
 
