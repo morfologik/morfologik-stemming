@@ -5,6 +5,4 @@
 fsa.dict.separator=+
 fsa.dict.encoding=iso8859-1
 
-fsa.dict.uses-prefixes=false
-fsa.dict.uses-infixes=false
-fsa.dict.uses-suffixes=false
+fsa.dict.encoder=none

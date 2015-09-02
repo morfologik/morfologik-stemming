@@ -50,8 +50,10 @@ public class FSATestUtils {
         }
         
         for (ByteBuffer sequence : uniqueInput) {
-            Assert.assertTrue("Not present in the right language: "
-                    + SerializerTestBase.toString(sequence), rl.remove(sequence));
+            if (!rl.remove(sequence)) {
+              Assert.fail("Not present in the right language: " 
+                  + SerializerTestBase.toString(sequence));
+            }
         }
 
         // (2) No other sequence _other_ than the input is in the right language.

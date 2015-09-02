@@ -208,8 +208,9 @@ public abstract class SerializerTestBase {
         }
 
         for (ByteBuffer sequence : uniqueInput) {
-            Assert.assertTrue("Not present in the right language: "
-                    + toString(sequence), rl.remove(sequence));
+            if (!rl.remove(sequence)) {
+              Assert.fail("Not present in the right language: " + toString(sequence));
+            }
         }
 
         // (2) No other sequence _other_ than the input is in the right

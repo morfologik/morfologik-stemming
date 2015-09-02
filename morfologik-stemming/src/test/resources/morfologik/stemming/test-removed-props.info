@@ -3,6 +3,6 @@
 #
 
 fsa.dict.separator=+
-fsa.dict.encoding=UTF-8
+fsa.dict.encoding=iso-8859-2
 
-fsa.dict.encoder=suffix
+fsa.dict.uses-infixes=true

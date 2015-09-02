@@ -1,7 +1,7 @@
 #
 # Morfologik Polish dictionary.
 # Version: 2.0 PoliMorf
-# Copyright (c) 2013, Marcin Mi≥kowski
+# Copyright (c) 2013, Marcin Mi≈Çkowski
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,5 +32,4 @@ fsa.dict.license=BSD. http://morfologik.blogspot.com
 fsa.dict.separator=+
 fsa.dict.encoding=UTF-8
 
-fsa.dict.uses-prefixes=true
-fsa.dict.uses-infixes=false
+fsa.dict.encoder=prefix

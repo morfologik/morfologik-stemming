@@ -4,3 +4,5 @@
 
 fsa.dict.separator=+
 fsa.dict.encoding=iso-8859-2
+
+fsa.dict.encoder=suffix

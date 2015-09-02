@@ -17,16 +17,15 @@ import morfologik.util.FileUtils;
 import morfologik.util.ResourceUtils;
 
 /**
- * A dictionary combines {@link FSA} automaton and metadata describing the
- * internals of dictionary entries' coding ({@link DictionaryMetadata}.
+ * A dictionary combines {@link FSA} automaton and {@link DictionaryMetadata}
+ * describing the way terms are encoded in the automaton.
  * 
  * <p>
  * A dictionary consists of two files:
  * <ul>
  * <li>an actual compressed FSA file,
- * <li>a metadata file, describing the dictionary.
+ * <li>{@link DictionaryMetadata}, describing the way terms are encoded.
  * </ul>
- * Use static methods in this class to read dictionaries and their metadata.
  */
 public final class Dictionary {
   /**
@@ -114,23 +113,33 @@ public final class Dictionary {
 
       // Handle back-compatibility for encoder specification.
       if (!properties.containsKey(DictionaryAttribute.ENCODER.propertyName)) {
+        boolean hasDeprecated = properties.containsKey("fsa.dict.uses-suffixes") ||
+                                properties.containsKey("fsa.dict.uses-infixes") ||
+                                properties.containsKey("fsa.dict.uses-prefixes");
+
         boolean usesSuffixes = Boolean.valueOf(properties.getProperty("fsa.dict.uses-suffixes", "true"));
         boolean usesPrefixes = Boolean.valueOf(properties.getProperty("fsa.dict.uses-prefixes", "false"));
         boolean usesInfixes  = Boolean.valueOf(properties.getProperty("fsa.dict.uses-infixes",  "false"));
 
+        final EncoderType encoder;
         if (usesInfixes) {
-          map.put(DictionaryAttribute.ENCODER, EncoderType.INFIX.name());
+          encoder = EncoderType.INFIX;
         } else if (usesPrefixes) {
-          map.put(DictionaryAttribute.ENCODER, EncoderType.PREFIX.name());
+          encoder = EncoderType.PREFIX;
         } else if (usesSuffixes) {
-          map.put(DictionaryAttribute.ENCODER, EncoderType.SUFFIX.name());
+          encoder = EncoderType.SUFFIX;
         } else {
-          map.put(DictionaryAttribute.ENCODER, EncoderType.NONE.name());
+          encoder = EncoderType.NONE;
         }
 
-        properties.remove("fsa.dict.uses-suffixes");
-        properties.remove("fsa.dict.uses-prefixes");
-        properties.remove("fsa.dict.uses-infixes");
+        if (!hasDeprecated) {
+          throw new IOException("Use an explicit " +
+              DictionaryAttribute.ENCODER.propertyName + "=" + encoder.name() +
+              " metadata key: ");
+        }
+
+        throw new IOException("Deprecated encoder keys in metadata. Use " +
+            DictionaryAttribute.ENCODER.propertyName + "=" + encoder.name());
       }
 
       for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements();) {

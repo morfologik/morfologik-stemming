@@ -16,13 +16,27 @@ import morfologik.fsa.FSA;
 import morfologik.fsa.FSABuilder;
 import morfologik.fsa.FSAUtils;
 
+import org.fest.assertions.api.Assertions;
+import org.junit.Assert;
 import org.junit.Test;
 
 /*
  *
  */
 public class DictionaryLookupTest {
-  /* */
+
+  @Test
+  public void testRemovedEncoderProperties() throws IOException {
+    final URL url = this.getClass().getResource("test-removed-props.dict");
+    try {
+      new DictionaryLookup(Dictionary.read(url));
+      Assert.fail();
+    } catch (IOException e) {
+      Assertions.assertThat(e).hasMessageContaining(
+          DictionaryAttribute.ENCODER.propertyName);
+    }
+  }
+
   @Test
   public void testPrefixDictionaries() throws IOException {
     final URL url = this.getClass().getResource("test-prefix.dict");

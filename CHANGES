@@ -11,6 +11,9 @@ Changes in backwards compatibility policy
  * GH-54: Make Java 1.7 the minimum required version.
    (Dawid Weiss)
 
+ * GH-51: Remove and fail on deprecated metadata (fsa.dict.uses-*).
+   (Dawid Weiss)
+
 New Features
  
  * Added OSGi support (Michal Hlavac)
