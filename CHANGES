@@ -4,6 +4,27 @@ Morfologik-stemming Change Log
 For an up-to-date CHANGES file see 
 https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
+======================= morfologik-stemming 1.11.0-SNAPSHOT =======================
+
+Changes in backwards compatibility policy
+
+ * GH-54: Make Java 1.7 the minimum required version.
+   (Dawid Weiss)
+
+New Features
+ 
+ * Added OSGi support (Michal Hlavac)
+
+Bug Fixes
+
+ * GH-32: make replaceRunOnWords return "a lot" for "alot", etc. 
+   (Daniel Naber)
+
+ * GH-34: ArrayIndexOutOfBoundsException with replacement-pairs. 
+   (Jaume Ortolà, Daniel Naber)
+
+Optimizations
+
 ======================= morfologik-stemming 1.10.0 =======================
 
 Changes in backwards compatibility policy

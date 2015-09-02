@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <prerequisites>
-    <maven>3.0.2</maven>
+    <maven>3.2.5</maven>
   </prerequisites>
 
   <!-- We use SonaType for publishing artefacts. Parent POM makes things easier here. -->
@@ -35,9 +35,6 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-
-  <!-- <organization> <name></name> <url></url> </organization> -->
-  <!-- <issueManagement> <system></system> <url></url> </issueManagement> -->
 
   <mailingLists>
     <mailingList>
@@ -68,27 +65,13 @@
 
   <!-- Global properties. -->
   <properties>
-    <maven.compiler.source>1.6</maven.compiler.source>
-    <maven.compiler.target>1.6</maven.compiler.target>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <skip.deployment>false</skip.deployment>
     <gpg.passphrase></gpg.passphrase>
   </properties>
-
-  <!-- Add snapshots from SonaType -->
-  <repositories>
-    <repository>
-      <id>SonaType snapshots</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
 
   <!-- Submodules -->
   <modules>
@@ -100,8 +83,6 @@
     <module>morfologik-speller</module>
   </modules>
 
-  <!-- Manage dependencies; we keep versions separate to possibly split out submodules 
-    later on. -->
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -110,6 +91,7 @@
         <version>0.6.1</version>
       </dependency>
 
+      <!-- REMOVE THIS -->
       <dependency>
         <groupId>com.carrotsearch</groupId>
         <artifactId>junit-benchmarks</artifactId>
