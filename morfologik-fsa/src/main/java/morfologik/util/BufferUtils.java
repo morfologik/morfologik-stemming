@@ -44,11 +44,4 @@ public final class BufferUtils {
 		}
 		return buffer;
 	}
-
-	/**
-	 * Convert a byte buffer to a string in platform default encoding.
-	 */
-	public static String toString(ByteBuffer sequence) {
-		return new String(sequence.array(), sequence.position(), sequence.remaining());
-    }
 }

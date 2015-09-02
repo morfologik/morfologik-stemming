@@ -3,7 +3,6 @@ package morfologik.fsa;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import morfologik.util.BufferUtils;
 import morfologik.util.MinMax;
 
 import org.junit.Assert;
@@ -52,7 +51,7 @@ public class FSATestUtils {
         
         for (ByteBuffer sequence : uniqueInput) {
             Assert.assertTrue("Not present in the right language: "
-                    + BufferUtils.toString(sequence), rl.remove(sequence));
+                    + SerializerTestBase.toString(sequence), rl.remove(sequence));
         }
 
         // (2) No other sequence _other_ than the input is in the right language.

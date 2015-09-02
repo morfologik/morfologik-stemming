@@ -2,8 +2,6 @@ package morfologik.fsa;
 
 import java.util.*;
 
-import morfologik.util.Arrays;
-
 import static morfologik.fsa.ConstantArcSizeFSA.*;
 
 /**
@@ -158,10 +156,10 @@ public final class FSABuilder {
         assert serialized != null : "Automaton already built.";
         assert previous == null || len == 0 || compare(previous, 0, previousLength, sequence, start, len) <= 0 : 
             "Input must be sorted: " 
-                + Arrays.toString(previous, 0, previousLength) + " >= " 
-                + Arrays.toString(sequence, start, len);
+                + Arrays.toString(Arrays.copyOf(previous, previousLength)) + " >= " 
+                + Arrays.toString(Arrays.copyOfRange(sequence, start, len));
         assert setPrevious(sequence, start, len);
-    
+
         // Determine common prefix length.
         final int commonPrefix = commonPrefix(sequence, start, len);
     

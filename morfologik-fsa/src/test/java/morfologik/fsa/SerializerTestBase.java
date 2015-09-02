@@ -1,16 +1,20 @@
 package morfologik.fsa;
 
-import static morfologik.fsa.FSAFlags.NUMBERS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static morfologik.fsa.FSAFlags.*;
+import static org.junit.Assert.*;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 
-import morfologik.util.BufferUtils;
-
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.Test;
 
 public abstract class SerializerTestBase {
     @Test
@@ -205,7 +209,7 @@ public abstract class SerializerTestBase {
 
         for (ByteBuffer sequence : uniqueInput) {
             Assert.assertTrue("Not present in the right language: "
-                    + BufferUtils.toString(sequence), rl.remove(sequence));
+                    + toString(sequence), rl.remove(sequence));
         }
 
         // (2) No other sequence _other_ than the input is in the right
@@ -253,4 +257,13 @@ public abstract class SerializerTestBase {
      * 
      */
     protected abstract FSASerializer createSerializer();
+
+    /**
+     * Drain bytes from a byte buffer to a string.
+     */
+    public static String toString(ByteBuffer sequence) {
+        byte [] bytes = new byte [sequence.remaining()];
+        sequence.get(bytes);
+        return Arrays.toString(bytes);
+    }    
 }

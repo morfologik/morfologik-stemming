@@ -41,6 +41,7 @@ public final class FileUtils {
 
 	/**
 	 * Force any non-null closeables.
+	 * NOCOMMIT: remove, use try-with-resources.
 	 */
 	public static void close(Closeable... closeables) {
 		for (Closeable c : closeables) {

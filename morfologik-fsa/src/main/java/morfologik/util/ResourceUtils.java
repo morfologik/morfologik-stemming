@@ -23,6 +23,8 @@ public final class ResourceUtils {
 	 * @return InputStream instance.
 	 * @throws IOException
 	 *             If the resource could not be found or opened.
+	 *             
+	 * NOCOMMIT: remove entirely.
 	 */
 	public static InputStream openInputStream(String resource)
 	        throws IOException {
