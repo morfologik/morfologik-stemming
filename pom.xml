@@ -13,7 +13,7 @@
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>7</version>
+    <version>9</version>
   </parent>
 
   <!-- Project info. -->
@@ -59,7 +59,6 @@
     <developer>
       <id>marcin.milkowski</id>
       <name>Marcin Miłkowski</name>
-      <!-- <email></email> -->
     </developer>
   </developers>
 
@@ -71,37 +70,38 @@
 
     <skip.deployment>false</skip.deployment>
     <gpg.passphrase></gpg.passphrase>
+
+    <version.randomizedtesting>2.1.16</version.randomizedtesting>
+    <version.junit>4.12</version.junit>
   </properties>
 
   <!-- Submodules -->
   <modules>
     <module>morfologik-fsa</module>
+    <module>morfologik-fsa-builders</module>
+    <!-- 
     <module>morfologik-stemming</module>
     <module>morfologik-polish</module>
     <module>morfologik-tools</module>
     <module>morfologik-distribution</module>
     <module>morfologik-speller</module>
+     -->
   </modules>
 
   <dependencyManagement>
     <dependencies>
+      <!-- NOCOMMIT: UPGRADE! -->
       <dependency>
         <groupId>com.carrotsearch</groupId>
         <artifactId>hppc</artifactId>
         <version>0.6.1</version>
       </dependency>
 
-      <!-- REMOVE THIS -->
+      <!-- NOCOMMIT: REMOVE! -->
       <dependency>
         <groupId>com.carrotsearch</groupId>
         <artifactId>junit-benchmarks</artifactId>
         <version>0.7.2</version>
-      </dependency>
-
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.12</version>
       </dependency>
 
       <dependency>
@@ -128,18 +128,35 @@
         <version>2.0M10</version>
         <scope>test</scope>
       </dependency>
-      
-      <dependency>
-        <groupId>com.carrotsearch.randomizedtesting</groupId>
-        <artifactId>randomizedtesting-runner</artifactId>
-        <version>2.1.11</version>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
   <!-- Manage the build. -->
   <build>
-    <defaultGoal>install</defaultGoal>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.2</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <inherited>false</inherited>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>[3.2.5,)</version>
+                  <message>At least Maven 3.2.5+ required.</message>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
 
     <pluginManagement>
       <plugins>
@@ -202,29 +219,8 @@
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-eclipse-plugin</artifactId>
-          <version>2.9</version>
-          <configuration>
-            <outputDirectory>${basedir}/.eclipse/classes</outputDirectory>
-            <buildcommands>
-              <java.lang.String>org.eclipse.jdt.core.javabuilder</java.lang.String>
-            </buildcommands>
-            <projectnatures>
-              <nature>org.eclipse.jdt.core.javanature</nature>
-            </projectnatures>
-          </configuration>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>2.5.1</version>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.12.4</version>
         </plugin>
 
         <plugin>
@@ -245,6 +241,163 @@
 
   <!-- Profiles. -->
   <profiles>
+
+    <!-- Module feature: src/profiles/randomizedtesting -->
+    <profile>
+      <id>randomizedtesting</id>
+
+      <activation>
+        <file><exists>src/profiles/randomizedtesting</exists></file>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>com.carrotsearch.randomizedtesting</groupId>
+          <artifactId>randomizedtesting-runner</artifactId>
+          <version>${version.randomizedtesting}</version>
+          <scope>test</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>${version.junit}</version>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+
+      <build>
+        <plugins>
+          <!-- Disable Surefire by binding it to a non-existent phase. -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.18.1</version>
+            <configuration>
+              <skipTests>true</skipTests>
+            </configuration>
+            <executions>
+              <execution>
+                <id>default-test</id>
+                <phase>none</phase>
+              </execution>
+            </executions>
+          </plugin>
+          
+          <!-- Configure common settings for RR/JUnit4 runner. -->
+          <plugin>
+            <groupId>com.carrotsearch.randomizedtesting</groupId>
+            <artifactId>junit4-maven-plugin</artifactId>
+            <version>${version.randomizedtesting}</version>
+  
+            <!-- Defaults for all tests (ITs and Unit). -->
+            <configuration>
+              <parallelism>auto</parallelism>
+              <heartbeat>30</heartbeat>
+              <jvmOutputAction>pipe,ignore</jvmOutputAction>
+              <leaveTemporary>true</leaveTemporary>
+              <ifNoTests>warn</ifNoTests>
+
+              <listeners>
+                <report-text 
+                  showThrowable="true" 
+                  showStackTraces="true" 
+                  showOutput="always" 
+                  showStatusOk="true"
+                  showStatusError="true" 
+                  showStatusFailure="true" 
+                  showStatusIgnored="true" 
+                  showSuiteSummary="true" />
+              </listeners>
+            </configuration>
+  
+            <executions>
+              <!-- Defaults for unit tests. -->
+              <execution>
+                <id>unit-tests</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>junit4</goal>
+                </goals>
+                <inherited>true</inherited>
+                <configuration>
+                  <includes>
+                    <include>**/Test*.class</include>
+                    <include>**/*Test.class</include>
+                  </includes>
+                  <excludes>
+                    <exclude>**/*$*</exclude>
+                    <exclude>**/TestBase.class</exclude>
+                  </excludes>
+                </configuration>
+              </execution>
+  
+              <!-- Defaults for integration tests. -->
+              <execution>
+                <id>integration-tests</id>
+                <phase>integration-test</phase>
+                <goals>
+                  <goal>junit4</goal>
+                </goals>
+                <inherited>true</inherited>
+                <configuration>
+                  <includes>
+                    <include>**/IT*.class</include>
+                    <include>**/*IT.class</include>
+                  </includes>
+                  <excludes>
+                    <exclude>**/*$*</exclude>
+                  </excludes>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>        
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>ide-eclipse-m2e</id>
+      <activation>
+        <property>
+          <name>m2e.version</name>
+        </property>
+      </activation>
+      <build>
+        <directory>target/eclipse</directory>
+
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.eclipse.m2e</groupId>
+              <artifactId>lifecycle-mapping</artifactId>
+              <version>1.0.0</version>
+              <configuration>
+                <lifecycleMappingMetadata>
+                  <pluginExecutions>
+                    <pluginExecution>
+                      <pluginExecutionFilter>
+                        <groupId>de.thetaphi</groupId>
+                        <artifactId>forbiddenapis</artifactId>
+                        <versionRange>[1.0.0,)</versionRange>
+                        <goals>
+                          <goal>testCheck</goal>
+                          <goal>check</goal>
+                        </goals>
+                      </pluginExecutionFilter>
+                      <action>
+                        <ignore />
+                      </action>
+                    </pluginExecution>
+                  </pluginExecutions>
+                </lifecycleMappingMetadata>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+
     <profile>
       <id>quick</id>
       <properties>

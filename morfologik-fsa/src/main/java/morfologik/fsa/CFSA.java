@@ -1,7 +1,6 @@
 package morfologik.fsa;
 
 import static morfologik.fsa.FSAFlags.*;
-import static morfologik.util.FileUtils.readFully;
 
 import java.io.*;
 import java.util.*;
@@ -147,9 +146,9 @@ public final class CFSA extends FSA {
 	 */
     private final Set<FSAFlags> flags;
 
-    /**
-     * Number of bytes each address takes in full, expanded form (goto length).
-     */
+  /**
+   * Number of bytes each address takes in full, expanded form (goto length).
+   */
 	public final int gtl;
 
 	/**
@@ -161,42 +160,41 @@ public final class CFSA extends FSA {
 	/**
 	 * Creates a new automaton, reading it from a file in FSA format, version 5.
 	 */
-	public CFSA(InputStream fsaStream) throws IOException {
-		// Read the header first.
-		final FSAHeader header = FSAHeader.read(fsaStream);
+	CFSA(InputStream stream) throws IOException {
+	  DataInputStream in = new DataInputStream(stream);
 
-		// Ensure we have the correct version.
-		if (header.version != VERSION) {
-			throw new IOException("This class can read FSA version 5 only: " + header.version);
-		}
+    // Skip legacy header fields.
+    in.readByte();  // filler
+    in.readByte();  // annotation
+    final byte hgtl = in.readByte();
 
 		/*
 		 * Determine if the automaton was compiled with NUMBERS. If so, modify
 		 * ctl and goto fields accordingly.
 		 */
 		flags = EnumSet.of(FLEXIBLE, STOPBIT, NEXTBIT);
-		if ((header.gtl & 0xf0) != 0) {
-			this.nodeDataLength = (header.gtl >>> 4) & 0x0f;
-			this.gtl = header.gtl & 0x0f;
+		if ((hgtl & 0xf0) != 0) {
+			this.nodeDataLength = (hgtl >>> 4) & 0x0f;
+			this.gtl = hgtl & 0x0f;
 			flags.add(NUMBERS);
 		} else {
 			this.nodeDataLength = 0;
-			this.gtl = header.gtl & 0x0f;
+			this.gtl = hgtl & 0x0f;
 		}
 
 		/*
 		 * Read mapping dictionary.
 		 */
 		labelMapping = new byte[1 << 5];
-		readFully(fsaStream, labelMapping);
+		in.readFully(labelMapping);
 
 		/*
 		 * Read arcs' data.
 		 */
-		arcs = readFully(fsaStream);		
+		arcs = readRemaining(in);
 	}
 
-	/**
+  /**
 	 * Returns the start node of this automaton. May return <code>0</code> if
 	 * the start node is also an end node.
 	 */

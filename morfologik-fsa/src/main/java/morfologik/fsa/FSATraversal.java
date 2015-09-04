@@ -46,8 +46,9 @@ public final class FSATraversal {
 		for (int arc = fsa.getFirstArc(node); arc != 0;) {
 			if (fsa.getArcLabel(arc) == label) {
 				if (fsa.isArcFinal(arc)) {
-					if (seqIndex == end)
+					if (seqIndex == end) {
 						return hash;
+					}
 
 					hash++;
 				}
@@ -67,10 +68,12 @@ public final class FSATraversal {
 				label = sequence[++seqIndex];
 				continue;
 			} else {
-				if (fsa.isArcFinal(arc))
+				if (fsa.isArcFinal(arc)) {
 					hash++;
-				if (!fsa.isArcTerminal(arc))
+				}
+				if (!fsa.isArcTerminal(arc)) {
 					hash += fsa.getRightLanguageCount(fsa.getEndNode(arc));
+				}
 			}
 
 			arc = fsa.getNextArc(arc);
@@ -96,9 +99,7 @@ public final class FSATraversal {
 	 * @return The same object as <code>result</code>, but with reset internal
 	 *         type and other fields.
 	 */
-	public MatchResult match(MatchResult result, 
-			byte[] sequence, int start, int length, int node)
-	{
+	public MatchResult match(MatchResult result, byte[] sequence, int start, int length, int node) {
 		if (node == 0) {
 			result.reset(NO_MATCH, start, node);
 			return result;
@@ -134,24 +135,24 @@ public final class FSATraversal {
 		return result;
 	}
 
-	/**
-	 * Finds a matching path in the dictionary for a given sequence of labels
-	 * from <code>sequence</code> and starting at node <code>node</code>.
-	 * 
-	 * @param sequence
-	 *            An array of labels to follow in the FSA.
-	 * @param start
-	 *            Starting index in <code>sequence</code>.
-	 * @param length
-	 *            How many symbols to consider from <code>sequence</code>?
-	 * @param node
-	 *            Start node identifier in the FSA.
-	 * 
-	 * @see #match(byte [], int)
-	 */
-	public MatchResult match(byte[] sequence, int start, int length, int node) {
-		return match(new MatchResult(), sequence, start, length, node);
-	}
+  /**
+   * Finds a matching path in the dictionary for a given sequence of labels from
+   * <code>sequence</code> and starting at node <code>node</code>.
+   * 
+   * @param sequence
+   *          An array of labels to follow in the FSA.
+   * @param start
+   *          Starting index in <code>sequence</code>.
+   * @param length
+   *          How many symbols to consider from <code>sequence</code>?
+   * @param node
+   *          Start node identifier in the FSA.
+   * 
+   * @see #match(byte [], int)
+   */
+  public MatchResult match(byte[] sequence, int start, int length, int node) {
+    return match(new MatchResult(), sequence, start, length, node);
+  }
 
 	/**
 	 * @see #match(byte[], int, int, int)

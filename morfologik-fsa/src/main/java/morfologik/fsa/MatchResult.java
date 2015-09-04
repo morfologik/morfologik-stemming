@@ -54,30 +54,18 @@ public final class MatchResult {
 	 */
 	public int node;
 
-	/*
-     * 
-     */
 	MatchResult(int kind, int index, int node) {
 		reset(kind, index, node);
 	}
 
-	/*
-     * 
-     */
 	MatchResult(int kind) {
 		reset(kind, 0, 0);
 	}
 
-	/*
-	 * 
-	 */
 	public MatchResult() {
 		reset(NO_MATCH, 0, 0);
 	}
 
-	/*
-     * 
-     */
 	final void reset(int kind, int index, int node) {
 		this.kind = kind;
 		this.index = index;

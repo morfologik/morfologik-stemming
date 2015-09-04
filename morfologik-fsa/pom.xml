@@ -15,26 +15,10 @@
   <artifactId>morfologik-fsa</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Morfologik FSA</name>
-  <description>Morfologik Finite State Automata (construction and traversal).</description>
-
-  <dependencies>
-    <dependency>
-      <groupId>com.carrotsearch</groupId>
-      <artifactId>hppc</artifactId>
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <name>Morfologik FSA (Traversal)</name>
+  <description>Morfologik Finite State Automata Traversal.</description>
 
   <build>
-    <defaultGoal>install</defaultGoal>
-
     <plugins>
       <plugin>
         <groupId>org.apache.felix</groupId>

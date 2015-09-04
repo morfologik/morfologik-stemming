@@ -4,19 +4,25 @@ Morfologik-stemming Change Log
 For an up-to-date CHANGES file see 
 https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
-======================= morfologik-stemming 1.11.0-SNAPSHOT =======================
+======================= morfologik-stemming 2.0.0-SNAPSHOT =======================
 
 Changes in backwards compatibility policy
 
- * GH-54: Make Java 1.7 the minimum required version.
+ * GH-57: Restructured the project into FSA traversal/ reading (only)
+   and FSA Builders (construction). This cleans up dependency
+   structure as well (HPPC is not required for FSA traversals).
    (Dawid Weiss)
+
+ * GH-54: Make Java 1.7 the minimum required version. Certain methods
+   that relied on File as arguments have been removed or changed to
+   accept Path. (Dawid Weiss)
+
+New Features
+
+ * Added OSGi support (Michal Hlavac)
 
  * GH-51: Remove and fail on deprecated metadata (fsa.dict.uses-*).
    (Dawid Weiss)
-
-New Features
- 
- * Added OSGi support (Michal Hlavac)
 
 Bug Fixes
 
@@ -25,8 +31,6 @@ Bug Fixes
 
  * GH-34: ArrayIndexOutOfBoundsException with replacement-pairs. 
    (Jaume Ortolà, Daniel Naber)
-
-Optimizations
 
 ======================= morfologik-stemming 1.10.0 =======================
 
@@ -43,8 +47,6 @@ Bug Fixes
 
  * GH-34: ArrayIndexOutOfBoundsException with replacement-pairs. 
    (Jaume Ortolà, Daniel Naber)
-
-Optimizations
 
 ======================= morfologik-stemming 1.9.1 =======================
 
