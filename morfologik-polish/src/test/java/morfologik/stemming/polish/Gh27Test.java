@@ -1,7 +1,9 @@
-package morfologik.stemming;
+package morfologik.stemming.polish;
 
 import java.io.IOException;
 import java.util.Locale;
+
+import morfologik.stemming.WordData;
 
 import org.junit.Test;
 

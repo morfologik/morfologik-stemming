@@ -80,10 +80,11 @@
   <modules>
     <module>morfologik-fsa</module>
     <module>morfologik-fsa-builders</module>
- 
+
     <module>morfologik-stemming</module>
-    <!-- 
     <module>morfologik-polish</module>
+
+    <!-- 
     <module>morfologik-tools</module>
     <module>morfologik-speller</module>
 
@@ -149,6 +150,25 @@
 
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.6</version>
+          <configuration>
+            <failOnError>false</failOnError>
+            <excludeDefaultDirectories>true</excludeDefaultDirectories>
+            <filesets>
+              <fileset>
+                <directory>${project.build.directory}</directory>
+                <excludes>
+                  <exclude>eclipse/**</exclude>
+                  <exclude>idea/**</exclude>
+                </excludes>
+              </fileset>
+            </filesets>            
+          </configuration>
+        </plugin>
+      
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
@@ -303,7 +323,7 @@
                 <report-text 
                   showThrowable="true" 
                   showStackTraces="true" 
-                  showOutput="always" 
+                  showOutput="onerror" 
                   showStatusOk="true"
                   showStatusError="true" 
                   showStatusFailure="true" 
