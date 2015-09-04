@@ -5,8 +5,6 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharsetDecoder;
 import java.util.Iterator;
 
-import morfologik.util.BufferUtils;
-
 /**
  * An iterator over {@link WordData} entries of a {@link Dictionary}. The stems
  * can be decoded from compressed format or the compressed form can be
@@ -40,7 +38,6 @@ public final class DictionaryIterator implements Iterator<WordData> {
 
 	public WordData next() {
 		final ByteBuffer entryBuffer = entriesIter.next();
-		entry.reset();
 
 		/*
 		 * Entries are typically: inflected<SEP>codedBase<SEP>tag so try to find
@@ -51,8 +48,9 @@ public final class DictionaryIterator implements Iterator<WordData> {
 
 		int sepPos;
 		for (sepPos = 0; sepPos < bbSize; sepPos++) {
-			if (ba[sepPos] == separator)
+			if (ba[sepPos] == separator) {
 				break;
+			}
 		}
 
 		if (sepPos == bbSize) {
@@ -66,8 +64,7 @@ public final class DictionaryIterator implements Iterator<WordData> {
 		inflectedBuffer.flip();
 
 		inflectedCharBuffer = bytesToChars(inflectedBuffer, inflectedCharBuffer);
-		entry.wordBuffer = inflectedBuffer;
-		entry.wordCharSequence = inflectedCharBuffer;
+    entry.update(inflectedBuffer, inflectedCharBuffer);
 
 		temp.clear();
 		temp = BufferUtils.ensureCapacity(temp, bbSize - sepPos);

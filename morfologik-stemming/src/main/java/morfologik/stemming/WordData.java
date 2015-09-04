@@ -5,8 +5,6 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
 
-import morfologik.util.BufferUtils;
-
 /**
  * Stem and tag data associated with a given word.
  * 
@@ -37,7 +35,7 @@ public final class WordData implements Cloneable {
 	/**
 	 * Inflected word form data.
 	 */
-	CharSequence wordCharSequence;
+	private CharSequence wordCharSequence;
 
 	/**
 	 * Character sequence after converting {@link #stemBuffer} using
@@ -222,18 +220,6 @@ public final class WordData implements Cloneable {
 	}
 
 	/**
-	 * Reset internal structures for storing another word's data.
-	 */
-	void reset() {
-		this.wordCharSequence = null;
-		this.wordBuffer = null;
-		this.stemCharSequence.clear();
-		this.tagCharSequence.clear();
-		this.stemBuffer.clear();
-		this.tagBuffer.clear();
-	}
-
-	/**
 	 * Decode byte buffer, optionally expanding the char buffer to.
 	 */
 	private CharBuffer decode(ByteBuffer bytes, CharBuffer chars) {
@@ -251,4 +237,14 @@ public final class WordData implements Cloneable {
 
 		return chars;
 	}
+
+  void update(ByteBuffer wordBuffer, CharSequence word) {
+    this.stemCharSequence.clear();
+    this.tagCharSequence.clear();
+    this.stemBuffer.clear();
+    this.tagBuffer.clear();
+
+    this.wordBuffer = wordBuffer;
+    this.wordCharSequence = word;
+  }
 }

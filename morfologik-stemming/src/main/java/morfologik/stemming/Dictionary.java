@@ -13,8 +13,6 @@ import java.util.Properties;
 import java.util.WeakHashMap;
 
 import morfologik.fsa.FSA;
-import morfologik.util.FileUtils;
-import morfologik.util.ResourceUtils;
 
 /**
  * A dictionary combines {@link FSA} automaton and {@link DictionaryMetadata}
@@ -74,11 +72,10 @@ public final class Dictionary {
     final File featuresFile = new File(fsaFile.getParent(),
         getExpectedFeaturesName(fsaFile.getName()));
 
-    FileUtils.assertExists(featuresFile, true, false);
-
-    return readAndClose(
-        new FileInputStream(fsaFile),
-        new FileInputStream(featuresFile));
+    try (InputStream fsaStream = new FileInputStream(fsaFile);
+         InputStream metadataStream = new FileInputStream(featuresFile)) {
+      return read(fsaStream, metadataStream);
+    }
   }
 
   /**
@@ -94,66 +91,62 @@ public final class Dictionary {
     final String fsa = fsaURL.toExternalForm();
     final String features = getExpectedFeaturesName(fsa);
 
-    return readAndClose(
-        ResourceUtils.openInputStream(fsa),
-        ResourceUtils.openInputStream(features));
+    try (InputStream fsaStream = ResourceUtils.openInputStream(fsa);
+         InputStream metadataStream = ResourceUtils.openInputStream(features)) {
+      return read(fsaStream, metadataStream);
+    }
   }
 
   /**
    * Attempts to load a dictionary from opened streams of FSA dictionary data
    * and associated metadata.
    */
-  public static Dictionary readAndClose(InputStream fsaData, InputStream featuresData)
-      throws IOException
-      {
-    try {
-      Map<DictionaryAttribute, String> map = new HashMap<DictionaryAttribute, String>();
-      final Properties properties = new Properties();
-      properties.load(new InputStreamReader(featuresData, "UTF-8"));
+  public static Dictionary read(InputStream fsaData, InputStream featuresData) throws IOException
+  {
+    Map<DictionaryAttribute, String> map = new HashMap<DictionaryAttribute, String>();
+    final Properties properties = new Properties();
+    properties.load(new InputStreamReader(featuresData, "UTF-8"));
 
-      // Handle back-compatibility for encoder specification.
-      if (!properties.containsKey(DictionaryAttribute.ENCODER.propertyName)) {
-        boolean hasDeprecated = properties.containsKey("fsa.dict.uses-suffixes") ||
-                                properties.containsKey("fsa.dict.uses-infixes") ||
-                                properties.containsKey("fsa.dict.uses-prefixes");
+    // Handle back-compatibility for encoder specification.
+    if (!properties.containsKey(DictionaryAttribute.ENCODER.propertyName)) {
+      boolean hasDeprecated = properties.containsKey("fsa.dict.uses-suffixes") ||
+                              properties.containsKey("fsa.dict.uses-infixes") ||
+                              properties.containsKey("fsa.dict.uses-prefixes");
 
-        boolean usesSuffixes = Boolean.valueOf(properties.getProperty("fsa.dict.uses-suffixes", "true"));
-        boolean usesPrefixes = Boolean.valueOf(properties.getProperty("fsa.dict.uses-prefixes", "false"));
-        boolean usesInfixes  = Boolean.valueOf(properties.getProperty("fsa.dict.uses-infixes",  "false"));
+      boolean usesSuffixes = Boolean.valueOf(properties.getProperty("fsa.dict.uses-suffixes", "true"));
+      boolean usesPrefixes = Boolean.valueOf(properties.getProperty("fsa.dict.uses-prefixes", "false"));
+      boolean usesInfixes  = Boolean.valueOf(properties.getProperty("fsa.dict.uses-infixes",  "false"));
 
-        final EncoderType encoder;
-        if (usesInfixes) {
-          encoder = EncoderType.INFIX;
-        } else if (usesPrefixes) {
-          encoder = EncoderType.PREFIX;
-        } else if (usesSuffixes) {
-          encoder = EncoderType.SUFFIX;
-        } else {
-          encoder = EncoderType.NONE;
-        }
-
-        if (!hasDeprecated) {
-          throw new IOException("Use an explicit " +
-              DictionaryAttribute.ENCODER.propertyName + "=" + encoder.name() +
-              " metadata key: ");
-        }
-
-        throw new IOException("Deprecated encoder keys in metadata. Use " +
-            DictionaryAttribute.ENCODER.propertyName + "=" + encoder.name());
+      final EncoderType encoder;
+      if (usesInfixes) {
+        encoder = EncoderType.INFIX;
+      } else if (usesPrefixes) {
+        encoder = EncoderType.PREFIX;
+      } else if (usesSuffixes) {
+        encoder = EncoderType.SUFFIX;
+      } else {
+        encoder = EncoderType.NONE;
       }
 
-      for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements();) {
-        String key = (String) e.nextElement();
-        map.put(DictionaryAttribute.fromPropertyName(key), properties.getProperty(key));
+      if (!hasDeprecated) {
+        throw new IOException("Use an explicit " +
+            DictionaryAttribute.ENCODER.propertyName + "=" + encoder.name() +
+            " metadata key: ");
       }
-      final DictionaryMetadata features = new DictionaryMetadata(map);
-      final FSA fsa = FSA.read(fsaData);
 
-      return new Dictionary(fsa, features);
-    } finally {
-      FileUtils.close(fsaData, featuresData);
+      throw new IOException("Deprecated encoder keys in metadata. Use " +
+          DictionaryAttribute.ENCODER.propertyName + "=" + encoder.name());
     }
-      }
+
+    for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements();) {
+      String key = (String) e.nextElement();
+      map.put(DictionaryAttribute.fromPropertyName(key), properties.getProperty(key));
+    }
+    final DictionaryMetadata features = new DictionaryMetadata(map);
+    final FSA fsa = FSA.read(fsaData);
+
+    return new Dictionary(fsa, features);    
+  }
 
   /**
    * Returns the expected name of the metadata file, based on the name of the
@@ -195,12 +188,12 @@ public final class Dictionary {
 
       try {
         final String dictPath = "morfologik/dictionaries/" + languageCode + ".dict";
-        final String metaPath = Dictionary
-            .getExpectedFeaturesName(dictPath);
+        final String metaPath = Dictionary.getExpectedFeaturesName(dictPath);
 
-        dict = Dictionary.readAndClose(
-            ResourceUtils.openInputStream(dictPath),
-            ResourceUtils.openInputStream(metaPath));
+        try (InputStream fsaStream = ResourceUtils.openInputStream(dictPath);
+            InputStream metadataStream = ResourceUtils.openInputStream(metaPath)) {
+         dict = read(fsaStream, metadataStream);
+        }
 
         defaultDictionaries.put(languageCode, dict);
         return dict;

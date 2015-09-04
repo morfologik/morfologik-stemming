@@ -6,19 +6,17 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
 import morfologik.fsa.FSA;
-import morfologik.fsa.FSABuilder;
-import morfologik.fsa.FSAUtils;
 
-import org.fest.assertions.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 /*
  *
@@ -32,7 +30,7 @@ public class DictionaryLookupTest {
       new DictionaryLookup(Dictionary.read(url));
       Assert.fail();
     } catch (IOException e) {
-      Assertions.assertThat(e).hasMessageContaining(
+      assertThat(e).hasMessageContaining(
           DictionaryAttribute.ENCODER.propertyName);
     }
   }
@@ -126,7 +124,6 @@ public class DictionaryLookupTest {
       assertEqualSequences(clone.getStem(), wd.getStem());
       assertEqualSequences(clone.getTag(), wd.getTag());
       assertEqualSequences(clone.getWord(), wd.getWord());
-      assertEqualSequences(clone.wordCharSequence, wd.wordCharSequence);
     }
 
     // Check collections contract.
@@ -149,10 +146,6 @@ public class DictionaryLookupTest {
     final URL url = this.getClass().getResource("test-diacritics-utf8.dict");
     Dictionary read = Dictionary.read(url);
     final IStemmer s = new DictionaryLookup(read);
-
-    for (byte[] ba : FSAUtils.rightLanguage(read.fsa, read.fsa.getRootNode())) {
-      System.out.println(new String(ba, "UTF-8"));
-    }
 
     assertArrayEquals(new String[] { "merge", "001" }, stem(s, "mergeam"));
     assertArrayEquals(new String[] { "merge", "002" }, stem(s, "merseserăm"));
@@ -202,16 +195,13 @@ public class DictionaryLookupTest {
   /* */
   @Test
   public void testSeparatorInLookupTerm() throws IOException {
-    FSA fsa = FSABuilder.build(toBytes("iso8859-1", new String [] {
-        "l+A+LW",
-        "l+A+NN1d",
-    }));
+    FSA fsa = FSA.read(getClass().getResourceAsStream("test-separator-in-lookup.fsa"));
 
     DictionaryMetadata metadata = new DictionaryMetadataBuilder()
-    .separator('+')
-    .encoding("iso8859-1")
-    .encoder(EncoderType.INFIX)
-    .build();
+      .separator('+')
+      .encoding("iso8859-1")
+      .encoder(EncoderType.INFIX)
+      .build();
 
     final DictionaryLookup s = new DictionaryLookup(new Dictionary(fsa, metadata));
     assertEquals(0, s.lookup("l+A").size());
@@ -223,18 +213,6 @@ public class DictionaryLookupTest {
     final URL url = this.getClass().getResource("test-separators.dict");
     final DictionaryLookup s = new DictionaryLookup(Dictionary.read(url));
     assertEquals('+', s.getSeparatorChar());
-  }
-
-  private static byte[][] toBytes(String charset, String[] strings) {
-    byte [][] out = new byte [strings.length][];
-    for (int i = 0; i < strings.length; i++) {
-      try {
-        out[i] = strings[i].getBytes(charset);
-      } catch (UnsupportedEncodingException e) {
-        throw new RuntimeException(e);
-      }
-    }
-    return out;
   }
 
   /* */

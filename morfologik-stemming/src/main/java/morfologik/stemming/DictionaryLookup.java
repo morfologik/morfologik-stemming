@@ -14,7 +14,6 @@ import morfologik.fsa.FSA;
 import morfologik.fsa.FSAFinalStatesIterator;
 import morfologik.fsa.FSATraversal;
 import morfologik.fsa.MatchResult;
-import morfologik.util.BufferUtils;
 
 /**
  * This class implements a dictionary lookup over an FSA dictionary. The
@@ -200,14 +199,10 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
            * the base form.
            */
           final WordData wordData = forms[formsCount++];
-          wordData.reset();
-
-          wordData.wordBuffer = byteBuffer;
           if (dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
-            wordData.wordCharSequence = word;
+            wordData.update(byteBuffer, word);
           } else {
-            wordData.wordCharSequence = Dictionary.convertText(word,
-                dictionaryMetadata.getOutputConversionPairs());
+            wordData.update(byteBuffer, Dictionary.convertText(word, dictionaryMetadata.getOutputConversionPairs()));
           }
 
           /*
@@ -224,8 +219,8 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
            * Decode the stem into stem buffer.
            */
           wordData.stemBuffer.clear();
-          wordData.stemBuffer = decodeBaseForm(wordData.stemBuffer, ba,
-              sepPos, byteBuffer, dictionaryMetadata);
+          wordData.stemBuffer = 
+              decodeBaseForm(wordData.stemBuffer, ba, sepPos, byteBuffer, dictionaryMetadata);
           wordData.stemBuffer.flip();
 
           // Skip separator character.
