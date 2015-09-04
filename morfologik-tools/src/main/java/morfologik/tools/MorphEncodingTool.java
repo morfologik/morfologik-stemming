@@ -44,7 +44,7 @@ class MorphEncodingTool extends Tool {
 		if (line.hasOption(SharedOptions.encoder.getOpt())) {
 		    String encValue = line.getOptionValue(SharedOptions.encoder.getOpt());
 		    try {
-		        encType = EncoderType.valueOf(encValue.toUpperCase());
+		        encType = EncoderType.valueOf(encValue.toUpperCase(Locale.ROOT));
 		    } catch (IllegalArgumentException e) {
 		        throw new IllegalArgumentException("Invalid encoder: " + encValue + ", "
 		            + "allowed values: " + Arrays.toString(EncoderType.values()));

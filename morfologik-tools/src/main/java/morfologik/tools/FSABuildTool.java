@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -148,7 +149,7 @@ public final class FSABuildTool extends Tool {
 		// Parse the input options.
         parseOptions(line);
 
-        logger = new WriterMessageLogger(new PrintWriter(System.err));
+        logger = new WriterMessageLogger(new PrintWriter(new OutputStreamWriter(System.err, Charset.defaultCharset().name())));
         this.serializer.withLogger(logger);
 
         BufferedInputStream inputStream = null;
@@ -316,7 +317,7 @@ public final class FSABuildTool extends Tool {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < length; i++) {
             if (i > 0) builder.append(" ");
-            builder.append(String.format("%02x", line[i]));
+            builder.append(String.format(Locale.ROOT, "%02x", line[i]));
         }
         builder.append(" | ");
         for (int i = 0; i < length; i++) {
@@ -338,7 +339,7 @@ public final class FSABuildTool extends Tool {
 	    if (line.hasOption(opt)) {
             String formatValue = line.getOptionValue(opt);
             try {
-                format = Format.valueOf(formatValue.toUpperCase());
+                format = Format.valueOf(formatValue.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException e) {
                 throw new TerminateProgramException("Not a valid format: " 
                         + formatValue);
@@ -352,15 +353,15 @@ public final class FSABuildTool extends Tool {
 		opt = SharedOptions.fillerCharacterOption.getLongOpt();
 		if (line.hasOption(opt) && requiredCapability(opt, FSAFlags.SEPARATORS)) {
 			String chr = StringEscapeUtils.unescapeJava(line.getOptionValue(opt));
-			checkSingleByte(chr, defaultCharset);
-			serializer.withFiller(chr.getBytes()[0]);
+			byte filler = checkSingleByte(chr, defaultCharset);
+			serializer.withFiller(filler);
 		}
 
 		opt = SharedOptions.annotationSeparatorCharacterOption.getLongOpt();
 		if (line.hasOption(opt) && requiredCapability(opt, FSAFlags.SEPARATORS)) {
 			String chr = StringEscapeUtils.unescapeJava(line.getOptionValue(opt));
-			checkSingleByte(chr, defaultCharset);
-			serializer.withAnnotationSeparator(chr.getBytes()[0]);
+			byte ann = checkSingleByte(chr, defaultCharset);
+			serializer.withAnnotationSeparator(ann);
 		}
 
         opt = SharedOptions.withNumbersOption.getOpt();
@@ -395,14 +396,16 @@ public final class FSABuildTool extends Tool {
 	 * Check if the argument is a single byte after conversion using platform-default
 	 * encoding. 
 	 */
-	public static byte checkSingleByte(String chr, Charset charset) {
-	    byte bytes [] = chr.getBytes(charset); 
-		if (bytes.length == 1)
-			return bytes[0];
-
-		throw new IllegalArgumentException("Filler and annotation characters must be single" +
-				"-byte values, " + chr + " has " + chr.getBytes().length + " bytes."); 
+  public static byte checkSingleByte(String chr, Charset charset) {
+    byte bytes[] = chr.getBytes(charset);
+    if (bytes.length == 1) {
+      return bytes[0];
     }
+
+    throw new IllegalArgumentException("Filler and annotation characters must be single" 
+        + "-byte values, " + chr
+        + " has " + bytes.length + " bytes.");
+  }
 
     /**
 	 * Read all the input lines, unsorted.

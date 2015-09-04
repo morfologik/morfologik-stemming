@@ -73,7 +73,8 @@
 
     <version.randomizedtesting>2.1.16</version.randomizedtesting>
     <version.junit>4.12</version.junit>
-    <version.assertj>1.6.1</version.assertj> 
+    <version.assertj>1.6.1</version.assertj>
+    <version.forbiddenapis>1.8</version.forbiddenapis>  
   </properties>
 
   <!-- Submodules -->
@@ -255,6 +256,46 @@
   <!-- Profiles. -->
   <profiles>
 
+    <profile>
+      <id>forbiddenapis</id>
+      
+      <activation>
+        <file><exists>src/profiles/forbiddenapis</exists></file>
+      </activation>
+      
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>de.thetaphi</groupId>
+            <artifactId>forbiddenapis</artifactId>
+            <version>${version.forbiddenapis}</version>
+
+            <executions>
+              <execution>
+                <id>forbidden-apis</id>
+                <configuration>
+                  <targetVersion>${maven.compiler.source}</targetVersion>
+                  <internalRuntimeForbidden>true</internalRuntimeForbidden>
+                  <failOnUnsupportedJava>false</failOnUnsupportedJava>
+                  <failOnUnresolvableSignatures>false</failOnUnresolvableSignatures>
+                  <excludes><!-- Override in subprojects. --></excludes>
+                  <bundledSignatures>
+                    <bundledSignature>jdk-unsafe</bundledSignature>
+                    <bundledSignature>jdk-deprecated</bundledSignature>
+                    <bundledSignature>jdk-system-out</bundledSignature>
+                  </bundledSignatures>
+                </configuration>
+                <phase>compile</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
     <!-- Module feature: src/profiles/randomizedtesting -->
     <profile>
       <id>randomizedtesting</id>
@@ -331,10 +372,8 @@
                 <report-ant-xml mavenExtensions="true" dir="${project.build.directory}/surefire-reports" />
                 <report-json file="${project.build.directory}/test-results.html" />
               </listeners>
-              
-              
             </configuration>
-  
+
             <executions>
               <!-- Defaults for unit tests. -->
               <execution>

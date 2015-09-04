@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.TreeMap;
 import java.util.jar.Manifest;
 
@@ -45,12 +46,10 @@ public final class Launcher {
 		}
 
 		if (args.length == 0) {
-			System.out.println("Provide tool name and its command-line options. "
-			    + "Available tools:");
+			System.out.println("Provide tool name and its command-line options. " + "Available tools:");
 			for (String key : tools.keySet()) {
 				final ToolInfo toolInfo = tools.get(key);
-				System.out.println(String.format("  %-10s - %s", key,
-				        toolInfo.info));
+				System.out.println(String.format(Locale.ROOT, "  %-10s - %s", key, toolInfo.info));
 			}
 		} else {
 			final String toolName = args[0];

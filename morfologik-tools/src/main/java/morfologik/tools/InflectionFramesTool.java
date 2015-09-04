@@ -103,7 +103,7 @@ public class InflectionFramesTool {
 		        });
 
 		for (Map.Entry<String, ArrayList<String>> e : entries) {
-			System.out.println(String.format("%6d   %s %s",
+			System.out.println(String.format(Locale.ROOT, "%6d   %s %s",
 			        e.getValue().size(), e.getKey(), e.getValue()));
 		}
 

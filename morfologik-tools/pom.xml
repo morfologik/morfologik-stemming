@@ -136,6 +136,24 @@
           </dependency>
         </dependencies>
       </plugin>
+      
+      <plugin>
+        <groupId>de.thetaphi</groupId>
+        <artifactId>forbiddenapis</artifactId>
+        <version>${version.forbiddenapis}</version>
+
+        <executions>
+          <execution>
+            <id>forbidden-apis</id>
+            <configuration>
+              <bundledSignatures combine.self="override">
+                <bundledSignature>jdk-unsafe</bundledSignature>
+                <bundledSignature>jdk-deprecated</bundledSignature>
+              </bundledSignatures>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>

@@ -321,7 +321,7 @@ public enum DictionaryAttribute {
   }
 
   private static Boolean booleanValue(String value) {
-    value = value.toLowerCase();
+    value = value.toLowerCase(Locale.ROOT);
     if ("true".equals(value) || "yes".equals(value) || "on".equals(value)) {
       return Boolean.TRUE;
     }
