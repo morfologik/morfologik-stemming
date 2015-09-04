@@ -18,6 +18,8 @@ Changes in backwards compatibility policy
    accept Path. (Dawid Weiss)
 
 New Features
+ * GH-53: Review library dependencies and bring them up to date. 
+   (Dawid Weiss)
 
  * Added OSGi support (Michal Hlavac)
 

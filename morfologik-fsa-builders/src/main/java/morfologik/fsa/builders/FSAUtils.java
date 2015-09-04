@@ -13,7 +13,7 @@ import morfologik.fsa.FSA5;
 import morfologik.fsa.FSAFlags;
 import morfologik.fsa.StateVisitor;
 
-import com.carrotsearch.hppc.IntIntOpenHashMap;
+import com.carrotsearch.hppc.IntIntHashMap;
 
 /**
  * Other FSA-related utilities not directly associated with the class hierarchy.
@@ -190,8 +190,8 @@ public final class FSAUtils {
   /**
    * Calculate the size of right language for each state in an FSA.
    */
-  public static IntIntOpenHashMap rightLanguageForAllStates(final FSA fsa) {
-    final IntIntOpenHashMap numbers = new IntIntOpenHashMap();
+  public static IntIntHashMap rightLanguageForAllStates(final FSA fsa) {
+    final IntIntHashMap numbers = new IntIntHashMap();
 
     fsa.visitInPostOrder(new StateVisitor() {
       public boolean accept(int state) {

@@ -15,7 +15,7 @@ import morfologik.fsa.FSAFlags;
 import morfologik.fsa.FSAHeader;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.IntIntOpenHashMap;
+import com.carrotsearch.hppc.IntIntHashMap;
 import com.carrotsearch.hppc.IntStack;
 
 /**
@@ -72,12 +72,12 @@ public final class FSA5Serializer implements FSASerializer {
   /**
    * A hash map of [state, offset] pairs.
    */
-  private IntIntOpenHashMap offsets = new IntIntOpenHashMap();
+  private IntIntHashMap offsets = new IntIntHashMap();
 
   /**
    * A hash map of [state, right-language-count] pairs.
    */
-  private IntIntOpenHashMap numbers = new IntIntOpenHashMap();
+  private IntIntHashMap numbers = new IntIntHashMap();
 
   /**
    * Serialize the automaton with the number of right-language sequences in each

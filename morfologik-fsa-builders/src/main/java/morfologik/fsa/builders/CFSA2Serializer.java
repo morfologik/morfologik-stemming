@@ -22,7 +22,7 @@ import morfologik.fsa.builders.FSAUtils.IntIntHolder;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.BoundedProportionalArraySizingStrategy;
 import com.carrotsearch.hppc.IntArrayList;
-import com.carrotsearch.hppc.IntIntOpenHashMap;
+import com.carrotsearch.hppc.IntIntHashMap;
 import com.carrotsearch.hppc.IntStack;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
@@ -58,12 +58,12 @@ public final class CFSA2Serializer implements FSASerializer {
   /**
    * A hash map of [state, offset] pairs.
    */
-  private IntIntOpenHashMap offsets = new IntIntOpenHashMap();
+  private IntIntHashMap offsets = new IntIntHashMap();
 
   /**
    * A hash map of [state, right-language-count] pairs.
    */
-  private IntIntOpenHashMap numbers = new IntIntOpenHashMap();
+  private IntIntHashMap numbers = new IntIntHashMap();
 
   /**
    * Scratch array for serializing vints.
@@ -218,7 +218,7 @@ public final class CFSA2Serializer implements FSASerializer {
      * Compute the states with most inlinks. These should be placed as close to the 
      * start of the automaton, as possible so that v-coded addresses are tiny.  
      */
-    final IntIntOpenHashMap inlinkCount = computeInlinkCount(fsa);
+    final IntIntHashMap inlinkCount = computeInlinkCount(fsa);
 
     /*
      * An array of ordered states for serialization.
@@ -283,7 +283,7 @@ public final class CFSA2Serializer implements FSASerializer {
    * and calculating stable state offsets.
    */
   private int linearizeAndCalculateOffsets(FSA fsa, IntArrayList states, IntArrayList linearized,
-      IntIntOpenHashMap offsets) throws IOException {
+      IntIntHashMap offsets) throws IOException {
     final BitSet visited = new BitSet();
     final IntStack nodes = new IntStack();
     linearized.clear();
@@ -342,7 +342,7 @@ public final class CFSA2Serializer implements FSASerializer {
    * Compute the set of states that should be linearized first to minimize other
    * states goto length.
    */
-  private ArrayDeque<Integer> computeFirstStates(IntIntOpenHashMap inlinkCount, int maxStates, int minInlinkCount) {
+  private ArrayDeque<Integer> computeFirstStates(IntIntHashMap inlinkCount, int maxStates, int minInlinkCount) {
     Comparator<IntIntHolder> comparator = new Comparator<FSAUtils.IntIntHolder>() {
       public int compare(IntIntHolder o1, IntIntHolder o2) {
         int v = o1.a - o2.a;
@@ -376,8 +376,8 @@ public final class CFSA2Serializer implements FSASerializer {
   /**
    * Compute in-link count for each state.
    */
-  private IntIntOpenHashMap computeInlinkCount(final FSA fsa) {
-    IntIntOpenHashMap inlinkCount = new IntIntOpenHashMap();
+  private IntIntHashMap computeInlinkCount(final FSA fsa) {
+    IntIntHashMap inlinkCount = new IntIntHashMap();
     BitSet visited = new BitSet();
     IntStack nodes = new IntStack();
     nodes.push(fsa.getRootNode());

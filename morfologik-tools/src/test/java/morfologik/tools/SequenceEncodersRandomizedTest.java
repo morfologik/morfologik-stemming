@@ -62,8 +62,8 @@ public class SequenceEncodersRandomizedTest extends RandomizedTest {
     {
         ByteArrayList src = ByteArrayList.from(srcString.getBytes(UTF8));
         ByteArrayList dst = ByteArrayList.from(dstString.getBytes(UTF8));
-        ByteArrayList encoded = ByteArrayList.newInstance();
-        ByteArrayList decoded = ByteArrayList.newInstance();
+        ByteArrayList encoded = new ByteArrayList();
+        ByteArrayList decoded = new ByteArrayList();
 
         coder.encode(src, dst, encoded);
         coder.decode(src, encoded, decoded);
@@ -88,7 +88,7 @@ public class SequenceEncodersRandomizedTest extends RandomizedTest {
             encoded.size(), 
             ByteBuffer.wrap(src.toArray()), builder.build());
         
-        ByteArrayList decoded2 = ByteArrayList.newInstance();
+        ByteArrayList decoded2 = new ByteArrayList();
         bb.flip();
         while (bb.hasRemaining()) decoded2.add(bb.get());
 

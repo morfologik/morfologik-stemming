@@ -34,7 +34,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.StringEscapeUtils;
 
-import com.carrotsearch.hppc.IntIntOpenHashMap;
+import com.carrotsearch.hppc.IntIntHashMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
 
 /**
@@ -177,7 +177,7 @@ public final class FSABuildTool extends Tool {
                 TreeMap<Integer, Integer> fanout = FSAUtils.calculateFanOuts(fsa, fsa.getRootNode());
                 logger.endPart();
 
-                final IntIntOpenHashMap numbers = new IntIntOpenHashMap();
+                final IntIntHashMap numbers = new IntIntHashMap();
                 fsa.visitInPostOrder(new StateVisitor() {
                     public boolean accept(int state) {
                         int thisNodeNumber = 0;
