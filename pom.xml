@@ -84,10 +84,10 @@
     <module>morfologik-stemming</module>
     <module>morfologik-polish</module>
 
-    <!-- 
-    <module>morfologik-tools</module>
     <module>morfologik-speller</module>
 
+    <!-- 
+    <module>morfologik-tools</module>
     <module>morfologik-distribution</module>
      -->
   </modules>

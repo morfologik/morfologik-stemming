@@ -3,7 +3,7 @@ package morfologik.stemming;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
-final class BufferUtils {
+public final class BufferUtils {
   /**
    * No instances.
    */
@@ -19,7 +19,7 @@ final class BufferUtils {
    *          The buffer to check or <code>null</code> if a new buffer should be
    *          allocated.
    */
-  static ByteBuffer ensureCapacity(ByteBuffer buffer, int capacity) {
+  public static ByteBuffer ensureCapacity(ByteBuffer buffer, int capacity) {
     if (buffer == null || buffer.capacity() < capacity) {
       buffer = ByteBuffer.allocate(capacity);
     }
@@ -34,7 +34,7 @@ final class BufferUtils {
    *          The buffer to check or <code>null</code> if a new buffer should be
    *          allocated.
    */
-  static CharBuffer ensureCapacity(CharBuffer buffer, int capacity) {
+  public static CharBuffer ensureCapacity(CharBuffer buffer, int capacity) {
     if (buffer == null || buffer.capacity() < capacity) {
       buffer = CharBuffer.allocate(capacity);
     }
