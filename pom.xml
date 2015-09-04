@@ -327,7 +327,12 @@
                   showStatusFailure="true" 
                   showStatusIgnored="true" 
                   showSuiteSummary="true" />
+                  
+                <report-ant-xml mavenExtensions="true" dir="${project.build.directory}/surefire-reports" />
+                <report-json file="${project.build.directory}/test-results.html" />
               </listeners>
+              
+              
             </configuration>
   
             <executions>
