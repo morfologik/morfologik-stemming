@@ -9,8 +9,6 @@ import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.jar.Manifest;
 
-import morfologik.util.FileUtils;
-
 /**
  * A launcher for other command-line tools.
  */
@@ -141,15 +139,11 @@ public final class Launcher {
     		if (manifestResource == null)
     			return;
 
-			InputStream stream = null;
-			try {
-				stream = manifestResource.openStream();
+			try (InputStream stream = manifestResource.openStream()) {
 				Manifest manifest = new Manifest(stream);
-				
+
 				System.out.println("Required JARs: "
 						+ manifest.getMainAttributes().getValue("Class-Path"));
-			} catch (IOException e) {
-				FileUtils.close(stream);
 			}
 		} catch (IOException e) {
 			// Ignore.

@@ -1,9 +1,10 @@
 package morfologik.tools;
 
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Locale;
 
-import morfologik.fsa.IMessageLogger;
+import morfologik.fsa.builders.IMessageLogger;
 
 /**
  * A logger dumping info to <code>System.err</code>.

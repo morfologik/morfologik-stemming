@@ -6,10 +6,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.util.List;
 
 import morfologik.fsa.FSA;
@@ -19,7 +21,7 @@ import morfologik.stemming.DictionaryMetadataBuilder;
 import morfologik.stemming.EncoderType;
 import morfologik.stemming.WordData;
 
-import org.fest.assertions.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -183,7 +185,11 @@ public class MorphEncodingToolTest extends RandomizedTest {
             "--input", output.getAbsolutePath(),
             "--output", fsaFile.getAbsolutePath());
 
-        FSA fsa = FSA.read(fsaFile);
+        final FSA fsa;
+        try (InputStream is = Files.newInputStream(fsaFile.toPath())) {
+          fsa = FSA.read(is);
+        }
+
         DictionaryLookup dl = new DictionaryLookup(
             new Dictionary(
                 fsa, 

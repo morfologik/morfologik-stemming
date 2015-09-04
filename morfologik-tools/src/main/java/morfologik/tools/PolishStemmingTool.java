@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Locale;
 
 import morfologik.stemming.*;
+import morfologik.stemming.polish.PolishStemmer;
 
 import org.apache.commons.cli.*;
 

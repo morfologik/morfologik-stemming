@@ -1,8 +1,15 @@
 package morfologik.tools;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 
-import morfologik.fsa.*;
+import morfologik.fsa.FSA;
+import morfologik.fsa.FSA5;
+import morfologik.fsa.builders.FSAInfo;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,7 +38,9 @@ public class Text2FSA5Test {
 				"--output", output.getAbsolutePath()
 		});
 
-		FSA5 fsa = FSA.read(new FileInputStream(output));
-		Assert.assertEquals(3, new FSAInfo(fsa).finalStatesCount);
+		try (InputStream is = new FileInputStream(output)) {
+	    FSA5 fsa = FSA.read(is, FSA5.class);
+	    Assert.assertEquals(3, new FSAInfo(fsa).finalStatesCount);
+		}
 	}
 }

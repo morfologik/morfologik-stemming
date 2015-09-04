@@ -16,16 +16,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
-import morfologik.fsa.CFSA2Serializer;
 import morfologik.fsa.FSA;
-import morfologik.fsa.FSA5Serializer;
-import morfologik.fsa.FSABuilder;
 import morfologik.fsa.FSAFlags;
-import morfologik.fsa.FSAInfo;
-import morfologik.fsa.FSASerializer;
-import morfologik.fsa.FSAUtils;
-import morfologik.fsa.IMessageLogger;
 import morfologik.fsa.StateVisitor;
+import morfologik.fsa.builders.CFSA2Serializer;
+import morfologik.fsa.builders.FSA5Serializer;
+import morfologik.fsa.builders.FSABuilder;
+import morfologik.fsa.builders.FSAInfo;
+import morfologik.fsa.builders.FSASerializer;
+import morfologik.fsa.builders.FSAUtils;
+import morfologik.fsa.builders.IMessageLogger;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;

@@ -16,13 +16,12 @@ import java.util.Map;
 
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSA5;
-import morfologik.fsa.FSAInfo;
-import morfologik.fsa.FSAUtils;
+import morfologik.fsa.builders.FSAInfo;
+import morfologik.fsa.builders.FSAUtils;
 import morfologik.stemming.Dictionary;
 import morfologik.stemming.DictionaryAttribute;
 import morfologik.stemming.DictionaryLookup;
 import morfologik.stemming.WordData;
-import morfologik.util.FileUtils;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -41,7 +40,7 @@ public final class FSADumpTool extends Tool {
 	/**
      * A writer for messages and any text-based output.
      */
-    private Writer w;
+  private Writer w;
 
 	/**
 	 * Print raw data only, no headers.
@@ -69,8 +68,6 @@ public final class FSADumpTool extends Tool {
 		dataOnly = line.hasOption(SharedOptions.dataOnly.getOpt());
 		decode = line.hasOption(SharedOptions.decode.getOpt());
 		dot = line.hasOption(SharedOptions.dot.getLongOpt());
-
-		FileUtils.assertExists(dictionaryFile, true, false);
 
 		dump(dictionaryFile);
 	}

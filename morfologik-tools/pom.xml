@@ -24,11 +24,12 @@
       <artifactId>morfologik-fsa</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
+
     <dependency>
-      <groupId>com.carrotsearch</groupId>
-      <artifactId>hppc</artifactId>
-    </dependency>    
+      <groupId>org.carrot2</groupId>
+      <artifactId>morfologik-fsa-builders</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.carrot2</groupId>
@@ -52,34 +53,15 @@
       <artifactId>commons-lang</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-
+<!-- NOCOMMIT: remove me. -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <scope>test</scope>
     </dependency>
-    
-    <dependency>
-      <groupId>com.carrotsearch.randomizedtesting</groupId>
-      <artifactId>randomizedtesting-runner</artifactId>
-      <scope>test</scope>
-    </dependency>    
-    
-    <dependency>
-      <groupId>org.easytesting</groupId>
-      <artifactId>fest-assert-core</artifactId>
-      <scope>test</scope>
-    </dependency>    
   </dependencies>
 
   <build>
-    <defaultGoal>install</defaultGoal>
-
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
