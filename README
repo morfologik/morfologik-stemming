@@ -2,17 +2,8 @@
 MORFOLOGIK
 ==========
 
-FSA (automata), stemming, dictionaries and tools. Tools quickstart:
-
-java -jar lib/morfologik-tools-${version}-standalone.jar
-
-
-MODULES
-=======
-
-This project provides:
-
 morfologik-fsa:
+morfologik-fsa-builders:
 
   - Creation of byte-based, efficient finite state automata in Java, including
     custom, efficient data storage formats.
@@ -22,12 +13,11 @@ morfologik-fsa:
 
 morfologik-stemming:
 
-  - FSA-based stemming interfaces and dictionary metadata.
+  - Automata-based dictionary stemming infrastructure.
 
 morfologik-polish:
 
-  - Precompiled dictionary of inflected forms, stems and tags for the Polish 
-    language built on top of a large dictionary.
+  - Precompiled dictionary of inflected forms, stems and tags for Polish.
 
 morfologik-tools:
 
@@ -40,6 +30,12 @@ morfologik-tools:
 morfologik-speller:
 
   - Simplistic automaton-based spelling correction (suggester).
+
+
+COMPILING
+=========
+
+mvn package
 
 
 AUTHORS
