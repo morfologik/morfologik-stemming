@@ -8,6 +8,9 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
 Changes in backwards compatibility policy
 
+ * GH-55: Removed the "distribution" module entirely. The tools module
+   should be self-organizing. (Dawid Weiss)
+
  * GH-57: Restructured the project into FSA traversal/ reading (only)
    and FSA Builders (construction). This cleans up dependency
    structure as well (HPPC is not required for FSA traversals).
