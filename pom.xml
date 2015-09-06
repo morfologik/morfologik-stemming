@@ -11,9 +11,10 @@
 
   <!-- We use SonaType for publishing artefacts. Parent POM makes things easier here. -->
   <parent>
-    <groupId>org.sonatype.oss</groupId>
+    <groupId>com.carrotsearch.maven</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>9</version>
+    <version>1.0.0-SNAPSHOT</version>
+    <relativePath>poms/oss-parent</relativePath>
   </parent>
 
   <!-- Project info. -->
@@ -64,12 +65,9 @@
 
   <!-- Global properties. -->
   <properties>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <profile.jdk>1.7</profile.jdk>  
 
     <skip.deployment>false</skip.deployment>
-    <gpg.passphrase></gpg.passphrase>
 
     <version.randomizedtesting>2.1.16</version.randomizedtesting>
     <version.junit>4.12</version.junit>
@@ -122,31 +120,6 @@
 
   <!-- Manage the build. -->
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <version>1.4.1</version>
-        <executions>
-          <execution>
-            <id>enforce-maven</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <inherited>false</inherited>
-            <configuration>
-              <rules>
-                <requireMavenVersion>
-                  <version>[3.2.5,)</version>
-                  <message>At least Maven 3.2.5+ required.</message>
-                </requireMavenVersion>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-
     <pluginManagement>
       <plugins>
         <plugin>
