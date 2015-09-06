@@ -92,7 +92,6 @@
 
   <dependencyManagement>
     <dependencies>
-      <!-- NOCOMMIT: UPGRADE! -->
       <dependency>
         <groupId>com.carrotsearch</groupId>
         <artifactId>hppc</artifactId>
@@ -119,7 +118,6 @@
     </dependencies>
   </dependencyManagement>
 
-  <!-- Manage the build. -->
   <build>
     <plugins>
       <plugin>
@@ -252,9 +250,7 @@
     </pluginManagement>
   </build>
 
-  <!-- Profiles. -->
   <profiles>
-
     <profile>
       <id>forbiddenapis</id>
       
