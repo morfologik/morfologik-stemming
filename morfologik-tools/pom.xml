@@ -18,6 +18,10 @@
   <name>Morfologik Command Line Tools</name>
   <description>Morfologik Command Line Tools</description>
 
+  <properties>
+    <forbiddenapis.signaturefile>../etc/forbidden-apis/signatures.txt</forbiddenapis.signaturefile>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.carrot2</groupId>
@@ -136,7 +140,7 @@
           </dependency>
         </dependencies>
       </plugin>
-      
+
       <plugin>
         <groupId>de.thetaphi</groupId>
         <artifactId>forbiddenapis</artifactId>

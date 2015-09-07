@@ -18,6 +18,10 @@
   <name>Morfologik Stemming APIs</name>
   <description>Morfologik Stemming APIs.</description>
 
+  <properties>
+    <forbiddenapis.signaturefile>../etc/forbidden-apis/signatures.txt</forbiddenapis.signaturefile>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.carrot2</groupId>

@@ -18,39 +18,25 @@
   <name>Morfologik FSA (Builder)</name>
   <description>Morfologik Finite State Automata Builder</description>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.carrotsearch</groupId>
-      <artifactId>hppc</artifactId>
-    </dependency>
+  <properties>
+    <forbiddenapis.signaturefile>../etc/forbidden-apis/signatures.txt</forbiddenapis.signaturefile>
+  </properties>
 
+  <dependencies>
     <dependency>
       <groupId>org.carrot2</groupId>
       <artifactId>morfologik-fsa</artifactId>
       <version>${project.version}</version>
     </dependency>
+    
+    <dependency>
+      <groupId>com.carrotsearch</groupId>
+      <artifactId>hppc</artifactId>
+    </dependency>    
   </dependencies>
 
   <build>
-    <defaultGoal>install</defaultGoal>
-
     <plugins>
-      <plugin>
-        <groupId>com.carrotsearch.randomizedtesting</groupId>
-        <artifactId>junit4-maven-plugin</artifactId>
-        <executions>
-          <!-- Local override for unit tests. -->
-          <execution>
-            <id>unit-tests</id>
-            <configuration>
-              <systemProperties combine.children="append">
-                <arg.unit>arg.unit</arg.unit>
-              </systemProperties>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>

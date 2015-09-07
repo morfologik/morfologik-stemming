@@ -18,6 +18,10 @@
   <name>Morfologik Speller</name>
   <description>Morfologik Speller</description>
 
+  <properties>
+    <forbiddenapis.signaturefile>../etc/forbidden-apis/signatures.txt</forbiddenapis.signaturefile>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.carrot2</groupId>
