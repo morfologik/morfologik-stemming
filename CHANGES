@@ -8,6 +8,10 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
 Changes in backwards compatibility policy
 
+ * GH-59: Moved Dictionary.convertText utility to 
+   DictionaryLookup.applyReplacements and fixed current reliance on map 
+   ordering. (Dawid Weiss)
+
  * GH-55: Removed the "distribution" module entirely. The tools module
    should be self-organizing. (Dawid Weiss)
 

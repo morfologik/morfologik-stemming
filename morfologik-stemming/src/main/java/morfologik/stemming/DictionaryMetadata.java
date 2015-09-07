@@ -22,31 +22,30 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 /**
  * Description of attributes, their types and default values.
- * 
- * @see Dictionary
  */
 public final class DictionaryMetadata {
   /**
    * Default attribute values.
    */
   private static Map<DictionaryAttribute, String> DEFAULT_ATTRIBUTES = new DictionaryMetadataBuilder()
-  .separator('+')
-  .encoder(EncoderType.SUFFIX)
-  .frequencyIncluded()
-  .ignorePunctuation()
-  .ignoreNumbers()
-  .ignoreCamelCase()
-  .ignoreAllUppercase()
-  .ignoreDiacritics()
-  .convertCase()
-  .supportRunOnWords()
-  .toMap();
+    .separator('+')
+    .encoder(EncoderType.SUFFIX)
+    .frequencyIncluded()
+    .ignorePunctuation()
+    .ignoreNumbers()
+    .ignoreCamelCase()
+    .ignoreAllUppercase()
+    .ignoreDiacritics()
+    .convertCase()
+    .supportRunOnWords()
+    .toMap();
 
   /**
    * Required attributes.
@@ -73,17 +72,17 @@ public final class DictionaryMetadata {
   /**
    * Replacement pairs for non-obvious candidate search in a speller dictionary.
    */
-  private Map<String, List<String>> replacementPairs = Collections.emptyMap();
+  private LinkedHashMap<String, List<String>> replacementPairs = new LinkedHashMap<>();
 
   /**
    * Conversion pairs for input conversion, for example to replace ligatures.
    */
-  private Map<String, String> inputConversion = Collections.emptyMap();
+  private LinkedHashMap<String, String> inputConversion = new LinkedHashMap<>();
 
   /**
    * Conversion pairs for output conversion, for example to replace ligatures.
    */
-  private Map<String, String> outputConversion = Collections.emptyMap();
+  private LinkedHashMap<String, String> outputConversion = new LinkedHashMap<>();
 
   /**
    * Equivalent characters (treated similarly as equivalent chars with and without
@@ -91,7 +90,7 @@ public final class DictionaryMetadata {
    * 
    * This implements a feature similar to hunspell MAP in the affix file.
    */
-  private Map<Character, List<Character>> equivalentChars = Collections.emptyMap();
+  private LinkedHashMap<Character, List<Character>> equivalentChars = new LinkedHashMap<>();
 
   /**
    * All attributes.
@@ -120,11 +119,11 @@ public final class DictionaryMetadata {
   public byte getSeparator()       { return separator; }
   public Locale getLocale()        { return locale; }
 
-  public Map<String, String> getInputConversionPairs() { return inputConversion; }
-  public Map<String, String> getOutputConversionPairs() { return outputConversion; }
+  public LinkedHashMap<String, String> getInputConversionPairs() { return inputConversion; }
+  public LinkedHashMap<String, String> getOutputConversionPairs() { return outputConversion; }
 
-  public Map<String, List<String>> getReplacementPairs() { return replacementPairs; }
-  public Map<Character, List<Character>> getEquivalentChars() { return equivalentChars; }
+  public LinkedHashMap<String, List<String>> getReplacementPairs() { return replacementPairs; }
+  public LinkedHashMap<Character, List<Character>> getEquivalentChars() { return equivalentChars; }
 
   // Dynamically fetched.
   public boolean isFrequencyIncluded()  { return boolAttributes.get(FREQUENCY_INCLUDED); }
@@ -182,7 +181,7 @@ public final class DictionaryMetadata {
       case INPUT_CONVERSION:
       {
         @SuppressWarnings("unchecked")
-        Map<String, String> gvalue = (Map<String, String>) value;
+        LinkedHashMap<String, String> gvalue = (LinkedHashMap<String, String>) value;
         this.inputConversion = gvalue;
       }
       break;
@@ -190,7 +189,7 @@ public final class DictionaryMetadata {
       case OUTPUT_CONVERSION:
       {
         @SuppressWarnings("unchecked")
-        Map<String, String> gvalue = (Map<String, String>) value;
+        LinkedHashMap<String, String> gvalue = (LinkedHashMap<String, String>) value;
         this.outputConversion = gvalue;
       }
       break;
@@ -198,7 +197,7 @@ public final class DictionaryMetadata {
       case REPLACEMENT_PAIRS:
       {
         @SuppressWarnings("unchecked")
-        Map<String, List<String>> gvalue = (Map<String, List<String>>) value;
+        LinkedHashMap<String, List<String>> gvalue = (LinkedHashMap<String, List<String>>) value;
         this.replacementPairs = gvalue;
       }
       break;
@@ -206,7 +205,7 @@ public final class DictionaryMetadata {
       case EQUIVALENT_CHARS:
       {
         @SuppressWarnings("unchecked")
-        Map<Character, List<Character>> gvalue = (Map<Character, List<Character>>) value;
+        LinkedHashMap<Character, List<Character>> gvalue = (LinkedHashMap<Character, List<Character>>) value;
         this.equivalentChars = gvalue;
       }
       break;

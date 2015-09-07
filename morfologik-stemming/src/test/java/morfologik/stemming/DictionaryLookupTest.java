@@ -1,27 +1,34 @@
 package morfologik.stemming;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 import morfologik.fsa.FSA;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.*;
-
-/*
- *
- */
 public class DictionaryLookupTest {
+  @Test
+  public void testApplyReplacements() {
+    LinkedHashMap<String, String> conversion = new LinkedHashMap<>();
+    conversion.put("'", "`");
+    conversion.put("fi", "ﬁ");
+    conversion.put("\\a", "ą");
+    conversion.put("Barack", "George");
+    conversion.put("_", "xx");
+    assertEquals("ﬁlut", DictionaryLookup.applyReplacements("filut", conversion));
+    assertEquals("ﬁzdrygałką", DictionaryLookup.applyReplacements("fizdrygałk\\a", conversion));
+    assertEquals("George Bush", DictionaryLookup.applyReplacements("Barack Bush", conversion));
+    assertEquals("xxxxxxxx", DictionaryLookup.applyReplacements("____", conversion));
+  }
 
   @Test
   public void testRemovedEncoderProperties() throws IOException {

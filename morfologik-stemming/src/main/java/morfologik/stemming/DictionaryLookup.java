@@ -1,6 +1,6 @@
 package morfologik.stemming;
 
-import static morfologik.fsa.MatchResult.SEQUENCE_IS_A_PREFIX;
+import static morfologik.fsa.MatchResult.*;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -8,7 +8,9 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSAFinalStatesIterator;
@@ -143,7 +145,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
     final byte separator = dictionaryMetadata.getSeparator();
 
     if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
-      word = Dictionary.convertText(word, dictionaryMetadata.getInputConversionPairs());
+      word = applyReplacements(word, dictionaryMetadata.getInputConversionPairs());
     }
 
     // Reset the output list to zero length.
@@ -202,7 +204,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
           if (dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
             wordData.update(byteBuffer, word);
           } else {
-            wordData.update(byteBuffer, Dictionary.convertText(word, dictionaryMetadata.getOutputConversionPairs()));
+            wordData.update(byteBuffer, applyReplacements(word, dictionaryMetadata.getOutputConversionPairs()));
           }
 
           /*
@@ -249,6 +251,27 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
        */
     }
     return formsList;
+  }
+
+  /**
+   * Apply replacements partial string replacements from
+   * a given map.
+   * 
+   * Useful if the word needs to be normalized somehow (i.e., ligatures,
+   * apostrophes and such).
+   */
+  public static String applyReplacements(CharSequence word, LinkedHashMap<String, String> replacements) {
+    // quite horrible from performance point of view; this should really be a transducer.
+    StringBuilder sb = new StringBuilder(word);
+    for (final Map.Entry<String, String> e : replacements.entrySet()) {
+      String key = e.getKey();
+      int index = sb.indexOf(e.getKey());
+      while (index != -1) {
+        sb.replace(index, index + key.length(), e.getValue());
+        index = sb.indexOf(key, index + key.length());
+      }
+    }
+    return sb.toString();
   }
 
   /**

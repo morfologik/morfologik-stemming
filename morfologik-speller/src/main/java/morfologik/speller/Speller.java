@@ -19,6 +19,7 @@ import morfologik.fsa.FSATraversal;
 import morfologik.fsa.MatchResult;
 import morfologik.stemming.BufferUtils;
 import morfologik.stemming.Dictionary;
+import morfologik.stemming.DictionaryLookup;
 import morfologik.stemming.DictionaryMetadata;
 
 /**
@@ -249,7 +250,7 @@ public class Speller {
     // dictionaries usually do not contain punctuation
     String wordToCheck = word;
     if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
-      wordToCheck = Dictionary.convertText(word, dictionaryMetadata.getInputConversionPairs()).toString();
+      wordToCheck = DictionaryLookup.applyReplacements(word, dictionaryMetadata.getInputConversionPairs());
     }
     boolean isAlphabetic = wordToCheck.length() != 1 || isAlphabetic(wordToCheck.charAt(0));
     return wordToCheck.length() > 0
@@ -332,7 +333,7 @@ public class Speller {
    */
   public List<String> replaceRunOnWords(final String original) {
     final List<String> candidates = new ArrayList<String>();
-    if (!isInDictionary(Dictionary.convertText(original, dictionaryMetadata.getInputConversionPairs()).toString())
+    if (!isInDictionary(DictionaryLookup.applyReplacements(original, dictionaryMetadata.getInputConversionPairs()))
         && dictionaryMetadata.isSupportingRunOnWords()) {
       for (int i = 1; i < original.length(); i++) {
         // chop from left to right
@@ -341,7 +342,7 @@ public class Speller {
           if (!dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
             candidates.add(firstCh + " " + original.subSequence(i, original.length()));
           } else {
-            candidates.add(Dictionary.convertText(firstCh + " " + original.subSequence(i, original.length()),
+            candidates.add(DictionaryLookup.applyReplacements(firstCh + " " + original.subSequence(i, original.length()),
                 dictionaryMetadata.getOutputConversionPairs()).toString());
           }
         }
@@ -362,7 +363,7 @@ public class Speller {
   public List<String> findReplacements(final String w) throws CharacterCodingException {
     String word = w;
     if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
-      word = Dictionary.convertText(w, dictionaryMetadata.getInputConversionPairs()).toString();
+      word = DictionaryLookup.applyReplacements(w, dictionaryMetadata.getInputConversionPairs());
     }
     candidates.clear();
     if (word.length() > 0 && word.length() < MAX_WORD_LENGTH && !isInDictionary(word)) {
@@ -433,7 +434,7 @@ public class Speller {
     // Use a linked set to avoid duplicates and preserve the ordering of candidates.
     final Set<String> candStringSet = new LinkedHashSet<String>();
     for (final CandidateData cd : candidates) {
-      candStringSet.add(Dictionary.convertText(cd.getWord(), dictionaryMetadata.getOutputConversionPairs()).toString());
+      candStringSet.add(DictionaryLookup.applyReplacements(cd.getWord(), dictionaryMetadata.getOutputConversionPairs()).toString());
     }
     final List<String> candStringList = new ArrayList<String>(candStringSet.size());
     candStringList.addAll(candStringSet);

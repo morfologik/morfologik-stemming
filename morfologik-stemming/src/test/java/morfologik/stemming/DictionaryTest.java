@@ -4,26 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.Test;
 
 import com.carrotsearch.randomizedtesting.RandomizedTest;
 
 public class DictionaryTest extends RandomizedTest {
-  @Test
-  public void testConvertText() {
-    Map<String, String> conversion = new HashMap<String, String>();
-    conversion.put("'", "`");
-    conversion.put("fi", "ﬁ");
-    conversion.put("\\a", "ą");
-    conversion.put("Barack", "George");
-    assertEquals("ﬁlut", Dictionary.convertText("filut", conversion));
-    assertEquals("ﬁzdrygałką", Dictionary.convertText("fizdrygałk\\a", conversion));
-    assertEquals("George Bush", Dictionary.convertText("Barack Bush", conversion));
-  }
-
   @Test
   public void testReadFromFile() throws IOException {
     Path tempDir = super.newTempDir().toPath();

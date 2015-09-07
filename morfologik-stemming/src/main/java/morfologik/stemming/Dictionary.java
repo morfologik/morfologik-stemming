@@ -169,32 +169,4 @@ public final class Dictionary {
 
     return featuresName;
   }
-
-  // NOCOMMIT: move to speller.
-  /**
-   * Converts the words on input or output according to conversion tables.
-   * 
-   * Useful if the input words need to be normalized (i.e., ligatures,
-   * apostrophes and such).
-   * 
-   * @param str input character sequence to be converted
-   * @param conversionMap conversion map used to convert the string (a map
-   * from String to String)
-   * @return a converted string.
-   * 
-   * @since 1.9.0
-   */
-  public static CharSequence convertText(final CharSequence str, final Map<String, String> conversionMap) {
-    StringBuilder sb = new StringBuilder();
-    sb.append(str);
-    for (final String auxKey : conversionMap.keySet()) {
-      int index = sb.indexOf(auxKey);
-      while (index != -1) {
-        sb.replace(index, index + auxKey.length(), conversionMap.get(auxKey));
-        index = sb.indexOf(auxKey);
-      }
-    }
-    return sb.toString();
-  }
-
 }
