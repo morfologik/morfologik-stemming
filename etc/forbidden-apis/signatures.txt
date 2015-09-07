@@ -34,5 +34,5 @@ java.io.FilterReader#<init>(java.io.Reader)
 java.io.FilterWriter#<init>(java.io.Writer)
 
 #@defaultMessage Do not use context class loaders, prefer explicit ClassLoader argument.
-#java.lang.Thread@getContextClassLoader()
-#java.lang.Thread@setContextClassLoader()
+java.lang.Thread@getContextClassLoader()
+java.lang.Thread@setContextClassLoader()

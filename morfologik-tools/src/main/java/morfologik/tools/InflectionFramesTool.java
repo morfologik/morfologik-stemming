@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import morfologik.stemming.*;
 import morfologik.stemming.Dictionary;
+import morfologik.stemming.polish.PolishStemmer;
 
 /**
  * Calculate inflection frames from the Polish dictionary.
@@ -20,7 +21,7 @@ public class InflectionFramesTool {
 	/* */
 	@SuppressWarnings( { "unused" })
 	public void inflectionFrames() throws IOException {
-		final Dictionary pl = Dictionary.getForLanguage("pl");
+		final Dictionary pl = new PolishStemmer().getDictionary();
 		final DictionaryLookup dict = new DictionaryLookup(pl);
 		final CharsetDecoder decoder = pl.metadata.getDecoder();
 

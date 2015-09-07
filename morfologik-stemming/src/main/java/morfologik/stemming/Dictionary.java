@@ -1,16 +1,17 @@
 package morfologik.stemming;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.WeakHashMap;
 
 import morfologik.fsa.FSA;
 
@@ -42,11 +43,6 @@ public final class Dictionary {
   public final DictionaryMetadata metadata;
 
   /**
-   * Default loaded dictionaries.
-   */
-  public static final WeakHashMap<String, Dictionary> defaultDictionaries = new WeakHashMap<String, Dictionary>();
-
-  /**
    * It is strongly recommended to use static methods in this class for
    * reading dictionaries.
    * 
@@ -68,14 +64,22 @@ public final class Dictionary {
    * Attempts to load a dictionary using the path to the FSA file and the
    * expected metadata extension.
    */
-  public static Dictionary read(File fsaFile) throws IOException {
-    final File featuresFile = new File(fsaFile.getParent(),
-        getExpectedFeaturesName(fsaFile.getName()));
+  public static Dictionary read(Path fsa) throws IOException {
+    final Path featureMap = 
+        fsa.resolveSibling(getExpectedFeatureMapFileName(fsa.getFileName().toString()));
 
-    try (InputStream fsaStream = new FileInputStream(fsaFile);
-         InputStream metadataStream = new FileInputStream(featuresFile)) {
+    try (InputStream fsaStream = Files.newInputStream(fsa);
+         InputStream metadataStream = Files.newInputStream(featureMap)) {
       return read(fsaStream, metadataStream);
     }
+  }
+
+  /**
+   * Attempts to load a dictionary using the path to the FSA file and the
+   * expected metadata extension.
+   */
+  public static Dictionary read(File fsa) throws IOException {
+    return read(fsa.toPath());
   }
 
   /**
@@ -88,24 +92,27 @@ public final class Dictionary {
    * of JAR resource-locking issues that arise from resource URLs.
    */
   public static Dictionary read(URL fsaURL) throws IOException {
-    final String fsa = fsaURL.toExternalForm();
-    final String features = getExpectedFeaturesName(fsa);
+    final URL featureMapURL;
+    try {
+      featureMapURL = new URL(fsaURL, getExpectedFeatureMapFileName(fsaURL.getPath()));
+    } catch (MalformedURLException e) {
+      throw new IOException("Couldn't construct relative feature map URL for: " + fsaURL, e);
+    }
 
-    try (InputStream fsaStream = ResourceUtils.openInputStream(fsa);
-         InputStream metadataStream = ResourceUtils.openInputStream(features)) {
+    try (InputStream fsaStream = fsaURL.openStream();
+         InputStream metadataStream = featureMapURL.openStream()) {
       return read(fsaStream, metadataStream);
     }
   }
 
   /**
    * Attempts to load a dictionary from opened streams of FSA dictionary data
-   * and associated metadata.
+   * and associated metadata. Input streams are not closed automatically.
    */
-  public static Dictionary read(InputStream fsaData, InputStream featuresData) throws IOException
-  {
+  public static Dictionary read(InputStream fsaData, InputStream featureMapData) throws IOException {
     Map<DictionaryAttribute, String> map = new HashMap<DictionaryAttribute, String>();
     final Properties properties = new Properties();
-    properties.load(new InputStreamReader(featuresData, "UTF-8"));
+    properties.load(new InputStreamReader(featureMapData, "UTF-8"));
 
     // Handle back-compatibility for encoder specification.
     if (!properties.containsKey(DictionaryAttribute.ENCODER.propertyName)) {
@@ -154,7 +161,7 @@ public final class Dictionary {
    * suffix of <code>name</code> and appending
    * {@link #METADATA_FILE_EXTENSION}.
    */
-  public static String getExpectedFeaturesName(String name) {
+  public static String getExpectedFeatureMapFileName(String name) {
     final int dotIndex = name.lastIndexOf('.');
     final String featuresName;
     if (dotIndex >= 0) {
@@ -167,57 +174,19 @@ public final class Dictionary {
     return featuresName;
   }
 
-  /**
-   * Return a built-in dictionary for a given ISO language code. Dictionaries
-   * are cached internally for potential reuse.
-   * 
-   * @throws RuntimeException
-   *             Throws a {@link RuntimeException} if the dictionary is not
-   *             bundled with the library.
-   */
-  public static Dictionary getForLanguage(String languageCode) {
-    if (languageCode == null || "".equals(languageCode)) {
-      throw new IllegalArgumentException(
-          "Language code must not be empty.");
-    }
-
-    synchronized (defaultDictionaries) {
-      Dictionary dict = defaultDictionaries.get(languageCode);
-      if (dict != null)
-        return dict;
-
-      try {
-        final String dictPath = "morfologik/dictionaries/" + languageCode + ".dict";
-        final String metaPath = Dictionary.getExpectedFeaturesName(dictPath);
-
-        try (InputStream fsaStream = ResourceUtils.openInputStream(dictPath);
-            InputStream metadataStream = ResourceUtils.openInputStream(metaPath)) {
-         dict = read(fsaStream, metadataStream);
-        }
-
-        defaultDictionaries.put(languageCode, dict);
-        return dict;
-      } catch (IOException e) {
-        throw new RuntimeException(
-            "Default dictionary resource for language '"
-                + languageCode + "not found.", e);
-      }
-    }
-  }
-
+  // NOCOMMIT: move to speller.
   /**
    * Converts the words on input or output according to conversion tables.
    * 
    * Useful if the input words need to be normalized (i.e., ligatures,
    * apostrophes and such).
    * 
-   * @param str - input character sequence to be converted
-   * @param conversionMap - conversion map used to convert the string (a map
+   * @param str input character sequence to be converted
+   * @param conversionMap conversion map used to convert the string (a map
    * from String to String)
    * @return a converted string.
    * 
    * @since 1.9.0
-   * 
    */
   public static CharSequence convertText(final CharSequence str, final Map<String, String> conversionMap) {
     StringBuilder sb = new StringBuilder();

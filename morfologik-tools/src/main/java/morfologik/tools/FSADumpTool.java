@@ -262,7 +262,7 @@ public final class FSADumpTool extends Tool {
 	 * Check if there is a metadata file for the given FSA automaton.
 	 */
 	private static File expectedMetadataFile(File fsaFile) {
-		return new File(fsaFile.getParent(), Dictionary.getExpectedFeaturesName(fsaFile.getName()));
+		return new File(fsaFile.getParent(), Dictionary.getExpectedFeatureMapFileName(fsaFile.getName()));
 	}
 
 	/**
