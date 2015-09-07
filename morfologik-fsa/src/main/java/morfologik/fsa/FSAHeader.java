@@ -31,10 +31,11 @@ public final class FSAHeader {
   }
 
   /**
-   * Read FSA header and version from a stream, consuming its bytes.
+   * Read FSA header and version from a stream, consuming read bytes.
    * 
-   * @throws IOException
-   *           If the stream ends prematurely or if it contains invalid data.
+   * @param in The input stream to read data from.
+   * @return Returns a valid {@link FSAHeader} with version information.
+   * @throws IOException If the stream ends prematurely or if it contains invalid data.
    */
   public static FSAHeader read(InputStream in) throws IOException {
     if (in.read() != ((FSA_MAGIC >>> 24)       ) ||
@@ -53,7 +54,11 @@ public final class FSAHeader {
   }
 
   /**
-   * Writes FSA magic and version.
+   * Writes FSA magic bytes and version information.
+   * 
+   * @param os The stream to write to.
+   * @param version Automaton version.
+   * @throws IOException Rethrown if writing fails.
    */
   public static void write(OutputStream os, byte version) throws IOException {
     os.write(FSA_MAGIC >> 24);

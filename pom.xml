@@ -246,7 +246,7 @@
     </profile>
 
     <profile>
-      <id>aspect.require-java17</id>
+      <id>profile.require-java17</id>
       <activation>
         <file><exists>etc/profiles/require-java17.enabled</exists></file>
       </activation>
@@ -489,6 +489,14 @@
           </plugins>
         </pluginManagement>
       </build>
+    </profile>
+
+    <profile>
+      <id>quick</id>
+      
+      <properties>
+        <skipTests>true</skipTests>
+      </properties>
     </profile>
 
     <profile>

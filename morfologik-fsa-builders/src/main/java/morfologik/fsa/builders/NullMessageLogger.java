@@ -5,10 +5,6 @@ package morfologik.fsa.builders;
  */
 final class NullMessageLogger implements IMessageLogger {
   @Override
-  public void log(String msg) {
-  }
-
-  @Override
   public void startPart(String header) {
   }
 
@@ -17,6 +13,6 @@ final class NullMessageLogger implements IMessageLogger {
   }
 
   @Override
-  public void log(String header, Object v) {
+  public void log(String header, Object... v) {
   }
 }

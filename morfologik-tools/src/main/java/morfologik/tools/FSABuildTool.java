@@ -169,7 +169,9 @@ public final class FSABuildTool extends Tool {
 		        fsa = processUnsortedInput(inputStream);
 		    }
 
-	        if (crWarning) logger.log("Warning: input contained carriage returns?");
+        if (crWarning) { 
+          logger.log("Warning: input contained carriage returns?");
+        }
 
             if (statistics) {
                 logger.startPart("Statistics");
@@ -254,7 +256,7 @@ public final class FSABuildTool extends Tool {
         final ArrayList<byte[]> input = readInput(inputStream);
         logger.endPart();
 
-        logger.log("Input sequences", input.size());
+        logger.log("Input sequences: %,d", input.size());
 
         logger.startPart("Sorting");
         Collections.sort(input, FSABuilder.LEXICAL_ORDERING);
@@ -266,6 +268,23 @@ public final class FSABuildTool extends Tool {
         root = builder.complete();
         logger.endPart();
         return root;
+    }
+
+    /**
+     * Lexicographic order of input sequences. By default, consistent with the "C"
+     * sort (absolute value of bytes, 0-255).
+     */
+    private static int compare(byte[] s1, int start1, int lens1, byte[] s2, int start2, int lens2) {
+      final int max = Math.min(lens1, lens2);
+
+      for (int i = 0; i < max; i++) {
+        final byte c1 = s1[start1++];
+        final byte c2 = s2[start2++];
+        if (c1 != c2)
+          return (c1 & 0xff) - (c2 & 0xff);
+      }
+
+      return lens1 - lens2;
     }
 
     /**
@@ -282,7 +301,7 @@ public final class FSABuildTool extends Tool {
             public byte[] process(byte[] current, int currentLen) {
                 // Verify the order.
                 if (previous != null) {
-                    if (FSABuilder.compare(previous, 0, previousLen, current, 0, currentLen) > 0) {
+                    if (compare(previous, 0, previousLen, current, 0, currentLen) > 0) {
                         logger.log("\n\nERROR: The input is not sorted: \n" + 
                                 dumpLine(previous, previousLen) + "\n" +
                                 dumpLine(current, currentLen));
@@ -441,7 +460,7 @@ public final class FSABuildTool extends Tool {
 			    }
 
 				if (printProgress && line++ > 0 && (line % 1000000) == 0) {
-				    logger.log(String.format(Locale.ENGLISH, "%6.2fs, sequences: %d", elapsedTime(), line));
+				    logger.log("%6.2fs, sequences: %d", elapsedTime(), line);
 				}
 			} else {
 				if (pos >= buffer.length) {

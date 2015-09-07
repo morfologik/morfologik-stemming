@@ -8,40 +8,57 @@ import morfologik.fsa.FSA;
 import morfologik.fsa.FSAFlags;
 
 /**
- * All FSA serializers to binary formats will implement this interface.
+ * All FSA serializers (to binary formats) will implement this interface.
  */
 public interface FSASerializer {
   /**
    * Serialize a finite state automaton to an output stream.
+   * 
+   * @param fsa The automaton to serialize.
+   * @param os The output stream to serialize to.
+   * @param <T> A subclass of {@link OutputStream}, returned for chaining. 
+   * @return Returns <code>T</code> for chaining.
+   * @throws IOException Rethrown if an I/O error occurs.
    */
   public <T extends OutputStream> T serialize(FSA fsa, T os) throws IOException;
 
   /**
-   * Returns the set of flags supported by the serializer (and the output
+   * @return Returns the set of flags supported by the serializer (and the output
    * automaton).
    */
   public Set<FSAFlags> getFlags();
 
   /**
    * Log extra messages during construction.
+   * 
+   * @param logger The logger to receive messages during serialization.
+   * @return Returns <code>this</code> for call chaining.
    */
   public FSASerializer withLogger(IMessageLogger logger);
 
   /**
-   * Supports built-in filler separator. Only if {@link #getFlags()} returns
-   * {@link FSAFlags#SEPARATORS}.
+   * Sets the filler separator (only if {@link #getFlags()} returns
+   * {@link FSAFlags#SEPARATORS}).
+   * 
+   * @param filler The filler separator byte.
+   * @return Returns <code>this</code> for call chaining.
    */
   public FSASerializer withFiller(byte filler);
 
   /**
-   * Supports built-in annotation separator. Only if {@link #getFlags()} returns
-   * {@link FSAFlags#SEPARATORS}.
+   * Sets the annotation separator (only if {@link #getFlags()} returns
+   * {@link FSAFlags#SEPARATORS}).
+   * 
+   * @param annotationSeparator The filler separator byte.
+   * @return Returns <code>this</code> for call chaining.
    */
   public FSASerializer withAnnotationSeparator(byte annotationSeparator);
 
   /**
-   * Supports built-in right language count on nodes, speeding up perfect hash
-   * counts. Only if {@link #getFlags()} returns {@link FSAFlags#NUMBERS}.
+   * Enables support for right language count on nodes, speeding up perfect hash
+   * counts (only if {@link #getFlags()} returns {@link FSAFlags#NUMBERS}).
+   * 
+   * @return Returns <code>this</code> for call chaining.
    */
   public FSASerializer withNumbers();
 }

@@ -3,8 +3,6 @@ package morfologik.fsa.builders;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.TreeMap;
 
@@ -36,6 +34,10 @@ public final class FSAUtils {
    * Returns the right-language reachable from a given FSA node, formatted as an
    * input for the graphviz package (expressed in the <code>dot</code>
    * language).
+   * 
+   * @param fsa The automaton to visualize.
+   * @param node Starting node (subgraph will be visualized unless it's the automaton's root node).
+   * @return Returns the dot language description of the automaton.
    */
   public static String toDot(FSA fsa, int node) {
     try {
@@ -51,6 +53,11 @@ public final class FSAUtils {
    * Saves the right-language reachable from a given FSA node, formatted as an
    * input for the graphviz package (expressed in the <code>dot</code>
    * language), to the given writer.
+   * 
+   * @param w The writer to write dot language description of the automaton. 
+   * @param fsa The automaton to visualize.
+   * @param node Starting node (subgraph will be visualized unless it's the automaton's root node).
+   * @throws IOException Rethrown if an I/O exception occurs. 
    */
   public static void toDot(Writer w, FSA fsa, int node) throws IOException {
     w.write("digraph Automaton {\n");
@@ -119,52 +126,22 @@ public final class FSAUtils {
   }
 
   /**
-   * All byte sequences generated as the right language of <code>state</code>.
-   */
-  public static ArrayList<byte[]> rightLanguage(FSA fsa, int state) {
-    final ArrayList<byte[]> rl = new ArrayList<byte[]>();
-    final byte[] buffer = new byte[0];
-
-    descend(fsa, state, buffer, 0, rl);
-
-    return rl;
-  }
-
-  /**
-   * Recursive descend and collection of the right language.
-   */
-  private static byte[] descend(FSA fsa, int state, byte[] b, int position, ArrayList<byte[]> rl) {
-
-    if (b.length <= position) {
-      b = Arrays.copyOf(b, position + 1);
-    }
-
-    for (int arc = fsa.getFirstArc(state); arc != 0; arc = fsa.getNextArc(arc)) {
-      b[position] = fsa.getArcLabel(arc);
-
-      if (fsa.isArcFinal(arc)) {
-        rl.add(Arrays.copyOf(b, position + 1));
-      }
-
-      if (!fsa.isArcTerminal(arc))
-        b = descend(fsa, fsa.getEndNode(arc), b, position + 1, rl);
-    }
-
-    return b;
-  }
-
-  /**
-   * Calculate fan-out ratio.
+   * Calculate fan-out ratio (how many nodes have a given number of outgoing arcs).  
    * 
-   * @return The returned array: result[outgoing-arcs]
+   * @param fsa The automaton to calculate fanout for. 
+   * @param root The starting node for calculations.
+   * 
+   * @return The returned map contains keys for the number of outgoing arcs and
+   * an associated value being the number of nodes with that arc number. 
    */
   public static TreeMap<Integer, Integer> calculateFanOuts(final FSA fsa, int root) {
     final int[] result = new int[256];
     fsa.visitInPreOrder(new StateVisitor() {
       public boolean accept(int state) {
         int count = 0;
-        for (int arc = fsa.getFirstArc(state); arc != 0; arc = fsa.getNextArc(arc))
+        for (int arc = fsa.getFirstArc(state); arc != 0; arc = fsa.getNextArc(arc)) {
           count++;
+        }
         result[count]++;
         return true;
       }
@@ -173,12 +150,14 @@ public final class FSAUtils {
     TreeMap<Integer, Integer> output = new TreeMap<Integer, Integer>();
 
     int low = 1; // Omit #0, there is always a single node like that (dummy).
-    while (low < result.length && result[low] == 0)
+    while (low < result.length && result[low] == 0) {
       low++;
+    }
 
     int high = result.length - 1;
-    while (high >= 0 && result[high] == 0)
+    while (high >= 0 && result[high] == 0) {
       high--;
+    }
 
     for (int i = low; i <= high; i++) {
       output.put(i, result[i]);
@@ -188,7 +167,12 @@ public final class FSAUtils {
   }
 
   /**
-   * Calculate the size of right language for each state in an FSA.
+   * Calculate the size of "right language" for each state in an FSA. The right
+   * language is the number of sequences encoded from a given node in the automaton.
+   * 
+   * @param fsa The automaton to calculate right language for.
+   * @return Returns a map with node identifiers as keys and their right language
+   * counts as associated values. 
    */
   public static IntIntHashMap rightLanguageForAllStates(final FSA fsa) {
     final IntIntHashMap numbers = new IntIntHashMap();

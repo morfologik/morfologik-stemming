@@ -47,14 +47,16 @@ public enum FSAFlags {
   }
 
   /**
-   * Returns <code>true</code> if the corresponding flag is set in the bit set.
+   * @param flags The bitset with flags. 
+   * @return Returns <code>true</code> iff this flag is set in <code>flags</code>. 
    */
-  public static boolean isSet(int flags, FSAFlags flag) {
-    return (flags & flag.bits) != 0;
+  public boolean isSet(int flags) {
+    return (flags & bits) != 0;
   }
 
   /**
-   * Returns the set of flags encoded in a single short.
+   * @param flags A set of flags to encode. 
+   * @return Returns the set of flags encoded as packed <code>short</code>.
    */
   public static short asShort(Set<FSAFlags> flags) {
     short value = 0;

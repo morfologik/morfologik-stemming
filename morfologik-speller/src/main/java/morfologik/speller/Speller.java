@@ -5,7 +5,6 @@ import static morfologik.fsa.MatchResult.SEQUENCE_IS_A_PREFIX;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
@@ -355,12 +354,10 @@ public class Speller {
    * Find suggestions by using K. Oflazer's algorithm. See Jan Daciuk's s_fsa
    * package, spell.cc for further explanation.
    * 
-   * @param w
-   *          The original misspelled word.
+   * @param w The original misspelled word.
    * @return A list of suggested replacements.
-   * @throws CharacterCodingException
    */
-  public List<String> findReplacements(final String w) throws CharacterCodingException {
+  public List<String> findReplacements(final String w) {
     String word = w;
     if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
       word = DictionaryLookup.applyReplacements(w, dictionaryMetadata.getInputConversionPairs());
@@ -547,10 +544,10 @@ public class Speller {
   /**
    * Calculates edit distance.
    * 
-   * @param i
-   *          length of first word (here: misspelled) - 1;
-   * @param j
-   *          length of second word (here: candidate) - 1.
+   * @param i length of first word (here: misspelled) - 1;
+   * @param j length of second word (here: candidate) - 1.
+   * @param wordIndex (TODO?)
+   * @param candIndex (TODO?)
    * @return Edit distance between the two words. Remarks: See Oflazer.
    */
   public int ed(final int i, final int j, final int wordIndex, final int candIndex) {
@@ -613,8 +610,9 @@ public class Speller {
   /**
    * Calculates cut-off edit distance.
    * 
-   * @param depth
-   *          current length of candidates.
+   * @param depth current length of candidates.
+   * @param wordIndex (TODO?)
+   * @param candIndex (TODO?)
    * @return Cut-off edit distance. Remarks: See Oflazer.
    */
 
@@ -773,6 +771,7 @@ public class Speller {
   }
 
   /**
+   * @param str (TODO?)
    * @return Returns true if str is CamelCase.
    */
   public boolean isCamelCase(final String str) {
@@ -799,8 +798,7 @@ public class Speller {
    * @param fromIndex
    *          The index from which replacements are found.
    * @param level
-   *          The recursion level. The search stops if level is >
-   *          MAX_RECURSION_LEVEL.
+   *          The recursion level. The search stops if level is &gt; MAX_RECURSION_LEVEL.
    * @return A list of all possible replacements of a {#link str} given string
    */
   public List<String> getAllReplacements(final String str, final int fromIndex, final int level) {

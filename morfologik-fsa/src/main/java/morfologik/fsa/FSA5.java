@@ -264,9 +264,11 @@ public final class FSA5 extends FSA {
   }
 
   /**
-   * Returns <code>true</code> if this arc has <code>LAST</code> bit set.
+   * Returns <code>true</code> if this arc has <code>NEXT</code> bit set.
    * 
    * @see #BIT_LAST_ARC
+   * @param arc The node's arc identifier.
+   * @return Returns true if the argument is the last arc of a node.
    */
   public boolean isArcLast(int arc) {
     return (arcs[arc + ADDRESS_OFFSET] & BIT_LAST_ARC) != 0;
@@ -274,6 +276,8 @@ public final class FSA5 extends FSA {
 
   /**
    * @see #BIT_TARGET_NEXT
+   * @param arc The node's arc identifier.
+   * @return Returns true if {@link #BIT_TARGET_NEXT} is set for this arc.
    */
   public boolean isNextSet(int arc) {
     return (arcs[arc + ADDRESS_OFFSET] & BIT_TARGET_NEXT) != 0;

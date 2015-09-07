@@ -8,7 +8,7 @@ import morfologik.fsa.StateVisitor;
 import static com.carrotsearch.randomizedtesting.RandomizedTest.*;
 
 public class FSATestUtils {
-  /**
+  /*
    * Generate a sorted list of random sequences.
    */
   public static byte[][] generateRandom(int count, MinMax length, MinMax alphabet) {
@@ -32,7 +32,7 @@ public class FSATestUtils {
     return bytes;
   }
 
-  /**
+  /*
    * Check if the DFSA is correct with respect to the given input.
    */
   public static void checkCorrect(byte[][] input, FSA fsa) {
@@ -57,7 +57,7 @@ public class FSATestUtils {
     assertEquals(0, rl.size());
   }
 
-  /**
+  /*
    * Check if the DFSA reachable from a given state is minimal. This means no
    * two states have the same right language.
    */
@@ -95,7 +95,7 @@ public class FSATestUtils {
     return seq;
   }
 
-  /**
+  /*
    * Check if two FSAs are identical.
    */
   public static void checkIdentical(FSA fsa1, FSA fsa2) {

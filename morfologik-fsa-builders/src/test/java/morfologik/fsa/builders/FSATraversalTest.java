@@ -23,17 +23,11 @@ import static com.carrotsearch.randomizedtesting.RandomizedTest.*;
 public final class FSATraversalTest extends TestBase {
   private FSA fsa;
 
-  /**
-     * 
-     */
   @Before
   public void setUp() throws Exception {
     fsa = FSA.read(this.getClass().getResourceAsStream("en_tst.dict"));
   }
 
-  /**
-     * 
-     */
   @Test
   public void testTraversalWithIterable() {
     int count = 0;
@@ -45,9 +39,6 @@ public final class FSATraversalTest extends TestBase {
     assertEquals(346773, count);
   }
 
-  /**
-     * 
-     */
   @Test
   public void testPerfectHash() throws IOException {
     byte[][] input = new byte[][] { { 'a' }, { 'a', 'b', 'a' }, { 'a', 'c' }, { 'b' }, { 'b', 'a' }, { 'c' }, };
@@ -111,9 +102,6 @@ public final class FSATraversalTest extends TestBase {
     assertEquals(346773, counter[0]);
   }
 
-  /**
-   * Test {@link FSATraversal} and matching results.
-   */
   @Test
   public void testMatch() throws IOException {
     final FSA fsa = FSA.read(this.getClass().getResourceAsStream("abc.fsa"));

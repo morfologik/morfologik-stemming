@@ -42,10 +42,6 @@ public class FSABuilderTest extends TestBase {
     checkCorrect(input, FSABuilder.build(input));
   }
 
-  /**
-   * Verify absolute byte-value ordering in the comparators and serialized
-   * automaton.
-   */
   @Test
   public void testLexicographicOrder() throws IOException {
     byte[][] input = { { 0 }, { 1 }, { (byte) 0xff }, };

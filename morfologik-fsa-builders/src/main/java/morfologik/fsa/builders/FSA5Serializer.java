@@ -121,7 +121,7 @@ public final class FSA5Serializer implements FSASerializer {
    * Serialize root state <code>s</code> to an output stream in
    * <code>FSA5</code> format.
    * 
-   * @see #withNumbers
+   * @see #withNumbers()
    * @return Returns <code>os</code> for chaining.
    */
   @Override

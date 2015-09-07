@@ -63,7 +63,7 @@ import java.util.*;
  * 
  * 1) NEXT bit set, mapped arc label. 
  * 
- *                +--------------- arc's label mapped in M bits if M's field value > 0
+ *                +--------------- arc's label mapped in M bits if M's field value &gt; 0
  *                | +------------- node pointed to is next
  *                | | +----------- the last arc of the node
  *         _______| | | +--------- the arc is final
@@ -293,6 +293,8 @@ public final class CFSA extends FSA {
 	 * Returns <code>true</code> if this arc has <code>NEXT</code> bit set.
 	 * 
 	 * @see #BIT_LAST_ARC
+	 * @param arc The node's arc identifier.
+	 * @return Returns true if the argument is the last arc of a node.
 	 */
 	public boolean isArcLast(int arc) {
 		return (arcs[arc] & BIT_LAST_ARC) != 0;
@@ -300,13 +302,16 @@ public final class CFSA extends FSA {
 
 	/**
 	 * @see #BIT_TARGET_NEXT
+   * @param arc The node's arc identifier.
+   * @return Returns true if {@link #BIT_TARGET_NEXT} is set for this arc.
 	 */
 	public boolean isNextSet(int arc) {
 		return (arcs[arc] & BIT_TARGET_NEXT) != 0;
 	}
 
 	/**
-	 * Returns <code>true</code> if the label is compressed inside flags byte.
+   * @param arc The node's arc identifier.
+   * @return Returns <code>true</code> if the label is compressed inside flags byte.
 	 */
 	public boolean isLabelCompressed(int arc) {
 		assert isNextSet(arc) : "Only applicable to arcs with NEXT bit.";

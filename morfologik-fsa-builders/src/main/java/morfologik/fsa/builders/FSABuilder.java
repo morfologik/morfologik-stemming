@@ -6,9 +6,12 @@ import morfologik.fsa.FSA;
 import static morfologik.fsa.builders.ConstantArcSizeFSA.*;
 
 /**
- * Fast, memory-conservative finite state automaton builder, returning a
- * byte-serialized {@link ConstantArcSizeFSA} (a tradeoff between construction
- * speed and memory consumption).
+ * Fast, memory-conservative finite state automaton builder, returning an
+ * in-memory {@link FSA} that is a tradeoff between construction speed and
+ * memory consumption. Use serializers to compress the returned automaton into
+ * more compact form.
+ * 
+ * @see FSASerializer
  */
 public final class FSABuilder {
   /**
@@ -51,8 +54,7 @@ public final class FSABuilder {
   private final static int MAX_LABELS = 256;
 
   /**
-   * Comparator comparing full byte arrays consistently with
-   * {@link #compare(byte[], int, int, byte[], int, int)}.
+   * A comparator comparing full byte arrays. Unsigned byte comparisons ('C'-locale).
    */
   public static final Comparator<byte[]> LEXICAL_ORDERING = new Comparator<byte[]>() {
     public int compare(byte[] o1, byte[] o2) {
@@ -138,7 +140,9 @@ public final class FSABuilder {
     this(BUFFER_GROWTH_SIZE);
   }
 
-  /** */
+  /**
+   * @param bufferGrowthSize Buffer growth size (in bytes) when constructing the automaton.
+   */
   public FSABuilder(int bufferGrowthSize) {
     this.bufferGrowthSize = Math.max(bufferGrowthSize, ARC_SIZE * MAX_LABELS);
 
@@ -154,6 +158,10 @@ public final class FSABuilder {
   /**
    * Add a single sequence of bytes to the FSA. The input must be
    * lexicographically greater than any previously added sequence.
+   * 
+   * @param sequence The array holding input sequence of bytes. 
+   * @param start Starting offset (inclusive)
+   * @param len Length of the input sequence (at least 1 byte).
    */
   public void add(byte[] sequence, int start, int len) {
     assert serialized != null : "Automaton already built.";
@@ -195,7 +203,7 @@ public final class FSABuilder {
   private int serializationBufferReallocations;
 
   /**
-   * Complete the automaton.
+   * @return Finalizes the construction of the automaton and returns it.
    */
   public FSA complete() {
     add(new byte[0], 0, 0);
@@ -228,6 +236,9 @@ public final class FSABuilder {
   /**
    * Build a minimal, deterministic automaton from a sorted list of byte
    * sequences.
+   * 
+   * @param input Input sequences to build automaton from. 
+   * @return Returns the automaton encoding all input sequences.
    */
   public static FSA build(byte[][] input) {
     final FSABuilder builder = new FSABuilder();
@@ -241,6 +252,9 @@ public final class FSABuilder {
   /**
    * Build a minimal, deterministic automaton from an iterable list of byte
    * sequences.
+   * 
+   * @param input Input sequences to build automaton from. 
+   * @return Returns the automaton encoding all input sequences.
    */
   public static FSA build(Iterable<byte[]> input) {
     final FSABuilder builder = new FSABuilder();
@@ -252,7 +266,8 @@ public final class FSABuilder {
   }
 
   /**
-   * Return various statistics concerning the FSA and its compilation.
+   * @return Returns various statistics concerning the FSA and its compilation.
+   * @see InfoEntry
    */
   public Map<InfoEntry, Object> getInfo() {
     return info;
@@ -475,7 +490,7 @@ public final class FSABuilder {
    * Lexicographic order of input sequences. By default, consistent with the "C"
    * sort (absolute value of bytes, 0-255).
    */
-  public static int compare(byte[] s1, int start1, int lens1, byte[] s2, int start2, int lens2) {
+  private static int compare(byte[] s1, int start1, int lens1, byte[] s2, int start2, int lens2) {
     final int max = Math.min(lens1, lens2);
 
     for (int i = 0; i < max; i++) {

@@ -69,7 +69,7 @@ import java.util.Set;
  *        +----------------------- node pointed to is next
  *        | +--------------------- the last arc of the node
  *        | | +------------------- this arc leads to a final state (acceptor)
- *        | | |  _______+--------- arc's label; indexed if M > 0, otherwise explicit label follows
+ *        | | |  _______+--------- arc's label; indexed if M &gt; 0, otherwise explicit label follows
  *        | | | / | | | |
  *       +-+-+-+-+-+-+-+-+\
  *     0 |N|L|F|M|M|M|M|M| +------ flags + (M) index of the mapped label.
@@ -158,7 +158,7 @@ public final class CFSA2 extends FSA {
 		short flagBits = in.readShort();
 		flags = EnumSet.noneOf(FSAFlags.class);
 		for (FSAFlags f : FSAFlags.values()) {
-		    if (FSAFlags.isSet(flagBits, f)) {
+		    if (f.isSet(flagBits)) {
 		        flags.add(f);
 		    }
 		}
@@ -283,6 +283,8 @@ public final class CFSA2 extends FSA {
    * Returns <code>true</code> if this arc has <code>NEXT</code> bit set.
    * 
    * @see #BIT_LAST_ARC
+   * @param arc The node's arc identifier.
+   * @return Returns true if the argument is the last arc of a node.
    */
   public boolean isArcLast(int arc) {
     return (arcs[arc] & BIT_LAST_ARC) != 0;
@@ -290,6 +292,8 @@ public final class CFSA2 extends FSA {
 
   /**
    * @see #BIT_TARGET_NEXT
+   * @param arc The node's arc identifier.
+   * @return Returns true if {@link #BIT_TARGET_NEXT} is set for this arc.
    */
   public boolean isNextSet(int arc) {
     return (arcs[arc] & BIT_TARGET_NEXT) != 0;

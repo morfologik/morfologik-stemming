@@ -37,6 +37,8 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
 
   /**
    * Create an instance of the iterator for a given node.
+   * @param fsa The automaton to iterate over. 
+   * @param node The starting node's identifier (can be the {@link FSA#getRootNode()}).
    */
   public FSAFinalStatesIterator(FSA fsa, int node) {
     this.fsa = fsa;
@@ -48,13 +50,17 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
 
   /**
    * Restart walking from <code>node</code>. Allows iterator reuse.
+   * 
+   * @param node Restart the iterator from <code>node</code>.
+   * @return Returns <code>this</code> for call chaining.
    */
-  public void restartFrom(int node) {
+  public FSAFinalStatesIterator restartFrom(int node) {
     position = 0;
     bufferWrapper.clear();
     nextElement = null;
 
     pushNode(node);
+    return this;
   }
 
   /** Returns <code>true</code> if there are still elements in this iterator. */

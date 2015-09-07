@@ -2,22 +2,22 @@ package morfologik.fsa.builders;
 
 public interface IMessageLogger {
   /**
-   * Log progress to the console.
+   * Start a larger computation part.
+   * 
+   * @param name The name of the computation part. 
    */
-  public void log(String msg);
+  public void startPart(String name);
 
   /**
-   * Log message header and save current time.
+   * End a larger computation part.
    */
-  public void startPart(String header);
-
-  /**
-     * 
-     */
   public void endPart();
 
   /**
-   * Log a two-part message.
+   * Log a message with arguments.
+   * 
+   * @param msg The message.
+   * @param args Arguments to be passed to {@link String#format(java.util.Locale, String, Object...)}.
    */
-  public void log(String header, Object v);
+  public void log(String msg, Object... args);
 }

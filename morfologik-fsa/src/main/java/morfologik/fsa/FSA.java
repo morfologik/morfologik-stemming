@@ -24,12 +24,16 @@ public abstract class FSA implements Iterable<ByteBuffer> {
   public abstract int getRootNode();
 
   /**
+   * @param node
+   *          Identifier of the node.
    * @return Returns the identifier of the first arc leaving <code>node</code>
    *         or 0 if the node has no outgoing arcs.
    */
   public abstract int getFirstArc(int node);
 
   /**
+   * @param arc
+   *          The arc's identifier.
    * @return Returns the identifier of the next arc after <code>arc</code> and
    *         leaving <code>node</code>. Zero is returned if no more arcs are
    *         available for the node.
@@ -37,6 +41,10 @@ public abstract class FSA implements Iterable<ByteBuffer> {
   public abstract int getNextArc(int arc);
 
   /**
+   * @param node
+   *          Identifier of the node.
+   * @param label
+   *          The arc's label.
    * @return Returns the identifier of an arc leaving <code>node</code> and
    *         labeled with <code>label</code>. An identifier equal to 0 means the
    *         node has no outgoing arc labeled <code>label</code>.
@@ -44,38 +52,48 @@ public abstract class FSA implements Iterable<ByteBuffer> {
   public abstract int getArc(int node, byte label);
 
   /**
-   * Return the label associated with a given <code>arc</code>.
+   * @param arc
+   *          The arc's identifier.
+   * @return Return the label associated with a given <code>arc</code>.
    */
   public abstract byte getArcLabel(int arc);
 
   /**
-   * Returns <code>true</code> if the destination node at the end of this
-   * <code>arc</code> corresponds to an input sequence created when building
-   * this automaton.
+   * @param arc
+   *          The arc's identifier.
+   * @return Returns <code>true</code> if the destination node at the end of
+   *         this <code>arc</code> corresponds to an input sequence created when
+   *         building this automaton.
    */
   public abstract boolean isArcFinal(int arc);
 
   /**
-   * Returns <code>true</code> if this <code>arc</code> does not have a
-   * terminating node (@link {@link #getEndNode(int)} will throw an exception).
-   * Implies {@link #isArcFinal(int)}.
+   * @param arc
+   *          The arc's identifier.
+   * @return Returns <code>true</code> if this <code>arc</code> does not have a
+   *         terminating node (@link {@link #getEndNode(int)} will throw an
+   *         exception). Implies {@link #isArcFinal(int)}.
    */
   public abstract boolean isArcTerminal(int arc);
 
   /**
-   * Return the end node pointed to by a given <code>arc</code>. Terminal arcs
-   * (those that point to a terminal state) have no end node representation and
-   * throw a runtime exception.
+   * @param arc
+   *          The arc's identifier.
+   * @return Return the end node pointed to by a given <code>arc</code>.
+   *         Terminal arcs (those that point to a terminal state) have no end
+   *         node representation and throw a runtime exception.
    */
   public abstract int getEndNode(int arc);
 
   /**
-   * Returns a set of flags for this FSA instance.
+   * @return Returns a set of flags for this FSA instance.
    */
   public abstract Set<FSAFlags> getFlags();
 
   /**
-   * Calculates the number of arcs of a given node.
+   * @param node
+   *          Identifier of the node.
+   * @return Calculates and returns the number of arcs of a given node.
    */
   public int getArcCount(int node) {
     int count = 0;
@@ -86,6 +104,9 @@ public abstract class FSA implements Iterable<ByteBuffer> {
   }
 
   /**
+   * @param node
+   *          Identifier of the node.
+   * 
    * @return Returns the number of sequences reachable from the given state if
    *         the automaton was compiled with {@link FSAFlags#NUMBERS}. The size
    *         of the right language of the state, in other words.
@@ -93,7 +114,7 @@ public abstract class FSA implements Iterable<ByteBuffer> {
    * @throws UnsupportedOperationException
    *           If the automaton was not compiled with {@link FSAFlags#NUMBERS}.
    *           The value can then be computed by manual count of
-   *           {@link #getSequences(int)}.
+   *           {@link #getSequences}.
    */
   public int getRightLanguageCount(int node) {
     throw new UnsupportedOperationException("Automaton not compiled with " + FSAFlags.NUMBERS);
@@ -116,6 +137,10 @@ public abstract class FSA implements Iterable<ByteBuffer> {
    * by a byte array and that the content of the byte buffer starts at the
    * array's index 0.
    * </p>
+   * 
+   * @param node
+   *          Identifier of the starting node from which to return subsequences.
+   * @return An iterable over all sequences encoded starting at the given node.
    */
   public Iterable<ByteBuffer> getSequences(final int node) {
     if (node == 0) {
@@ -132,6 +157,8 @@ public abstract class FSA implements Iterable<ByteBuffer> {
   /**
    * An alias of calling {@link #iterator} directly ({@link FSA} is also
    * {@link Iterable}).
+   * 
+   * @return Returns all sequences encoded in the automaton.
    */
   public final Iterable<ByteBuffer> getSequences() {
     return getSequences(getRootNode());
@@ -159,6 +186,10 @@ public abstract class FSA implements Iterable<ByteBuffer> {
    * faster than traversing the automaton in post or preorder since it can scan
    * states linearly. Returning false from {@link StateVisitor#accept(int)}
    * immediately terminates the traversal.
+   * 
+   * @param v Visitor to receive traversal calls.
+   * @param <T> A subclass of {@link StateVisitor}. 
+   * @return Returns the argument (for access to anonymous class fields).
    */
   public <T extends StateVisitor> T visitAllStates(T v) {
     return visitInPostOrder(v);
@@ -167,6 +198,10 @@ public abstract class FSA implements Iterable<ByteBuffer> {
   /**
    * Same as {@link #visitInPostOrder(StateVisitor, int)}, starting from root
    * automaton node.
+   * 
+   * @param v Visitor to receive traversal calls.
+   * @param <T> A subclass of {@link StateVisitor}. 
+   * @return Returns the argument (for access to anonymous class fields).
    */
   public <T extends StateVisitor> T visitInPostOrder(T v) {
     return visitInPostOrder(v, getRootNode());
@@ -176,6 +211,11 @@ public abstract class FSA implements Iterable<ByteBuffer> {
    * Visits all states reachable from <code>node</code> in postorder. Returning
    * false from {@link StateVisitor#accept(int)} immediately terminates the
    * traversal.
+   * 
+   * @param v Visitor to receive traversal calls.
+   * @param <T> A subclass of {@link StateVisitor}. 
+   * @param node Identifier of the node.
+   * @return Returns the argument (for access to anonymous class fields).
    */
   public <T extends StateVisitor> T visitInPostOrder(T v, int node) {
     visitInPostOrder(v, node, new BitSet());
@@ -201,6 +241,10 @@ public abstract class FSA implements Iterable<ByteBuffer> {
   /**
    * Same as {@link #visitInPreOrder(StateVisitor, int)}, starting from root
    * automaton node.
+   * 
+   * @param v Visitor to receive traversal calls.
+   * @param <T> A subclass of {@link StateVisitor}. 
+   * @return Returns the argument (for access to anonymous class fields).
    */
   public <T extends StateVisitor> T visitInPreOrder(T v) {
     return visitInPreOrder(v, getRootNode());
@@ -210,6 +254,11 @@ public abstract class FSA implements Iterable<ByteBuffer> {
    * Visits all states in preorder. Returning false from
    * {@link StateVisitor#accept(int)} skips traversal of all sub-states of a
    * given state.
+   * 
+   * @param v Visitor to receive traversal calls.
+   * @param <T> A subclass of {@link StateVisitor}. 
+   * @param node Identifier of the node.
+   * @return Returns the argument (for access to anonymous class fields).
    */
   public <T extends StateVisitor> T visitInPreOrder(T v, int node) {
     visitInPreOrder(v, node, new BitSet());
@@ -217,7 +266,10 @@ public abstract class FSA implements Iterable<ByteBuffer> {
   }
 
   /**
-   * Utility reading the remaining for subclasses.
+   * @param in The input stream. 
+   * @return Reads all remaining bytes from an input stream and returns
+   * them as a byte array. 
+   * @throws IOException Rethrown if an I/O exception occurs.
    */
   protected static final byte[] readRemaining(InputStream in) throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -247,6 +299,14 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 
   /**
    * A factory for reading automata in any of the supported versions.
+   * 
+   * @param stream
+   *          The input stream to read automaton data from. The stream is not
+   *          closed.
+   * @return Returns an instantiated automaton. Never null.
+   * @throws IOException
+   *           If the input stream does not represent an automaton or is
+   *           otherwise invalid.
    */
   public static FSA read(InputStream stream) throws IOException {
     final FSAHeader header = FSAHeader.read(stream);
@@ -266,6 +326,17 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 
   /**
    * A factory for reading a specific FSA subclass, including proper casting.
+   * 
+   * @param stream
+   *          The input stream to read automaton data from. The stream is not
+   *          closed.
+   * @param clazz A subclass of {@link FSA} to cast the read automaton to.
+   * @param <T> A subclass of {@link FSA} to cast the read automaton to.
+   * @return Returns an instantiated automaton. Never null.
+   * @throws IOException
+   *           If the input stream does not represent an automaton, is otherwise
+   *           invalid or the class of the automaton read from the input stream
+   *           is not assignable to <code>clazz</code>.
    */
   public static <T extends FSA> T read(InputStream stream, Class<? extends T> clazz) throws IOException {
     FSA fsa = read(stream);

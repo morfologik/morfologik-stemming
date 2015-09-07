@@ -86,9 +86,6 @@ public abstract class SerializerTestBase extends TestBase {
       "z+A+NN", });
   }
 
-  /**
-   * 
-   */
   @Test
   public void testFSA5Bug1() throws IOException {
     checkCorrect(new String[] { "+NP", "n+N", "n+NP", });
@@ -106,9 +103,6 @@ public abstract class SerializerTestBase extends TestBase {
     checkSerialization(input, s);
   }
 
-  /**
-   * 
-   */
   @Test
   public void testEmptyInput() throws IOException {
     byte[][] input = new byte[][] {};
@@ -117,33 +111,21 @@ public abstract class SerializerTestBase extends TestBase {
     checkSerialization(input, s);
   }
 
-  /**
-   * 
-   */
   @Test
   public void test_abc() throws IOException {
     testBuiltIn(FSA.read(FSA5Test.class.getResourceAsStream("abc.fsa")));
   }
 
-  /**
-   * 
-   */
   @Test
   public void test_minimal() throws IOException {
     testBuiltIn(FSA.read(FSA5Test.class.getResourceAsStream("minimal.fsa")));
   }
 
-  /**
-   * 
-   */
   @Test
   public void test_minimal2() throws IOException {
     testBuiltIn(FSA.read(FSA5Test.class.getResourceAsStream("minimal2.fsa")));
   }
 
-  /**
-   * 
-   */
   @Test
   public void test_en_tst() throws IOException {
     testBuiltIn(FSA.read(FSA5Test.class.getResourceAsStream("en_tst.dict")));
@@ -169,7 +151,6 @@ public abstract class SerializerTestBase extends TestBase {
     checkSerialization(in, root);
   }
 
-  /** */
   private void checkSerialization(byte[][] input, FSA root) throws IOException {
     checkSerialization0(createSerializer(), input, root);
     if (createSerializer().getFlags().contains(FSAFlags.NUMBERS)) {
@@ -177,7 +158,6 @@ public abstract class SerializerTestBase extends TestBase {
     }
   }
 
-  /** */
   private void checkSerialization0(FSASerializer serializer, final byte[][] in, FSA root) throws IOException {
     final byte[] fsaData = serializer.serialize(root, new ByteArrayOutputStream()).toByteArray();
 
@@ -185,7 +165,7 @@ public abstract class SerializerTestBase extends TestBase {
     checkCorrect(in, fsa);
   }
 
-  /**
+  /*
    * Check if the FSA is correct with respect to the given input.
    */
   protected void checkCorrect(byte[][] input, FSA fsa) {
@@ -249,12 +229,9 @@ public abstract class SerializerTestBase extends TestBase {
             result);
   }
 
-  /**
-   * 
-   */
   protected abstract FSASerializer createSerializer();
 
-  /**
+  /*
    * Drain bytes from a byte buffer to a string.
    */
   public static String toString(ByteBuffer sequence) {

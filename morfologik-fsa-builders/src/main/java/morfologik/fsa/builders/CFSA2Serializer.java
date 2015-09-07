@@ -101,7 +101,7 @@ public final class CFSA2Serializer implements FSASerializer {
   /**
    * Serializes any {@link FSA} to {@link CFSA2} stream.
    * 
-   * @see #withNumbers
+   * @see #withNumbers()
    * @return Returns <code>os</code> for chaining.
    */
   @Override
@@ -188,7 +188,7 @@ public final class CFSA2Serializer implements FSASerializer {
 
     this.logger.startPart("Label distribution");
     for (IntIntHolder c : labelAndCount) {
-      this.logger.log("0x" + Integer.toHexString(c.a), c.b);
+      this.logger.log("%12s %10s", "0x" + Integer.toHexString(c.a), c.b);
     }
     this.logger.endPart();
 
@@ -254,12 +254,12 @@ public final class CFSA2Serializer implements FSASerializer {
      * because the result isn't monotonic.
      */
     logger.startPart("Compacting");
-    logger.log("Initial output size", serializedSize);
+    logger.log("Initial output size: %,d", serializedSize);
     int cutAt = 0;
     for (int cut = Math.min(25, states.size()); cut <= Math.min(150, states.size()); cut += 25) {
       sublist.elementsCount = cut;
       int newSize = linearizeAndCalculateOffsets(fsa, sublist, linearized, offsets);
-      logger.log("Moved " + sublist.size() + " states, output size", newSize);
+      logger.log("Moved %,d states, output size: %,d", sublist.size(), newSize);
       if (newSize >= serializedSize) {
         break;
       }
@@ -272,7 +272,7 @@ public final class CFSA2Serializer implements FSASerializer {
     sublist.elementsCount = cutAt;
     int size = linearizeAndCalculateOffsets(fsa, sublist, linearized, offsets);
 
-    logger.log("Will move " + sublist.size() + " states, final size", size);
+    logger.log("Will move %,d states, final size: %,d", sublist.size(), size);
     logger.endPart();
 
     return linearized;
