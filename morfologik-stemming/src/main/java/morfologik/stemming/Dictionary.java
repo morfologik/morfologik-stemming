@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -83,19 +84,14 @@ public final class Dictionary {
   }
 
   /**
-   * <p>
    * Attempts to load a dictionary using the URL to the FSA file and the
    * expected metadata extension.
-   * 
-   * <p>
-   * This method can be used to load resource-based dictionaries, but be aware
-   * of JAR resource-locking issues that arise from resource URLs.
    */
   public static Dictionary read(URL fsaURL) throws IOException {
     final URL featureMapURL;
     try {
-      featureMapURL = new URL(fsaURL, getExpectedFeatureMapFileName(fsaURL.getPath()));
-    } catch (MalformedURLException e) {
+      featureMapURL = new URL(fsaURL, getExpectedFeatureMapFileName(fsaURL.toURI().getPath()));
+    } catch (MalformedURLException | URISyntaxException e) {
       throw new IOException("Couldn't construct relative feature map URL for: " + fsaURL, e);
     }
 
