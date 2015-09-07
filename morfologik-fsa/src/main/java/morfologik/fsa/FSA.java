@@ -149,7 +149,7 @@ public abstract class FSA implements Iterable<ByteBuffer> {
 
     return new Iterable<ByteBuffer>() {
       public Iterator<ByteBuffer> iterator() {
-        return new FSAFinalStatesIterator(FSA.this, node);
+        return new ByteSequenceIterator(FSA.this, node);
       }
     };
   }

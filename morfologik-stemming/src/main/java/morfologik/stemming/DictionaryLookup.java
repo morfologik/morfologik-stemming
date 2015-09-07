@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import morfologik.fsa.FSA;
-import morfologik.fsa.FSAFinalStatesIterator;
+import morfologik.fsa.ByteSequenceIterator;
 import morfologik.fsa.FSATraversal;
 import morfologik.fsa.MatchResult;
 
@@ -39,7 +39,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
   private final FSATraversal matcher;
 
   /** An iterator for walking along the final states of {@link #fsa}. */
-  private final FSAFinalStatesIterator finalStatesIterator;
+  private final ByteSequenceIterator finalStatesIterator;
 
   /** FSA's root node. */
   private final int rootNode;
@@ -118,7 +118,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
     this.rootNode = dictionary.fsa.getRootNode();
     this.fsa = dictionary.fsa;
     this.matcher = new FSATraversal(fsa);
-    this.finalStatesIterator = new FSAFinalStatesIterator(fsa, fsa.getRootNode());
+    this.finalStatesIterator = new ByteSequenceIterator(fsa, fsa.getRootNode());
 
     if (rootNode == 0) {
       throw new IllegalArgumentException(

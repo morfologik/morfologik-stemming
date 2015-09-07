@@ -13,7 +13,7 @@ import java.text.Normalizer.Form;
 import java.util.*;
 
 import morfologik.fsa.FSA;
-import morfologik.fsa.FSAFinalStatesIterator;
+import morfologik.fsa.ByteSequenceIterator;
 import morfologik.fsa.FSATraversal;
 import morfologik.fsa.MatchResult;
 import morfologik.stemming.BufferUtils;
@@ -112,7 +112,7 @@ public class Speller {
   private final FSA fsa;
 
   /** An iterator for walking along the final states of {@link #fsa}. */
-  private final FSAFinalStatesIterator finalStatesIterator;
+  private final ByteSequenceIterator finalStatesIterator;
 
   public Speller(final Dictionary dictionary) {
     this(dictionary, 1);
@@ -126,7 +126,7 @@ public class Speller {
     this.rootNode = dictionary.fsa.getRootNode();
     this.fsa = dictionary.fsa;
     this.matcher = new FSATraversal(fsa);
-    this.finalStatesIterator = new FSAFinalStatesIterator(fsa, rootNode);
+    this.finalStatesIterator = new ByteSequenceIterator(fsa, rootNode);
 
     if (rootNode == 0) {
       throw new IllegalArgumentException("Dictionary must have at least the root node.");

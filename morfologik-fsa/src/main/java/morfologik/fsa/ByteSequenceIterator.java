@@ -7,7 +7,7 @@ import java.util.*;
  * An iterator that traverses the right language of a given node (all sequences
  * reachable from a given node).
  */
-public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
+public final class ByteSequenceIterator implements Iterator<ByteBuffer> {
   /**
    * Default expected depth of the recursion stack (estimated longest sequence
    * in the automaton). Buffers expand by the same value if exceeded.
@@ -36,11 +36,20 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
   private int position;
 
   /**
+   * Create an instance of the iterator iterating over all automaton sequences.
+   * 
+   * @param fsa The automaton to iterate over. 
+   */
+  public ByteSequenceIterator(FSA fsa) {
+    this(fsa, fsa.getRootNode());
+  }
+
+  /**
    * Create an instance of the iterator for a given node.
    * @param fsa The automaton to iterate over. 
    * @param node The starting node's identifier (can be the {@link FSA#getRootNode()}).
    */
-  public FSAFinalStatesIterator(FSA fsa, int node) {
+  public ByteSequenceIterator(FSA fsa, int node) {
     this.fsa = fsa;
 
     if (fsa.getFirstArc(node) != 0) {
@@ -54,7 +63,7 @@ public final class FSAFinalStatesIterator implements Iterator<ByteBuffer> {
    * @param node Restart the iterator from <code>node</code>.
    * @return Returns <code>this</code> for call chaining.
    */
-  public FSAFinalStatesIterator restartFrom(int node) {
+  public ByteSequenceIterator restartFrom(int node) {
     position = 0;
     bufferWrapper.clear();
     nextElement = null;
