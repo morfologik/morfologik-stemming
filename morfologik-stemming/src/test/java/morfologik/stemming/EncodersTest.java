@@ -13,19 +13,19 @@ public class EncodersTest extends RandomizedTest {
   @Test
   public void testSharedPrefix() throws IOException {
     Assertions.assertThat(
-      Encoders.sharedPrefixLength(
+      BufferUtils.sharedPrefixLength(
           ByteBuffer.wrap(b("abcdef")),
           ByteBuffer.wrap(b("abcd__"))))
       .isEqualTo(4);
     
     Assertions.assertThat(
-        Encoders.sharedPrefixLength(
+        BufferUtils.sharedPrefixLength(
             ByteBuffer.wrap(b("")),
             ByteBuffer.wrap(b("_"))))
         .isEqualTo(0);
 
     Assertions.assertThat(
-        Encoders.sharedPrefixLength(
+        BufferUtils.sharedPrefixLength(
             ByteBuffer.wrap(b( "abcdef"), 2, 2),
             ByteBuffer.wrap(b("___cd__"), 3, 2)))
         .isEqualTo(2);

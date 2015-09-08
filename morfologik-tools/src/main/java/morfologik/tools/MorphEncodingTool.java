@@ -15,7 +15,6 @@ import java.util.Locale;
 
 import morfologik.fsa.FSA5;
 import morfologik.stemming.EncoderType;
-import morfologik.stemming.Encoders;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -31,7 +30,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 class MorphEncodingTool extends Tool {
     private static Charset US_ASCII = Charset.forName("US-ASCII"); 
 	private boolean noWarn = false;
-	private SequenceAssembler encoder;
+	private SequenceAssembler assembler;
     private byte separatorByte;
     private char separator; 
 
@@ -47,7 +46,7 @@ class MorphEncodingTool extends Tool {
 		    try {
 		        encType = EncoderType.valueOf(encValue.toUpperCase(Locale.ROOT));
 		    } catch (IllegalArgumentException e) {
-		        throw new IllegalArgumentException("Invalid encoder: " + encValue + ", "
+		        throw new IllegalArgumentException("Invalid assembler: " + encValue + ", "
 		            + "allowed values: " + Arrays.toString(EncoderType.values()));
 		    }
 		}
@@ -68,7 +67,7 @@ class MorphEncodingTool extends Tool {
 			separatorByte = FSABuildTool.checkSingleByte(Character.toString(separator), Charset.defaultCharset());
 		}
 		
-        encoder = new SequenceAssembler(Encoders.forType(encType), (byte) separator);
+    assembler = new SequenceAssembler(encType.get(), (byte) separator);
 
 		// Determine input and output streams.
 		final DataInputStream input = initializeInput(line);
@@ -151,7 +150,7 @@ class MorphEncodingTool extends Tool {
                                     toAscii(columns)));
                         }
 
-                        output.write(encoder.encode(
+                        output.write(assembler.encode(
                             wordForm, 
                             wordLemma, 
                             columns.size() > 2 ? columns.get(2) : null));

@@ -24,7 +24,7 @@ public class SequenceEncodersTest extends RandomizedTest {
     public static List<Object[]> testFactory() {
         List<Object[]> encoders = new ArrayList<>();
         for (EncoderType t : EncoderType.values()) {    
-            encoders.add(new Object [] {Encoders.forType(t)});
+            encoders.add(new Object [] {t.get()});
         }
         return encoders;
     }

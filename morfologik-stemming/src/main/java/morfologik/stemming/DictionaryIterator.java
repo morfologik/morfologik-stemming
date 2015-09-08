@@ -19,12 +19,12 @@ public final class DictionaryIterator implements Iterator<WordData> {
   private ByteBuffer inflectedBuffer = ByteBuffer.allocate(0);
   private CharBuffer inflectedCharBuffer = CharBuffer.allocate(0);
   private ByteBuffer temp = ByteBuffer.allocate(0);
-  private final ISequenceEncoder formEncoder;
+  private final ISequenceEncoder sequenceEncoder;
 
   public DictionaryIterator(Dictionary dictionary, CharsetDecoder decoder, boolean decodeStems) {
     this.entriesIter = dictionary.fsa.iterator();
     this.separator = dictionary.metadata.getSeparator();
-    this.formEncoder = Encoders.forType(dictionary.metadata.getEncoderType());
+    this.sequenceEncoder = dictionary.metadata.getEncoderType().get();
     this.decoder = decoder;
     this.entry = new WordData(decoder);
     this.decodeStems = decodeStems;
@@ -84,7 +84,7 @@ public final class DictionaryIterator implements Iterator<WordData> {
      * Decode the stem into stem buffer.
      */
     if (decodeStems) {
-      entry.stemBuffer = formEncoder.decode(entry.stemBuffer,
+      entry.stemBuffer = sequenceEncoder.decode(entry.stemBuffer,
                                             inflectedBuffer,
                                             ByteBuffer.wrap(ba, 0, sepPos));
     } else {

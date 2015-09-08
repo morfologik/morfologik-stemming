@@ -11,11 +11,8 @@ import java.nio.ByteBuffer;
  * and more repetitive (which results in higher compression rates).
  * 
  * <p>See example implementation for details.
- * 
- * @see Encoders
- * @see EncoderType
  */
-public interface ISequenceEncoder { 
+public interface ISequenceEncoder {
   /**
    * Encodes <code>target</code> relative to <code>source</code>,
    * optionally reusing the provided {@link ByteBuffer}.

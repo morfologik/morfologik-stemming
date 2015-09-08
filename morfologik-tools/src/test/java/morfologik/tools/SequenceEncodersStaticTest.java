@@ -3,7 +3,9 @@ package morfologik.tools;
 import java.io.UnsupportedEncodingException;
 
 import morfologik.stemming.EncoderType;
-import morfologik.stemming.Encoders;
+import morfologik.stemming.TrimInfixAndSuffixEncoder;
+import morfologik.stemming.TrimPrefixAndSuffixEncoder;
+import morfologik.stemming.TrimSuffixEncoder;
 
 import org.junit.Test;
 
@@ -13,9 +15,9 @@ import com.carrotsearch.randomizedtesting.RandomizedTest;
  * 
  */
 public class SequenceEncodersStaticTest extends RandomizedTest {
-  private SequenceAssembler suffix = new SequenceAssembler(new Encoders.TrimSuffixEncoder());
-  private SequenceAssembler prefix = new SequenceAssembler(new Encoders.TrimPrefixAndSuffixEncoder());
-  private SequenceAssembler infix = new SequenceAssembler(new Encoders.TrimInfixAndSuffixEncoder());
+  private SequenceAssembler suffix = new SequenceAssembler(new TrimSuffixEncoder());
+  private SequenceAssembler prefix = new SequenceAssembler(new TrimPrefixAndSuffixEncoder());
+  private SequenceAssembler infix = new SequenceAssembler(new TrimInfixAndSuffixEncoder());
 
   @Test
   public void testStandardEncode() throws Exception {
@@ -28,10 +30,10 @@ public class SequenceEncodersStaticTest extends RandomizedTest {
   public void testSeparatorChange() throws Exception {
     assertEquals("abc+Ad+tag", encode(suffix, "abc", "abcd", "tag"));
 
-    SequenceAssembler assembler = new SequenceAssembler(new Encoders.TrimSuffixEncoder(), (byte) '_');
+    SequenceAssembler assembler = new SequenceAssembler(new TrimSuffixEncoder(), (byte) '_');
     assertEquals("abc_Ad_tag", encode(assembler, "abc", "abcd", "tag"));
 
-    assembler = new SequenceAssembler(new Encoders.TrimSuffixEncoder(), (byte) '\t');
+    assembler = new SequenceAssembler(new TrimSuffixEncoder(), (byte) '\t');
     assertEquals("abc\tAd\ttag", encode(assembler, "abc", "abcd", "tag"));
   }
 
@@ -78,7 +80,7 @@ public class SequenceEncodersStaticTest extends RandomizedTest {
   @Test
   public void testAllEncodersHaveImplementations() {
     for (EncoderType t : EncoderType.values()) {
-      assertNotNull(null != Encoders.forType(t));
+      assertNotNull(null != t.get());
     }
   }
 

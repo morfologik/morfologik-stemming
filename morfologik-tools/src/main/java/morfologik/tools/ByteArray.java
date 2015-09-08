@@ -1,4 +1,4 @@
-package morfologik.stemming;
+package morfologik.tools;
 
 import java.util.Arrays;
 

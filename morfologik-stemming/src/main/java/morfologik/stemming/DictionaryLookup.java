@@ -101,7 +101,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
    */
   private final Dictionary dictionary;
 
-  private final ISequenceEncoder formEncoder;
+  private final ISequenceEncoder sequenceEncoder;
 
   /**
    * <p>
@@ -115,7 +115,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
       throws IllegalArgumentException {
     this.dictionary = dictionary;
     this.dictionaryMetadata = dictionary.metadata;
-    this.formEncoder = Encoders.forType(dictionary.metadata.getEncoderType());
+    this.sequenceEncoder = dictionary.metadata.getEncoderType().get();
     this.rootNode = dictionary.fsa.getRootNode();
     this.fsa = dictionary.fsa;
     this.matcher = new FSATraversal(fsa);
@@ -222,7 +222,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
           /*
            * Decode the stem into stem buffer.
            */
-          wordData.stemBuffer = formEncoder.decode(wordData.stemBuffer,
+          wordData.stemBuffer = sequenceEncoder.decode(wordData.stemBuffer,
                                                    byteBuffer,
                                                    ByteBuffer.wrap(ba, 0, sepPos));
 

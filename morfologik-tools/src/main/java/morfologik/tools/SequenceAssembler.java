@@ -3,7 +3,6 @@ package morfologik.tools;
 import java.nio.ByteBuffer;
 
 import morfologik.fsa.FSA5;
-import morfologik.stemming.ByteArray;
 import morfologik.stemming.ISequenceEncoder;
 
 final class SequenceAssembler {
