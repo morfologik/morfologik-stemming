@@ -24,9 +24,9 @@ import com.beust.jcommander.Parameters;
  * Build finite state automaton out of text input.
  */
 @Parameters(
-    commandNames = "buildfsa",
-    commandDescription = "Builds finite state automaton from \\n-delimited input")
-public class BuildFSA extends CliTool {
+    commandNames = "fsa_build",
+    commandDescription = "Builds finite state automaton from \\n-delimited input.")
+public class FSABuild extends CliTool {
   /**
    * The serialization and encoding format to use for compressing the
    * automaton.
@@ -87,10 +87,10 @@ public class BuildFSA extends CliTool {
       description = "Ignore empty lines in the input.")  
   private boolean ignoreEmpty;
 
-  BuildFSA() {
+  FSABuild() {
   }
   
-  public BuildFSA(Path input,
+  public FSABuild(Path input,
                   Path output,
                   Format format,
                   boolean ignoreBom,
@@ -211,6 +211,6 @@ public class BuildFSA extends CliTool {
   }
 
   public static void main(String[] args) {
-    main(args, new BuildFSA());
+    main(args, new FSABuild());
   }
 }

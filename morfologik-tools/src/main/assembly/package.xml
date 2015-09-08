@@ -13,4 +13,23 @@
       <useProjectArtifact>true</useProjectArtifact>
     </dependencySet>
   </dependencySets>
+  
+  <fileSets>
+    <fileSet>
+      <directory>src/main/package</directory>
+      <filtered>false</filtered>
+      <outputDirectory>.</outputDirectory>
+      <excludes>
+        <exclude>**/*.txt</exclude>
+      </excludes>
+    </fileSet>
+    <fileSet>
+      <directory>src/main/package</directory>
+      <filtered>true</filtered>
+      <outputDirectory>.</outputDirectory>
+      <includes>
+        <include>**/*.txt</include>
+      </includes>
+    </fileSet>
+  </fileSets>
 </assembly>
