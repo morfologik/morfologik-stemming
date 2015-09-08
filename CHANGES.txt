@@ -25,6 +25,7 @@ Changes in backwards compatibility policy
    accept Path. (Dawid Weiss)
 
 New Features
+
  * GH-53: Review library dependencies and bring them up to date. 
    (Dawid Weiss)
 
@@ -32,6 +33,11 @@ New Features
 
  * GH-51: Remove and fail on deprecated metadata (fsa.dict.uses-*).
    (Dawid Weiss)
+
+Optimizations
+
+ * GH-61: Refactored the code to use one encoding/ decoding routine
+   and ByteBuffers. Removed dependency on Guava.
 
 Bug Fixes
 
