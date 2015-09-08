@@ -546,8 +546,8 @@ public class Speller {
    * 
    * @param i length of first word (here: misspelled) - 1;
    * @param j length of second word (here: candidate) - 1.
-   * @param wordIndex (TODO?)
-   * @param candIndex (TODO?)
+   * @param wordIndex (TODO: javadoc?)
+   * @param candIndex (TODO: javadoc?)
    * @return Edit distance between the two words. Remarks: See Oflazer.
    */
   public int ed(final int i, final int j, final int wordIndex, final int candIndex) {
@@ -611,8 +611,8 @@ public class Speller {
    * Calculates cut-off edit distance.
    * 
    * @param depth current length of candidates.
-   * @param wordIndex (TODO?)
-   * @param candIndex (TODO?)
+   * @param wordIndex (TODO: javadoc?)
+   * @param candIndex (TODO: javadoc?)
    * @return Cut-off edit distance. Remarks: See Oflazer.
    */
 
@@ -771,12 +771,16 @@ public class Speller {
   }
 
   /**
-   * @param str (TODO?)
+   * @param str The string to check.
    * @return Returns true if str is CamelCase.
    */
   public boolean isCamelCase(final String str) {
-    return isNotEmpty(str) && !isAllUppercase(str) && isNotCapitalizedWord(str) && Character.isUpperCase(str.charAt(0))
-        && (!(str.length() > 1) || Character.isLowerCase(str.charAt(1))) && isNotAllLowercase(str);
+    return isNotEmpty(str) && 
+           !isAllUppercase(str) && 
+           isNotCapitalizedWord(str) && 
+           Character.isUpperCase(str.charAt(0)) && 
+           (!(str.length() > 1) || Character.isLowerCase(str.charAt(1))) 
+           && isNotAllLowercase(str);
   }
 
   /**

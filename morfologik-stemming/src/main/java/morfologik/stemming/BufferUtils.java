@@ -2,6 +2,7 @@ package morfologik.stemming;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 
 public final class BufferUtils {
   /**
@@ -39,5 +40,17 @@ public final class BufferUtils {
       buffer = CharBuffer.allocate(capacity);
     }
     return buffer;
+  }
+
+  /**
+   * @param buffer The buffer to convert to a string.
+   * @param charset The charset to use when converting bytes to characters.
+   * @return A string representation of buffer's content.
+   */
+  public static String toString(ByteBuffer buffer, Charset charset) {
+    buffer = buffer.slice();
+    byte [] buf = new byte [buffer.remaining()];
+    buffer.get(buf);
+    return new String(buf, charset);
   }
 }

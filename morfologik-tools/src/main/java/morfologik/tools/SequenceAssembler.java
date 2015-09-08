@@ -1,46 +1,43 @@
 package morfologik.tools;
 
-import morfologik.fsa.FSA5;
-import morfologik.tools.SequenceEncoders.IEncoder;
+import java.nio.ByteBuffer;
 
-import com.carrotsearch.hppc.ByteArrayList;
+import morfologik.fsa.FSA5;
+import morfologik.stemming.ByteArray;
+import morfologik.stemming.ISequenceEncoder;
 
 final class SequenceAssembler {
-	private final byte annotationSeparator;
+  private final ByteArray ba = new ByteArray();
+  private final byte annotationSeparator;
+  private ByteBuffer tmp;
 
-	private final ByteArrayList src = new ByteArrayList();
-	private final ByteArrayList dst = new ByteArrayList();
-	private final ByteArrayList tmp = new ByteArrayList();
+  private final ISequenceEncoder encoder;
 
-    private final IEncoder encoder;
+  public SequenceAssembler(ISequenceEncoder encoder) {
+    this(encoder, FSA5.DEFAULT_ANNOTATION);
+  }
 
-	public SequenceAssembler(SequenceEncoders.IEncoder encoder) {
-		this(encoder, FSA5.DEFAULT_ANNOTATION);
-	}
+  public SequenceAssembler(ISequenceEncoder encoder, byte annotationSeparator) {
+    this.annotationSeparator = annotationSeparator;
+    this.encoder = encoder;
+  }
 
-	public SequenceAssembler(SequenceEncoders.IEncoder encoder, byte annotationSeparator) {
-		this.annotationSeparator = annotationSeparator;
-		this.encoder = encoder;
-	}
+  byte[] encode(byte[] wordForm, byte[] wordLemma, byte[] wordTag) {
+    tmp = encoder.encode(tmp, ByteBuffer.wrap(wordForm), ByteBuffer.wrap(wordLemma));
 
-    byte [] encode(byte [] wordForm, byte [] wordLemma, byte [] wordTag)
-    {
-        src.clear(); 
-        dst.clear(); 
-        tmp.clear();
+    ba.clear();
+
+    ba.add(wordForm);
+    ba.add(annotationSeparator);
     
-        tmp.add(wordForm);
-        tmp.add(annotationSeparator);
-        
-        src.add(wordForm);
-        dst.add(wordLemma);
-        encoder.encode(src, dst, tmp);
+    assert tmp.hasArray() && tmp.arrayOffset() == 0 && tmp.position() == 0;
+    ba.add(tmp.array(), 0, tmp.remaining());
+    ba.add(annotationSeparator);
 
-        tmp.add(annotationSeparator);
-        if (wordTag != null) {
-    	    tmp.add(wordTag);
-        }
-    
-        return tmp.toArray();
+    if (wordTag != null) {
+      ba.add(wordTag);
     }
+
+    return ba.toArray();
+  }
 }

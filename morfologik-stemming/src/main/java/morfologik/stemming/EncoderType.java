@@ -1,7 +1,7 @@
 package morfologik.stemming;
 
 /**
- * Sequence encoder type.
+ * Known {@link ISequenceEncoder}s.
  */
 public enum EncoderType {
     SUFFIX,

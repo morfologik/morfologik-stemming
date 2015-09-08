@@ -15,6 +15,7 @@ import java.util.Locale;
 
 import morfologik.fsa.FSA5;
 import morfologik.stemming.EncoderType;
+import morfologik.stemming.Encoders;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -67,7 +68,7 @@ class MorphEncodingTool extends Tool {
 			separatorByte = FSABuildTool.checkSingleByte(Character.toString(separator), Charset.defaultCharset());
 		}
 		
-        encoder = new SequenceAssembler(SequenceEncoders.forType(encType), (byte) separator);
+        encoder = new SequenceAssembler(Encoders.forType(encType), (byte) separator);
 
 		// Determine input and output streams.
 		final DataInputStream input = initializeInput(line);

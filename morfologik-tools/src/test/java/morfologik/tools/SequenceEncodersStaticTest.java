@@ -1,23 +1,21 @@
 package morfologik.tools;
 
-import static org.junit.Assert.*;
-
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 
 import morfologik.stemming.EncoderType;
+import morfologik.stemming.Encoders;
 
 import org.junit.Test;
 
-import com.google.common.base.Charsets;
+import com.carrotsearch.randomizedtesting.RandomizedTest;
 
 /*
  * 
  */
-public class SequenceEncodersStaticTest {
-  private SequenceAssembler suffix = new SequenceAssembler(new SequenceEncoders.TrimSuffixEncoder());
-  private SequenceAssembler prefix = new SequenceAssembler(new SequenceEncoders.TrimPrefixAndSuffixEncoder());
-  private SequenceAssembler infix = new SequenceAssembler(new SequenceEncoders.TrimInfixAndSuffixEncoder());
+public class SequenceEncodersStaticTest extends RandomizedTest {
+  private SequenceAssembler suffix = new SequenceAssembler(new Encoders.TrimSuffixEncoder());
+  private SequenceAssembler prefix = new SequenceAssembler(new Encoders.TrimPrefixAndSuffixEncoder());
+  private SequenceAssembler infix = new SequenceAssembler(new Encoders.TrimInfixAndSuffixEncoder());
 
   @Test
   public void testStandardEncode() throws Exception {
@@ -30,10 +28,10 @@ public class SequenceEncodersStaticTest {
   public void testSeparatorChange() throws Exception {
     assertEquals("abc+Ad+tag", encode(suffix, "abc", "abcd", "tag"));
 
-    SequenceAssembler assembler = new SequenceAssembler(new SequenceEncoders.TrimSuffixEncoder(), (byte) '_');
+    SequenceAssembler assembler = new SequenceAssembler(new Encoders.TrimSuffixEncoder(), (byte) '_');
     assertEquals("abc_Ad_tag", encode(assembler, "abc", "abcd", "tag"));
 
-    assembler = new SequenceAssembler(new SequenceEncoders.TrimSuffixEncoder(), (byte) '\t');
+    assembler = new SequenceAssembler(new Encoders.TrimSuffixEncoder(), (byte) '\t');
     assertEquals("abc\tAd\ttag", encode(assembler, "abc", "abcd", "tag"));
   }
 
@@ -80,12 +78,11 @@ public class SequenceEncodersStaticTest {
   @Test
   public void testAllEncodersHaveImplementations() {
     for (EncoderType t : EncoderType.values()) {
-      assertNotNull(null != SequenceEncoders.forType(t));
+      assertNotNull(null != Encoders.forType(t));
     }
   }
 
   private String encode(SequenceAssembler assembler, String wordForm, String wordLemma, String wordTag) {
-    Charset UTF8 = Charsets.UTF_8;
     return new String(assembler.encode(wordForm.getBytes(UTF8), wordLemma.getBytes(UTF8), wordTag.getBytes(UTF8)), UTF8);
   }
 }

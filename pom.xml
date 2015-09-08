@@ -56,7 +56,6 @@
     <version.assertj>2.2.0</version.assertj>
     <version.commons-cli>1.3.1</version.commons-cli>
     <version.commons-lang>2.6</version.commons-lang>
-    <version.guava>18.0</version.guava>
     <version.hppc>0.7.1</version.hppc>
     <version.junit>4.12</version.junit>
     <version.randomizedtesting>2.1.16</version.randomizedtesting>
@@ -92,12 +91,6 @@
         <groupId>commons-lang</groupId>
         <artifactId>commons-lang</artifactId>
         <version>${version.commons-lang}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>${version.guava}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -1,6 +1,6 @@
 package morfologik.stemming;
 
-import static morfologik.fsa.MatchResult.*;
+import static morfologik.fsa.MatchResult.SEQUENCE_IS_A_PREFIX;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -12,8 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import morfologik.fsa.FSA;
 import morfologik.fsa.ByteSequenceIterator;
+import morfologik.fsa.FSA;
 import morfologik.fsa.FSATraversal;
 import morfologik.fsa.MatchResult;
 
@@ -33,8 +33,6 @@ import morfologik.fsa.MatchResult;
  *      site</a>
  */
 public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
-  private static final int REMOVE_EVERYTHING = 255;
-
   /** An FSA used for lookups. */
   private final FSATraversal matcher;
 
@@ -103,6 +101,8 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
    */
   private final Dictionary dictionary;
 
+  private final ISequenceEncoder formEncoder;
+
   /**
    * <p>
    * Creates a new object of this class using the given FSA for word lookups
@@ -115,6 +115,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
       throws IllegalArgumentException {
     this.dictionary = dictionary;
     this.dictionaryMetadata = dictionary.metadata;
+    this.formEncoder = Encoders.forType(dictionary.metadata.getEncoderType());
     this.rootNode = dictionary.fsa.getRootNode();
     this.fsa = dictionary.fsa;
     this.matcher = new FSATraversal(fsa);
@@ -213,17 +214,17 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
            */
           int sepPos;
           for (sepPos = 0; sepPos < bbSize; sepPos++) {
-            if (ba[sepPos] == separator)
+            if (ba[sepPos] == separator) {
               break;
+            }
           }
 
           /*
            * Decode the stem into stem buffer.
            */
-          wordData.stemBuffer.clear();
-          wordData.stemBuffer = 
-              decodeBaseForm(wordData.stemBuffer, ba, sepPos, byteBuffer, dictionaryMetadata);
-          wordData.stemBuffer.flip();
+          wordData.stemBuffer = formEncoder.decode(wordData.stemBuffer,
+                                                   byteBuffer,
+                                                   ByteBuffer.wrap(ba, 0, sepPos));
 
           // Skip separator character.
           sepPos++;
@@ -233,8 +234,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
            */
           final int tagSize = bbSize - sepPos;
           if (tagSize > 0) {
-            wordData.tagBuffer = BufferUtils.ensureCapacity(
-                wordData.tagBuffer, tagSize);
+            wordData.tagBuffer = BufferUtils.ensureCapacity(wordData.tagBuffer, tagSize);
             wordData.tagBuffer.clear();
             wordData.tagBuffer.put(ba, sepPos, tagSize);
             wordData.tagBuffer.flip();
@@ -272,101 +272,6 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
       }
     }
     return sb.toString();
-  }
-
-  /**
-   * Decode the base form of an inflected word and save its decoded form into
-   * a byte buffer.
-   * 
-   * @param output
-   *            The byte buffer to save the result to. A new buffer may be
-   *            allocated if the capacity of <code>bb</code> is not large
-   *            enough to store the result. The buffer is not flipped upon
-   *            return.
-   * 
-   * @param inflectedForm
-   *            Inflected form's bytes (decoded properly).
-   * 
-   * @param encoded
-   *            Bytes of the encoded base form, starting at 0 index.
-   * 
-   * @param encodedLen
-   *            Length of the encode base form.
-   * 
-   * @return Returns either <code>bb</code> or a new buffer whose capacity is
-   *         large enough to store the output of the decoded data.
-   */
-  public static ByteBuffer decodeBaseForm(
-      ByteBuffer output,
-      byte[] encoded,
-      int encodedLen,
-      ByteBuffer inflectedForm,
-      DictionaryMetadata metadata) {
-    
-    // FIXME: We should eventually get rid of this method and use 
-    // each encoder's #decode method. The problem is that we'd have to include
-    // HPPC or roundtrip via HPPC to a ByteBuffer, which would slow things down.
-    // Since this is performance-crucial routine, I leave it for now.
-              
-    // Prepare the buffer.
-    output.clear();
-
-    assert inflectedForm.position() == 0;
-
-    // Increase buffer size (overallocating), if needed.
-    final byte[] src = inflectedForm.array();
-    final int srcLen = inflectedForm.remaining();
-    if (output.capacity() < srcLen + encodedLen) {
-      output = ByteBuffer.allocate(srcLen + encodedLen);
-    }
-
-    switch (metadata.getEncoderType()) {
-    case SUFFIX:
-      int suffixTrimCode = encoded[0];
-      int truncateBytes = suffixTrimCode - 'A' & 0xFF;
-      if (truncateBytes == REMOVE_EVERYTHING) {
-        truncateBytes = srcLen;
-      }
-      output.put(src, 0, srcLen - truncateBytes);
-      output.put(encoded, 1, encodedLen - 1);
-      break;
-
-    case PREFIX:
-      int truncatePrefixBytes = encoded[0] - 'A' & 0xFF;
-      int truncateSuffixBytes = encoded[1] - 'A' & 0xFF;
-      if (truncatePrefixBytes == REMOVE_EVERYTHING ||
-          truncateSuffixBytes == REMOVE_EVERYTHING) {
-        truncatePrefixBytes = srcLen;
-        truncateSuffixBytes = 0;
-      }
-      output.put(src, truncatePrefixBytes, srcLen - (truncateSuffixBytes + truncatePrefixBytes));
-      output.put(encoded, 2, encodedLen - 2);
-      break;
-
-    case INFIX:
-      int infixIndex  = encoded[0] - 'A' & 0xFF;
-      int infixLength = encoded[1] - 'A' & 0xFF;
-      truncateSuffixBytes = encoded[2] - 'A' & 0xFF;
-      if (infixLength == REMOVE_EVERYTHING ||
-          truncateSuffixBytes == REMOVE_EVERYTHING) {
-        infixIndex = 0;
-        infixLength = srcLen;
-        truncateSuffixBytes = 0;
-      }
-      output.put(src, 0, infixIndex);
-      output.put(src, infixIndex + infixLength, srcLen - (infixIndex + infixLength + truncateSuffixBytes));
-      output.put(encoded, 3, encodedLen - 3);
-      break;
-
-    case NONE:
-      output.put(encoded, 0, encodedLen);
-      break;
-
-    default:
-      throw new RuntimeException("Unhandled switch/case: " + metadata.getEncoderType());
-    }
-
-    return output;
   }
 
   /**

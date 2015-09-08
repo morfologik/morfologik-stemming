@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 
 import morfologik.fsa.FSA;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -74,12 +75,14 @@ public class DictionaryLookupTest {
     final URL url = this.getClass().getResource("test-infix.dict");
     final IStemmer s = new DictionaryLookup(Dictionary.read(url));
 
-    assertArrayEquals(new String[] { "Rzeczpospolita", "subst:irreg" },
-        stem(s, "Rzeczypospolitej"));
-    assertArrayEquals(new String[] { "Rzeczycki", "adj:pl:nom:m" }, stem(s,
-        "Rzeczyccy"));
-    assertArrayEquals(new String[] { "Rzeczpospolita", "subst:irreg" },
-        stem(s, "Rzecząpospolitą"));
+    Assertions.assertThat(stem(s, "Rzeczypospolitej"))
+      .containsExactly("Rzeczpospolita", "subst:irreg");
+
+    Assertions.assertThat(stem(s, "Rzeczyccy"))
+      .containsExactly("Rzeczycki", "adj:pl:nom:m");
+
+    Assertions.assertThat(stem(s, "Rzecząpospolitą"))
+      .containsExactly("Rzeczpospolita", "subst:irreg");
 
     // This word is not in the dictionary.
     assertNoStemFor(s, "martygalski");
@@ -98,17 +101,14 @@ public class DictionaryLookupTest {
     }
 
     // Make sure a sample of the entries is present.
-    assertTrue(entries.contains("Rzekunia Rzekuń subst:sg:gen:m"));
-    assertTrue(entries
-        .contains("Rzeczkowskie Rzeczkowski adj:sg:nom.acc.voc:n+adj:pl:acc.nom.voc:f.n"));
-    assertTrue(entries
-        .contains("Rzecząpospolitą Rzeczpospolita subst:irreg"));
-    assertTrue(entries
-        .contains("Rzeczypospolita Rzeczpospolita subst:irreg"));
-    assertTrue(entries
-        .contains("Rzeczypospolitych Rzeczpospolita subst:irreg"));
-    assertTrue(entries
-        .contains("Rzeczyckiej Rzeczycki adj:sg:gen.dat.loc:f"));
+    Assertions.assertThat(entries)
+      .contains(
+          "Rzekunia Rzekuń subst:sg:gen:m",
+          "Rzeczkowskie Rzeczkowski adj:sg:nom.acc.voc:n+adj:pl:acc.nom.voc:f.n",
+          "Rzecząpospolitą Rzeczpospolita subst:irreg",
+          "Rzeczypospolita Rzeczpospolita subst:irreg",
+          "Rzeczypospolitych Rzeczpospolita subst:irreg",
+          "Rzeczyckiej Rzeczycki adj:sg:gen.dat.loc:f");
   }
 
   /* */
