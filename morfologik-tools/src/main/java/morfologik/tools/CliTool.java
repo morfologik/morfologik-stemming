@@ -81,6 +81,13 @@ public abstract class CliTool implements Callable<ExitStatus> {
     }
   }
 
+  protected static <T> T checkNotNull(T arg) {
+    if (arg == null) {
+      throw new IllegalArgumentException("Argument must not be null.");
+    }
+    return arg;
+  }
+
   private static void helpDisplayCommandOptions(PrintStream pw, String command, JCommander jc) {
     StringBuilder sb = new StringBuilder();
     jc = jc.getCommands().get(command);

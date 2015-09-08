@@ -89,6 +89,19 @@ public class BuildFSA extends CliTool {
 
   BuildFSA() {
   }
+  
+  public BuildFSA(Path input,
+                  Path output,
+                  Format format,
+                  boolean ignoreBom,
+                  boolean ignoreCr,
+                  boolean ignoreEmpty) {
+    this.input = checkNotNull(input);
+    this.output = checkNotNull(output);
+    this.ignoreBom = ignoreBom;
+    this.ignoreCr = ignoreCr;
+    this.ignoreEmpty = ignoreEmpty;
+  }
 
   @Override
   public ExitStatus call() throws Exception {

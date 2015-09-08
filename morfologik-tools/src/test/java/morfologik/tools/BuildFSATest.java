@@ -8,7 +8,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -53,14 +52,15 @@ public class BuildFSATest extends RandomizedTest {
       }
     }
     
-    String format = randomFrom(Arrays.asList("CFSA2", "FSA5"));
+    BuildFSA.Format format = randomFrom(BuildFSA.Format.values());
 
-    BuildFSA.main(new String[] {
-        "--exit", "false",
-        "--ignore-empty",
-        "--format", format,
-        "--input", input.toAbsolutePath().toString(), 
-        "--output", output.toAbsolutePath().toString() });
+    Assertions.assertThat(new BuildFSA(
+        input,
+        output,
+        format,
+        false,
+        false,
+        true).call()).isEqualTo(ExitStatus.SUCCESS);
 
     try (InputStream is = Files.newInputStream(output)) {
       FSA fsa = FSA.read(is);
