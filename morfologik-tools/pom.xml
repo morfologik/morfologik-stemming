@@ -62,6 +62,49 @@
           </archive>
         </configuration>
       </plugin>
+      
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>package-zip</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <formats>
+                <format>zip</format>
+              </formats>
+              <descriptors>
+                <descriptor>src/main/assembly/package.xml</descriptor>
+              </descriptors>
+              <attach>true</attach>
+              <appendAssemblyId>true</appendAssemblyId>
+              <finalName>${project.artifactId}-${project.version}</finalName>
+            </configuration>
+          </execution>
+          
+          <execution>
+            <id>package-dir</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <formats>
+                <format>dir</format>
+              </formats>
+              <descriptors>
+                <descriptor>src/main/assembly/package.xml</descriptor>
+              </descriptors>
+              <attach>false</attach>
+              <appendAssemblyId>false</appendAssemblyId>
+              <finalName>${project.artifactId}-${project.version}</finalName>
+            </configuration>
+          </execution>          
+        </executions>
+      </plugin>    
 
       <plugin>
         <groupId>de.thetaphi</groupId>
