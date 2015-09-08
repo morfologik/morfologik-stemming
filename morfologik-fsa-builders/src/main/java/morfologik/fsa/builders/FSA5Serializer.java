@@ -110,14 +110,6 @@ public final class FSA5Serializer implements FSASerializer {
   }
 
   /**
-   * {@inheritDoc}
-   */
-  @Override
-  public FSASerializer withLogger(IMessageLogger logger) {
-    return this;
-  }
-
-  /**
    * Serialize root state <code>s</code> to an output stream in
    * <code>FSA5</code> format.
    * 

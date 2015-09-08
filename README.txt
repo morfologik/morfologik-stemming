@@ -1,4 +1,3 @@
-
 MORFOLOGIK
 ==========
 
@@ -19,38 +18,14 @@ morfologik-polish:
 
   - Precompiled dictionary of inflected forms, stems and tags for Polish.
 
-morfologik-tools:
-
-  - Command line tools to preprocess, build and dump FSA automata and dictionaries.
-
-  - There are a few command-line tools you may find useful. Type:
-    java -jar lib/morfologik-tools-${version}.jar
-    for an up-to-date list of all tools.
-
 morfologik-speller:
 
   - Simplistic automaton-based spelling correction (suggester).
 
+morfologik-tools:
 
-COMPILING
-=========
-
-mvn package
-
-
-AUTHORS
-=======
-
-Marcin Miłkowski (http://marcinmilkowski.pl) [linguistic data lead, code]
-Dawid Weiss (http://www.dawidweiss.com) [fsa lead, code]
-
-
-CONTRIBUTORS
-============
-
-Daniel Naber
-Jaume Ortolà
-Grzegorz Słowikowski
+  - Command line tools to preprocess, build and dump FSA automata and 
+    dictionaries.
 
 
 QUESTIONS, COMMENTS

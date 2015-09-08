@@ -29,14 +29,6 @@ public interface FSASerializer {
   public Set<FSAFlags> getFlags();
 
   /**
-   * Log extra messages during construction.
-   * 
-   * @param logger The logger to receive messages during serialization.
-   * @return Returns <code>this</code> for call chaining.
-   */
-  public FSASerializer withLogger(IMessageLogger logger);
-
-  /**
    * Sets the filler separator (only if {@link #getFlags()} returns
    * {@link FSAFlags#SEPARATORS}).
    * 

@@ -8,9 +8,12 @@ import java.io.OutputStream;
 import java.util.ArrayDeque;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import morfologik.fsa.CFSA2;
 import morfologik.fsa.FSA;
@@ -38,6 +41,8 @@ import com.carrotsearch.hppc.cursors.IntIntCursor;
  * @see CFSA2
  */
 public final class CFSA2Serializer implements FSASerializer {
+  private final Logger logger = Logger.getLogger(getClass().getName());
+
   /**
    * Supported flags.
    */
@@ -80,11 +85,6 @@ public final class CFSA2Serializer implements FSASerializer {
    * index <code>i<code> has the index or zero (no integration).
    */
   private int[] labelsInvIndex;
-
-  /**
-   * Logger for progress.
-   */
-  private IMessageLogger logger = new NullMessageLogger();
 
   /**
    * Serialize the automaton with the number of right-language sequences in each
@@ -186,12 +186,6 @@ public final class CFSA2Serializer implements FSASerializer {
       }
     }
 
-    this.logger.startPart("Label distribution");
-    for (IntIntHolder c : labelAndCount) {
-      this.logger.log("%12s %10s", "0x" + Integer.toHexString(c.a), c.b);
-    }
-    this.logger.endPart();
-
     labelsIndex = new byte[1 + Math.min(labelAndCount.size(), CFSA2.LABEL_INDEX_SIZE)];
     labelsInvIndex = new int[256];
     for (int i = labelsIndex.length - 1; i > 0 && !labelAndCount.isEmpty(); i--) {
@@ -253,13 +247,12 @@ public final class CFSA2Serializer implements FSASerializer {
      * Probe the initial region a little bit, looking for optimal cut. It can't be binary search
      * because the result isn't monotonic.
      */
-    logger.startPart("Compacting");
-    logger.log("Initial output size: %,d", serializedSize);
+    log(Level.FINE, "Compacting, initial output size: %,d", serializedSize);
     int cutAt = 0;
     for (int cut = Math.min(25, states.size()); cut <= Math.min(150, states.size()); cut += 25) {
       sublist.elementsCount = cut;
       int newSize = linearizeAndCalculateOffsets(fsa, sublist, linearized, offsets);
-      logger.log("Moved %,d states, output size: %,d", sublist.size(), newSize);
+      log(Level.FINE, "Moved %,d states, output size: %,d", sublist.size(), newSize);
       if (newSize >= serializedSize) {
         break;
       }
@@ -271,11 +264,12 @@ public final class CFSA2Serializer implements FSASerializer {
      */
     sublist.elementsCount = cutAt;
     int size = linearizeAndCalculateOffsets(fsa, sublist, linearized, offsets);
-
-    logger.log("Will move %,d states, final size: %,d", sublist.size(), size);
-    logger.endPart();
-
+    log(Level.INFO, "%,d states moved, final size: %,d", sublist.size(), size);
     return linearized;
+  }
+
+  private void log(Level level, String msg, Object... args) {
+    logger.log(level, String.format(Locale.ROOT, msg, args));
   }
 
   /**
@@ -526,13 +520,6 @@ public final class CFSA2Serializer implements FSASerializer {
   public CFSA2Serializer withAnnotationSeparator(byte annotationSeparator) {
     throw new UnsupportedOperationException("CFSA2 does not support separator. Use .info file.");
   }
-
-  @Override
-  public CFSA2Serializer withLogger(IMessageLogger logger) {
-    this.logger = logger;
-    return this;
-  }
-  
 
   /**
    * Write a v-int to a byte array.

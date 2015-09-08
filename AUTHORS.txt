@@ -1,0 +1,12 @@
+Committers
+==========
+
+Marcin Miłkowski
+Dawid Weiss
+
+Contributors
+============
+
+Daniel Naber
+Jaume Ortolà
+Grzegorz Słowikowski
