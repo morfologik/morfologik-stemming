@@ -15,6 +15,9 @@ public interface IStemmer {
 	 * The returned list and any object it contains are not usable after a
 	 * subsequent call to this method. Any data that should be stored in between
 	 * must be copied by the caller.
+	 * 
+	 * @param word The word (typically inflected) to look up base forms for. 
+	 * @return A list of {@link WordData} entries (possibly empty).
 	 */
 	public List<WordData> lookup(CharSequence word);
 }

@@ -282,7 +282,10 @@ public enum DictionaryAttribute {
   public final String propertyName;
 
   /**
-   * Converts a string to the given attribute's value (covariants used).
+   * Converts a string to the given attribute's value.
+
+   * @param value The value to convert to an attribute value. 
+   * @return Returns the attribute's value converted from a string.
    * 
    * @throws IllegalArgumentException
    *             If the input string cannot be converted to the attribute's
@@ -293,7 +296,9 @@ public enum DictionaryAttribute {
   }
 
   /**
-   * Return an {@link DictionaryAttribute} by its {@link #propertyName}.
+   * @param propertyName The property of a {@link DictionaryAttribute}.
+   * @return Return a {@link DictionaryAttribute} associated with
+   * a given {@link #propertyName}. 
    */
   public static DictionaryAttribute fromPropertyName(String propertyName) {
     DictionaryAttribute value = attrsByPropertyName.get(propertyName);

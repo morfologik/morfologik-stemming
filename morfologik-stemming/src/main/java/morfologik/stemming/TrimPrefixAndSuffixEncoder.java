@@ -29,12 +29,6 @@ import java.nio.ByteBuffer;
  * dst: xyz
  * encoded: ADxyz
  * </pre>
- * 
- * <p>
- * <strong>Note:</strong> Each code's length is a single byte. If any is equal
- * to {@link Encoders#REMOVE_EVERYTHING} the entire <code>src</code>
- * sequence should be discarded.
- * </p>
  */
 public class TrimPrefixAndSuffixEncoder implements ISequenceEncoder {
   /**

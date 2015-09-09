@@ -39,13 +39,20 @@ public abstract class CliTool implements Callable<ExitStatus> {
     }
   }
 
-  /** Call {@link System#exit(int)} at the end of command processing. */
+  /**
+   * Call {@link System#exit(int)} at the end of command processing.
+   * 
+   * @param flag Call {@link System#exit(int)} if <code>true</code>.
+   */
   public void setCallSystemExit(boolean flag) {
     this.callSystemExit = flag;
   }
 
   /**
-   * Parse and execute one of the commands. 
+   * Parse and execute one of the commands.
+   * 
+   * @param args Command line arguments (command and options).
+   * @param commands A list of commands.
    */
   protected static void main(String[] args, CliTool... commands) {
     if (commands.length == 1) {
@@ -107,9 +114,12 @@ public abstract class CliTool implements Callable<ExitStatus> {
   }
 
   /**
-   * Parse and execute a single command. 
+   * Parse and execute a single command.
+   *  
+   * @param args Command line arguments (command and options).
+   * @param command The command to execute.
    */
-  private static void main(String[] args, CliTool command) {
+  protected static void main(String[] args, CliTool command) {
     JCommander jc = new JCommander(command);
     jc.addConverterFactory(new CustomParameterConverters());
     jc.setProgramName(command.getClass().getAnnotation(Parameters.class).commandNames()[0]);

@@ -29,12 +29,6 @@ import java.nio.ByteBuffer;
  * dst: aller
  * encoded: BBCr
  * </pre>
- * 
- * <p>
- * <strong>Note:</strong> Each code's length is a single byte. If any is equal
- * to {@link Encoders#REMOVE_EVERYTHING} the entire <code>src</code>
- * sequence should be discarded.
- * </p>
  */
 public class TrimInfixAndSuffixEncoder implements ISequenceEncoder {
   /**

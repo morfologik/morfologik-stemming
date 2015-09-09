@@ -1,6 +1,5 @@
 package morfologik.stemming;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -54,38 +53,37 @@ public final class Dictionary {
   /**
    * Attempts to load a dictionary using the path to the FSA file and the
    * expected metadata extension.
+   * 
+   * @param location The location of the dictionary file (<code>*.dict</code>).
+   * @return An instantiated dictionary.
+   * @throws IOException if an I/O error occurs.
    */
-  public static Dictionary read(Path fsa) throws IOException {
-    final Path featureMap = 
-        fsa.resolveSibling(DictionaryMetadata.getExpectedMetadataFileName(fsa.getFileName().toString()));
+  public static Dictionary read(Path location) throws IOException {
+    final Path metadata = DictionaryMetadata.getExpectedMetadataLocation(location);
 
-    try (InputStream fsaStream = Files.newInputStream(fsa);
-         InputStream metadataStream = Files.newInputStream(featureMap)) {
+    try (InputStream fsaStream = Files.newInputStream(location);
+         InputStream metadataStream = Files.newInputStream(metadata)) {
       return read(fsaStream, metadataStream);
     }
   }
 
   /**
-   * Attempts to load a dictionary using the path to the FSA file and the
-   * expected metadata extension.
-   */
-  public static Dictionary read(File fsa) throws IOException {
-    return read(fsa.toPath());
-  }
-
-  /**
    * Attempts to load a dictionary using the URL to the FSA file and the
    * expected metadata extension.
+   * 
+   * @param dictURL The URL pointing to the dictionary file (<code>*.dict</code>).
+   * @return An instantiated dictionary.
+   * @throws IOException if an I/O error occurs.
    */
-  public static Dictionary read(URL fsaURL) throws IOException {
+  public static Dictionary read(URL dictURL) throws IOException {
     final URL featureMapURL;
     try {
-      featureMapURL = new URL(fsaURL, DictionaryMetadata.getExpectedMetadataFileName(fsaURL.toURI().getPath()));
+      featureMapURL = new URL(dictURL, DictionaryMetadata.getExpectedMetadataFileName(dictURL.toURI().getPath()));
     } catch (MalformedURLException | URISyntaxException e) {
-      throw new IOException("Couldn't construct relative feature map URL for: " + fsaURL, e);
+      throw new IOException("Couldn't construct relative feature map URL for: " + dictURL, e);
     }
 
-    try (InputStream fsaStream = fsaURL.openStream();
+    try (InputStream fsaStream = dictURL.openStream();
          InputStream metadataStream = featureMapURL.openStream()) {
       return read(fsaStream, metadataStream);
     }
@@ -98,6 +96,7 @@ public final class Dictionary {
    * @param fsaStream The stream with FSA data
    * @param metadataStream The stream with metadata
    * @return Returns an instantiated {@link Dictionary}.
+   * @throws IOException if an I/O error occurs.
    */
   public static Dictionary read(InputStream fsaStream, InputStream metadataStream) throws IOException {
     return new Dictionary(FSA.read(fsaStream), DictionaryMetadata.read(metadataStream));    

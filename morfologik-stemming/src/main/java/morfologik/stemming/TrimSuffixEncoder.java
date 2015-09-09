@@ -27,12 +27,6 @@ import java.nio.ByteBuffer;
  * dst: bar
  * encoded: Dbar
  * </pre>
- * 
- * <p>
- * <strong>Note:</strong> The code length is a single byte. If equal to
- * {@link Encoders#REMOVE_EVERYTHING} the entire <code>src</code>
- * sequence should be discarded.
- * </p>
  */
 public class TrimSuffixEncoder implements ISequenceEncoder {
   /**

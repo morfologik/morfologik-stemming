@@ -104,10 +104,10 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
   private final ISequenceEncoder sequenceEncoder;
 
   /**
-   * <p>
    * Creates a new object of this class using the given FSA for word lookups
    * and encoding for converting characters to bytes.
    * 
+   * @param dictionary The dictionary to use for lookups.
    * @throws IllegalArgumentException
    *             if FSA's root node cannot be acquired (dictionary is empty).
    */
@@ -249,11 +249,14 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
   }
 
   /**
-   * Apply replacements partial string replacements from
-   * a given map.
+   * Apply partial string replacements from a given map.
    * 
    * Useful if the word needs to be normalized somehow (i.e., ligatures,
    * apostrophes and such).
+   * 
+   * @param word The word to apply replacements to.
+   * @param replacements A map of replacements (from-&gt;to).
+   * @return Returns a new string with all replacements applied.
    */
   public static String applyReplacements(CharSequence word, LinkedHashMap<String, String> replacements) {
     // quite horrible from performance point of view; this should really be a transducer.

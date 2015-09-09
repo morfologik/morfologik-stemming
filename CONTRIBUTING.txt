@@ -1,0 +1,6 @@
+Contributions are welcome!
+
+If you use Eclipse, set up project formatting and
+validation with:
+
+mvn -Peclipse

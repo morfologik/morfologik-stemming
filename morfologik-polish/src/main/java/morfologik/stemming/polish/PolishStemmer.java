@@ -39,7 +39,7 @@ public final class PolishStemmer implements IStemmer, Iterable<WordData> {
   }
 
   /**
-   * Return the underlying {@link Dictionary} driving the stemmer.
+   * @return Return the underlying {@link Dictionary} driving the stemmer.
    */
   public Dictionary getDictionary() {
     return dictionary;

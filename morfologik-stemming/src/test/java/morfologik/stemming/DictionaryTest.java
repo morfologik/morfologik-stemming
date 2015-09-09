@@ -24,6 +24,5 @@ public class DictionaryTest extends RandomizedTest {
 
     assertNotNull(Dictionary.read(dict.toUri().toURL()));
     assertNotNull(Dictionary.read(dict));
-    assertNotNull(Dictionary.read(dict.toFile()));
   }
 }

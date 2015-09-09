@@ -16,11 +16,16 @@ public final class BufferUtils {
    * Ensure the byte buffer's capacity. If a new buffer is allocated, its
    * content is empty (the old buffer's contents is not copied).
    * 
+   * @param capacity The required capacity of the buffer.
+   * 
    * @param buffer
    *          The buffer to check or <code>null</code> if a new buffer should be
    *          allocated.
+   *
+   * @return Returns the same buffer or a new buffer with the given capacity. 
    */
   public static ByteBuffer ensureCapacity(ByteBuffer buffer, int capacity) {
+    // TODO: GH-63 
     if (buffer == null || buffer.capacity() < capacity) {
       buffer = ByteBuffer.allocate(capacity);
     }
@@ -31,11 +36,16 @@ public final class BufferUtils {
    * Ensure the char buffer's capacity. If a new buffer is allocated, its
    * content is empty (the old buffer's contents is not copied).
    * 
+   * @param capacity The required capacity of the buffer.
+   * 
    * @param buffer
    *          The buffer to check or <code>null</code> if a new buffer should be
    *          allocated.
+   *
+   * @return Returns the same buffer or a new buffer with the given capacity. 
    */
   public static CharBuffer ensureCapacity(CharBuffer buffer, int capacity) {
+    // TODO: GH-63 
     if (buffer == null || buffer.capacity() < capacity) {
       buffer = CharBuffer.allocate(capacity);
     }
@@ -55,7 +65,7 @@ public final class BufferUtils {
   }
 
   /**
-   * @param The buffer to read from.
+   * @param buffer The buffer to read from.
    * @return Returns the remaining bytes from the buffer copied to an array.
    */
   public static byte[] toArray(ByteBuffer buffer) {

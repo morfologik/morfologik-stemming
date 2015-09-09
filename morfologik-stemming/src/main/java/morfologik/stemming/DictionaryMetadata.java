@@ -111,7 +111,7 @@ public final class DictionaryMetadata {
   public final static String METADATA_FILE_EXTENSION = "info";
 
   /**
-   * Return all attributes.
+   * @return Return all metadata attributes.  
    */
   public Map<DictionaryAttribute, String> getAttributes() {
     return Collections.unmodifiableMap(attributes);
@@ -141,20 +141,21 @@ public final class DictionaryMetadata {
   /**
    * Create an instance from an attribute map.
    * 
+   * @param attrs A set of {@link DictionaryAttribute} keys and their associated values.
    * @see DictionaryMetadataBuilder
    */
-  public DictionaryMetadata(Map<DictionaryAttribute, String> userAttrs) {
+  public DictionaryMetadata(Map<DictionaryAttribute, String> attrs) {
     this.boolAttributes = new EnumMap<DictionaryAttribute,Boolean>(DictionaryAttribute.class);
     this.attributes = new EnumMap<DictionaryAttribute, String>(DictionaryAttribute.class);
-    this.attributes.putAll(userAttrs);
+    this.attributes.putAll(attrs);
 
-    EnumMap<DictionaryAttribute, String> attrs = new EnumMap<DictionaryAttribute, String>(DEFAULT_ATTRIBUTES);
-    attrs.putAll(userAttrs);
+    EnumMap<DictionaryAttribute, String> attributeMap = new EnumMap<DictionaryAttribute, String>(DEFAULT_ATTRIBUTES);
+    attributeMap.putAll(attrs);
 
     // Convert some attrs from the map to local fields for performance reasons.
     EnumSet<DictionaryAttribute> requiredAttributes = EnumSet.copyOf(REQUIRED_ATTRIBUTES);
 
-    for (Map.Entry<DictionaryAttribute,String> e : attrs.entrySet()) {
+    for (Map.Entry<DictionaryAttribute,String> e : attributeMap.entrySet()) {
       requiredAttributes.remove(e.getKey());
 
       // Run validation and conversion on all of them.
@@ -257,7 +258,7 @@ public final class DictionaryMetadata {
   }
 
   /**
-   * Returns a new {@link CharsetDecoder} for the {@link #encoding}.
+   * @return Returns a new {@link CharsetDecoder} for the {@link #encoding}. 
    */
   public CharsetDecoder getDecoder() {
     try {
@@ -271,7 +272,7 @@ public final class DictionaryMetadata {
   }
 
   /**
-   * Returns a new {@link CharsetEncoder} for the {@link #encoding}.
+   * @return Returns a new {@link CharsetEncoder} for the {@link #encoding}.
    */
   public CharsetEncoder getEncoder() {
     try {
@@ -283,16 +284,18 @@ public final class DictionaryMetadata {
   }
 
   /**
-   * Return sequence encoder type.
+   * @return Return sequence encoder type.
    */
   public EncoderType getSequenceEncoderType() {
     return encoderType;
   }
 
   /**
-   * Returns the {@link #separator} byte converted to a single <code>char</code>. Throws
-   * a {@link RuntimeException} if this conversion is for some reason impossible
-   * (the byte is a surrogate pair, FSA's {@link #encoding} is not available).
+   * @return Returns the {@link #separator} byte converted to a single
+   *         <code>char</code>.
+   * @throws RuntimeException
+   *           if this conversion is for some reason impossible (the byte is a
+   *           surrogate pair, FSA's {@link #encoding} is not available).
    */
   public char getSeparatorAsChar() {
     return separatorChar;
@@ -309,7 +312,10 @@ public final class DictionaryMetadata {
    * Returns the expected name of the metadata file, based on the name of the
    * dictionary file. The expected name is resolved by truncating any
    * file extension of <code>name</code> and appending
-   * {@link METADATA_FILE_EXTENSION}.
+   * {@link DictionaryMetadata#METADATA_FILE_EXTENSION}.
+   * 
+   * @param dictionaryFile The name of the dictionary (<code>*.dict</code>) file. 
+   * @return Returns the expected name of the metadata file. 
    */
   public static String getExpectedMetadataFileName(String dictionaryFile) {
     final int dotIndex = dictionaryFile.lastIndexOf('.');
@@ -324,7 +330,7 @@ public final class DictionaryMetadata {
   }
 
   /**
-   * @param input The location of the dictionary file.
+   * @param dictionary The location of the dictionary file.
    * @return Returns the expected location of a metadata file.
    */
   public static Path getExpectedMetadataLocation(Path dictionary) {
@@ -334,6 +340,10 @@ public final class DictionaryMetadata {
 
   /**
    * Read dictionary metadata from a property file (stream).
+   * 
+   * @param metadataStream The stream with metadata. 
+   * @return Returns {@link DictionaryMetadata} read from a the stream (property file).
+   * @throws IOException Thrown if an I/O exception occurs. 
    */
   public static DictionaryMetadata read(InputStream metadataStream) throws IOException {
     Map<DictionaryAttribute, String> map = new HashMap<DictionaryAttribute, String>();
@@ -381,6 +391,9 @@ public final class DictionaryMetadata {
 
   /**
    * Write dictionary attributes (metadata).
+   * 
+   * @param writer The writer to write to.
+   * @throws IOException Thrown when an I/O error occurs.
    */
   public void write(Writer writer) throws IOException {
     final Properties properties = new Properties();
