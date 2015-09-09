@@ -1,0 +1,23 @@
+#
+# This example compiles a dictionary for use with DictionaryLookup 
+# (dictionary-driven stemming and morphological tag lookup).
+#
+# The input file must contain, in each \n-delimited line a sequence of:
+# 
+# lemma;inflected;tag
+#
+# The separator character (byte) is configurable.
+# The tag is optional.
+# 
+# Note that, in addition to the input file, the compiler will
+# also require an associated dictionary "metadata" file, which tells
+# it how to compress and interpret the input.
+#
+# Open and inspect the content of this example's input files:
+#   04-dict-compile.input
+#   04-dict-compile.info
+#
+
+java -jar ../lib/${project.artifactId}-${project.version}.jar dict_compile --input 04-dict-compile.input
+
+# The compiled dictionary should be written to 04-dict-compile.dict.

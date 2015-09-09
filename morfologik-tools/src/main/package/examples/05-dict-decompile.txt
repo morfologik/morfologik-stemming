@@ -1,0 +1,8 @@
+#
+# This example decompiles an existing dictionary into
+# its source form (columns).
+#
+# The input file must point at the *.dict file (automaton) and
+# it must have an associated metadata (*.info) file.
+#
+java -jar ../lib/${project.artifactId}-${project.version}.jar dict_decompile --input 04-dict-compile.dict --output 05-dict-decompile.input

@@ -8,19 +8,22 @@ import java.nio.charset.*;
 /**
  * Stem and tag data associated with a given word.
  * 
- * <p>
- * <b>Important notes:</b>
- * <ul>
- * <li>Objects of this class are <i>volatile</i> (their content changes on
- * subsequent calls to {@link DictionaryLookup} class. If you need a copy of the
+ * Instances of this class are reused and mutable (values
+ * returned from {@link #getStem()}, {@link #getWord()}
+ * and other related methods change on subsequent calls to 
+ * {@link DictionaryLookup} class that returned a given
+ * instance of {@link WordData}.
+ * 
+ * If you need a copy of the
  * stem or tag data for a given word, you have to create a custom buffer
  * yourself and copy the associated data, perform {@link #clone()} or create
  * strings (they are immutable) using {@link #getStem()} and then
- * {@link CharSequence#toString()}.</li>
- * <li>Objects of this class must not be used in any Java collections. In fact
- * both equals and hashCode methods are overridden and throw exceptions to
- * prevent accidental damage.</li>
- * </ul>
+ * {@link CharSequence#toString()}.
+ * 
+ * For reasons above it makes no sense to use instances
+ * of this class in associative containers or lists. In fact,
+ * both {@link #equals(Object)} and {@link #hashCode()} are overridden and throw 
+ * exceptions to prevent accidental damage.
  */
 public final class WordData implements Cloneable {
 	/**

@@ -10,6 +10,8 @@ public final class Launcher {
   public static void main(String[] args) {
     CliTool.main(args, new FSABuild(),
                        new FSADump(),
-                       new FSAInfo());
+                       new FSAInfo(),
+                       new DictCompile(),
+                       new DictDecompile());
   }
 }
