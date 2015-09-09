@@ -544,6 +544,141 @@
         </plugins>
       </build>
     </profile>
+
+    <profile>
+      <id>eclipse</id>
+      <build>
+        <defaultGoal>compile antrun:run</defaultGoal>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <artifactId>maven-antrun-plugin</artifactId>
+              <version>1.8</version>
+              <executions>
+                <execution>
+                  <id>default-cli</id>
+                  <phase>none</phase>
+                  <inherited>false</inherited>
+                  <configuration>
+                    <target>
+                      <presetdef name="copy">
+                        <copy overwrite="true" />
+                      </presetdef>
+                      <condition property="onwin">
+                        <os family="windows" />
+                      </condition>
+
+                      <fileset id="id:settings" dir="etc/eclipse/settings" />
+                      <copy todir="morfologik-fsa/.settings">           <fileset refid="id:settings" /></copy>
+                      <copy todir="morfologik-fsa-builders/.settings">  <fileset refid="id:settings" /></copy>
+                      <copy todir="morfologik-polish/.settings">        <fileset refid="id:settings" /></copy>
+                      <copy todir="morfologik-speller/.settings">       <fileset refid="id:settings" /></copy>
+                      <copy todir="morfologik-stemming/.settings">      <fileset refid="id:settings" /></copy>
+                      <copy todir="morfologik-tools/.settings">         <fileset refid="id:settings" /></copy>
+
+                      <!-- no custom configs.
+                      <copy todir=".">
+                        <fileset dir="etc/eclipse/configs" />
+                        <filtermapper>
+                          <replacestring from="_" to="." />
+                        </filtermapper>
+                        <filterchain unless:true="${onwin}" xmlns:unless="ant:unless">
+                          <tokenfilter>
+                            <filetokenizer />
+                            <replacestring from=".bat" to="" />
+                          </tokenfilter>
+                        </filterchain>
+                      </copy> -->
+                    </target>
+                  </configuration>
+                  <goals>
+                    <goal>run</goal>
+                  </goals>
+                </execution>
+              </executions>
+              <dependencies>
+                <dependency>
+                  <groupId>org.apache.ant</groupId>
+                  <artifactId>ant</artifactId>
+                  <version>1.9.4</version>
+                </dependency>
+              </dependencies>
+            </plugin>
+
+            <plugin>
+              <groupId>org.eclipse.m2e</groupId>
+              <artifactId>lifecycle-mapping</artifactId>
+              <version>1.0.0</version>
+              <configuration>
+                <lifecycleMappingMetadata>
+                  <pluginExecutions>
+                    <pluginExecution>
+                      <pluginExecutionFilter>
+                        <groupId>de.thetaphi</groupId>
+                        <artifactId>forbiddenapis</artifactId>
+                        <versionRange>[0.0.0,)</versionRange>
+                        <goals>
+                          <goal>check</goal>
+                          <goal>testCheck</goal>
+                        </goals>
+                      </pluginExecutionFilter>
+                      <action>
+                        <ignore />
+                      </action>
+                    </pluginExecution>
+                    <pluginExecution>
+                      <pluginExecutionFilter>
+                        <groupId>com.carrotsearch</groupId>
+                        <artifactId>hppc-template-processor</artifactId>
+                        <versionRange>[0.0.0,)</versionRange>
+                        <goals>
+                          <goal>template-processor</goal>
+                          <goal>add-source</goal>
+                          <goal>add-test-source</goal>
+                        </goals>
+                      </pluginExecutionFilter>
+                      <action>
+                        <execute>
+                          <runOnIncremental>false</runOnIncremental>
+                          <runOnConfiguration>true</runOnConfiguration>
+                        </execute>
+                      </action>
+                    </pluginExecution>
+                    <pluginExecution>
+                      <pluginExecutionFilter>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-plugin-plugin</artifactId>
+                        <versionRange>[3.4,)</versionRange>
+                        <goals>
+                          <goal>descriptor</goal>
+                          <goal>helpmojo</goal>
+                        </goals>
+                      </pluginExecutionFilter>
+                      <action>
+                        <ignore></ignore>
+                      </action>
+                    </pluginExecution>
+                    <pluginExecution>
+                      <pluginExecutionFilter>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <versionRange>[0.0,)</versionRange>
+                        <goals>
+                          <goal>enforce</goal>
+                        </goals>
+                      </pluginExecutionFilter>
+                      <action>
+                        <ignore></ignore>
+                      </action>
+                    </pluginExecution>
+                  </pluginExecutions>
+                </lifecycleMappingMetadata>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>    
   </profiles>
 </project>
 
