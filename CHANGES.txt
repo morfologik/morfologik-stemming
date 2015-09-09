@@ -1,5 +1,5 @@
 
-Morfologik-stemming Change Log
+Morfologik, Change Log
 
 For an up-to-date CHANGES file see 
 https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
@@ -8,12 +8,17 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
 Changes in backwards compatibility policy
 
+ * GH-72: Recompress Polish dictionary to use ';' as the separator.
+   (Dawid Weiss)
+
  * GH-59: Moved Dictionary.convertText utility to 
    DictionaryLookup.applyReplacements and fixed current reliance on map 
    ordering. (Dawid Weiss)
 
  * GH-55: Removed the "distribution" module entirely. The tools module
-   should be self-organizing. (Dawid Weiss)
+   should be self-organizing. Complete overhaul of all the tools. 
+   Examples. Simplified syntax, options and assumptions. 
+   Input sanity checks and validation. (Dawid Weiss)
 
  * GH-57: Restructured the project into FSA traversal/ reading (only)
    and FSA Builders (construction). This cleans up dependency
