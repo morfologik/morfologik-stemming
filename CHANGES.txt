@@ -8,6 +8,9 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
 Changes in backwards compatibility policy
 
+ * GH-64: Removed OSGi support because of Maven issues (forks build
+   phases, tests, etc.).
+
  * GH-72: Recompress Polish dictionary to use ';' as the separator.
    (Dawid Weiss)
 
