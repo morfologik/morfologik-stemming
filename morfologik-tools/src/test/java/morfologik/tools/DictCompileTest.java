@@ -80,12 +80,13 @@ public class DictCompileTest extends RandomizedTest {
     }
     
     Assertions.assertThat(reconstructed).containsOnlyElementsOf(sequences);
-    
-    // Verify decompilation.
+
+    // Verify decompilation via DictDecompile.
+
     Files.delete(input);
     Assertions.assertThat(new DictDecompile(dict, null, true, validate).call())
       .isEqualTo(ExitStatus.SUCCESS);
-    
+
     List<String> allLines = Files.readAllLines(input, StandardCharsets.UTF_8);
     Assertions.assertThat(allLines).containsOnlyElementsOf(sequences);
   }

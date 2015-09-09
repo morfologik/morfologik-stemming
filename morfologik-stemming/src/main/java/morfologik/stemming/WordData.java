@@ -98,8 +98,8 @@ public final class WordData implements Cloneable {
 	 * @return Returns <code>target</code> or the new reallocated buffer.
 	 */
 	public ByteBuffer getStemBytes(ByteBuffer target) {
-	  assert target.position() == 0;
 		target = BufferUtils.ensureCapacity(target, stemBuffer.remaining());
+    assert target.position() == 0;
 		stemBuffer.mark();
 		target.put(stemBuffer);
 		stemBuffer.reset();
@@ -119,8 +119,8 @@ public final class WordData implements Cloneable {
 	 * @return Returns <code>target</code> or the new reallocated buffer.
 	 */
 	public ByteBuffer getTagBytes(ByteBuffer target) {
-	  assert target.position() == 0;
 		target = BufferUtils.ensureCapacity(target, tagBuffer.remaining());
+    assert target.position() == 0;
 		tagBuffer.mark();
 		target.put(tagBuffer);
 		tagBuffer.reset();
@@ -140,8 +140,8 @@ public final class WordData implements Cloneable {
 	 * @return Returns <code>target</code> or the new reallocated buffer.
 	 */
 	public ByteBuffer getWordBytes(ByteBuffer target) {
-    assert target.position() == 0;
 		target = BufferUtils.ensureCapacity(target, wordBuffer.remaining());
+    assert target.position() == 0;
 		wordBuffer.mark();
 		target.put(wordBuffer);
 		wordBuffer.reset();
