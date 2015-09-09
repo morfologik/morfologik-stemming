@@ -264,7 +264,7 @@ public final class CFSA2Serializer implements FSASerializer {
      */
     sublist.elementsCount = cutAt;
     int size = linearizeAndCalculateOffsets(fsa, sublist, linearized, offsets);
-    log(Level.INFO, "%,d states moved, final size: %,d", sublist.size(), size);
+    log(Level.FINE, "%,d states moved, final size: %,d", sublist.size(), size);
     return linearized;
   }
 

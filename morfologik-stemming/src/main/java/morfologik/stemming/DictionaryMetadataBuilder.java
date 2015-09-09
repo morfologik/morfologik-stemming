@@ -10,8 +10,8 @@ import java.util.Map;
  * Helper class to build {@link DictionaryMetadata} instances.
  */
 public final class DictionaryMetadataBuilder {
-  private final EnumMap<DictionaryAttribute, String> attrs
-  = new EnumMap<DictionaryAttribute, String>(DictionaryAttribute.class);
+  private final EnumMap<DictionaryAttribute, String> attrs = 
+      new EnumMap<DictionaryAttribute, String>(DictionaryAttribute.class);
 
   public DictionaryMetadataBuilder separator(char c) {
     this.attrs.put(DictionaryAttribute.SEPARATOR, Character.toString(c));

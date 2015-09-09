@@ -2,4 +2,4 @@
 # state automaton (created in a previous example), 
 # separating each sequence with a CR byte.
 
-java -jar ../lib/${project.artifactId}-${project.version}.jar fsa_dump --input 01-building-fsa.fsa --output 02-dumping-fsa.out
+java -jar ../lib/${project.artifactId}-${project.version}.jar fsa_dump --input 01-fsa-build.fsa5 --output 02-fsa-dump.output

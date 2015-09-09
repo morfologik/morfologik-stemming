@@ -94,11 +94,6 @@ public class TrimSuffixEncoder implements ISequenceEncoder {
   }
 
   @Override
-  public EncoderType type() {
-    return EncoderType.SUFFIX;
-  }
-
-  @Override
   public String toString() {
     return getClass().getSimpleName();
   }

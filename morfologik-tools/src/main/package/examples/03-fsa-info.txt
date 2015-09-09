@@ -1,0 +1,8 @@
+# This example prints diagnostic information about
+# a compiled automaton.
+
+echo "FSA5:"
+java -jar ../lib/${project.artifactId}-${project.version}.jar fsa_info --input 01-fsa-build.fsa5
+
+echo "CFSA2:"
+java -jar ../lib/${project.artifactId}-${project.version}.jar fsa_info --input 01-fsa-build.cfsa2

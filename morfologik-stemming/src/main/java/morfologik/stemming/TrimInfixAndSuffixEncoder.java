@@ -154,11 +154,6 @@ public class TrimInfixAndSuffixEncoder implements ISequenceEncoder {
   }
 
   @Override
-  public EncoderType type() {
-    return EncoderType.INFIX;
-  }
-
-  @Override
   public String toString() {
     return getClass().getSimpleName();
   }

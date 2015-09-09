@@ -141,10 +141,10 @@ public final class CFSA extends FSA {
 	 */
 	public final int nodeDataLength;
 
-	/**
-	 * Flags for this automaton version.
-	 */
-    private final Set<FSAFlags> flags;
+  /**
+   * Flags for this automaton version.
+   */
+  private final Set<FSAFlags> flags;
 
   /**
    * Number of bytes each address takes in full, expanded form (goto length).

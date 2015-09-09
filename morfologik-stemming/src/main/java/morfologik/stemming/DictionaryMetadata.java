@@ -1,16 +1,11 @@
 package morfologik.stemming;
 
-import static morfologik.stemming.DictionaryAttribute.CONVERT_CASE;
-import static morfologik.stemming.DictionaryAttribute.ENCODING;
-import static morfologik.stemming.DictionaryAttribute.FREQUENCY_INCLUDED;
-import static morfologik.stemming.DictionaryAttribute.IGNORE_ALL_UPPERCASE;
-import static morfologik.stemming.DictionaryAttribute.IGNORE_CAMEL_CASE;
-import static morfologik.stemming.DictionaryAttribute.IGNORE_DIACRITICS;
-import static morfologik.stemming.DictionaryAttribute.IGNORE_NUMBERS;
-import static morfologik.stemming.DictionaryAttribute.IGNORE_PUNCTUATION;
-import static morfologik.stemming.DictionaryAttribute.RUN_ON_WORDS;
-import static morfologik.stemming.DictionaryAttribute.SEPARATOR;
+import static morfologik.stemming.DictionaryAttribute.*;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -19,13 +14,17 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.UnsupportedCharsetException;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Description of attributes, their types and default values.
@@ -35,8 +34,6 @@ public final class DictionaryMetadata {
    * Default attribute values.
    */
   private static Map<DictionaryAttribute, String> DEFAULT_ATTRIBUTES = new DictionaryMetadataBuilder()
-    .separator('+')
-    .encoder(EncoderType.SUFFIX)
     .frequencyIncluded()
     .ignorePunctuation()
     .ignoreNumbers()
@@ -52,6 +49,7 @@ public final class DictionaryMetadata {
    */
   private static EnumSet<DictionaryAttribute> REQUIRED_ATTRIBUTES = EnumSet.of(
       SEPARATOR,
+      ENCODER,
       ENCODING);
 
   /**
@@ -108,6 +106,11 @@ public final class DictionaryMetadata {
   private EncoderType encoderType;
 
   /**
+   * Expected metadata file extension.
+   */
+  public final static String METADATA_FILE_EXTENSION = "info";
+
+  /**
    * Return all attributes.
    */
   public Map<DictionaryAttribute, String> getAttributes() {
@@ -126,7 +129,7 @@ public final class DictionaryMetadata {
   public LinkedHashMap<Character, List<Character>> getEquivalentChars() { return equivalentChars; }
 
   // Dynamically fetched.
-  public boolean isFrequencyIncluded()  { return boolAttributes.get(FREQUENCY_INCLUDED); }
+  public boolean isFrequencyIncluded()    { return boolAttributes.get(FREQUENCY_INCLUDED); }
   public boolean isIgnoringPunctuation()  { return boolAttributes.get(IGNORE_PUNCTUATION); }
   public boolean isIgnoringNumbers()      { return boolAttributes.get(IGNORE_NUMBERS); }
   public boolean isIgnoringCamelCase()    { return boolAttributes.get(IGNORE_CAMEL_CASE); }
@@ -157,79 +160,79 @@ public final class DictionaryMetadata {
       // Run validation and conversion on all of them.
       Object value = e.getKey().fromString(e.getValue());
       switch (e.getKey()) {
-      case ENCODING:
-        this.encoding = e.getValue();
-        if (!Charset.isSupported(encoding)) {
-          throw new IllegalArgumentException("Encoding not supported on this JVM: "
-              + encoding);
+        case ENCODING:
+          this.encoding = e.getValue();
+          if (!Charset.isSupported(encoding)) {
+            throw new IllegalArgumentException("Encoding not supported on this JVM: "
+                + encoding);
+          }
+          this.charset = (Charset) value;
+          break;
+  
+        case SEPARATOR:
+          this.separatorChar = (Character) value;
+          break;
+  
+        case LOCALE:
+          this.locale = (Locale) value;
+          break;
+  
+        case ENCODER:
+          this.encoderType = (EncoderType) value;
+          break;
+  
+        case INPUT_CONVERSION:
+        {
+          @SuppressWarnings("unchecked")
+          LinkedHashMap<String, String> gvalue = (LinkedHashMap<String, String>) value;
+          this.inputConversion = gvalue;
         }
-        this.charset = (Charset) value;
         break;
-
-      case SEPARATOR:
-        this.separatorChar = (Character) value;
+  
+        case OUTPUT_CONVERSION:
+        {
+          @SuppressWarnings("unchecked")
+          LinkedHashMap<String, String> gvalue = (LinkedHashMap<String, String>) value;
+          this.outputConversion = gvalue;
+        }
         break;
-
-      case LOCALE:
-        this.locale = (Locale) value;
+  
+        case REPLACEMENT_PAIRS:
+        {
+          @SuppressWarnings("unchecked")
+          LinkedHashMap<String, List<String>> gvalue = (LinkedHashMap<String, List<String>>) value;
+          this.replacementPairs = gvalue;
+        }
         break;
-
-      case ENCODER:
-        this.encoderType = (EncoderType) value;
+  
+        case EQUIVALENT_CHARS:
+        {
+          @SuppressWarnings("unchecked")
+          LinkedHashMap<Character, List<Character>> gvalue = (LinkedHashMap<Character, List<Character>>) value;
+          this.equivalentChars = gvalue;
+        }
         break;
-
-      case INPUT_CONVERSION:
-      {
-        @SuppressWarnings("unchecked")
-        LinkedHashMap<String, String> gvalue = (LinkedHashMap<String, String>) value;
-        this.inputConversion = gvalue;
-      }
-      break;
-
-      case OUTPUT_CONVERSION:
-      {
-        @SuppressWarnings("unchecked")
-        LinkedHashMap<String, String> gvalue = (LinkedHashMap<String, String>) value;
-        this.outputConversion = gvalue;
-      }
-      break;
-
-      case REPLACEMENT_PAIRS:
-      {
-        @SuppressWarnings("unchecked")
-        LinkedHashMap<String, List<String>> gvalue = (LinkedHashMap<String, List<String>>) value;
-        this.replacementPairs = gvalue;
-      }
-      break;
-
-      case EQUIVALENT_CHARS:
-      {
-        @SuppressWarnings("unchecked")
-        LinkedHashMap<Character, List<Character>> gvalue = (LinkedHashMap<Character, List<Character>>) value;
-        this.equivalentChars = gvalue;
-      }
-      break;
-
-      case IGNORE_PUNCTUATION:
-      case IGNORE_NUMBERS:
-      case IGNORE_CAMEL_CASE:
-      case IGNORE_ALL_UPPERCASE:
-      case IGNORE_DIACRITICS:
-      case CONVERT_CASE:
-      case RUN_ON_WORDS:
-      case FREQUENCY_INCLUDED:
-        this.boolAttributes.put(e.getKey(), (Boolean) value);
-        break;
-
-      case AUTHOR:
-      case LICENSE:
-      case CREATION_DATE:
-        // Just run validation.
-        e.getKey().fromString(e.getValue());
-        break;
-
-      default:
-        throw new RuntimeException("Unexpected code path (attribute should be handled but is not): " + e.getKey());
+  
+        case IGNORE_PUNCTUATION:
+        case IGNORE_NUMBERS:
+        case IGNORE_CAMEL_CASE:
+        case IGNORE_ALL_UPPERCASE:
+        case IGNORE_DIACRITICS:
+        case CONVERT_CASE:
+        case RUN_ON_WORDS:
+        case FREQUENCY_INCLUDED:
+          this.boolAttributes.put(e.getKey(), (Boolean) value);
+          break;
+  
+        case AUTHOR:
+        case LICENSE:
+        case CREATION_DATE:
+          // Just run validation.
+          e.getKey().fromString(e.getValue());
+          break;
+  
+        default:
+          throw new RuntimeException("Unexpected code path (attribute should be handled but is not): " + e.getKey());
       }
     }
 
@@ -282,7 +285,7 @@ public final class DictionaryMetadata {
   /**
    * Return sequence encoder type.
    */
-  public EncoderType getEncoderType() {
+  public EncoderType getSequenceEncoderType() {
     return encoderType;
   }
 
@@ -293,5 +296,99 @@ public final class DictionaryMetadata {
    */
   public char getSeparatorAsChar() {
     return separatorChar;
+  }
+
+  /**
+   * @return A shortcut returning {@link DictionaryMetadataBuilder}.
+   */
+  public static DictionaryMetadataBuilder builder() {
+    return new DictionaryMetadataBuilder();
+  }
+  
+  /**
+   * Returns the expected name of the metadata file, based on the name of the
+   * dictionary file. The expected name is resolved by truncating any
+   * file extension of <code>name</code> and appending
+   * {@link METADATA_FILE_EXTENSION}.
+   */
+  public static String getExpectedMetadataFileName(String dictionaryFile) {
+    final int dotIndex = dictionaryFile.lastIndexOf('.');
+    final String featuresName;
+    if (dotIndex >= 0) {
+      featuresName = dictionaryFile.substring(0, dotIndex) + "." + METADATA_FILE_EXTENSION;
+    } else {
+      featuresName = dictionaryFile + "." + METADATA_FILE_EXTENSION;
+    }
+  
+    return featuresName;
+  }
+
+  /**
+   * @param input The location of the dictionary file.
+   * @return Returns the expected location of a metadata file.
+   */
+  public static Path getExpectedMetadataLocation(Path dictionary) {
+    return dictionary.resolveSibling(
+        getExpectedMetadataFileName(dictionary.getFileName().toString()));
+  }
+
+  /**
+   * Read dictionary metadata from a property file (stream).
+   */
+  public static DictionaryMetadata read(InputStream metadataStream) throws IOException {
+    Map<DictionaryAttribute, String> map = new HashMap<DictionaryAttribute, String>();
+    final Properties properties = new Properties();
+    properties.load(new InputStreamReader(metadataStream, "UTF-8"));
+
+    // Handle back-compatibility for encoder specification.
+    if (!properties.containsKey(DictionaryAttribute.ENCODER.propertyName)) {
+      boolean hasDeprecated = properties.containsKey("fsa.dict.uses-suffixes") ||
+                              properties.containsKey("fsa.dict.uses-infixes") ||
+                              properties.containsKey("fsa.dict.uses-prefixes");
+
+      boolean usesSuffixes = Boolean.valueOf(properties.getProperty("fsa.dict.uses-suffixes", "true"));
+      boolean usesPrefixes = Boolean.valueOf(properties.getProperty("fsa.dict.uses-prefixes", "false"));
+      boolean usesInfixes  = Boolean.valueOf(properties.getProperty("fsa.dict.uses-infixes",  "false"));
+
+      final EncoderType encoder;
+      if (usesInfixes) {
+        encoder = EncoderType.INFIX;
+      } else if (usesPrefixes) {
+        encoder = EncoderType.PREFIX;
+      } else if (usesSuffixes) {
+        encoder = EncoderType.SUFFIX;
+      } else {
+        encoder = EncoderType.NONE;
+      }
+
+      if (!hasDeprecated) {
+        throw new IOException("Use an explicit " +
+            DictionaryAttribute.ENCODER.propertyName + "=" + encoder.name() +
+            " metadata key: ");
+      }
+
+      throw new IOException("Deprecated encoder keys in metadata. Use " +
+          DictionaryAttribute.ENCODER.propertyName + "=" + encoder.name());
+    }
+
+    for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements();) {
+      String key = (String) e.nextElement();
+      map.put(DictionaryAttribute.fromPropertyName(key), properties.getProperty(key));
+    }
+
+    return new DictionaryMetadata(map);
+  }
+
+  /**
+   * Write dictionary attributes (metadata).
+   */
+  public void write(Writer writer) throws IOException {
+    final Properties properties = new Properties();
+
+    for (Map.Entry<DictionaryAttribute, String> e : getAttributes().entrySet()) {
+      properties.setProperty(e.getKey().propertyName, e.getValue());
+    }
+
+    properties.store(writer, "# " + getClass().getName());
   }
 }

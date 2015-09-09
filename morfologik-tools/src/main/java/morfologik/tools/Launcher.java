@@ -9,6 +9,7 @@ public final class Launcher {
 
   public static void main(String[] args) {
     CliTool.main(args, new FSABuild(),
-                       new FSADump());
+                       new FSADump(),
+                       new FSAInfo());
   }
 }

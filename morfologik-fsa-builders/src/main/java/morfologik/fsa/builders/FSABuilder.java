@@ -243,8 +243,9 @@ public final class FSABuilder {
   public static FSA build(byte[][] input) {
     final FSABuilder builder = new FSABuilder();
 
-    for (byte[] chs : input)
+    for (byte[] chs : input) {
       builder.add(chs, 0, chs.length);
+    }
 
     return builder.complete();
   }
@@ -259,8 +260,9 @@ public final class FSABuilder {
   public static FSA build(Iterable<byte[]> input) {
     final FSABuilder builder = new FSABuilder();
 
-    for (byte[] chs : input)
+    for (byte[] chs : input) {
       builder.add(chs, 0, chs.length);
+    }
 
     return builder.complete();
   }

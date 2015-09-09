@@ -55,6 +55,18 @@ public final class BufferUtils {
   }
 
   /**
+   * @param The buffer to read from.
+   * @return Returns the remaining bytes from the buffer copied to an array.
+   */
+  public static byte[] toArray(ByteBuffer buffer) {
+    byte [] dst = new byte [buffer.remaining()];
+    buffer.mark();
+    buffer.get(dst);
+    buffer.reset();
+    return dst;
+  }
+
+  /**
    * Compute the length of the shared prefix between two byte sequences.
    */
   static int sharedPrefixLength(ByteBuffer a, int aStart, ByteBuffer b, int bStart) {

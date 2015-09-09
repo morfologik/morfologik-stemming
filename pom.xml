@@ -372,6 +372,10 @@
               <leaveTemporary>true</leaveTemporary>
               <ifNoTests>warn</ifNoTests>
 
+              <assertions>
+                <enable />
+              </assertions>
+
               <listeners>
                 <report-text showThrowable="true" showStackTraces="true" showOutput="onerror" showStatusOk="true"
                   showStatusError="true" showStatusFailure="true" showStatusIgnored="true" showSuiteSummary="true" />

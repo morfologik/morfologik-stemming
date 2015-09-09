@@ -115,16 +115,11 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
       throws IllegalArgumentException {
     this.dictionary = dictionary;
     this.dictionaryMetadata = dictionary.metadata;
-    this.sequenceEncoder = dictionary.metadata.getEncoderType().get();
+    this.sequenceEncoder = dictionary.metadata.getSequenceEncoderType().get();
     this.rootNode = dictionary.fsa.getRootNode();
     this.fsa = dictionary.fsa;
     this.matcher = new FSATraversal(fsa);
     this.finalStatesIterator = new ByteSequenceIterator(fsa, fsa.getRootNode());
-
-    if (rootNode == 0) {
-      throw new IllegalArgumentException(
-          "Dictionary must have at least the root node.");
-    }
 
     if (dictionaryMetadata == null) {
       throw new IllegalArgumentException(

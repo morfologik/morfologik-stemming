@@ -1,0 +1,7 @@
+#
+# An escape sequence for the separator.
+#
+
+fsa.dict.separator=\t
+fsa.dict.encoding=UTF-8
+fsa.dict.encoder=suffix

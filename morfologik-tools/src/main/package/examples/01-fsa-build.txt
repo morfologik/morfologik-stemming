@@ -1,0 +1,14 @@
+# This example constructs a finite state automaton (FSA) out
+# of byte sequences in the input file:
+#
+# https://en.wikipedia.org/wiki/Finite-state_machine
+#
+# Each sequence is encoded as one path in the automaton. Input are LF-separated 
+# byte sequences.
+#
+
+# This example constructs an automaton serialized with FSA5 (Jan Daciuk's fsa_build compatible format).
+java -jar ../lib/${project.artifactId}-${project.version}.jar fsa_build --input 01-fsa-build.input --output 01-fsa-build.fsa5  --format fsa5
+
+# This example uses CFSA2, a custom format that is packed slightly better, but slower at runtime.
+java -jar ../lib/${project.artifactId}-${project.version}.jar fsa_build --input 01-fsa-build.input --output 01-fsa-build.cfsa2 --format cfsa2

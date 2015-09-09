@@ -115,11 +115,6 @@ public class TrimPrefixAndSuffixEncoder implements ISequenceEncoder {
   }
 
   @Override
-  public EncoderType type() {
-    return EncoderType.PREFIX;
-  }
-
-  @Override
   public String toString() {
     return getClass().getSimpleName();
   }

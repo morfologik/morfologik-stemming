@@ -34,6 +34,4 @@ public interface ISequenceEncoder {
    * @return Returns the {@link ByteBuffer} with decoded <code>target</code>.
    */
   public ByteBuffer decode(ByteBuffer reuse, ByteBuffer source, ByteBuffer encoded);
-
-  public EncoderType type();
 }

@@ -2,6 +2,7 @@ package morfologik.tools;
 
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Callable;
 
 import com.beust.jcommander.JCommander;
@@ -15,6 +16,9 @@ import com.beust.jcommander.Parameters;
  * Base class for command-line applications.
  */
 public abstract class CliTool implements Callable<ExitStatus> {
+  protected final static String ARG_OVERWRITE = "--overwrite";
+  protected final static String ARG_VALIDATE = "--validate";
+
   @Parameter(
       names = {"--exit"},
       hidden = true,
@@ -73,6 +77,12 @@ public abstract class CliTool implements Callable<ExitStatus> {
             System.exit(exitStatus.code);
           }
         }
+      } catch (ExitStatusException e) {
+        System.err.println(e.getMessage());
+        if (e.getCause() != null) {
+          e.getCause().printStackTrace(System.err);
+        }
+        exitStatus = e.exitStatus;
       } catch (MissingCommandException e) {
         System.err.println("Invalid argument: " + e);
         System.err.println();
@@ -112,6 +122,12 @@ public abstract class CliTool implements Callable<ExitStatus> {
       } else {
         exitStatus = command.call();
       }
+    } catch (ExitStatusException e) {
+      System.err.println(e.getMessage());
+      if (e.getCause() != null) {
+        e.getCause().printStackTrace(System.err);
+      }
+      exitStatus = e.exitStatus;
     } catch (MissingCommandException e) {
       System.err.println("Invalid argument: " + e);
       System.err.println();
@@ -136,6 +152,10 @@ public abstract class CliTool implements Callable<ExitStatus> {
     if (command.callSystemExit) {
       System.exit(exitStatus.code);
     }
+  }
+
+  protected static void printf(String msg, Object... args) {
+    System.out.println(String.format(Locale.ROOT, msg, args));
   }
 
   protected static <T> T checkNotNull(T arg) {

@@ -23,13 +23,15 @@ public class FSADump extends CliTool {
   @Parameter(
       names = {"-i", "--input"},
       description = "The input automaton.", 
-      required = true)
+      required = true,
+      validateValueWith = ValidateFileExists.class)
   private Path input;  
 
   @Parameter(
       names = {"-o", "--output"},
       description = "The output file for byte sequences.", 
-      required = true)
+      required = true,
+      validateValueWith = ValidateParentDirExists.class)
   private Path output;  
 
   FSADump() {

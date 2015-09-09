@@ -52,7 +52,7 @@ public class FSABuildTest extends RandomizedTest {
       }
     }
     
-    FSABuild.Format format = randomFrom(FSABuild.Format.values());
+    SerializationFormat format = randomFrom(SerializationFormat.values());
 
     Assertions.assertThat(new FSABuild(
         input,

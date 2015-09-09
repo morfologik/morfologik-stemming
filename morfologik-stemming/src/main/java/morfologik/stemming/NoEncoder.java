@@ -11,12 +11,10 @@ public class NoEncoder implements ISequenceEncoder {
     reuse = BufferUtils.ensureCapacity(reuse, target.remaining());
     reuse.clear();
 
-    assert target.hasArray() && 
-           target.position() == 0 && 
-           target.arrayOffset() == 0;
-
-    reuse.put(target.array(), 0, target.remaining())
+    target.mark();
+    reuse.put(target)
          .flip();
+    target.reset();
 
     return reuse;
   }
@@ -26,18 +24,12 @@ public class NoEncoder implements ISequenceEncoder {
     reuse = BufferUtils.ensureCapacity(reuse, encoded.remaining());
     reuse.clear();
 
-    assert encoded.hasArray() && 
-           encoded.position() == 0 && 
-           encoded.arrayOffset() == 0;
-
-    reuse.put(encoded.array(), 0, encoded.remaining());
-    reuse.flip();
+    encoded.mark();
+    reuse.put(encoded)
+         .flip();
+    encoded.reset();
+         
     return reuse;
-  }
-
-  @Override
-  public EncoderType type() {
-    return EncoderType.NONE;
   }
 
   @Override
