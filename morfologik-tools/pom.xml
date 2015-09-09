@@ -79,12 +79,12 @@
               <descriptors>
                 <descriptor>src/main/assembly/package.xml</descriptor>
               </descriptors>
-              <attach>true</attach>
+              <attach>false</attach>
               <appendAssemblyId>true</appendAssemblyId>
               <finalName>${project.artifactId}-${project.version}</finalName>
             </configuration>
           </execution>
-          
+
           <execution>
             <id>package-dir</id>
             <phase>package</phase>
