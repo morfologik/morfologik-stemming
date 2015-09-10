@@ -1,35 +1,18 @@
 MORFOLOGIK
 ==========
 
-morfologik-fsa:
-morfologik-fsa-builders:
+Tools for finite state automata construction and dictionary-based 
+morphological dictionaries.
 
-  - Creation of byte-based, efficient finite state automata in Java, including
-    custom, efficient data storage formats.
+Morphosyntactic dictionary for the Polish language.
 
-  - Compatibility with FSA5, binary format of finite state automata produced by
-    Jan Daciuk's "fsa" package.
+See the following for more information:
+  Wiki: https://github.com/morfologik/morfologik-stemming/wiki
+  Bugs: https://github.com/morfologik/morfologik-stemming/issues
+  List: morfologik-devel@lists.sourceforge.net
 
-morfologik-stemming:
+See LICENSE.txt to make your company's lawyer happy.
 
-  - Automata-based dictionary stemming infrastructure.
+See CHANGES.txt for API changes and updates.
 
-morfologik-polish:
-
-  - Precompiled dictionary of inflected forms, stems and tags for Polish.
-
-morfologik-speller:
-
-  - Simplistic automaton-based spelling correction (suggester).
-
-morfologik-tools:
-
-  - Command line tools to preprocess, build and dump FSA automata and 
-    dictionaries.
-
-
-QUESTIONS, COMMENTS
-===================
-
-Web site:     http://www.morfologik.blogspot.com
-Mailing list: morfologik-devel@lists.sourceforge.net
+(c) Marcin Miłkowski, Dawid Weiss
