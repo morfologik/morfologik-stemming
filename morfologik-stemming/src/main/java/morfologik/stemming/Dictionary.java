@@ -3,7 +3,6 @@ package morfologik.stemming;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -76,15 +75,16 @@ public final class Dictionary {
    * @throws IOException if an I/O error occurs.
    */
   public static Dictionary read(URL dictURL) throws IOException {
-    final URL featureMapURL;
+    final URL expectedMetadataURL;
     try {
-      featureMapURL = new URL(dictURL, DictionaryMetadata.getExpectedMetadataFileName(dictURL.toURI().getPath()));
-    } catch (MalformedURLException | URISyntaxException e) {
+      String external = dictURL.toExternalForm();
+      expectedMetadataURL = new URL(DictionaryMetadata.getExpectedMetadataFileName(external));
+    } catch (MalformedURLException e) {
       throw new IOException("Couldn't construct relative feature map URL for: " + dictURL, e);
     }
 
     try (InputStream fsaStream = dictURL.openStream();
-         InputStream metadataStream = featureMapURL.openStream()) {
+         InputStream metadataStream = expectedMetadataURL.openStream()) {
       return read(fsaStream, metadataStream);
     }
   }
