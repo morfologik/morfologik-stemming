@@ -1,6 +1,7 @@
 package morfologik.stemming.polish;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,7 +29,11 @@ public final class PolishStemmer implements IStemmer, Iterable<WordData> {
     synchronized (getClass()) {
       if (dictionary == null) {
         try {
-          dictionary = Dictionary.read(getClass().getResource("pl.dict"));
+          URL dictResource = getClass().getResource("pl.dict");
+          if (dictResource == null) {
+            throw new IOException("Polish dictionary resource not found.");
+          }
+          dictionary = Dictionary.read(dictResource);
         } catch (IOException e) {
           throw new RuntimeException("Could not read dictionary data.", e);
         }
