@@ -33,12 +33,6 @@
     </mailingList>
   </mailingLists>
 
-  <scm>
-    <url>https://morfologik.svn.sourceforge.net/svnroot/morfologik/morfologik-stemming/trunk</url>
-    <connection>scm:svn:https://morfologik.svn.sourceforge.net/svnroot/morfologik/morfologik-stemming/trunk</connection>
-    <developerConnection>scm:svn:https://morfologik.svn.sourceforge.net/svnroot/morfologik/morfologik-stemming/trunk</developerConnection>
-  </scm>
-
   <developers>
     <developer>
       <id>dawid.weiss</id>
