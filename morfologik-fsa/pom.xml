@@ -13,7 +13,7 @@
   </parent>
 
   <artifactId>morfologik-fsa</artifactId>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
 
   <name>Morfologik FSA (Traversal)</name>
   <description>Morfologik Finite State Automata Traversal.</description>
@@ -21,4 +21,19 @@
   <properties>
     <forbiddenapis.signaturefile>../etc/forbidden-apis/signatures.txt</forbiddenapis.signaturefile>
   </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <Export-Package>morfologik.fsa</Export-Package>
+            <Import-Package>*</Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
