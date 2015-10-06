@@ -13,7 +13,7 @@
   </parent>
 
   <artifactId>morfologik-polish</artifactId>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
 
   <name>Morfologik Stemming (Polish Dictionary)</name>
   <description>Morfologik Stemming (Polish Dictionary)</description>
@@ -29,4 +29,19 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <Export-Package>morfologik.stemming.polish</Export-Package>
+            <Import-Package>*</Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

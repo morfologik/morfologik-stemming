@@ -33,12 +33,6 @@
     </mailingList>
   </mailingLists>
 
-  <scm>
-    <url>https://morfologik.svn.sourceforge.net/svnroot/morfologik/morfologik-stemming/trunk</url>
-    <connection>scm:svn:https://morfologik.svn.sourceforge.net/svnroot/morfologik/morfologik-stemming/trunk</connection>
-    <developerConnection>scm:svn:https://morfologik.svn.sourceforge.net/svnroot/morfologik/morfologik-stemming/trunk</developerConnection>
-  </scm>
-
   <developers>
     <developer>
       <id>dawid.weiss</id>
@@ -167,6 +161,13 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
           <version>1.6</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <version>3.0.0</version>
+          <extensions>true</extensions>
         </plugin>
 
         <plugin>
