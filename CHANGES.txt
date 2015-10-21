@@ -9,6 +9,10 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
 ======================= morfologik-stemming 2.0.2-SNAPSHOT =======================
 
+Bug Fixes
+
+ * GH-68: WordData.clone() should be public. (Dawid Weiss)
+
 Other Changes
 
  * GH-64: reverted back OSGi annotations (bundle packaging). (Dawid Weiss)

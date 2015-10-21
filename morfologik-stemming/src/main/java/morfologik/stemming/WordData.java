@@ -207,7 +207,7 @@ public final class WordData implements Cloneable {
 	 * this object. The content of all internal buffers is copied.
 	 */
 	@Override
-	protected WordData clone() {
+	public WordData clone() {
 		final WordData clone = new WordData(this.decoder);
 		clone.wordCharSequence = cloneCharSequence(wordCharSequence);
 		clone.wordBuffer = getWordBytes(null);
