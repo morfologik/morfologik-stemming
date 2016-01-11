@@ -772,7 +772,8 @@ public class Speller {
 
   /**
    * @param str The string to check.
-   * @return Returns true if str is CamelCase.
+   * @return Returns true if str is CamelCase. Note that German compounds with a dash
+   *         (like "Waschmaschinen-Test") are also considered camel case by this method.
    */
   public boolean isCamelCase(final String str) {
     return isNotEmpty(str) && 
