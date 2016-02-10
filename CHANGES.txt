@@ -17,6 +17,9 @@ Other Changes
 
  * GH-64: reverted back OSGi annotations (bundle packaging). (Dawid Weiss)
 
+ * GH-72: Rename tools: fsa_dump to fsa_decompile and fsa_build to fsa_compile.
+   Existing names remain as aliases but will be removed in 2.1.0. (Dawid Weiss)
+
 ======================= morfologik-stemming 2.0.1 =======================
 
 Bug Fixes

@@ -7,9 +7,12 @@ package morfologik.tools;
 public final class Launcher {
   private Launcher() {}
 
+  @SuppressWarnings("deprecation")
   public static void main(String[] args) {
-    CliTool.main(args, new FSABuild(),
+    CliTool.main(args, new FSACompile(),
                        new FSADump(),
+                       new FSADecompile(),
+                       new FSABuild(),
                        new FSAInfo(),
                        new DictCompile(),
                        new DictDecompile());

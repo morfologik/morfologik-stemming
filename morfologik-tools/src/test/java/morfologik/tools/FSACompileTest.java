@@ -23,7 +23,7 @@ import org.junit.Test;
 import com.carrotsearch.randomizedtesting.RandomizedTest;
 import com.carrotsearch.randomizedtesting.annotations.Repeat;
 
-public class FSABuildTest extends RandomizedTest {
+public class FSACompileTest extends RandomizedTest {
   @Test
   @Repeat(iterations = 100)
   public void testCliInvocation() throws Exception {
@@ -54,7 +54,7 @@ public class FSABuildTest extends RandomizedTest {
     
     SerializationFormat format = randomFrom(SerializationFormat.values());
 
-    Assertions.assertThat(new FSABuild(
+    Assertions.assertThat(new FSACompile(
         input,
         output,
         format,
@@ -85,7 +85,7 @@ public class FSABuildTest extends RandomizedTest {
     String out = sysouts(new Callable<Void>() {
        @Override
       public Void call() throws Exception {
-       FSABuild.main(new String[] {
+       FSACompile.main(new String[] {
            "--exit", "false",
            "--input", input.toAbsolutePath().toString(), 
            "--output", output.toAbsolutePath().toString() });
@@ -106,7 +106,7 @@ public class FSABuildTest extends RandomizedTest {
     String out = sysouts(new Callable<Void>() {
        @Override
       public Void call() throws Exception {
-       FSABuild.main(new String[] {
+       FSACompile.main(new String[] {
            "--exit", "false",
            "--input", input.toAbsolutePath().toString(), 
            "--output", output.toAbsolutePath().toString() });
@@ -131,7 +131,7 @@ public class FSABuildTest extends RandomizedTest {
     String out = sysouts(new Callable<Void>() {
        @Override
       public Void call() throws Exception {
-       FSABuild.main(new String[] {
+       FSACompile.main(new String[] {
            "--exit", "false",
            "--input", input.toAbsolutePath().toString(), 
            "--output", output.toAbsolutePath().toString() });
