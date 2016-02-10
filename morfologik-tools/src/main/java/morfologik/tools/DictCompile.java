@@ -110,21 +110,25 @@ public class DictCompile extends CliTool {
     if (!sequences.isEmpty()) {
       Iterator<byte[]> i = sequences.iterator();
       byte [] row = i.next();
-      final int columns = countOf(separator, row);
-      
-      if (columns < 1 || columns > 2) {
+      final int separatorCount = countOf(separator, row);
+
+      if (separatorCount < 1 || separatorCount > 2) {
         throw new ExitStatusException(ExitStatus.ERROR_OTHER, 
-            "Invalid input. Each row must consist of [base,inflected,tag?] columns. This row contains %d columns: %s",
-              columns,
+            "Invalid input. Each row must consist of [base,inflected,tag?] columns, where ',' is a "
+            + "separator character (declared as: %s). This row contains %d separator characters: %s",
+              Character.isJavaIdentifierPart(metadata.getSeparatorAsChar()) 
+                ? "'" + Character.toString(metadata.getSeparatorAsChar()) + "'"
+                : "0x" + Integer.toHexString((int) separator & 0xff),
+              separatorCount,
               new String(row, charsetDecoder.charset()));
       }
 
       while (i.hasNext()) {
         row = i.next();
         int count = countOf(separator, row);
-        if (count != columns) {
+        if (count != separatorCount) {
           throw new ExitStatusException(ExitStatus.ERROR_OTHER,
-              "The number of columns (%d) is inconsistent with previous sequences: %s",
+              "The number of separators (%d) is inconsistent with previous lines: %s",
               count,
               new String(row, charsetDecoder.charset()));
         }

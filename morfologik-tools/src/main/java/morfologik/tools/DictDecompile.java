@@ -57,7 +57,6 @@ public class DictDecompile extends CliTool {
     this.validate = validate;
   }
 
-  @SuppressWarnings("resource") // Eclipse escape analysis bug.
   @Override
   public ExitStatus call() throws Exception {
     final Dictionary dictionary = Dictionary.read(input);
