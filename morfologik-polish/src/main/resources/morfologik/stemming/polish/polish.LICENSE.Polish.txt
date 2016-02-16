@@ -1,0 +1,34 @@
+Morfologik
+
+VERSION: 2.1 PoliMorf
+BUILD:   2016-02-13 19:37:51+01:00
+GIT:     6e63b53
+
+Copyright (c) 2016, Marcin Miłkowski
+Wszelkie prawa zastrzeżone
+
+Redystrybucja i używanie, czy to w formie kodu źródłowego, czy w formie kodu 
+wykonawczego, są dozwolone pod warunkiem spełnienia poniższych warunków:
+
+1. Redystrybucja kodu źródłowego musi zawierać powyższą notę copyrightową, 
+   niniejszą listę warunków oraz poniższe oświadczenie o wyłączeniu 
+   odpowiedzialności.
+2. Redystrybucja kodu wykonawczego musi zawierać powyższą notę copyrightową, 
+   niniejszą listę warunków oraz poniższe oświadczenie o wyłączeniu 
+   odpowiedzialności w dokumentacji i/lub w innych materiałach dostarczanych 
+   wraz z kopią oprogramowania.
+
+TO OPROGRAMOWANIE JEST DOSTARCZONE PRZEZ <POSIADACZA PRAW AUTORSKICH> 
+„TAKIM, JAKIE JEST”. KAŻDA, DOROZUMIANA LUB BEZPOŚREDNIO WYRAŻONA GWARANCJA,
+NIE WYŁĄCZAJĄC DOROZUMIANEJ GWARANCJI PRZYDATNOŚCI HANDLOWEJ I PRZYDATNOŚCI
+DO OKREŚLONEGO ZASTOSOWANIA, JEST WYŁĄCZONA. W ŻADNYM WYPADKU 
+<POSIADACZE PRAW AUTORSKICH> NIE MOGĄ BYĆ ODPOWIEDZIALNI ZA JAKIEKOLWIEK 
+BEZPOŚREDNIE, POŚREDNIE, INCYDENTALNE, SPECJALNE, UBOCZNE I WTÓRNE SZKODY 
+(NIE WYŁĄCZAJĄC OBOWIĄZKU DOSTARCZENIA PRODUKTU ZASTĘPCZEGO LUB SERWISU, 
+ODPOWIEDZIALNOŚCI Z TYTUŁU UTRATY WALORÓW UŻYTKOWYCH, UTRATY DANYCH LUB 
+KORZYŚCI, A TAKŻE PRZERW W PRACY PRZEDSIĘBIORSTWA) SPOWODOWANE W JAKIKOLWIEK 
+SPOSÓB I NA PODSTAWIE ISTNIEJĄCEJ W TEORII ODPOWIEDZIALNOŚCI KONTRAKTOWEJ, 
+CAŁKOWITEJ LUB DELIKTOWEJ (WYNIKŁEJ ZARÓWNO Z NIEDBALSTWA JAK INNYCH POSTACI 
+WINY), POWSTAŁE W JAKIKOLWIEK SPOSÓB W WYNIKU UŻYWANIA LUB MAJĄCE ZWIĄZEK 
+Z UŻYWANIEM OPROGRAMOWANIA, NAWET JEŚLI O MOŻLIWOŚCI POWSTANIA TAKICH SZKÓD 
+OSTRZEŻONO.

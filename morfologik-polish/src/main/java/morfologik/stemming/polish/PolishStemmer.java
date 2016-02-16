@@ -29,7 +29,7 @@ public final class PolishStemmer implements IStemmer, Iterable<WordData> {
     synchronized (getClass()) {
       if (dictionary == null) {
         try {
-          URL dictResource = getClass().getResource("pl.dict");
+          URL dictResource = getClass().getResource("polish.dict");
           if (dictResource == null) {
             throw new IOException("Polish dictionary resource not found.");
           }
