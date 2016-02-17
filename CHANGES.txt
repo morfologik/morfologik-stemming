@@ -9,6 +9,9 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
 New Features
 
+ * GH-74: Add dict_apply tool to apply a dictionary to a file or stdin. 
+   (Dawid Weiss)
+
  * GH-73: Update Polish stemming dictionaries to polimorfologik 2.1. (Dawid Weiss)
 
 Bug Fixes:

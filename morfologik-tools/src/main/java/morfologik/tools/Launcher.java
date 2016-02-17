@@ -15,6 +15,7 @@ public final class Launcher {
                        new FSABuild(),
                        new FSAInfo(),
                        new DictCompile(),
-                       new DictDecompile());
+                       new DictDecompile(),
+                       new DictApply());
   }
 }
