@@ -162,7 +162,7 @@ public final class WordData implements Cloneable {
 	 *         <code>null</code> if no associated tag data exists.
 	 */
 	public CharSequence getTag() {
-		tagCharSequence = decode(tagBuffer, tagCharSequence);
+		tagCharSequence = BufferUtils.bytesToChars(decoder, tagBuffer, tagCharSequence);
 		return tagCharSequence.remaining() == 0 ? null : tagCharSequence;
 	}
 
@@ -171,7 +171,7 @@ public final class WordData implements Cloneable {
 	 *         <code>null</code> if no associated stem data exists.
 	 */
 	public CharSequence getStem() {
-		stemCharSequence = decode(stemBuffer, stemCharSequence);
+		stemCharSequence = BufferUtils.bytesToChars(decoder, stemBuffer, stemCharSequence);
 		return stemCharSequence.remaining() == 0 ? null : stemCharSequence;
 	}
 
@@ -228,25 +228,6 @@ public final class WordData implements Cloneable {
 		if (chs instanceof String)
 			return chs;
 		return chs.toString();
-	}
-
-	/**
-	 * Decode byte buffer, optionally expanding the char buffer to.
-	 */
-	private CharBuffer decode(ByteBuffer bytes, CharBuffer chars) {
-		chars.clear();
-		final int maxCapacity = (int) (bytes.remaining() * decoder.maxCharsPerByte());
-		if (chars.capacity() <= maxCapacity) {
-			chars = CharBuffer.allocate(maxCapacity);
-		}
-
-		bytes.mark();
-		decoder.reset();
-		decoder.decode(bytes, chars, true);
-		chars.flip();
-		bytes.reset();
-
-		return chars;
 	}
 
   void update(ByteBuffer wordBuffer, CharSequence word) {

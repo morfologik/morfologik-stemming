@@ -86,6 +86,8 @@ public class DictionaryLookupTest {
 
     // This word is not in the dictionary.
     assertNoStemFor(s, "martygalski");
+    
+    // This word uses characters that are outside of the encoding range of the dictionary. 
     assertNoStemFor(s, "Rzeczyckiõh");
   }
 

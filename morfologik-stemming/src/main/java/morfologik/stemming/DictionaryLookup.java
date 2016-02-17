@@ -18,19 +18,9 @@ import morfologik.fsa.FSATraversal;
 import morfologik.fsa.MatchResult;
 
 /**
- * This class implements a dictionary lookup over an FSA dictionary. The
- * dictionary for this class should be prepared from a text file using Jan
- * Daciuk's FSA package (see link below).
- * 
- * <p>
- * <b>Important:</b> finite state automatons in Jan Daciuk's implementation use
- * <em>bytes</em> not unicode characters. Therefore objects of this class always
- * have to be constructed with an encoding used to convert Java strings to byte
- * arrays and the other way around. You <b>can</b> use UTF-8 encoding, as it
- * should not conflict with any control sequences and separator characters.
- * 
- * @see <a href="http://www.eti.pg.gda.pl/~jandac/fsa.html">FSA package Web
- *      site</a>
+ * This class implements a dictionary lookup of an inflected word over a
+ * dictionary previously compiled using the 
+ * <code>dict_compile</code> tool.
  */
 public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
   /** An FSA used for lookups. */
@@ -151,12 +141,20 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
     charBuffer = BufferUtils.clearAndEnsureCapacity(charBuffer, word.length());
     for (int i = 0; i < word.length(); i++) {
       char chr = word.charAt(i);
-      if (chr == separatorChar)
+      if (chr == separatorChar) {
+        // No valid input can contain the separator.
         return formsList;
+      }
       charBuffer.put(chr);
     }
     charBuffer.flip();
-    byteBuffer = charsToBytes(charBuffer, byteBuffer);
+    try {
+      byteBuffer = BufferUtils.charsToBytes(encoder, charBuffer, byteBuffer);
+    } catch (UnmappableInputException e) {
+      // This should be a rare occurrence, but if it happens it means there is no way
+      // the dictionary can contain the input word.
+      return formsList;
+    }
 
     // Try to find a partial match in the dictionary.
     final MatchResult match = matcher.match(matchResult, byteBuffer
@@ -268,29 +266,6 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
       }
     }
     return sb.toString();
-  }
-
-  /**
-   * Encode a character sequence into a byte buffer, optionally expanding
-   * buffer.
-   */
-  private ByteBuffer charsToBytes(CharBuffer chars, ByteBuffer bytes) {
-    bytes.clear();
-    final int maxCapacity = (int) (chars.remaining() * encoder.maxBytesPerChar());
-    if (bytes.capacity() <= maxCapacity) {
-      bytes = ByteBuffer.allocate(maxCapacity);
-    }
-
-    chars.mark();
-    encoder.reset();
-    if (encoder.encode(chars, bytes, true).isError()) {
-      // remove everything, we don't want to accept malformed input
-      bytes.clear();
-    }
-    bytes.flip();
-    chars.reset();
-
-    return bytes;
   }
 
   /**

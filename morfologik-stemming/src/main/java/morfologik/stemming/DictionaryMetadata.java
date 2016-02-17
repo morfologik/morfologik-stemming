@@ -262,9 +262,9 @@ public final class DictionaryMetadata {
    */
   public CharsetDecoder getDecoder() {
     try {
-      return charset.newDecoder().onMalformedInput(
-          CodingErrorAction.REPORT).onUnmappableCharacter(
-              CodingErrorAction.REPORT);
+      return charset.newDecoder()
+              .onMalformedInput(CodingErrorAction.REPORT)
+              .onUnmappableCharacter(CodingErrorAction.REPORT);
     } catch (UnsupportedCharsetException e) {
       throw new RuntimeException(
           "FSA's encoding charset is not supported: " + encoding);
@@ -276,7 +276,9 @@ public final class DictionaryMetadata {
    */
   public CharsetEncoder getEncoder() {
     try {
-      return charset.newEncoder();
+      return charset.newEncoder()
+        .onMalformedInput(CodingErrorAction.REPORT)
+        .onUnmappableCharacter(CodingErrorAction.REPORT);
     } catch (UnsupportedCharsetException e) {
       throw new RuntimeException(
           "FSA's encoding charset is not supported: " + encoding);

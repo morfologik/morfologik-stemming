@@ -58,7 +58,7 @@ public final class DictionaryIterator implements Iterator<WordData> {
     inflectedBuffer.put(ba, 0, sepPos);
     inflectedBuffer.flip();
 
-    inflectedCharBuffer = bytesToChars(inflectedBuffer, inflectedCharBuffer);
+    inflectedCharBuffer = BufferUtils.bytesToChars(decoder, inflectedBuffer, inflectedCharBuffer);
     entry.update(inflectedBuffer, inflectedCharBuffer);
 
     temp = BufferUtils.clearAndEnsureCapacity(temp, bbSize - sepPos);
@@ -104,25 +104,6 @@ public final class DictionaryIterator implements Iterator<WordData> {
     entry.tagBuffer.flip();
 
     return entry;
-  }
-
-  /**
-   * Decode the byte buffer, optionally expanding the char buffer.
-   */
-  private CharBuffer bytesToChars(ByteBuffer bytes, CharBuffer chars) {
-    chars.clear();
-    final int maxCapacity = (int) (bytes.remaining() * decoder.maxCharsPerByte());
-    if (chars.capacity() <= maxCapacity) {
-      chars = CharBuffer.allocate(maxCapacity);
-    }
-
-    bytes.mark();
-    decoder.reset();
-    decoder.decode(bytes, chars, true);
-    chars.flip();
-    bytes.reset();
-
-    return chars;
   }
 
   public void remove() {

@@ -2,7 +2,13 @@ package morfologik.stemming;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CoderResult;
+import java.nio.charset.CodingErrorAction;
+import java.util.Arrays;
 
 public final class BufferUtils {
   /**
@@ -99,5 +105,70 @@ public final class BufferUtils {
    */
   static int sharedPrefixLength(ByteBuffer a, ByteBuffer b) {
     return sharedPrefixLength(a, 0, b, 0);
+  }
+
+  /**
+   * Convert byte buffer's content into characters. The input buffer's bytes are not
+   * consumed (mark is set and reset).
+   */
+  public static CharBuffer bytesToChars(CharsetDecoder decoder, ByteBuffer bytes, CharBuffer chars) {
+    assert decoder.malformedInputAction() == CodingErrorAction.REPORT;
+
+    chars = clearAndEnsureCapacity(chars, (int) (bytes.remaining() * decoder.maxCharsPerByte()));
+
+    bytes.mark();
+    decoder.reset();
+    CoderResult cr = decoder.decode(bytes, chars, true);
+    if (cr.isError()) {
+      bytes.reset();
+      try {
+        cr.throwException();
+      } catch (CharacterCodingException e) {
+        throw new RuntimeException("Input cannot be mapped to bytes using encoding "
+            + decoder.charset().name() + ": " + Arrays.toString(toArray(bytes)), e);
+      }
+    }
+
+    assert cr.isUnderflow();  // This should be guaranteed by ensuring max. capacity.
+    cr = decoder.flush(chars);
+    assert cr.isUnderflow();
+
+    chars.flip();
+    bytes.reset();
+
+    return chars;
+  }
+
+  /**
+   * Convert chars into bytes.
+   */
+  public static ByteBuffer charsToBytes(CharsetEncoder encoder, CharBuffer chars, ByteBuffer bytes) 
+      throws UnmappableInputException {
+    assert encoder.malformedInputAction() == CodingErrorAction.REPORT;
+
+    bytes = clearAndEnsureCapacity(bytes, (int) (chars.remaining() * encoder.maxBytesPerChar()));
+
+    chars.mark();
+    encoder.reset();
+
+    CoderResult cr = encoder.encode(chars, bytes, true);
+    if (cr.isError()) {
+      chars.reset();
+      try {
+        cr.throwException();
+      } catch (CharacterCodingException e) {
+        throw new UnmappableInputException("Input cannot be mapped to characters using encoding "
+            + encoder.charset().name() + ": " + Arrays.toString(toArray(bytes)), e);
+      }
+    }
+
+    assert cr.isUnderflow();  // This should be guaranteed by ensuring max. capacity.
+    cr = encoder.flush(bytes);
+    assert cr.isUnderflow();
+
+    bytes.flip();
+    chars.reset();
+
+    return bytes;
   }
 }

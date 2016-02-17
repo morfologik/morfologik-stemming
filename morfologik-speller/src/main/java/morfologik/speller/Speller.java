@@ -20,6 +20,7 @@ import morfologik.stemming.BufferUtils;
 import morfologik.stemming.Dictionary;
 import morfologik.stemming.DictionaryLookup;
 import morfologik.stemming.DictionaryMetadata;
+import morfologik.stemming.UnmappableInputException;
 
 /**
  * Finds spelling suggestions. Implements K. Oflazer's algorithm as described
@@ -182,28 +183,7 @@ public class Speller {
     }
   }
 
-  /**
-   * Encode a character sequence into a byte buffer, optionally expanding
-   * buffer.
-   */
-  private ByteBuffer charsToBytes(final CharBuffer chars, ByteBuffer bytes) {
-    bytes.clear();
-    final int maxCapacity = (int) (chars.remaining() * encoder.maxBytesPerChar());
-    if (bytes.capacity() <= maxCapacity) {
-      bytes = ByteBuffer.allocate(maxCapacity);
-    }
-    chars.mark();
-    encoder.reset();
-    if (encoder.encode(chars, bytes, true).isError()) {
-      // in the case of encoding errors, clear the buffer
-      bytes.clear();
-    }
-    bytes.flip();
-    chars.reset();
-    return bytes;
-  }
-
-  private ByteBuffer charSequenceToBytes(final CharSequence word) {
+  private ByteBuffer charSequenceToBytes(final CharSequence word) throws UnmappableInputException {
     // Encode word characters into bytes in the same encoding as the FSA's.
     charBuffer = BufferUtils.clearAndEnsureCapacity(charBuffer, word.length());
     for (int i = 0; i < word.length(); i++) {
@@ -211,8 +191,8 @@ public class Speller {
       charBuffer.put(chr);
     }
     charBuffer.flip();
-    byteBuffer = charsToBytes(charBuffer, byteBuffer);
-    return byteBuffer;
+
+    return BufferUtils.charsToBytes(encoder, charBuffer, byteBuffer);
   }
 
   /**
@@ -275,7 +255,11 @@ public class Speller {
    * @return True if it is found.
    */
   public boolean isInDictionary(final CharSequence word) {
-    byteBuffer = charSequenceToBytes(word);
+    try {
+      byteBuffer = charSequenceToBytes(word);
+    } catch (UnmappableInputException e) {
+      return false;
+    }
 
     // Try to find a partial match in the dictionary.
     final MatchResult match = matcher.match(matchResult, byteBuffer.array(), 0, byteBuffer.remaining(), rootNode);
@@ -302,8 +286,14 @@ public class Speller {
     if (!dictionaryMetadata.isFrequencyIncluded()) {
       return 0;
     }
+
     final byte separator = dictionaryMetadata.getSeparator();
-    byteBuffer = charSequenceToBytes(word);
+    try {
+      byteBuffer = charSequenceToBytes(word);
+    } catch (UnmappableInputException e) {
+      return 0;
+    }
+
     final MatchResult match = matcher.match(matchResult, byteBuffer.array(), 0, byteBuffer.remaining(), rootNode);
     if (match.kind == SEQUENCE_IS_A_PREFIX) {
       final int arc = fsa.getArc(match.node, separator);
@@ -435,9 +425,7 @@ public class Speller {
     return candStringList;
   }
 
-  private void findRepl(final int depth, final int node, final byte[] prevBytes, final int wordIndex,
-      final int candIndex) {
-    // char separatorChar = dictionaryMetadata.getSeparatorAsChar();
+  private void findRepl(final int depth, final int node, final byte[] prevBytes, final int wordIndex, final int candIndex) {
     int dist = 0;
     for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
       byteBuffer = BufferUtils.clearAndEnsureCapacity(byteBuffer, prevBytes.length + 1);
@@ -446,6 +434,9 @@ public class Speller {
       final int bufPos = byteBuffer.position();
       byteBuffer.flip();
       decoder.reset();
+      // FIXME: this isn't correct -- no checks for overflows, no decoder flush. I don't think this should be in here
+      // too, the decoder should run once on the input charsequence, then the decoded byte array should be used for 
+      // suggestions. Reallocating buffers and decoding over and over doesn't make much sense.
       final CoderResult c = decoder.decode(byteBuffer, charBuffer, true);
       if (c.isMalformed()) { // assume that only valid
         // encodings are there

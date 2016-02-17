@@ -11,6 +11,10 @@ New Features
 
  * GH-73: Update Polish stemming dictionaries to polimorfologik 2.1. (Dawid Weiss)
 
+Bug Fixes:
+
+ * GH-76: Consolidate and fix character encoding and decoding. (Dawid Weiss)
+
 Other Changes
 
  * GH-63: BufferUtils.ensureCapacity now clears the input buffer. This also
