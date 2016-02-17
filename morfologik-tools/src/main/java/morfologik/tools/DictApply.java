@@ -110,11 +110,11 @@ public class DictApply extends CliTool {
           System.out.println(line + " => [not found]");
         } else {
           for (WordData wd : wordData) {
-            CharSequence word = wd.getWord();
+            CharSequence stem = wd.getStem();
             CharSequence tag = wd.getTag();
             System.out.println(line + " => " +
-                ((skipTags || tag == null) ? word
-                                           : word + " " + tag));
+                ((skipTags || tag == null) ? stem
+                                           : stem + " " + tag));
           }
         }
       }
