@@ -42,8 +42,7 @@ public class TrimSuffixEncoder implements ISequenceEncoder {
       sharedPrefix = 0;
     }
 
-    reuse = BufferUtils.ensureCapacity(reuse, 1 + target.remaining() - sharedPrefix); 
-    reuse.clear();
+    reuse = BufferUtils.clearAndEnsureCapacity(reuse, 1 + target.remaining() - sharedPrefix); 
 
     assert target.hasArray() && 
            target.position() == 0 && 
@@ -69,8 +68,7 @@ public class TrimSuffixEncoder implements ISequenceEncoder {
     final int len1 = source.remaining() - truncateBytes;
     final int len2 = encoded.remaining() - 1;
 
-    reuse = BufferUtils.ensureCapacity(reuse, len1 + len2);
-    reuse.clear();
+    reuse = BufferUtils.clearAndEnsureCapacity(reuse, len1 + len2);
 
     assert source.hasArray() && 
            source.position() == 0 && 

@@ -148,29 +148,25 @@ public class DictCompile extends CliTool {
         sep2 = row.length;
       }
 
-      source.clear();
-      source = BufferUtils.ensureCapacity(source, sep1);
+      source = BufferUtils.clearAndEnsureCapacity(source, sep1);
       source.put(row, 0, sep1);
       source.flip();
 
       final int len = sep2 - (sep1 + 1);
-      target.clear();
-      target = BufferUtils.ensureCapacity(target, len);
+      target = BufferUtils.clearAndEnsureCapacity(target, len);
       target.put(row, sep1 + 1, len);
       target.flip();
 
       final int len2 = row.length - (sep2 + 1);
-      tag.clear();
+      tag = BufferUtils.clearAndEnsureCapacity(tag, len2);
       if (len2 > 0) {
-        tag = BufferUtils.ensureCapacity(tag, len2);
         tag.put(row, sep2 + 1, len2);
       }
       tag.flip();
 
       encoded = sequenceEncoder.encode(encoded, target, source);
 
-      assembled.clear();
-      assembled = BufferUtils.ensureCapacity(assembled, 
+      assembled = BufferUtils.clearAndEnsureCapacity(assembled, 
           target.remaining() + 1 +
           encoded.remaining() + 1 + 
           tag.remaining());

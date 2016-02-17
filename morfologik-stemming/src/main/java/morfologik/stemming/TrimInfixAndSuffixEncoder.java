@@ -64,8 +64,7 @@ public class TrimInfixAndSuffixEncoder implements ISequenceEncoder {
         // Compute temporary src with the infix removed.
         // Concatenate in scratch space for simplicity.
         final int len2 = source.remaining() - (i + j);
-        scratch = BufferUtils.ensureCapacity(scratch, i + len2);
-        scratch.clear();
+        scratch = BufferUtils.clearAndEnsureCapacity(scratch, i + len2);
         scratch.put(source.array(), 0, i);
         scratch.put(source.array(), i + j, len2);
         scratch.flip();
@@ -99,8 +98,7 @@ public class TrimInfixAndSuffixEncoder implements ISequenceEncoder {
     }
 
     final int len1 = target.remaining() - maxSubsequenceLength;
-    reuse = BufferUtils.ensureCapacity(reuse, 3 + len1);
-    reuse.clear();
+    reuse = BufferUtils.clearAndEnsureCapacity(reuse, 3 + len1);
 
     reuse.put((byte) ((maxInfixIndex + 'A') & 0xFF));
     reuse.put((byte) ((maxInfixLength + 'A') & 0xFF));
@@ -128,8 +126,7 @@ public class TrimInfixAndSuffixEncoder implements ISequenceEncoder {
 
     final int len1 = source.remaining() - (infixIndex + infixLength + truncateSuffixBytes);
     final int len2 = encoded.remaining() - 3;
-    reuse = BufferUtils.ensureCapacity(reuse, infixIndex + len1 + len2);
-    reuse.clear();
+    reuse = BufferUtils.clearAndEnsureCapacity(reuse, infixIndex + len1 + len2);
 
     assert encoded.hasArray() && 
            encoded.position() == 0 && 

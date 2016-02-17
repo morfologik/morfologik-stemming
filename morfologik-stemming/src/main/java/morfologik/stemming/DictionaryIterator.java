@@ -54,16 +54,14 @@ public final class DictionaryIterator implements Iterator<WordData> {
       throw new RuntimeException("Invalid dictionary " + "entry format (missing separator).");
     }
 
-    inflectedBuffer.clear();
-    inflectedBuffer = BufferUtils.ensureCapacity(inflectedBuffer, sepPos);
+    inflectedBuffer = BufferUtils.clearAndEnsureCapacity(inflectedBuffer, sepPos);
     inflectedBuffer.put(ba, 0, sepPos);
     inflectedBuffer.flip();
 
     inflectedCharBuffer = bytesToChars(inflectedBuffer, inflectedCharBuffer);
     entry.update(inflectedBuffer, inflectedCharBuffer);
 
-    temp.clear();
-    temp = BufferUtils.ensureCapacity(temp, bbSize - sepPos);
+    temp = BufferUtils.clearAndEnsureCapacity(temp, bbSize - sepPos);
     sepPos++;
     temp.put(ba, sepPos, bbSize - sepPos);
     temp.flip();
@@ -88,8 +86,7 @@ public final class DictionaryIterator implements Iterator<WordData> {
                                             inflectedBuffer,
                                             ByteBuffer.wrap(ba, 0, sepPos));
     } else {
-      entry.stemBuffer = BufferUtils.ensureCapacity(entry.stemBuffer, sepPos);
-      entry.stemBuffer.clear();
+      entry.stemBuffer = BufferUtils.clearAndEnsureCapacity(entry.stemBuffer, sepPos);
       entry.stemBuffer.put(ba, 0, sepPos);
       entry.stemBuffer.flip();
     }
@@ -102,8 +99,7 @@ public final class DictionaryIterator implements Iterator<WordData> {
     /*
      * Decode the tag data.
      */
-    entry.tagBuffer = BufferUtils.ensureCapacity(entry.tagBuffer, bbSize - sepPos);
-    entry.tagBuffer.clear();
+    entry.tagBuffer = BufferUtils.clearAndEnsureCapacity(entry.tagBuffer, bbSize - sepPos);
     entry.tagBuffer.put(ba, sepPos, bbSize - sepPos);
     entry.tagBuffer.flip();
 

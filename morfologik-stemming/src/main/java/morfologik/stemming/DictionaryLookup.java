@@ -148,8 +148,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
     formsList.wrap(forms, 0, 0);
 
     // Encode word characters into bytes in the same encoding as the FSA's.
-    charBuffer.clear();
-    charBuffer = BufferUtils.ensureCapacity(charBuffer, word.length());
+    charBuffer = BufferUtils.clearAndEnsureCapacity(charBuffer, word.length());
     for (int i = 0; i < word.length(); i++) {
       char chr = word.charAt(i);
       if (chr == separatorChar)
@@ -229,8 +228,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
            */
           final int tagSize = bbSize - sepPos;
           if (tagSize > 0) {
-            wordData.tagBuffer = BufferUtils.ensureCapacity(wordData.tagBuffer, tagSize);
-            wordData.tagBuffer.clear();
+            wordData.tagBuffer = BufferUtils.clearAndEnsureCapacity(wordData.tagBuffer, tagSize);
             wordData.tagBuffer.put(ba, sepPos, tagSize);
             wordData.tagBuffer.flip();
           }
@@ -278,8 +276,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
    */
   private ByteBuffer charsToBytes(CharBuffer chars, ByteBuffer bytes) {
     bytes.clear();
-    final int maxCapacity = (int) (chars.remaining() * encoder
-        .maxBytesPerChar());
+    final int maxCapacity = (int) (chars.remaining() * encoder.maxBytesPerChar());
     if (bytes.capacity() <= maxCapacity) {
       bytes = ByteBuffer.allocate(maxCapacity);
     }

@@ -89,7 +89,6 @@ public class PolishMorfologikStemmerTest {
       // The buffer should be present in stems set.
       assertTrue(stem, stems.contains(stem));
       // Buffer large enough to hold the contents.
-      temp.clear();
       assertSame(temp, wd.getStemBytes(temp));
       // The copy and the clone should be identical.
       assertEquals(0, copy.compareTo(temp));

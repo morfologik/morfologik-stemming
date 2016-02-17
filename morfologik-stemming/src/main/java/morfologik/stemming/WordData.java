@@ -91,8 +91,11 @@ public final class WordData implements Cloneable {
 
 	/**
 	 * Copy the stem's binary data (no charset decoding) to a custom byte
-	 * buffer. If the buffer is null or not large enough to hold the result, a
-	 * new buffer is allocated.
+	 * buffer.
+	 *
+	 * The buffer is cleared prior to copying and flipped for reading
+	 * upon returning from this method. If the buffer is null or not large 
+	 * enough to hold the result, a new buffer is allocated.
 	 * 
 	 * @param target
 	 *            Target byte buffer to copy the stem buffer to or
@@ -101,8 +104,7 @@ public final class WordData implements Cloneable {
 	 * @return Returns <code>target</code> or the new reallocated buffer.
 	 */
 	public ByteBuffer getStemBytes(ByteBuffer target) {
-		target = BufferUtils.ensureCapacity(target, stemBuffer.remaining());
-    assert target.position() == 0;
+		target = BufferUtils.clearAndEnsureCapacity(target, stemBuffer.remaining());
 		stemBuffer.mark();
 		target.put(stemBuffer);
 		stemBuffer.reset();
@@ -112,8 +114,10 @@ public final class WordData implements Cloneable {
 
 	/**
 	 * Copy the tag's binary data (no charset decoding) to a custom byte buffer.
-	 * If the buffer is null or not large enough to hold the result, a new
-	 * buffer is allocated.
+	 * 
+   * The buffer is cleared prior to copying and flipped for reading
+   * upon returning from this method. If the buffer is null or not large 
+   * enough to hold the result, a new buffer is allocated.
 	 * 
 	 * @param target
 	 *            Target byte buffer to copy the tag buffer to or
@@ -122,8 +126,7 @@ public final class WordData implements Cloneable {
 	 * @return Returns <code>target</code> or the new reallocated buffer.
 	 */
 	public ByteBuffer getTagBytes(ByteBuffer target) {
-		target = BufferUtils.ensureCapacity(target, tagBuffer.remaining());
-    assert target.position() == 0;
+		target = BufferUtils.clearAndEnsureCapacity(target, tagBuffer.remaining());
 		tagBuffer.mark();
 		target.put(tagBuffer);
 		tagBuffer.reset();
@@ -133,8 +136,11 @@ public final class WordData implements Cloneable {
 
 	/**
 	 * Copy the inflected word's binary data (no charset decoding) to a custom
-	 * byte buffer. If the buffer is null or not large enough to hold the
-	 * result, a new buffer is allocated.
+	 * byte buffer.
+	 * 
+   * The buffer is cleared prior to copying and flipped for reading
+   * upon returning from this method. If the buffer is null or not large 
+   * enough to hold the result, a new buffer is allocated. 
 	 * 
 	 * @param target
 	 *            Target byte buffer to copy the word buffer to or
@@ -143,8 +149,7 @@ public final class WordData implements Cloneable {
 	 * @return Returns <code>target</code> or the new reallocated buffer.
 	 */
 	public ByteBuffer getWordBytes(ByteBuffer target) {
-		target = BufferUtils.ensureCapacity(target, wordBuffer.remaining());
-    assert target.position() == 0;
+		target = BufferUtils.clearAndEnsureCapacity(target, wordBuffer.remaining());
 		wordBuffer.mark();
 		target.put(wordBuffer);
 		wordBuffer.reset();

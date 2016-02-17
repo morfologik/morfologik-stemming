@@ -8,8 +8,7 @@ import java.nio.ByteBuffer;
 public class NoEncoder implements ISequenceEncoder {
   @Override
   public ByteBuffer encode(ByteBuffer reuse, ByteBuffer source, ByteBuffer target) {
-    reuse = BufferUtils.ensureCapacity(reuse, target.remaining());
-    reuse.clear();
+    reuse = BufferUtils.clearAndEnsureCapacity(reuse, target.remaining());
 
     target.mark();
     reuse.put(target)
@@ -21,8 +20,7 @@ public class NoEncoder implements ISequenceEncoder {
 
   @Override
   public ByteBuffer decode(ByteBuffer reuse, ByteBuffer source, ByteBuffer encoded) {
-    reuse = BufferUtils.ensureCapacity(reuse, encoded.remaining());
-    reuse.clear();
+    reuse = BufferUtils.clearAndEnsureCapacity(reuse, encoded.remaining());
 
     encoded.mark();
     reuse.put(encoded)

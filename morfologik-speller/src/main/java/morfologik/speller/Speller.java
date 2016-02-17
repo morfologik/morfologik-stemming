@@ -205,8 +205,7 @@ public class Speller {
 
   private ByteBuffer charSequenceToBytes(final CharSequence word) {
     // Encode word characters into bytes in the same encoding as the FSA's.
-    charBuffer.clear();
-    charBuffer = BufferUtils.ensureCapacity(charBuffer, word.length());
+    charBuffer = BufferUtils.clearAndEnsureCapacity(charBuffer, word.length());
     for (int i = 0; i < word.length(); i++) {
       final char chr = word.charAt(i);
       charBuffer.put(chr);
@@ -416,10 +415,8 @@ public class Speller {
           candidate = new char[MAX_WORD_LENGTH];
           candLen = candidate.length;
           effectEditDistance = wordLen <= editDistance ? wordLen - 1 : editDistance;
-          charBuffer = BufferUtils.ensureCapacity(charBuffer, MAX_WORD_LENGTH);
-          byteBuffer = BufferUtils.ensureCapacity(byteBuffer, MAX_WORD_LENGTH);
-          charBuffer.clear();
-          byteBuffer.clear();
+          charBuffer = BufferUtils.clearAndEnsureCapacity(charBuffer, MAX_WORD_LENGTH);
+          byteBuffer = BufferUtils.clearAndEnsureCapacity(byteBuffer, MAX_WORD_LENGTH);
           final byte[] prevBytes = new byte[0];
           findRepl(0, fsa.getRootNode(), prevBytes, 0, 0);
         }
@@ -443,8 +440,7 @@ public class Speller {
     // char separatorChar = dictionaryMetadata.getSeparatorAsChar();
     int dist = 0;
     for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
-      byteBuffer = BufferUtils.ensureCapacity(byteBuffer, prevBytes.length + 1);
-      byteBuffer.clear();
+      byteBuffer = BufferUtils.clearAndEnsureCapacity(byteBuffer, prevBytes.length + 1);
       byteBuffer.put(prevBytes);
       byteBuffer.put(fsa.getArcLabel(arc));
       final int bufPos = byteBuffer.position();

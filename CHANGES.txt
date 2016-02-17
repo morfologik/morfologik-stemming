@@ -11,6 +11,12 @@ New Features
 
  * GH-73: Update Polish stemming dictionaries to polimorfologik 2.1. (Dawid Weiss)
 
+Other Changes
+
+ * GH-63: BufferUtils.ensureCapacity now clears the input buffer. This also
+   affects WordData methods that accept a reusable byte buffer -- it is now
+   always cleared prior to being flipped and returned. (Dawid Weiss)
+
 ======================= morfologik-stemming 2.0.2-SNAPSHOT =======================
 
 Bug Fixes

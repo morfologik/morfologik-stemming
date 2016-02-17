@@ -78,7 +78,6 @@ public class DictDecompile extends CliTool {
     try (OutputStream os = new BufferedOutputStream(Files.newOutputStream(output))) {
       boolean hasTags = false;
       for (WordData wd : lookup) {
-        tag.clear();
         tag = wd.getTagBytes(tag);
         if (tag.hasRemaining()) {
           hasTags = true;
@@ -87,11 +86,8 @@ public class DictDecompile extends CliTool {
       }
 
       for (WordData wd : lookup) {
-        stem.clear();
         stem = wd.getStemBytes(stem);
-        word.clear();
         word = wd.getWordBytes(word);
-        tag.clear();
         tag = wd.getTagBytes(tag);
 
         write(os, stem);
