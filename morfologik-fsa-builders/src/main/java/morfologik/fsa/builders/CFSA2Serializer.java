@@ -5,7 +5,7 @@ import static morfologik.fsa.FSAFlags.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayDeque;
+import java.util.BitSet;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Locale;
@@ -15,20 +15,19 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import morfologik.fsa.CFSA2;
-import morfologik.fsa.FSA;
-import morfologik.fsa.FSAFlags;
-import morfologik.fsa.FSAHeader;
-import morfologik.fsa.StateVisitor;
-import morfologik.fsa.builders.FSAUtils.IntIntHolder;
-
-import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.BoundedProportionalArraySizingStrategy;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntIntHashMap;
 import com.carrotsearch.hppc.IntStack;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
+
+import morfologik.fsa.CFSA2;
+import morfologik.fsa.FSA;
+import morfologik.fsa.FSAFlags;
+import morfologik.fsa.FSAHeader;
+import morfologik.fsa.StateVisitor;
+import morfologik.fsa.builders.FSAUtils.IntIntHolder;
 
 /**
  * Serializes in-memory {@link FSA} graphs to {@link CFSA2}.
@@ -225,10 +224,7 @@ public final class CFSA2Serializer implements FSASerializer {
      */
     int maxStates = Integer.MAX_VALUE;
     int minInlinkCount = 2;
-    ArrayDeque<Integer> statesQueue = computeFirstStates(inlinkCount, maxStates, minInlinkCount);
-    IntArrayList states = new IntArrayList();
-    while (!statesQueue.isEmpty())
-      states.add(statesQueue.pop());
+    int [] states = computeFirstStates(inlinkCount, maxStates, minInlinkCount);
 
     /*
      * Compute initial addresses, without node rearrangements.
@@ -240,8 +236,8 @@ public final class CFSA2Serializer implements FSASerializer {
      * nodes from the potential candidate nodes list. 
      */
     IntArrayList sublist = new IntArrayList();
-    sublist.buffer = states.buffer;
-    sublist.elementsCount = states.elementsCount;
+    sublist.buffer = states;
+    sublist.elementsCount = states.length;
 
     /*
      * Probe the initial region a little bit, looking for optimal cut. It can't be binary search
@@ -249,7 +245,7 @@ public final class CFSA2Serializer implements FSASerializer {
      */
     log(Level.FINE, "Compacting, initial output size: %,d", serializedSize);
     int cutAt = 0;
-    for (int cut = Math.min(25, states.size()); cut <= Math.min(150, states.size()); cut += 25) {
+    for (int cut = Math.min(25, states.length); cut <= Math.min(150, states.length); cut += 25) {
       sublist.elementsCount = cut;
       int newSize = linearizeAndCalculateOffsets(fsa, sublist, linearized, offsets);
       log(Level.FINE, "Moved %,d states, output size: %,d", sublist.size(), newSize);
@@ -336,7 +332,7 @@ public final class CFSA2Serializer implements FSASerializer {
    * Compute the set of states that should be linearized first to minimize other
    * states goto length.
    */
-  private ArrayDeque<Integer> computeFirstStates(IntIntHashMap inlinkCount, int maxStates, int minInlinkCount) {
+  private int[] computeFirstStates(IntIntHashMap inlinkCount, int maxStates, int minInlinkCount) {
     Comparator<IntIntHolder> comparator = new Comparator<FSAUtils.IntIntHolder>() {
       public int compare(IntIntHolder o1, IntIntHolder o2) {
         int v = o1.a - o2.a;
@@ -353,17 +349,19 @@ public final class CFSA2Serializer implements FSASerializer {
 
         if (stateInlink.size() < maxStates || comparator.compare(scratch, stateInlink.peek()) > 0) {
           stateInlink.add(new IntIntHolder(c.value, c.key));
-          if (stateInlink.size() > maxStates)
+          if (stateInlink.size() > maxStates) {
             stateInlink.remove();
+          }
         }
       }
     }
 
-    ArrayDeque<Integer> states = new ArrayDeque<Integer>();
-    while (!stateInlink.isEmpty()) {
+    int [] states = new int [stateInlink.size()];
+    for (int position = states.length; !stateInlink.isEmpty(); position--) {
       IntIntHolder i = stateInlink.remove();
-      states.addFirst(i.b);
+      states[position] = i.b;
     }
+
     return states;
   }
 
