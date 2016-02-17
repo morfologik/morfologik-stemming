@@ -357,9 +357,9 @@ public final class CFSA2Serializer implements FSASerializer {
     }
 
     int [] states = new int [stateInlink.size()];
-    for (int position = states.length; !stateInlink.isEmpty(); position--) {
+    for (int position = states.length; !stateInlink.isEmpty();) {
       IntIntHolder i = stateInlink.remove();
-      states[position] = i.b;
+      states[--position] = i.b;
     }
 
     return states;
