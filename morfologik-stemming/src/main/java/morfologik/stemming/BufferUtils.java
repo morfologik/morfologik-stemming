@@ -74,6 +74,13 @@ public final class BufferUtils {
     return new String(buf, charset);
   }
 
+  public static String toString(CharBuffer buffer) {
+    buffer = buffer.slice();
+    char [] buf = new char [buffer.remaining()];
+    buffer.get(buf);
+    return new String(buf);
+  }
+
   /**
    * @param buffer The buffer to read from.
    * @return Returns the remaining bytes from the buffer copied to an array.

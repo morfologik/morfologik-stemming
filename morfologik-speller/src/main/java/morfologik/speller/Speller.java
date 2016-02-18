@@ -435,8 +435,9 @@ public class Speller {
       byteBuffer.flip();
       decoder.reset();
       // FIXME: this isn't correct -- no checks for overflows, no decoder flush. I don't think this should be in here
-      // too, the decoder should run once on the input charsequence, then the decoded byte array should be used for 
-      // suggestions. Reallocating buffers and decoding over and over doesn't make much sense.
+      // too, the decoder should run once on accumulated temporary byte buffer (current path) only when there's
+      // a potential that this buffer can become a replacement candidate (isEndOfCandidate). Because we assume candidates
+      // are valid input strings (this is verified when building the dictionary), it's save a lot of conversions.
       final CoderResult c = decoder.decode(byteBuffer, charBuffer, true);
       if (c.isMalformed()) { // assume that only valid
         // encodings are there
