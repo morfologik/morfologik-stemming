@@ -33,6 +33,12 @@
     </mailingList>
   </mailingLists>
 
+  <scm>
+    <url>git@github.com:morfologik/morfologik-stemming.git</url>
+    <connection>scm:git:git@github.com:morfologik/morfologik-stemming.git</connection>
+    <developerConnection>scm:git:git@github.com:morfologik/morfologik-stemming.git</developerConnection>
+  </scm>
+
   <developers>
     <developer>
       <id>dawid.weiss</id>
