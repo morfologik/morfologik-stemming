@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Arrays;
 
 /**
  * Attributes applying to {@link Dictionary} and {@link DictionaryMetadata}.
@@ -138,7 +139,11 @@ public enum DictionaryAttribute {
   ENCODER("fsa.dict.encoder") {
     @Override
     public EncoderType fromString(String value) {
-      return EncoderType.valueOf(value.toUpperCase(Locale.ROOT));
+      try {
+        return EncoderType.valueOf(value.trim().toUpperCase(Locale.ROOT));
+      } catch (IllegalArgumentException e) {
+        throw new IllegalArgumentException("Invalid encoder name '" + value.trim() + "', only these coders are valid: " + Arrays.toString(EncoderType.values()));
+      }
     }
   },
 
