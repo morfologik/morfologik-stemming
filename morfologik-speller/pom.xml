@@ -28,12 +28,6 @@
       <artifactId>morfologik-stemming</artifactId>
       <version>${project.version}</version>
     </dependency>
-        <dependency>
-      <groupId>org.carrot2</groupId>
-      <artifactId>morfologik-polish</artifactId>
-      <version>2.0.0</version>
-    </dependency>
-    
   </dependencies>
 
   <build>
