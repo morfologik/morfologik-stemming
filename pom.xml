@@ -190,6 +190,27 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${version.maven-enforcer-plugin}</version>
+        <configuration>
+          <rules>
+            <DependencyConvergence/>
+          </rules>
+        </configuration>
+        <executions>
+          <execution>
+            <id>enforce-dependency-convergence</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 
   <profiles>
@@ -336,6 +357,12 @@
           <artifactId>randomizedtesting-runner</artifactId>
           <version>${version.randomizedtesting}</version>
           <scope>test</scope>
+          <exclusions>
+            <exclusion><!-- prevents maven-enforcer DependencyConvergence error - bring in our own version below -->
+              <groupId>junit</groupId>
+              <artifactId>junit</artifactId>
+            </exclusion>
+          </exclusions>
         </dependency>
 
         <dependency>

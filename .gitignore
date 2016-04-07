@@ -11,6 +11,7 @@ target/
 *.iml
 .idea/compiler.xml
 .idea/encodings.xml
+.idea/findbugs-idea.xml
 .idea/copyright/profiles_settings.xml
 .idea/libraries/Maven__com_carrotsearch_hppc_0_5_3.xml
 .idea/libraries/Maven__com_carrotsearch_junit_benchmarks_0_7_2.xml
