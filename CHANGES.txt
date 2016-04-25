@@ -13,6 +13,8 @@ Bug Fixes:
 
 Other Changes
 
+ * GH-79: Corrected a corner case in DictCompileTest. (Dawid Weiss)
+
  * GH-77: Trailing spaces in encoder name can lead to illegal argument exception.
    (Jaume Ortolà, Dawid Weiss)
 

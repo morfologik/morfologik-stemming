@@ -78,10 +78,20 @@ public class DictCompileTest extends RandomizedTest {
           (useTags ? separator : "") + 
           (wd.getTag() == null ? "" : wd.getTag()));
     }
-    
+
     Assertions.assertThat(reconstructed).containsOnlyElementsOf(sequences);
 
     // Verify decompilation via DictDecompile.
+    
+    // GH-79: if there's only one sequence and there is no tag the decompiler will
+    // drop it.
+    if (useTags && sequences.size() == 1) {
+      String onlyOne = sequences.iterator().next();
+      if (onlyOne.endsWith(Character.toString(separator))) {
+        sequences.clear();
+        sequences.add(onlyOne.substring(0, onlyOne.length() - 1));
+      }
+    }
 
     Files.delete(input);
     Assertions.assertThat(new DictDecompile(dict, null, true, validate).call())
