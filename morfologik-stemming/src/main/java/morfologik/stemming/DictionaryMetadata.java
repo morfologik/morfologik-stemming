@@ -34,7 +34,7 @@ public final class DictionaryMetadata {
    * Default attribute values.
    */
   private static Map<DictionaryAttribute, String> DEFAULT_ATTRIBUTES = new DictionaryMetadataBuilder()
-    .frequencyIncluded()
+    .frequencyIncluded(false)
     .ignorePunctuation()
     .ignoreNumbers()
     .ignoreCamelCase()
