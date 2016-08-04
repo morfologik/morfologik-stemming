@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public final class DictionaryMetadataBuilder {
   private final EnumMap<DictionaryAttribute, String> attrs = 
-      new EnumMap<DictionaryAttribute, String>(DictionaryAttribute.class);
+      new EnumMap<>(DictionaryAttribute.class);
 
   public DictionaryMetadataBuilder separator(char c) {
     this.attrs.put(DictionaryAttribute.SEPARATOR, Character.toString(c));
@@ -27,7 +27,7 @@ public final class DictionaryMetadataBuilder {
     return this;
   }
 
-  public DictionaryMetadataBuilder frequencyIncluded()    { return frequencyIncluded(false); }
+  public DictionaryMetadataBuilder frequencyIncluded()    { return frequencyIncluded(true); }
   public DictionaryMetadataBuilder frequencyIncluded(boolean v)  { this.attrs.put(DictionaryAttribute.FREQUENCY_INCLUDED, Boolean.valueOf(v).toString()); return this; }
 
   public DictionaryMetadataBuilder ignorePunctuation()    { return ignorePunctuation(true); }
@@ -134,6 +134,6 @@ public final class DictionaryMetadataBuilder {
   }
 
   public EnumMap<DictionaryAttribute, String> toMap()    {
-    return new EnumMap<DictionaryAttribute, String>(attrs);
+    return new EnumMap<>(attrs);
   }
 }
