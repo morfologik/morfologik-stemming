@@ -11,6 +11,9 @@ Bug Fixes:
 
  * PR #78: Fix dependency issue in morfologik-speller (Alden Quimby).
 
+ * GH-84: Dictionary resources not found with security manager.
+   (Uwe Schindler)
+
 Other Changes
 
  * GH-79: Corrected a corner case in DictCompileTest. (Dawid Weiss)
