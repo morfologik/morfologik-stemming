@@ -73,6 +73,11 @@ public class TrimPrefixAndSuffixEncoder implements ISequenceEncoder {
 
     return reuse;
   }
+  
+  @Override
+  public int prefixBytes() {
+    return 2;
+  }
 
   public ByteBuffer decode(ByteBuffer reuse, ByteBuffer source, ByteBuffer encoded) {
     assert encoded.remaining() >= 2;

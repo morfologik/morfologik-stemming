@@ -55,7 +55,12 @@ public class TrimSuffixEncoder implements ISequenceEncoder {
 
     return reuse;
   }
-
+  
+  @Override
+  public int prefixBytes() {
+    return 1;
+  }
+  
   public ByteBuffer decode(ByteBuffer reuse, ByteBuffer source, ByteBuffer encoded) {
     assert encoded.remaining() >= 1;
 
@@ -84,7 +89,7 @@ public class TrimSuffixEncoder implements ISequenceEncoder {
 
     return reuse;
   }
-
+  
   @Override
   public String toString() {
     return getClass().getSimpleName();

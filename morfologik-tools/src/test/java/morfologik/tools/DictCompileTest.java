@@ -19,15 +19,21 @@ import org.junit.Test;
 
 import com.carrotsearch.randomizedtesting.RandomizedTest;
 import com.carrotsearch.randomizedtesting.annotations.Repeat;
+import com.carrotsearch.randomizedtesting.generators.RandomPicks;
 
 public class DictCompileTest extends RandomizedTest {
   @Test
-  @Repeat(iterations = 50)
+  @Repeat(iterations = 200)
   public void testRoundTrip() throws Exception {
     final Path input = newTempDir().toPath().resolve("dictionary.input");
     final Path metadata = DictionaryMetadata.getExpectedMetadataLocation(input);
 
-    char separator = '|';
+    char separator = RandomPicks.randomFrom(getRandom(), new Character [] {
+        '|',
+        ',',
+        '\t',
+    });
+
     try (Writer writer = Files.newBufferedWriter(metadata, StandardCharsets.UTF_8)) {
       DictionaryMetadata.builder()
           .separator(separator)
@@ -41,10 +47,44 @@ public class DictCompileTest extends RandomizedTest {
 
     Set<String> sequences = new LinkedHashSet<>();
     for (int seqs = randomIntBetween(0, 100); --seqs >= 0;) {
+      String base;
+      switch (randomIntBetween(0, 5)) {
+        case 0:
+          base = randomAsciiOfLength(('A' - separator) & 0xff);
+          break;
+
+        default:
+          base = randomAsciiOfLengthBetween(1, 100);
+          break;
+      }
+      
+      String inflected;
+      switch (randomIntBetween(0, 5)) {
+        case 0:
+          inflected = base;
+          break;
+
+        case 1:
+          inflected = randomAsciiOfLengthBetween(0, 5) + base;
+          break;
+          
+        case 3: 
+          inflected = base + randomAsciiOfLengthBetween(0, 5);
+          break;
+
+        case 4:
+          inflected = randomAsciiOfLengthBetween(0, 5) + base + randomAsciiOfLengthBetween(0, 5);
+          break;
+
+        default:
+          inflected = randomAsciiOfLengthBetween(0, 200);
+            break;
+      }
+       
+
       sequences.add(
-          randomAsciiOfLengthBetween(1, 10) + 
-          separator + 
-          randomAsciiOfLengthBetween(0, 10) +
+          base + separator + 
+          inflected +
           (useTags ? (separator + randomAsciiOfLengthBetween(0, 10)) : ""));
     }
 

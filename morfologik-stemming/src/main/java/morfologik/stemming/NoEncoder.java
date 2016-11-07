@@ -31,6 +31,11 @@ public class NoEncoder implements ISequenceEncoder {
   }
 
   @Override
+  public int prefixBytes() {
+    return 0;
+  }
+  
+  @Override
   public String toString() {
     return getClass().getSimpleName();
   }

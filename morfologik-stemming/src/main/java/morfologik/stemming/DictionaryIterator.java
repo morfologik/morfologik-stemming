@@ -72,7 +72,8 @@ public final class DictionaryIterator implements Iterator<WordData> {
     /*
      * Find the next separator byte's position splitting word form and tag.
      */
-    sepPos = 0;
+    assert sequenceEncoder.prefixBytes() <= bbSize : sequenceEncoder.getClass() + " >? " + bbSize;
+    sepPos = sequenceEncoder.prefixBytes();
     for (; sepPos < bbSize; sepPos++) {
       if (ba[sepPos] == separator)
         break;

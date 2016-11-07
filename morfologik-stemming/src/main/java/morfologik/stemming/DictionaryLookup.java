@@ -129,6 +129,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
   @Override
   public List<WordData> lookup(CharSequence word) {
     final byte separator = dictionaryMetadata.getSeparator();
+    final int prefixBytes = sequenceEncoder.prefixBytes();
 
     if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
       word = applyReplacements(word, dictionaryMetadata.getInputConversionPairs());
@@ -204,8 +205,9 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
            * Find the separator byte's position splitting the inflection instructions
            * from the tag.
            */
+          assert prefixBytes <= bbSize : sequenceEncoder.getClass() + " >? " + bbSize;
           int sepPos;
-          for (sepPos = 0; sepPos < bbSize; sepPos++) {
+          for (sepPos = prefixBytes; sepPos < bbSize; sepPos++) {
             if (ba[sepPos] == separator) {
               break;
             }

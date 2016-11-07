@@ -34,4 +34,14 @@ public interface ISequenceEncoder {
    * @return Returns the {@link ByteBuffer} with decoded <code>target</code>.
    */
   public ByteBuffer decode(ByteBuffer reuse, ByteBuffer source, ByteBuffer encoded);
+
+  /**
+   * The number of encoded form's prefix bytes that should be ignored (needed for separator lookup). 
+   * An ugly workaround for GH-85, should be fixed by prior knowledge of whether the dictionary contains tags;
+   * then we can scan for separator right-to-left.
+   * 
+   * @see "https://github.com/morfologik/morfologik-stemming/issues/85"
+   */
+  @Deprecated
+  public int prefixBytes();
 }
