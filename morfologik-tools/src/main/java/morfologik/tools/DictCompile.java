@@ -17,8 +17,11 @@ import morfologik.fsa.FSA;
 import morfologik.fsa.builders.FSABuilder;
 import morfologik.fsa.builders.FSASerializer;
 import morfologik.stemming.BufferUtils;
+import morfologik.stemming.Dictionary;
+import morfologik.stemming.DictionaryLookup;
 import morfologik.stemming.DictionaryMetadata;
 import morfologik.stemming.ISequenceEncoder;
+import morfologik.stemming.WordData;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
@@ -191,6 +194,13 @@ public class DictCompile extends CliTool {
       serializer.serialize(fsa, os);
     }
 
+    // If validating, try to scan the input
+    if (validate) {
+      for (WordData wd : new DictionaryLookup(new Dictionary(fsa, metadata))) {
+        // Do nothing, just scan and make sure no exceptions are thrown.
+      }
+    }
+    
     return ExitStatus.SUCCESS;
   }
 
