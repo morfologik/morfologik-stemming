@@ -264,8 +264,18 @@ public class Speller {
     // Try to find a partial match in the dictionary.
     final MatchResult match = matcher.match(matchResult, byteBuffer.array(), 0, byteBuffer.remaining(), rootNode);
 
-    if (match.kind == EXACT_MATCH) {
+    // Make sure the word doesn't contain a separator if there is an exact match
+    if (containsSeparators && match.kind == EXACT_MATCH) {
       containsSeparators = false;
+      for (int i=0; i<word.length(); i++) {
+        if (word.charAt(i) == dictionaryMetadata.getSeparator()) {
+          containsSeparators = true;
+          break;
+        }
+      }
+    }
+    
+    if (match.kind == EXACT_MATCH && !containsSeparators) {
       return true;
     }
 
