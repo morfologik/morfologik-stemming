@@ -116,6 +116,16 @@ public enum DictionaryAttribute {
       return booleanValue(value);
     }
   },
+  
+  /**
+   * If the spelling dictionary is supposed to join words.
+   */
+  JOIN_WORDS("fsa.dict.speller.joinwords"){
+	  @Override
+	    public Boolean fromString(String value) {
+	      return booleanValue(value);
+	    }	   
+  },
 
   /**
    * If the spelling dictionary is supposed to split runOnWords.
