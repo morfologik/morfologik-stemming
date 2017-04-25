@@ -50,6 +50,9 @@ public final class DictionaryMetadataBuilder {
 
   public DictionaryMetadataBuilder supportRunOnWords()    { return supportRunOnWords(true); }
   public DictionaryMetadataBuilder supportRunOnWords(boolean v)  { this.attrs.put(DictionaryAttribute.RUN_ON_WORDS, Boolean.valueOf(v).toString()); return this; }
+  
+  public DictionaryMetadataBuilder supportJoinWords()    { return supportRunOnWords(true); }
+  public DictionaryMetadataBuilder supportJoinWords(boolean v)  { this.attrs.put(DictionaryAttribute.JOIN_WORDS, Boolean.valueOf(v).toString()); return this; }
 
   public DictionaryMetadataBuilder encoder(EncoderType type) {
     this.attrs.put(DictionaryAttribute.ENCODER, type.name());
