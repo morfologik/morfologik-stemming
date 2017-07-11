@@ -5,10 +5,6 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <prerequisites>
-    <maven>3.2.5</maven>
-  </prerequisites>
-
   <groupId>org.carrot2</groupId>
   <artifactId>morfologik-parent</artifactId>
   <version>2.1.4-SNAPSHOT</version>
@@ -179,7 +175,7 @@
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>3.0.0</version>
+          <version>3.3.0</version>
           <extensions>true</extensions>
         </plugin>
 
@@ -188,13 +184,19 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.18.1</version>
         </plugin>
+        
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>${version.maven-enforcer-plugin}</version>
+        </plugin>
       </plugins>
     </pluginManagement>
+    
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>${version.maven-enforcer-plugin}</version>
         <configuration>
           <rules>
             <DependencyConvergence/>
@@ -229,7 +231,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-enforcer-plugin</artifactId>
-            <version>${version.maven-enforcer-plugin}</version>
             <executions>
               <execution>
                 <id>enforce-environment</id>
@@ -269,7 +270,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-enforcer-plugin</artifactId>
-            <version>${version.maven-enforcer-plugin}</version>
             <executions>
               <execution>
                 <id>enforce-environment</id>
@@ -278,11 +278,13 @@
                 </goals>
                 <inherited>true</inherited>
                 <configuration>
+                <!-- Temporarily avoid the incompatibility in enforcer and jigsaw (commons-lang 2.6). 
                   <rules combine.children="append">
                     <requireJavaVersion>
                       <version>1.7.0</version>
                     </requireJavaVersion>
-                  </rules>
+                  </rules> 
+                -->
                 </configuration>
               </execution>
             </executions>
@@ -301,7 +303,7 @@
       </activation>
 
       <properties>
-          <version.forbiddenapis>1.8</version.forbiddenapis>
+          <version.forbiddenapis>2.3</version.forbiddenapis>
           <forbiddenapis.signaturefile>src/forbidden-apis/signatures.txt</forbiddenapis.signaturefile>
       </properties>
 
@@ -317,7 +319,6 @@
                 <id>forbidden-apis</id>
                 <configuration>
                   <targetVersion>${maven.compiler.source}</targetVersion>
-                  <internalRuntimeForbidden>true</internalRuntimeForbidden>
                   <failOnUnsupportedJava>false</failOnUnsupportedJava>
                   <failOnUnresolvableSignatures>false</failOnUnresolvableSignatures>
                   <excludes>
@@ -632,7 +633,6 @@
                     <pluginExecution>
                       <pluginExecutionFilter>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-enforcer-plugin</artifactId>
                         <versionRange>[0.0,)</versionRange>
                         <goals>
                           <goal>enforce</goal>
