@@ -370,7 +370,7 @@ public class Speller {
           if (isInDictionary(wordChecked)) {
             candidates.add(new CandidateData(wordChecked, 0));
             found = true;
-          } else if (dictionaryMetadata.isConvertingCase()) {
+          } else {
             String lowerWord = wordChecked.toLowerCase(dictionaryMetadata.getLocale());
             String upperWord = wordChecked.toUpperCase(dictionaryMetadata.getLocale());
             if (isInDictionary(lowerWord)) {
