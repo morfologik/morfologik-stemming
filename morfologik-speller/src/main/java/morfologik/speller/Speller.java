@@ -364,7 +364,7 @@ public class Speller {
     candidates.clear();
     if (word.length() > 0 && word.length() < MAX_WORD_LENGTH && !isInDictionary(word)) {
       List<String> wordsToCheck = new ArrayList<String>();
-      if (replacementsTheRest != null && word.length() > MIN_WORD_LENGTH) {
+      if (replacementsTheRest != null) {  
         for (final String wordChecked : getAllReplacements(word, 0, 0)) {
           boolean found = false;
           if (isInDictionary(wordChecked)) {
