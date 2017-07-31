@@ -364,13 +364,13 @@ public class Speller {
     candidates.clear();
     if (word.length() > 0 && word.length() < MAX_WORD_LENGTH && !isInDictionary(word)) {
       List<String> wordsToCheck = new ArrayList<String>();
-      if (replacementsTheRest != null && word.length() > MIN_WORD_LENGTH) {
+      if (replacementsTheRest != null && word.length() > 1) {
         for (final String wordChecked : getAllReplacements(word, 0, 0)) {
           boolean found = false;
           if (isInDictionary(wordChecked)) {
             candidates.add(new CandidateData(wordChecked, 0));
             found = true;
-          } else if (dictionaryMetadata.isConvertingCase()) {
+          } else {
             String lowerWord = wordChecked.toLowerCase(dictionaryMetadata.getLocale());
             String upperWord = wordChecked.toUpperCase(dictionaryMetadata.getLocale());
             if (isInDictionary(lowerWord)) {
