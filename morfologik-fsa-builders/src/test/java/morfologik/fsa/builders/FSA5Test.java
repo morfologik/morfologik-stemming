@@ -14,8 +14,7 @@ import morfologik.fsa.FSA5;
 import morfologik.fsa.FSAFlags;
 
 import org.junit.Test;
-
-import static com.carrotsearch.randomizedtesting.RandomizedTest.*;
+import static org.junit.Assert.*;
 
 /**
  * Additional tests for {@link FSA5}.

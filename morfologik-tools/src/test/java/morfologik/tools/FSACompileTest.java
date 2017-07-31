@@ -27,12 +27,12 @@ public class FSACompileTest extends RandomizedTest {
   @Test
   @Repeat(iterations = 100)
   public void testCliInvocation() throws Exception {
-    final Path input = newTempFile().toPath();
-    final Path output = newTempFile().toPath();
+    final Path input = newTempFile();
+    final Path output = newTempFile();
 
     Set<String> sequences = new LinkedHashSet<>();
     for (int seqs = randomIntBetween(0, 100); --seqs >= 0;) {
-      sequences.add(randomAsciiOfLengthBetween(1, 10));
+      sequences.add(randomAsciiLettersOfLengthBetween(1, 10));
     }
 
     try (OutputStream os = Files.newOutputStream(input)) {
@@ -77,8 +77,8 @@ public class FSACompileTest extends RandomizedTest {
 
   @Test
   public void testEmptyWarning() throws Exception {
-    final Path input = newTempFile().toPath();
-    final Path output = newTempFile().toPath();
+    final Path input = newTempFile();
+    final Path output = newTempFile();
 
     Files.write(input, "abc\n\ndef".getBytes(StandardCharsets.US_ASCII));
 
@@ -98,8 +98,8 @@ public class FSACompileTest extends RandomizedTest {
 
   @Test
   public void testCrWarning() throws Exception {
-    final Path input = newTempFile().toPath();
-    final Path output = newTempFile().toPath();
+    final Path input = newTempFile();
+    final Path output = newTempFile();
 
     Files.write(input, "abc\r\ndef\r\n".getBytes(StandardCharsets.US_ASCII));
 
@@ -119,8 +119,8 @@ public class FSACompileTest extends RandomizedTest {
 
   @Test
   public void testBomWarning() throws Exception {
-    final Path input = newTempFile().toPath();
-    final Path output = newTempFile().toPath();
+    final Path input = newTempFile();
+    final Path output = newTempFile();
 
     // Emit UTF-8 BOM prefixed list of three strings.
     ByteArrayOutputStream baos = new ByteArrayOutputStream();

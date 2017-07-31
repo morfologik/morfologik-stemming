@@ -6,6 +6,7 @@ import java.util.*;
 import morfologik.fsa.FSA;
 import morfologik.fsa.StateVisitor;
 import static com.carrotsearch.randomizedtesting.RandomizedTest.*;
+import static org.junit.Assert.*;
 
 public class FSATestUtils {
   /*

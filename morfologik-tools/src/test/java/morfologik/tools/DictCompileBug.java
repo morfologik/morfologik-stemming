@@ -21,7 +21,7 @@ import morfologik.stemming.WordData;
 public class DictCompileBug extends RandomizedTest {
   @Test
   public void testSeparatorInEncoded() throws Exception {
-    final Path input = newTempDir().toPath().resolve("dictionary.input");
+    final Path input = newTempDir().resolve("dictionary.input");
     final Path metadata = DictionaryMetadata.getExpectedMetadataLocation(input);
 
     char separator = '_';

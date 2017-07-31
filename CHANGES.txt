@@ -7,28 +7,32 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
 ======================= morfologik-stemming 2.1.4-SNAPSHOT =======================
 
-Bug Fixes:
+Bug Fixes
 
  * GH-92: FSATraversal may return NOT_FOUND instead of AUTOMATON_HAS_PREFIX
           (stevendolg via Dawid Weiss)
 
+Other Changes
+
+ * Updated build and test plugins to newer versions.
+
 ======================= morfologik-stemming 2.1.3 =======================
 
-Bug Fixes:
+Bug Fixes
 
  * GH-86: Speller: words containing the dictionary separator are not handled
           properly (Jaume Ortolà via Dawid Weiss).
 
 ======================= morfologik-stemming 2.1.2 =======================
 
-Bug Fixes:
+Bug Fixes
 
  * GH-85: Encoded sequences can clash with separator byte and cause assertion 
    errors. (Daniel Naber, Dawid Weiss).
 
 ======================= morfologik-stemming 2.1.1 =======================
 
-Bug Fixes:
+Bug Fixes
 
  * PR #78: Fix dependency issue in morfologik-speller (Alden Quimby).
 
@@ -51,7 +55,7 @@ New Features
 
  * GH-73: Update Polish stemming dictionaries to polimorfologik 2.1. (Dawid Weiss)
 
-Bug Fixes:
+Bug Fixes
 
  * GH-76: Consolidate and fix character encoding and decoding. (Dawid Weiss)
 

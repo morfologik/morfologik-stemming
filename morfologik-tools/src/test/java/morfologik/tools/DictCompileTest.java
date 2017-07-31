@@ -25,7 +25,7 @@ public class DictCompileTest extends RandomizedTest {
   @Test
   @Repeat(iterations = 200)
   public void testRoundTrip() throws Exception {
-    final Path input = newTempDir().toPath().resolve("dictionary.input");
+    final Path input = newTempDir().resolve("dictionary.input");
     final Path metadata = DictionaryMetadata.getExpectedMetadataLocation(input);
 
     char separator = RandomPicks.randomFrom(getRandom(), new Character [] {
@@ -50,11 +50,11 @@ public class DictCompileTest extends RandomizedTest {
       String base;
       switch (randomIntBetween(0, 5)) {
         case 0:
-          base = randomAsciiOfLength(('A' - separator) & 0xff);
+          base = randomAsciiLettersOfLength(('A' - separator) & 0xff);
           break;
 
         default:
-          base = randomAsciiOfLengthBetween(1, 100);
+          base = randomAsciiLettersOfLengthBetween(1, 100);
           break;
       }
       
@@ -65,19 +65,19 @@ public class DictCompileTest extends RandomizedTest {
           break;
 
         case 1:
-          inflected = randomAsciiOfLengthBetween(0, 5) + base;
+          inflected = randomAsciiLettersOfLengthBetween(0, 5) + base;
           break;
           
         case 3: 
-          inflected = base + randomAsciiOfLengthBetween(0, 5);
+          inflected = base + randomAsciiLettersOfLengthBetween(0, 5);
           break;
 
         case 4:
-          inflected = randomAsciiOfLengthBetween(0, 5) + base + randomAsciiOfLengthBetween(0, 5);
+          inflected = randomAsciiLettersOfLengthBetween(0, 5) + base + randomAsciiLettersOfLengthBetween(0, 5);
           break;
 
         default:
-          inflected = randomAsciiOfLengthBetween(0, 200);
+          inflected = randomAsciiLettersOfLengthBetween(0, 200);
             break;
       }
        
@@ -85,7 +85,7 @@ public class DictCompileTest extends RandomizedTest {
       sequences.add(
           base + separator + 
           inflected +
-          (useTags ? (separator + randomAsciiOfLengthBetween(0, 10)) : ""));
+          (useTags ? (separator + randomAsciiLettersOfLengthBetween(0, 10)) : ""));
     }
 
     final boolean ignoreEmpty = randomBoolean();

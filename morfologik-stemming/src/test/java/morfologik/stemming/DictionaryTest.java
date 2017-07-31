@@ -8,11 +8,12 @@ import java.nio.file.Path;
 import org.junit.Test;
 
 import com.carrotsearch.randomizedtesting.RandomizedTest;
+import static org.junit.Assert.*;
 
 public class DictionaryTest extends RandomizedTest {
   @Test
   public void testReadFromFile() throws IOException {
-    Path tempDir = super.newTempDir().toPath();
+    Path tempDir = super.newTempDir();
 
     Path dict = tempDir.resolve("odd name.dict");
     Path info = dict.resolveSibling("odd name.info");

@@ -33,8 +33,8 @@ public class SequenceEncodersTest extends RandomizedTest {
     public void testEncodeSuffixOnRandomSequences() {
         for (int i = 0; i < 10000; i++) {
             assertRoundtripEncode(
-                randomAsciiOfLengthBetween(0, 500),
-                randomAsciiOfLengthBetween(0, 500));
+                randomAsciiLettersOfLengthBetween(0, 500),
+                randomAsciiLettersOfLengthBetween(0, 500));
         }
     }
 
