@@ -9,6 +9,8 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
 Bug Fixes
 
+ * PR #93: Case-changed words are always good suggestions (Jaume Ortolà).
+
  * GH-92: FSATraversal may return NOT_FOUND instead of AUTOMATON_HAS_PREFIX
           (stevendolg via Dawid Weiss)
 
