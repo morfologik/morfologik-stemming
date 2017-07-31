@@ -12,14 +12,20 @@ public final class MatchResult {
 	public static final int EXACT_MATCH = 0;
 
 	/**
-	 * The automaton has no match for the input sequence.
+	 * The automaton has no match for the input sequence and no sequence
+	 * in the automaton is a prefix of the input. 
+	 * 
+	 * Note that to check for a general "input does not exist in the automaton"
+	 * you have to check for both {@link #NO_MATCH} and 
+	 * {@link #AUTOMATON_HAS_PREFIX}.
 	 */
 	public static final int NO_MATCH = -1;
 
 	/**
-	 * The automaton contains a prefix of the input sequence. That is:
-	 * one of the input sequences used to build the automaton is a 
-	 * prefix of the input sequence that is shorter than the sequence. 
+	 * The automaton contains a prefix of the input sequence (but the
+	 * full sequence does not exist). This translates to: one of the input sequences 
+	 * used to build the automaton is a prefix of the input sequence, but the
+	 * input sequence contains a non-existent suffix. 
 	 * 
 	 * <p>{@link MatchResult#index} will contain an index of the
 	 * first character of the input sequence not present in the 
@@ -35,7 +41,7 @@ public final class MatchResult {
 	public static final int SEQUENCE_IS_A_PREFIX = -4;
 
 	/**
-	 * One of the match kind constants defined in this class.
+	 * One of the match types defined in this class.
 	 * 
 	 * @see #NO_MATCH
 	 * @see #EXACT_MATCH

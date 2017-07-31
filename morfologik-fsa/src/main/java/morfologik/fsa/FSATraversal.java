@@ -83,9 +83,13 @@ public final class FSATraversal {
 			arc = fsa.getNextArc(arc);
 		}
 
-		// Labels of this node ended without a match on the sequence. 
-		// Perfect hash does not exist.
-		return NO_MATCH;
+		if (seqIndex > start) {
+		  return AUTOMATON_HAS_PREFIX;
+		} else {
+  		// Labels of this node ended without a match on the sequence. 
+  		// Perfect hash does not exist.
+  		return NO_MATCH;
+		}
 	}
 	
 	/**
@@ -125,7 +129,7 @@ public final class FSATraversal {
 		for (int i = start; i < end; i++) {
 			final int arc = fsa.getArc(node, sequence[i]);
 			if (arc != 0) {
-				if (fsa.isArcFinal(arc) && i + 1 == end) {
+				if (i + 1 == end && fsa.isArcFinal(arc)) {
 					/* The automaton has an exact match of the input sequence. */
 				  reuse.reset(EXACT_MATCH, i, node);
 					return reuse;
@@ -133,14 +137,18 @@ public final class FSATraversal {
 
 				if (fsa.isArcTerminal(arc)) {
 					/* The automaton contains a prefix of the input sequence. */
-				  reuse.reset(AUTOMATON_HAS_PREFIX, i + 1, 0);
+				  reuse.reset(AUTOMATON_HAS_PREFIX, i + 1, node);
 					return reuse;
 				}
 
 				// Make a transition along the arc.
 				node = fsa.getEndNode(arc);
 			} else {
-			  reuse.reset(NO_MATCH, i, node);
+			  if (i > start) {
+			    reuse.reset(AUTOMATON_HAS_PREFIX, i, node);
+			  } else {
+	        reuse.reset(NO_MATCH, i, node);
+			  }
 				return reuse;
 			}
 		}

@@ -13,6 +13,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
+import com.beust.jcommander.ParametersDelegate;
+
 import morfologik.fsa.FSA;
 import morfologik.fsa.builders.FSABuilder;
 import morfologik.fsa.builders.FSASerializer;
@@ -21,11 +25,6 @@ import morfologik.stemming.Dictionary;
 import morfologik.stemming.DictionaryLookup;
 import morfologik.stemming.DictionaryMetadata;
 import morfologik.stemming.ISequenceEncoder;
-import morfologik.stemming.WordData;
-
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
-import com.beust.jcommander.ParametersDelegate;
 
 /**
  * Decompiles morphological dictionary automaton back to source state. 
@@ -196,11 +195,12 @@ public class DictCompile extends CliTool {
 
     // If validating, try to scan the input
     if (validate) {
-      for (WordData wd : new DictionaryLookup(new Dictionary(fsa, metadata))) {
+      DictionaryLookup dictionaryLookup = new DictionaryLookup(new Dictionary(fsa, metadata));
+      for (Iterator<?> i = dictionaryLookup.iterator(); i.hasNext(); i.next()) {
         // Do nothing, just scan and make sure no exceptions are thrown.
       }
     }
-    
+
     return ExitStatus.SUCCESS;
   }
 
