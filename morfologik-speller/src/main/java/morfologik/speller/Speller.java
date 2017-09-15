@@ -579,9 +579,11 @@ public class Speller {
     if (x == y) {
       return true;
     }
-    if (dictionaryMetadata.getEquivalentChars() != null && dictionaryMetadata.getEquivalentChars().containsKey(x)
-        && dictionaryMetadata.getEquivalentChars().get(x).contains(y)) {
-      return true;
+    if (dictionaryMetadata.getEquivalentChars() != null) {
+      List<Character> chars = dictionaryMetadata.getEquivalentChars().get(x);
+      if (chars != null && chars.contains(y)) {
+        return true;
+      }
     }
     if (dictionaryMetadata.isIgnoringDiacritics()) {
       String xn = Normalizer.normalize(Character.toString(x), Form.NFD);
