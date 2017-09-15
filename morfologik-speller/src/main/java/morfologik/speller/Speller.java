@@ -331,13 +331,16 @@ public class Speller {
    */
   public List<String> replaceRunOnWords(final String original) {
     final List<String> candidates = new ArrayList<String>();
-    if (!isInDictionary(DictionaryLookup.applyReplacements(original, dictionaryMetadata.getInputConversionPairs()))
-        && dictionaryMetadata.isSupportingRunOnWords()) {
+    String wordToCheck = original;
+    if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
+      wordToCheck = DictionaryLookup.applyReplacements(original, dictionaryMetadata.getInputConversionPairs());
+    }
+    if (!isInDictionary(wordToCheck) && dictionaryMetadata.isSupportingRunOnWords()) {
       for (int i = 1; i < original.length(); i++) {
         // chop from left to right
         final CharSequence firstCh = original.subSequence(0, i);
         if (isInDictionary(firstCh) && isInDictionary(original.subSequence(i, original.length()))) {
-          if (!dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
+          if (dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
             candidates.add(firstCh + " " + original.subSequence(i, original.length()));
           } else {
             candidates.add(DictionaryLookup.applyReplacements(firstCh + " " + original.subSequence(i, original.length()),
