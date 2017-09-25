@@ -331,16 +331,19 @@ public class Speller {
    */
   public List<String> replaceRunOnWords(final String original) {
     final List<String> candidates = new ArrayList<String>();
-    if (!isInDictionary(DictionaryLookup.applyReplacements(original, dictionaryMetadata.getInputConversionPairs()))
-        && dictionaryMetadata.isSupportingRunOnWords()) {
-      for (int i = 1; i < original.length(); i++) {
+    String wordToCheck = original;
+    if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
+      wordToCheck = DictionaryLookup.applyReplacements(original, dictionaryMetadata.getInputConversionPairs());
+    }
+    if (!isInDictionary(wordToCheck) && dictionaryMetadata.isSupportingRunOnWords()) {
+      for (int i = 1; i < wordToCheck.length(); i++) {
         // chop from left to right
-        final CharSequence firstCh = original.subSequence(0, i);
-        if (isInDictionary(firstCh) && isInDictionary(original.subSequence(i, original.length()))) {
-          if (!dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
-            candidates.add(firstCh + " " + original.subSequence(i, original.length()));
+        final CharSequence firstCh = wordToCheck.subSequence(0, i);
+        if (isInDictionary(firstCh) && isInDictionary(wordToCheck.subSequence(i, wordToCheck.length()))) {
+          if (dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
+            candidates.add(firstCh + " " + wordToCheck.subSequence(i, wordToCheck.length()));
           } else {
-            candidates.add(DictionaryLookup.applyReplacements(firstCh + " " + original.subSequence(i, original.length()),
+            candidates.add(DictionaryLookup.applyReplacements(firstCh + " " + wordToCheck.subSequence(i, wordToCheck.length()),
                 dictionaryMetadata.getOutputConversionPairs()).toString());
           }
         }
