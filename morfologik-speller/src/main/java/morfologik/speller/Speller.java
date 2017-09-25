@@ -59,12 +59,6 @@ public class Speller {
   private Map<String, List<char[]>> replacementsAnyToTwo = new HashMap<String, List<char[]>>();
   private Map<String, List<String>> replacementsTheRest = new HashMap<String, List<String>>();
 
-  /**
-   * List of candidate strings, including same additional data such as edit
-   * distance from the original word.
-   */
-  private final List<CandidateData> candidates = new ArrayList<CandidateData>();
-
   private boolean containsSeparators = true;
 
   /**
@@ -356,15 +350,35 @@ public class Speller {
    * Find suggestions by using K. Oflazer's algorithm. See Jan Daciuk's s_fsa
    * package, spell.cc for further explanation.
    * 
-   * @param w The original misspelled word.
+   * @param word The original misspelled word.
    * @return A list of suggested replacements.
    */
-  public List<String> findReplacements(final String w) {
-    String word = w;
-    if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
-      word = DictionaryLookup.applyReplacements(w, dictionaryMetadata.getInputConversionPairs());
+  public ArrayList<String> findReplacements(String word) {
+    final List<CandidateData> result = findReplacementCandidates(word);
+
+    final ArrayList<String> resultSuggestions = new ArrayList<String>(result.size());
+    for (CandidateData cd : result) {
+      resultSuggestions.add(cd.getWord());
     }
-    candidates.clear();
+    return resultSuggestions;
+  }
+
+  /**
+   * Find and return suggestions by using K. Oflazer's algorithm. See Jan Daciuk's s_fsa
+   * package, spell.cc for further explanation. This method is identical to
+   * {@link #findReplacements}, but returns candidate terms with their edit distance scores.
+   *
+   * @param word The original misspelled word.
+   * @return A list of suggested candidate replacements.
+   */
+  public ArrayList<CandidateData> findReplacementCandidates(String word) {
+    if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
+      word = DictionaryLookup.applyReplacements(word, dictionaryMetadata.getInputConversionPairs());
+    }
+
+    // candidate strings, including same additional data such as edit distance from the original word.
+    List<CandidateData> candidates = new ArrayList<CandidateData>();
+
     if (word.length() > 0 && word.length() < MAX_WORD_LENGTH && !isInDictionary(word)) {
       List<String> wordsToCheck = new ArrayList<String>();
       if (replacementsTheRest != null && word.length() > 1) {
@@ -386,9 +400,9 @@ public class Speller {
               found = true;
             }
             if (lowerWord.length() > 1) {
-              String firstupperWord = Character.toUpperCase(lowerWord.charAt(0)) + lowerWord.substring(1);
-              if (isInDictionary(firstupperWord)) {
-                candidates.add(new CandidateData(firstupperWord, 0));
+              String firstUpperWord = Character.toUpperCase(lowerWord.charAt(0)) + lowerWord.substring(1);
+              if (isInDictionary(firstUpperWord)) {
+                candidates.add(new CandidateData(firstUpperWord, 0));
                 found = true;
               }
             }
@@ -401,8 +415,8 @@ public class Speller {
         wordsToCheck.add(word);
       }
 
-      //If at least one candidate was found with the replacement pairs (which are usual errors),
-      //probably there is no need for more candidates
+      // If at least one candidate was found with the replacement pairs (which are usual errors),
+      // probably there is no need for more candidates
       if (candidates.isEmpty()) {
         int i = 1;
         for (final String wordChecked : wordsToCheck) {
@@ -421,24 +435,27 @@ public class Speller {
           charBuffer = BufferUtils.clearAndEnsureCapacity(charBuffer, MAX_WORD_LENGTH);
           byteBuffer = BufferUtils.clearAndEnsureCapacity(byteBuffer, MAX_WORD_LENGTH);
           final byte[] prevBytes = new byte[0];
-          findRepl(0, fsa.getRootNode(), prevBytes, 0, 0);
+          findRepl(candidates, 0, fsa.getRootNode(), prevBytes, 0, 0);
         }
       }
     }
 
     Collections.sort(candidates);
 
-    // Use a linked set to avoid duplicates and preserve the ordering of candidates.
-    final Set<String> candStringSet = new LinkedHashSet<String>();
+    // Apply replacements, prune duplicates while preserving the candidate order.
+    final Set<String> words = new HashSet<String>();
+    final List<CandidateData> result = new ArrayList<>(candidates.size());
     for (final CandidateData cd : candidates) {
-      candStringSet.add(DictionaryLookup.applyReplacements(cd.getWord(), dictionaryMetadata.getOutputConversionPairs()).toString());
+      String replaced = DictionaryLookup.applyReplacements(cd.getWord(), dictionaryMetadata.getOutputConversionPairs());
+      // Add only the first occurrence of a given word.
+      if (words.add(replaced)) {
+        result.add(new CandidateData(replaced, cd.distance));
+      }
     }
-    final List<String> candStringList = new ArrayList<String>(candStringSet.size());
-    candStringList.addAll(candStringSet);
-    return candStringList;
+    return result;
   }
 
-  private void findRepl(final int depth, final int node, final byte[] prevBytes, final int wordIndex, final int candIndex) {
+  private void findRepl(List<CandidateData> candidates, final int depth, final int node, final byte[] prevBytes, final int wordIndex, final int candIndex) {
     int dist = 0;
     for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
       byteBuffer = BufferUtils.clearAndEnsureCapacity(byteBuffer, prevBytes.length + 1);
@@ -458,7 +475,7 @@ public class Speller {
         byteBuffer.position(0);
         byteBuffer.get(prev);
         if (!fsa.isArcTerminal(arc)) {
-          findRepl(depth, fsa.getEndNode(arc), prev, wordIndex, candIndex); // note: depth is not incremented
+          findRepl(candidates, depth, fsa.getEndNode(arc), prev, wordIndex, candIndex); // note: depth is not incremented
         }
         byteBuffer.clear();
       } else if (!c.isError()) { // unmappable characters are silently discarded
@@ -477,13 +494,13 @@ public class Speller {
               dist = dist + Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 2));
             }
             if (dist <= effectEditDistance) {
-              addCandidate(candIndex, dist);
+              candidates.add(new CandidateData(String.valueOf(candidate, 0, candIndex + 1), dist));
             }
           }
           if (isArcNotTerminal(arc, candIndex)) {
             int x = hMatrix.get(depth, depth);
             hMatrix.set(depth, depth, hMatrix.get(depth - 1, depth - 1));
-            findRepl(Math.max(0, depth), fsa.getEndNode(arc), new byte[0], wordIndex + lengthReplacement - 1,
+            findRepl(candidates, Math.max(0, depth), fsa.getEndNode(arc), new byte[0], wordIndex + lengthReplacement - 1,
                 candIndex + 1);
             hMatrix.set(depth, depth, x);
           }
@@ -497,24 +514,23 @@ public class Speller {
               dist = dist + Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 1));
             }
             if (dist <= effectEditDistance) {
-              addCandidate(candIndex, dist);
+              candidates.add(new CandidateData(String.valueOf(candidate, 0, candIndex + 1), dist));
             }
           }
           if (isArcNotTerminal(arc, candIndex)) {
-            findRepl(depth, fsa.getEndNode(arc), new byte[0], wordIndex + lengthReplacement, candIndex + 1);
+            findRepl(candidates, depth, fsa.getEndNode(arc), new byte[0], wordIndex + lengthReplacement, candIndex + 1);
           }
         }
         //general
         if (cuted(depth, wordIndex, candIndex) <= effectEditDistance) {
           if ((isEndOfCandidate(arc, wordIndex))
               && (dist = ed(wordLen - 1 - (wordIndex - depth), depth, wordLen - 1, candIndex)) <= effectEditDistance) {
-            addCandidate(candIndex, dist);
+            candidates.add(new CandidateData(String.valueOf(candidate, 0, candIndex + 1), dist));
           }
           if (isArcNotTerminal(arc, candIndex)) {
-            findRepl(depth + 1, fsa.getEndNode(arc), new byte[0], wordIndex + 1, candIndex + 1);
+            findRepl(candidates, depth + 1, fsa.getEndNode(arc), new byte[0], wordIndex + 1, candIndex + 1);
           }
         }
-
       }
     }
   }
@@ -536,10 +552,6 @@ public class Speller {
       return arc1 != 0 && !fsa.isArcTerminal(arc1);
     }
     return false;
-  }
-
-  private void addCandidate(final int depth, final int dist) {
-    candidates.add(new CandidateData(String.valueOf(candidate, 0, depth + 1), dist));
   }
 
   /**
@@ -887,9 +899,8 @@ public class Speller {
   /**
    * Used to sort candidates according to edit distance, and possibly according
    * to their frequency in the future.
-   * 
    */
-  private class CandidateData implements Comparable<CandidateData> {
+  public final class CandidateData implements Comparable<CandidateData> {
     private final String word;
     private final int distance;
 
@@ -909,7 +920,7 @@ public class Speller {
     @Override
     public int compareTo(final CandidateData cd) {
       // Assume no overflow.
-      return cd.getDistance() > this.distance ? -1 : cd.getDistance() == this.distance ? 0 : 1;
+      return Integer.compare(this.distance, cd.getDistance());
     }
   }
 }

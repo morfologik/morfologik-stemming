@@ -13,6 +13,13 @@ Bug Fixes
 
  * PR #97: micro performance optimization (Daniel Naber).
 
+Other Changes
+
+ * GH-95: Speller: findReplacementCandidates returns full CandidateData. This 
+          commit also refactors the Speller to use a stateless returned array
+          list rather than reuse an internal field. Should not make a 
+          practical difference. (Dawid Weiss)
+
 ======================= morfologik-stemming 2.1.4 =======================
 
 Bug Fixes
