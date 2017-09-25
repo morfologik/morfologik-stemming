@@ -444,7 +444,7 @@ public class Speller {
 
     // Apply replacements, prune duplicates while preserving the candidate order.
     final Set<String> words = new HashSet<String>();
-    final List<CandidateData> result = new ArrayList<>(candidates.size());
+    final ArrayList<CandidateData> result = new ArrayList<>(candidates.size());
     for (final CandidateData cd : candidates) {
       String replaced = DictionaryLookup.applyReplacements(cd.getWord(), dictionaryMetadata.getOutputConversionPairs());
       // Add only the first occurrence of a given word.
@@ -452,6 +452,7 @@ public class Speller {
         result.add(new CandidateData(replaced, cd.distance));
       }
     }
+
     return result;
   }
 
