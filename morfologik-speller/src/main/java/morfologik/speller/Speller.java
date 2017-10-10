@@ -383,60 +383,51 @@ public class Speller {
       List<String> wordsToCheck = new ArrayList<String>();
       if (replacementsTheRest != null && word.length() > 1) {
         for (final String wordChecked : getAllReplacements(word, 0, 0)) {
-          boolean found = false;
           if (isInDictionary(wordChecked)) {
             candidates.add(new CandidateData(wordChecked, 0));
-            found = true;
           } else {
             String lowerWord = wordChecked.toLowerCase(dictionaryMetadata.getLocale());
             String upperWord = wordChecked.toUpperCase(dictionaryMetadata.getLocale());
             if (isInDictionary(lowerWord)) {
               //add the word as it is in the dictionary, not mixed-case versions of it
               candidates.add(new CandidateData(lowerWord, 0));
-              found = true;
             }
             if (isInDictionary(upperWord)) {
               candidates.add(new CandidateData(upperWord, 0));
-              found = true;
             }
             if (lowerWord.length() > 1) {
               String firstUpperWord = Character.toUpperCase(lowerWord.charAt(0)) + lowerWord.substring(1);
               if (isInDictionary(firstUpperWord)) {
                 candidates.add(new CandidateData(firstUpperWord, 0));
-                found = true;
               }
             }
           }
-          if (!found) {
-            wordsToCheck.add(wordChecked);
-          }
+          wordsToCheck.add(wordChecked);
         }
       } else {
         wordsToCheck.add(word);
       }
 
-      // If at least one candidate was found with the replacement pairs (which are usual errors),
-      // probably there is no need for more candidates
-      if (candidates.isEmpty()) {
-        int i = 1;
-        for (final String wordChecked : wordsToCheck) {
-          i++;
-          if (i > UPPER_SEARCH_LIMIT) { // for performance reasons, do not search too deeply
-            break;
-          }
-          wordProcessed = wordChecked.toCharArray();
-          wordLen = wordProcessed.length;
-          if (wordLen < MIN_WORD_LENGTH && i > 2) { // three-letter replacements make little sense anyway
-            break;
-          }
-          candidate = new char[MAX_WORD_LENGTH];
-          candLen = candidate.length;
-          effectEditDistance = wordLen <= editDistance ? wordLen - 1 : editDistance;
-          charBuffer = BufferUtils.clearAndEnsureCapacity(charBuffer, MAX_WORD_LENGTH);
-          byteBuffer = BufferUtils.clearAndEnsureCapacity(byteBuffer, MAX_WORD_LENGTH);
-          final byte[] prevBytes = new byte[0];
-          findRepl(candidates, 0, fsa.getRootNode(), prevBytes, 0, 0);
+      // Even if a candidate was found with the replacement pairs (which are usual errors),
+      // there might be more good candidates (see issue #94):
+      int i = 1;
+      for (final String wordChecked : wordsToCheck) {
+        i++;
+        if (i > UPPER_SEARCH_LIMIT) { // for performance reasons, do not search too deeply
+          break;
         }
+        wordProcessed = wordChecked.toCharArray();
+        wordLen = wordProcessed.length;
+        if (wordLen < MIN_WORD_LENGTH && i > 2) { // three-letter replacements make little sense anyway
+          break;
+        }
+        candidate = new char[MAX_WORD_LENGTH];
+        candLen = candidate.length;
+        effectEditDistance = wordLen <= editDistance ? wordLen - 1 : editDistance;
+        charBuffer = BufferUtils.clearAndEnsureCapacity(charBuffer, MAX_WORD_LENGTH);
+        byteBuffer = BufferUtils.clearAndEnsureCapacity(byteBuffer, MAX_WORD_LENGTH);
+        final byte[] prevBytes = new byte[0];
+        findRepl(candidates, 0, fsa.getRootNode(), prevBytes, 0, 0);
       }
     }
 
