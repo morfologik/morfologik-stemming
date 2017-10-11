@@ -325,6 +325,15 @@ public class SpellerTest {
     assertTrue(reps.get(4).equals("Czarkę"));
   }
 
+  @Test
+  public void testIssue94() throws Exception {
+    final URL url = getClass().getResource("issue94.dict");
+    final Speller speller = new Speller(Dictionary.read(url));
+    List<String> reps = speller.findReplacements("schänken");
+    assertTrue(reps.get(0).equals("Schänken"));
+    assertTrue(reps.get(1).equals("schenken"));
+  }
+
   private int getCutOffDistance(final Speller spell, final String word, final String candidate) {
     // assuming there is no pair-replacement 
     spell.setWordAndCandidate(word, candidate);

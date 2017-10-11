@@ -1,0 +1,5 @@
+fsa.dict.speller.replacement-pairs=ä e
+fsa.dict.encoder=SUFFIX
+fsa.dict.separator=+
+fsa.dict.encoding=utf-8
+fsa.dict.speller.ignore-diacritics=false
