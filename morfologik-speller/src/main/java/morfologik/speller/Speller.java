@@ -330,31 +330,31 @@ public class Speller {
       wordToCheck = DictionaryLookup.applyReplacements(original, dictionaryMetadata.getInputConversionPairs());
     }
     if (!isInDictionary(wordToCheck) && dictionaryMetadata.isSupportingRunOnWords()) {
+      Locale locale = dictionaryMetadata.getLocale();
       for (int i = 1; i < wordToCheck.length(); i++) {
         // chop from left to right
-        final CharSequence firstCh = wordToCheck.subSequence(0, i);
-        if (isInDictionary(firstCh) && isInDictionary(wordToCheck.subSequence(i, wordToCheck.length()))) {
-          if (dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
-            candidates.add(firstCh + " " + wordToCheck.subSequence(i, wordToCheck.length()));
-          } else {
-            candidates.add(DictionaryLookup.applyReplacements(firstCh + " " + wordToCheck.subSequence(i, wordToCheck.length()),
-                dictionaryMetadata.getOutputConversionPairs()).toString());
-          }
-        } else if (Character.isUpperCase(firstCh.charAt(0))) {
-          // a word that's uppercase just because used at sentence start
-          final String firstChLc = wordToCheck.subSequence(0, i).toString().toLowerCase(dictionaryMetadata.getLocale());
-          if (isInDictionary(firstChLc) && isInDictionary(wordToCheck.subSequence(i, wordToCheck.length()))) {
-            if (dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
-              candidates.add(firstCh + " " + wordToCheck.subSequence(i, wordToCheck.length()));
-            } else {
-              candidates.add(DictionaryLookup.applyReplacements(firstCh + " " + wordToCheck.subSequence(i, wordToCheck.length()),
-                  dictionaryMetadata.getOutputConversionPairs()).toString());
-            }
+        final String prefix = wordToCheck.substring(0, i);
+        final String suffix = wordToCheck.substring(i);
+        if (isInDictionary(suffix)) {
+          if (isInDictionary(prefix)) {
+            addReplacement(candidates, prefix + " " + suffix);
+          } else if (Character.isUpperCase(prefix.charAt(0)) && isInDictionary(prefix.toLowerCase(locale))) {
+            // a word that's uppercase just because used at sentence start
+            addReplacement(candidates, prefix + " " + suffix);
           }
         }
       }
     }
     return candidates;
+  }
+
+  private void addReplacement(List<String> candidates, String replacement) {
+    if (dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
+      candidates.add(replacement);
+    } else {
+      candidates.add(DictionaryLookup.applyReplacements(replacement,
+          dictionaryMetadata.getOutputConversionPairs()));
+    }
   }
 
   /**
