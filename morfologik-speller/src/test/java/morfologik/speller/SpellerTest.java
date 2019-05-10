@@ -39,6 +39,7 @@ public class SpellerTest {
     final Speller spell = new Speller(dictionary);
     Assertions.assertThat(spell.replaceRunOnWords("abaka")).isEmpty();
     Assertions.assertThat(spell.replaceRunOnWords("abakaabace")).contains("abaka abace");
+    Assertions.assertThat(spell.replaceRunOnWords("Abakaabace")).contains("Abaka abace");
 
     // Test on an morphological dictionary - should work as well
     final URL url1 = getClass().getResource("test-infix.dict");

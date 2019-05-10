@@ -340,6 +340,17 @@ public class Speller {
             candidates.add(DictionaryLookup.applyReplacements(firstCh + " " + wordToCheck.subSequence(i, wordToCheck.length()),
                 dictionaryMetadata.getOutputConversionPairs()).toString());
           }
+        } else if (Character.isUpperCase(firstCh.charAt(0))) {
+          // a word that's uppercase just because used at sentence start
+          final String firstChLc = wordToCheck.subSequence(0, i).toString().toLowerCase(dictionaryMetadata.getLocale());
+          if (isInDictionary(firstChLc) && isInDictionary(wordToCheck.subSequence(i, wordToCheck.length()))) {
+            if (dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
+              candidates.add(firstCh + " " + wordToCheck.subSequence(i, wordToCheck.length()));
+            } else {
+              candidates.add(DictionaryLookup.applyReplacements(firstCh + " " + wordToCheck.subSequence(i, wordToCheck.length()),
+                  dictionaryMetadata.getOutputConversionPairs()).toString());
+            }
+          }
         }
       }
     }
