@@ -5,7 +5,7 @@ Morfologik, Change Log
 For an up-to-date CHANGES file see 
 https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
-======================= morfologik-stemming 2.1.6-SNAPSHOT =======================
+======================= morfologik-stemming 2.1.6 =======================
 
 Other Changes
 
