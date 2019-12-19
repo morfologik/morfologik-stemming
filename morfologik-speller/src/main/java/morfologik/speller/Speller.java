@@ -321,10 +321,10 @@ public class Speller {
    * 
    * @param original
    *          The original misspelled word.
-   * @return The list of suggested pairs, as space-concatenated strings.
+   * @return The list of suggested pairs, as CandidateData with space-concatenated strings.
    */
-  public List<String> replaceRunOnWords(final String original) {
-    final List<String> candidates = new ArrayList<String>();
+  public List<CandidateData> replaceRunOnWordCandidates(final String original) {
+    final List<CandidateData> candidates = new ArrayList<>();
     String wordToCheck = original;
     if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
       wordToCheck = DictionaryLookup.applyReplacements(original, dictionaryMetadata.getInputConversionPairs());
@@ -348,12 +348,29 @@ public class Speller {
     return candidates;
   }
 
-  private void addReplacement(List<String> candidates, String replacement) {
+  /**
+   * Propose suggestions for misspelled run-on words. This algorithm is inspired
+   * by spell.cc in s_fsa package by Jan Daciuk.
+   *
+   * @param original
+   *          The original misspelled word.
+   * @return The list of suggested pairs, as space-concatenated strings.
+   */
+  public List<String> replaceRunOnWords(final String original) {
+    final List<CandidateData> candidateData = replaceRunOnWordCandidates(original);
+    final List<String> candidates = new ArrayList<>();
+    for (CandidateData candidate : candidateData) {
+      candidates.add(candidate.word);
+    }
+    return candidates;
+  }
+
+  private void addReplacement(List<CandidateData> candidates, String replacement) {
     if (dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
-      candidates.add(replacement);
+      candidates.add(new CandidateData(replacement, 1));
     } else {
-      candidates.add(DictionaryLookup.applyReplacements(replacement,
-          dictionaryMetadata.getOutputConversionPairs()));
+      candidates.add(new CandidateData(DictionaryLookup.applyReplacements(replacement,
+          dictionaryMetadata.getOutputConversionPairs()), 1));
     }
   }
 
@@ -451,7 +468,7 @@ public class Speller {
       String replaced = DictionaryLookup.applyReplacements(cd.getWord(), dictionaryMetadata.getOutputConversionPairs());
       // Add only the first occurrence of a given word.
       if (words.add(replaced)) {
-        result.add(new CandidateData(replaced, cd.distance));
+        result.add(new CandidateData(replaced, cd.origDistance));
       }
     }
 
@@ -905,18 +922,20 @@ public class Speller {
    */
   public final class CandidateData implements Comparable<CandidateData> {
     private final String word;
+    private final int origDistance;
     private final int distance;
 
     CandidateData(final String word, final int distance) {
       this.word = word;
+      this.origDistance = distance;
       this.distance = distance * FREQ_RANGES + FREQ_RANGES - getFrequency(word) - 1;
     }
 
-    final String getWord() {
+    public final String getWord() {
       return word;
     }
 
-    final int getDistance() {
+    public final int getDistance() {
       return distance;
     }
 
@@ -924,6 +943,11 @@ public class Speller {
     public int compareTo(final CandidateData cd) {
       // Assume no overflow.
       return Integer.compare(this.distance, cd.getDistance());
+    }
+
+    @Override
+    public String toString() {
+      return word + '/' + distance;
     }
   }
 }
