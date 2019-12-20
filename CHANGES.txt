@@ -7,6 +7,16 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
 ======================= morfologik-stemming 2.1.7-SNAPSHOT =======================
 
+Bug Fixes
+
+ * PR #103: fix distance value in the result of `Speller.findReplacementCandidates`
+   (Daniel Naber).
+
+Other Changes
+
+ * PR #103: introduce `Speller.replaceRunOnWordCandidates()` which returns
+   `CandidateData` (Daniel Naber).
+
 ======================= morfologik-stemming 2.1.6 =======================
 
 Other Changes
