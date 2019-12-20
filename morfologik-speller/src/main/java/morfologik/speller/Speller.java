@@ -55,9 +55,9 @@ public class Speller {
   private int wordLen; /* length of word being processed */
   private char[] wordProcessed; /* word being processed */
 
-  private Map<Character, List<char[]>> replacementsAnyToOne = new HashMap<Character, List<char[]>>();
-  private Map<String, List<char[]>> replacementsAnyToTwo = new HashMap<String, List<char[]>>();
-  private Map<String, List<String>> replacementsTheRest = new HashMap<String, List<String>>();
+  private Map<Character, List<char[]>> replacementsAnyToOne = new HashMap<>();
+  private Map<String, List<char[]>> replacementsAnyToTwo = new HashMap<>();
+  private Map<String, List<String>> replacementsTheRest = new HashMap<>();
 
   private boolean containsSeparators = true;
 
@@ -147,7 +147,7 @@ public class Speller {
         // the new key is the target of the replacement pair
         if (s.length() == 1) {
           if (!replacementsAnyToOne.containsKey(s.charAt(0))) {
-            List<char[]> charList = new ArrayList<char[]>();
+            List<char[]> charList = new ArrayList<>();
             charList.add(entry.getKey().toCharArray());
             replacementsAnyToOne.put(s.charAt(0), charList);
           } else {
@@ -158,7 +158,7 @@ public class Speller {
         // the new key is the target of the replacement pair
         else if (s.length() == 2) {
           if (!replacementsAnyToTwo.containsKey(s)) {
-            List<char[]> charList = new ArrayList<char[]>();
+            List<char[]> charList = new ArrayList<>();
             charList.add(entry.getKey().toCharArray());
             replacementsAnyToTwo.put(s, charList);
           } else {
@@ -166,7 +166,7 @@ public class Speller {
           }
         } else {
           if (!replacementsTheRest.containsKey(entry.getKey())) {
-            List<String> charList = new ArrayList<String>();
+            List<String> charList = new ArrayList<>();
             charList.add(s);
             replacementsTheRest.put(entry.getKey(), charList);
           } else {
@@ -384,7 +384,7 @@ public class Speller {
   public ArrayList<String> findReplacements(String word) {
     final List<CandidateData> result = findReplacementCandidates(word);
 
-    final ArrayList<String> resultSuggestions = new ArrayList<String>(result.size());
+    final ArrayList<String> resultSuggestions = new ArrayList<>(result.size());
     for (CandidateData cd : result) {
       resultSuggestions.add(cd.getWord());
     }
@@ -405,10 +405,10 @@ public class Speller {
     }
 
     // candidate strings, including same additional data such as edit distance from the original word.
-    List<CandidateData> candidates = new ArrayList<CandidateData>();
+    List<CandidateData> candidates = new ArrayList<>();
 
     if (word.length() > 0 && word.length() < MAX_WORD_LENGTH && !isInDictionary(word)) {
-      List<String> wordsToCheck = new ArrayList<String>();
+      List<String> wordsToCheck = new ArrayList<>();
       if (replacementsTheRest != null && word.length() > 1) {
         for (final String wordChecked : getAllReplacements(word, 0, 0)) {
           if (isInDictionary(wordChecked)) {
@@ -462,7 +462,7 @@ public class Speller {
     Collections.sort(candidates);
 
     // Apply replacements, prune duplicates while preserving the candidate order.
-    final Set<String> words = new HashSet<String>();
+    final Set<String> words = new HashSet<>();
     final ArrayList<CandidateData> result = new ArrayList<>(candidates.size());
     for (final CandidateData cd : candidates) {
       String replaced = DictionaryLookup.applyReplacements(cd.getWord(), dictionaryMetadata.getOutputConversionPairs());
@@ -650,7 +650,6 @@ public class Speller {
    * @param candIndex (TODO: javadoc?)
    * @return Cut-off edit distance. Remarks: See Oflazer.
    */
-
   public int cuted(final int depth, final int wordIndex, final int candIndex) {
     final int l = Math.max(0, depth - effectEditDistance); // min chars from word to consider - 1
     final int u = Math.min(wordLen - 1 - (wordIndex - depth), depth + effectEditDistance); // max chars from word to
@@ -824,9 +823,7 @@ public class Speller {
    * 
    * @return boolean value that answers this question in a deep and meaningful
    *         way.
-   *
    * @since 1.9
-   *
    */
   public boolean convertsCase() {
     return dictionaryMetadata.isConvertingCase();
