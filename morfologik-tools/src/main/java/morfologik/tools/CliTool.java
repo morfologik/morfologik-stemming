@@ -178,13 +178,13 @@ public abstract class CliTool implements Callable<ExitStatus> {
   private static void helpDisplayCommandOptions(PrintStream pw, String command, JCommander jc) {
     StringBuilder sb = new StringBuilder();
     jc = jc.getCommands().get(command);
-    jc.usage(sb, "");
+    jc.getUsageFormatter().usage(sb, "");
     pw.print(sb);
   }
 
   private static void helpDisplayCommandOptions(PrintStream pw, JCommander jc) {
     StringBuilder sb = new StringBuilder();
-    jc.usage(sb, "");
+    jc.getUsageFormatter().usage(sb, "");
     pw.print(sb);
   }  
 }

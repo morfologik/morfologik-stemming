@@ -12,6 +12,8 @@ Bug Fixes
  * PR #103: fix distance value in the result of `Speller.findReplacementCandidates`
    (Daniel Naber).
 
+ * GH-102: upgrade jcommander to newest version. (Dawid Weiss)
+
 Other Changes
 
  * PR #103: introduce `Speller.replaceRunOnWordCandidates()` which returns

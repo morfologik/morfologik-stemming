@@ -1,10 +1,10 @@
 package morfologik.tools;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.IStringConverterFactory;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 class CustomParameterConverters implements IStringConverterFactory {
   public static class PathConverter implements IStringConverter<Path> {
@@ -13,12 +13,11 @@ class CustomParameterConverters implements IStringConverterFactory {
       return Paths.get(value);
     }
   }
-  
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+
   @Override
-  public <T> Class<? extends IStringConverter<T>> getConverter(Class<T> forType) {
+  public Class<? extends IStringConverter<?>> getConverter(Class<?> forType) {
     if (forType.equals(Path.class)) {
-      return (Class) PathConverter.class;
+      return PathConverter.class;
     }
     return null;
   }
