@@ -375,6 +375,26 @@ public class Speller {
   }
 
   /**
+   * Find similar words even if the original word is a correct word that exists in the dictionary
+   * 
+   * @param word The original word.
+   * @return A list of suggested candidate replacements.
+   */
+  public ArrayList<CandidateData> findSimilarWordCandidates(String word) {
+    return findReplacementCandidates(word, true);
+  }
+  
+  public ArrayList<String> findSimilarWords(String word) {
+    final List<CandidateData> result = findSimilarWordCandidates(word);
+    final ArrayList<String> resultSuggestions = new ArrayList<>(result.size());
+    for (CandidateData cd : result) {
+      resultSuggestions.add(cd.getWord());
+    }
+    return resultSuggestions;
+  }
+  
+  
+  /**
    * Find suggestions by using K. Oflazer's algorithm. See Jan Daciuk's s_fsa
    * package, spell.cc for further explanation.
    * 
@@ -391,6 +411,7 @@ public class Speller {
     return resultSuggestions;
   }
 
+  
   /**
    * Find and return suggestions by using K. Oflazer's algorithm. See Jan Daciuk's s_fsa
    * package, spell.cc for further explanation. This method is identical to
@@ -400,6 +421,10 @@ public class Speller {
    * @return A list of suggested candidate replacements.
    */
   public ArrayList<CandidateData> findReplacementCandidates(String word) {
+    return findReplacementCandidates(word, false);
+  }
+  
+  public ArrayList<CandidateData> findReplacementCandidates(String word, boolean evenIfWordInDictionary) {
     if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
       word = DictionaryLookup.applyReplacements(word, dictionaryMetadata.getInputConversionPairs());
     }
@@ -407,7 +432,7 @@ public class Speller {
     // candidate strings, including same additional data such as edit distance from the original word.
     List<CandidateData> candidates = new ArrayList<>();
 
-    if (word.length() > 0 && word.length() < MAX_WORD_LENGTH && !isInDictionary(word)) {
+    if (word.length() > 0 && word.length() < MAX_WORD_LENGTH && (!isInDictionary(word) || evenIfWordInDictionary)) {
       List<String> wordsToCheck = new ArrayList<>();
       if (replacementsTheRest != null && word.length() > 1) {
         for (final String wordChecked : getAllReplacements(word, 0, 0)) {
@@ -467,7 +492,7 @@ public class Speller {
     for (final CandidateData cd : candidates) {
       String replaced = DictionaryLookup.applyReplacements(cd.getWord(), dictionaryMetadata.getOutputConversionPairs());
       // Add only the first occurrence of a given word.
-      if (words.add(replaced)) {
+      if (words.add(replaced) && !replaced.equals(word)) {
         result.add(new CandidateData(replaced, cd.origDistance));
       }
     }
