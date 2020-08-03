@@ -165,6 +165,21 @@ public class SpellerTest {
     assertTrue(reps.get(5).equals("dist"));
     assertTrue(reps.get(6).equals("gist"));
   }
+  
+  @Test
+  public void testFindSimilarWords() throws IOException {
+    final URL url = getClass().getResource("dict-with-freq.dict");
+    final Speller spell = new Speller(Dictionary.read(url));
+
+    List<String> reps = spell.findSimilarWords("fist");
+    assertTrue(reps.toString().equals("[list, mist, dist, gist, wist, hist]"));
+    reps = spell.findSimilarWords("mist");
+    assertTrue(reps.toString().equals("[list, fist, dist, gist, wist, hist]"));
+    reps = spell.findSimilarWords("Fist");
+    assertTrue(reps.toString().equals("[fist, list, mist, dist, gist, wist, hist]"));
+    reps = spell.findSimilarWords("licit");
+    assertTrue(reps.toString().equals("[list, fist, mist, dist, gist, wist, hist]"));
+  }
 
   @Test
   public void testConcurrentReplacements() throws IOException {
