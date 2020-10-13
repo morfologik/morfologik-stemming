@@ -51,7 +51,7 @@
   <properties>
     <version.assertj>2.2.0</version.assertj>
     <version.hppc>0.7.2</version.hppc>
-    <version.junit>4.12</version.junit>
+    <version.junit>4.13.1</version.junit>
     <version.randomizedtesting>2.5.2</version.randomizedtesting>
 
     <version.maven-enforcer-plugin>1.4.1</version.maven-enforcer-plugin>
