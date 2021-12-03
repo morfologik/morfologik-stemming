@@ -51,7 +51,7 @@
   <properties>
     <version.assertj>2.2.0</version.assertj>
     <version.hppc>0.7.2</version.hppc>
-    <version.junit>4.12</version.junit>
+    <version.junit>4.13.1</version.junit>
     <version.randomizedtesting>2.5.2</version.randomizedtesting>
 
     <version.maven-compiler-plugin>3.8.1</version.maven-compiler-plugin>
@@ -327,7 +327,7 @@
       </activation>
 
       <properties>
-          <version.forbiddenapis>2.3</version.forbiddenapis>
+          <version.forbiddenapis>2.7</version.forbiddenapis>
           <forbiddenapis.signaturefile>src/forbidden-apis/signatures.txt</forbiddenapis.signaturefile>
       </properties>
 
@@ -596,7 +596,7 @@
                 <dependency>
                   <groupId>org.apache.ant</groupId>
                   <artifactId>ant</artifactId>
-                  <version>1.9.4</version>
+                  <version>1.10.9</version>
                 </dependency>
               </dependencies>
             </plugin>

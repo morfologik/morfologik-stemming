@@ -10,6 +10,7 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 Other Changes
 
  * GH-112: Add automatic module name to all JARs.
+ * Upgrade selected build dependencies.
 
 ======================= morfologik-stemming 2.1.7 =======================
 
