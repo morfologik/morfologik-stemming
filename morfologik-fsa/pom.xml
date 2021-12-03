@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.carrot2</groupId>
     <artifactId>morfologik-parent</artifactId>
-    <version>2.1.8-SNAPSHOT</version>
+    <version>2.1.8</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -20,6 +20,7 @@
   
   <properties>
     <forbiddenapis.signaturefile>../etc/forbidden-apis/signatures.txt</forbiddenapis.signaturefile>
+    <project.moduleId>org.carrot2.morfologik.fsa</project.moduleId>
   </properties>
 
   <build>
