@@ -335,7 +335,9 @@ public class Speller {
         // chop from left to right
         final String prefix = wordToCheck.substring(0, i);
         final String suffix = wordToCheck.substring(i);
-        if (isInDictionary(suffix)) {
+        if (isInDictionary(suffix) 
+            // camel case words: e.g. GreatElephant
+            || (!isNotCapitalizedWord(suffix) && isInDictionary(suffix.toLowerCase(locale)))) {
           if (isInDictionary(prefix)) {
             addReplacement(candidates, prefix + " " + suffix);
           } else if (Character.isUpperCase(prefix.charAt(0)) && isInDictionary(prefix.toLowerCase(locale))) {
