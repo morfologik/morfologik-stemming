@@ -54,6 +54,10 @@ public class SpellerTest {
     final URL url2 = getClass().getResource("single-char-word.dict");
     final Speller spell2 = new Speller(Dictionary.read(url2));
     assertTrue(spell2.replaceRunOnWords("alot").contains("a lot"));
+    assertTrue(spell2.replaceRunOnWords("Alot").contains("A lot"));
+    assertTrue(spell2.replaceRunOnWords("ALot").contains("A Lot"));
+    assertTrue(spell2.replaceRunOnWords("LotAmusement").contains("Lot Amusement"));
+    //TODO? assertTrue(spell2.replaceRunOnWords("LOTAMUSEMENT").contains("LOT AMUSEMENT"));
     assertTrue(spell2.replaceRunOnWords("aalot").contains("aa lot"));
     assertTrue(spell2.replaceRunOnWords("aamusement").contains("a amusement"));
     assertTrue(spell2.replaceRunOnWords("clot").isEmpty());
