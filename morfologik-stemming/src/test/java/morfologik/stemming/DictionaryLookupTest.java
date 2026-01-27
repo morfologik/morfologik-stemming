@@ -139,7 +139,7 @@ public class DictionaryLookupTest {
     final HashSet<WordData> entries = new HashSet<WordData>();
     try {
       entries.add(words.get(0));
-      fail();
+      Assert.fail();
     } catch (RuntimeException e) {
       // Expected.
     }

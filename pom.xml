@@ -49,12 +49,12 @@
   </developers>
 
   <properties>
-    <version.assertj>2.2.0</version.assertj>
+    <version.assertj>3.27.7</version.assertj>
     <version.hppc>0.7.2</version.hppc>
     <version.junit>4.13.1</version.junit>
-    <version.randomizedtesting>2.5.2</version.randomizedtesting>
+    <version.randomizedtesting>2.8.3</version.randomizedtesting>
 
-    <version.maven-compiler-plugin>3.8.1</version.maven-compiler-plugin>
+    <version.maven-compiler-plugin>3.14.1</version.maven-compiler-plugin>
     <version.maven-enforcer-plugin>1.4.1</version.maven-enforcer-plugin>
     <version.maven-clean-plugin>2.6.1</version.maven-clean-plugin>
     <version.maven-jar-plugin>3.2.0</version.maven-jar-plugin>
@@ -284,8 +284,8 @@
       </activation>
 
       <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       </properties>
 
