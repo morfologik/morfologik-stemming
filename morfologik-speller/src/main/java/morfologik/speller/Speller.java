@@ -427,6 +427,7 @@ public class Speller {
   }
   
   private ArrayList<CandidateData> findReplacementCandidates(String word, boolean evenIfWordInDictionary) {
+    hMatrix.reset();
     if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
       word = DictionaryLookup.applyReplacements(word, dictionaryMetadata.getInputConversionPairs());
     }
