@@ -16,6 +16,10 @@ Bug Fixes
  * GH-38: support ^ (start) and $ (end) anchors and _ (space) in
    replacement-pairs, following hunspell REP conventions.
 
+ * GH-75: Fix incorrect and incomplete CharsetDecoder usage in Speller.findRepl():
+   missing charBuffer.clear() before decode and missing decoder.flush() after
+   decode, which could produce wrong candidates for stateful encodings.
+
 Other Changes
 
  * Update Maven build plugins to current versions.

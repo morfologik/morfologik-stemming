@@ -544,14 +544,10 @@ public class Speller {
       byteBuffer.put(fsa.getArcLabel(arc));
       final int bufPos = byteBuffer.position();
       byteBuffer.flip();
+      charBuffer.clear();
       decoder.reset();
-      // FIXME: this isn't correct -- no checks for overflows, no decoder flush. I don't think this should be in here
-      // too, the decoder should run once on accumulated temporary byte buffer (current path) only when there's
-      // a potential that this buffer can become a replacement candidate (isEndOfCandidate). Because we assume candidates
-      // are valid input strings (this is verified when building the dictionary), it's save a lot of conversions.
       final CoderResult c = decoder.decode(byteBuffer, charBuffer, true);
-      if (c.isMalformed()) { // assume that only valid
-        // encodings are there
+      if (c.isMalformed()) { // incomplete multi-byte sequence: accumulate bytes and descend
         final byte[] prev = new byte[bufPos];
         byteBuffer.position(0);
         byteBuffer.get(prev);
@@ -560,6 +556,7 @@ public class Speller {
         }
         byteBuffer.clear();
       } else if (!c.isError()) { // unmappable characters are silently discarded
+        decoder.flush(charBuffer);
         charBuffer.flip();
         candidate[candIndex] = charBuffer.get();
         charBuffer.clear();
