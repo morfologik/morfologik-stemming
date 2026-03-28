@@ -349,6 +349,21 @@ public class SpellerTest {
   }
 
   @Test
+  public void testFindReplacementsConsistentAcrossRepeatedCalls() throws IOException {
+    // HMatrix must be reset at the start of each findReplacementCandidates call.
+    // Without the reset, stale edit-distance values left by a previous traversal
+    // corrupt results: a reused Speller returns different candidates than a
+    // freshly constructed one.
+    final List<String> expected = new Speller(dictionary, 3).findReplacements("bak");
+
+    final Speller reused = new Speller(dictionary, 3);
+    reused.findReplacements("abka"); // dirties the hMatrix
+    final List<String> actual = reused.findReplacements("bak");
+
+    assertEquals(expected, actual);
+  }
+
+  @Test
   public void testIssue38AnchoredReplacementPairs() throws Exception {
     // GH-38: support for ^ (start), $ (end) anchors and _ (space) in replacement-pairs.
     // editDistance=0 ensures candidates are only found via replacement pairs, not by

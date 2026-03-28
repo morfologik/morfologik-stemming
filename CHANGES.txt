@@ -9,6 +9,10 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
 Bug Fixes
 
+ * PR #118: fix HMatrix not being reset between calls to
+   Speller.findReplacementCandidates(), causing incorrect candidates to be
+   returned on repeated calls (Jaume Ortolà).
+
  * GH-38: support ^ (start) and $ (end) anchors and _ (space) in
    replacement-pairs, following hunspell REP conventions.
 
