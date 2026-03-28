@@ -7,6 +7,11 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
 ======================= morfologik-stemming 2.1.10 =======================
 
+Bug Fixes
+
+ * GH-38: support ^ (start) and $ (end) anchors and _ (space) in
+   replacement-pairs, following hunspell REP conventions.
+
 Other Changes
 
  * Update Maven build plugins to current versions.

@@ -55,8 +55,21 @@ public class Speller {
   private int wordLen; /* length of word being processed */
   private char[] wordProcessed; /* word being processed */
 
-  private Map<Character, List<char[]>> replacementsAnyToOne = new HashMap<>();
-  private Map<String, List<char[]>> replacementsAnyToTwo = new HashMap<>();
+  /** Replacement pattern with optional start/end anchor. */
+  private static final class Pattern {
+    final char[] chars;
+    final boolean startAnchor;
+    final boolean endAnchor;
+    Pattern(char[] chars, boolean startAnchor, boolean endAnchor) {
+      this.chars = chars;
+      this.startAnchor = startAnchor;
+      this.endAnchor = endAnchor;
+    }
+  }
+
+  private Map<Character, List<Pattern>> replacementsAnyToOne = new HashMap<>();
+  private Map<String, List<Pattern>> replacementsAnyToTwo = new HashMap<>();
+  /** Keys may carry ^ / $ anchors; values are the replacement strings. */
   private Map<String, List<String>> replacementsTheRest = new HashMap<>();
 
   private boolean containsSeparators = true;
@@ -140,37 +153,57 @@ public class Speller {
     this.createReplacementsMaps();
   }
 
+  private static boolean isStartAnchored(String key) {
+    return key.startsWith("^");
+  }
+
+  private static boolean isEndAnchored(String key) {
+    return key.endsWith("$");
+  }
+
+  private static String stripAnchors(String key) {
+    int start = key.startsWith("^") ? 1 : 0;
+    int end = key.endsWith("$") ? key.length() - 1 : key.length();
+    return key.substring(start, end);
+  }
+
   private void createReplacementsMaps() {
     for (Map.Entry<String, List<String>> entry : dictionaryMetadata.getReplacementPairs().entrySet()) {
+      String rawKey = entry.getKey();
+      boolean startAnchor = isStartAnchored(rawKey);
+      boolean endAnchor = isEndAnchored(rawKey);
+      String strippedKey = stripAnchors(rawKey);
+
       for (String s : entry.getValue()) {
-        // replacements any to one
-        // the new key is the target of the replacement pair
+        // replacements any to one: key is the 1-char replacement target
         if (s.length() == 1) {
+          Pattern p = new Pattern(strippedKey.toCharArray(), startAnchor, endAnchor);
           if (!replacementsAnyToOne.containsKey(s.charAt(0))) {
-            List<char[]> charList = new ArrayList<>();
-            charList.add(entry.getKey().toCharArray());
-            replacementsAnyToOne.put(s.charAt(0), charList);
+            List<Pattern> list = new ArrayList<>();
+            list.add(p);
+            replacementsAnyToOne.put(s.charAt(0), list);
           } else {
-            replacementsAnyToOne.get(s.charAt(0)).add(entry.getKey().toCharArray());
+            replacementsAnyToOne.get(s.charAt(0)).add(p);
           }
         }
-        // replacements any to two
-        // the new key is the target of the replacement pair
+        // replacements any to two: key is the 2-char replacement target
         else if (s.length() == 2) {
+          Pattern p = new Pattern(strippedKey.toCharArray(), startAnchor, endAnchor);
           if (!replacementsAnyToTwo.containsKey(s)) {
-            List<char[]> charList = new ArrayList<>();
-            charList.add(entry.getKey().toCharArray());
-            replacementsAnyToTwo.put(s, charList);
+            List<Pattern> list = new ArrayList<>();
+            list.add(p);
+            replacementsAnyToTwo.put(s, list);
           } else {
-            replacementsAnyToTwo.get(s).add(entry.getKey().toCharArray());
+            replacementsAnyToTwo.get(s).add(p);
           }
         } else {
-          if (!replacementsTheRest.containsKey(entry.getKey())) {
-            List<String> charList = new ArrayList<>();
-            charList.add(s);
-            replacementsTheRest.put(entry.getKey(), charList);
+          // replacements with longer targets: key keeps anchors for getAllReplacements
+          if (!replacementsTheRest.containsKey(rawKey)) {
+            List<String> list = new ArrayList<>();
+            list.add(s);
+            replacementsTheRest.put(rawKey, list);
           } else {
-            replacementsTheRest.get(entry.getKey()).add(s);
+            replacementsTheRest.get(rawKey).add(s);
           }
         }
       }
@@ -696,12 +729,14 @@ public class Speller {
   // Match the last letter of the candidate against two or more letters of the word.
   private int matchAnyToOne(final int wordIndex, final int candIndex) {
     if (replacementsAnyToOne.containsKey(candidate[candIndex])) {
-      for (final char[] rep : replacementsAnyToOne.get(candidate[candIndex])) {
+      for (final Pattern p : replacementsAnyToOne.get(candidate[candIndex])) {
+        if (p.startAnchor && wordIndex != 0) continue;
         int i = 0;
-        while (i < rep.length && (wordIndex + i) < wordLen && rep[i] == wordProcessed[wordIndex + i]) {
+        while (i < p.chars.length && (wordIndex + i) < wordLen && p.chars[i] == wordProcessed[wordIndex + i]) {
           i++;
         }
-        if (i == rep.length) {
+        if (i == p.chars.length) {
+          if (p.endAnchor && wordIndex + i != wordLen) continue;
           return i;
         }
       }
@@ -714,16 +749,18 @@ public class Speller {
       char[] twoChar = { candidate[candIndex - 1], candidate[candIndex] };
       String sTwoChar = new String(twoChar);
       if (replacementsAnyToTwo.containsKey(sTwoChar)) {
-        for (final char[] rep : replacementsAnyToTwo.get(sTwoChar)) {
-          if (rep.length == 2 && wordIndex < wordLen && candidate[candIndex - 1] == wordProcessed[wordIndex - 1]
+        for (final Pattern p : replacementsAnyToTwo.get(sTwoChar)) {
+          if (p.startAnchor && wordIndex - 1 != 0) continue;
+          if (p.chars.length == 2 && wordIndex < wordLen && candidate[candIndex - 1] == wordProcessed[wordIndex - 1]
               && candidate[candIndex] == wordProcessed[wordIndex]) {
             return 0; //unnecessary replacements
           }
           int i = 0;
-          while (i < rep.length && (wordIndex - 1 + i) < wordLen && rep[i] == wordProcessed[wordIndex - 1 + i]) {
+          while (i < p.chars.length && (wordIndex - 1 + i) < wordLen && p.chars[i] == wordProcessed[wordIndex - 1 + i]) {
             i++;
           }
-          if (i == rep.length) {
+          if (i == p.chars.length) {
+            if (p.endAnchor && wordIndex - 1 + i != wordLen) continue;
             return i;
           }
         }
@@ -878,28 +915,43 @@ public class Speller {
     int keyLength = 0;
     boolean found = false;
     // find first possible replacement after fromIndex position
+    String strippedKeyForSelected = "";
     for (final String auxKey : replacementsTheRest.keySet()) {
-      int auxIndex = sb.indexOf(auxKey, fromIndex);
-      if (auxIndex > -1 && (auxIndex < index || (auxIndex == index && !(auxKey.length() < keyLength)))) { //select the longest possible key
+      boolean startAnchor = isStartAnchored(auxKey);
+      boolean endAnchor = isEndAnchored(auxKey);
+      String stripped = (startAnchor || endAnchor) ? stripAnchors(auxKey) : auxKey;
+      int auxIndex;
+      if (startAnchor && fromIndex > 0) {
+        continue; // ^ anchor only valid from the beginning
+      } else if (startAnchor) {
+        auxIndex = sb.indexOf(stripped, 0) == 0 ? 0 : -1;
+      } else if (endAnchor) {
+        int expectedIndex = sb.length() - stripped.length();
+        auxIndex = (expectedIndex >= fromIndex && sb.indexOf(stripped, expectedIndex) == expectedIndex) ? expectedIndex : -1;
+      } else {
+        auxIndex = sb.indexOf(auxKey, fromIndex);
+      }
+      if (auxIndex > -1 && (auxIndex < index || (auxIndex == index && !(stripped.length() < keyLength)))) { //select the longest possible key
         index = auxIndex;
         key = auxKey;
-        keyLength = auxKey.length();
+        keyLength = stripped.length();
+        strippedKeyForSelected = stripped;
       }
     }
     if (index < MAX_WORD_LENGTH) {
       for (final String rep : replacementsTheRest.get(key)) {
         // start a branch without replacement (only once per key)
         if (!found) {
-          replaced.addAll(getAllReplacements(str, index + key.length(), level + 1));
+          replaced.addAll(getAllReplacements(str, index + strippedKeyForSelected.length(), level + 1));
           found = true;
         }
         // avoid unnecessary replacements (ex. don't replace L by L·L when L·L already present)
         int ind = sb.indexOf(rep, fromIndex - rep.length() + 1);
-        if (rep.length() > key.length() && ind > -1 && (ind == index || ind == index - rep.length() + 1)) {
+        if (rep.length() > strippedKeyForSelected.length() && ind > -1 && (ind == index || ind == index - rep.length() + 1)) {
           continue;
         }
         // start a branch with replacement
-        sb.replace(index, index + key.length(), rep);
+        sb.replace(index, index + strippedKeyForSelected.length(), rep);
         replaced.addAll(getAllReplacements(sb.toString(), index + rep.length(), level + 1));
         sb.setLength(0);
         sb.append(str);

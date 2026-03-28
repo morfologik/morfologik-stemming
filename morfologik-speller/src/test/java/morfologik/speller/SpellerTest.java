@@ -349,6 +349,24 @@ public class SpellerTest {
   }
 
   @Test
+  public void testIssue38AnchoredReplacementPairs() throws Exception {
+    // GH-38: support for ^ (start), $ (end) anchors and _ (space) in replacement-pairs.
+    // editDistance=0 ensures candidates are only found via replacement pairs, not by
+    // coincidental edit distance (e.g. "alot"/"a lot" differ by just 1).
+    final URL url = getClass().getResource("issue38.dict");
+    final Speller speller = new Speller(Dictionary.read(url), 0);
+
+    // ^Ij IJ: start-anchored 2-char replacement; "Ijsland" -> "IJsland"
+    assertTrue(speller.findReplacements("Ijsland").contains("IJsland"));
+
+    // ^alot a_lot: start-anchored replacement with _ as space; "alot" -> "a lot"
+    assertTrue(speller.findReplacements("alot").contains("a lot"));
+
+    // ^påny$ på_ny: both anchors + _ as space; whole-word replacement "påny" -> "på ny"
+    assertTrue(speller.findReplacements("påny").contains("på ny"));
+  }
+
+  @Test
   public void testIssue94() throws Exception {
     final URL url = getClass().getResource("issue94.dict");
     final Speller speller = new Speller(Dictionary.read(url));

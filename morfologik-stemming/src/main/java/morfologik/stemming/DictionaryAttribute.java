@@ -218,12 +218,15 @@ public enum DictionaryAttribute {
       for (final String stringPair : replacements) {
         final String[] twoStrings = stringPair.trim().split(" ");
         if (twoStrings.length == 2) {
-          if (!replacementPairs.containsKey(twoStrings[0])) {
+          // _ represents a space (hunspell REP convention)
+          String key = twoStrings[0].replace('_', ' ');
+          String val = twoStrings[1].replace('_', ' ');
+          if (!replacementPairs.containsKey(key)) {
             List<String> strList = new ArrayList<String>();
-            strList.add(twoStrings[1]);
-            replacementPairs.put(twoStrings[0], strList);
+            strList.add(val);
+            replacementPairs.put(key, strList);
           } else {
-            replacementPairs.get(twoStrings[0]).add(twoStrings[1]);
+            replacementPairs.get(key).add(val);
           }
         } else {
           throw new IllegalArgumentException("Attribute " + propertyName
