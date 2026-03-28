@@ -1,5 +1,7 @@
 package morfologik.speller;
 
+import java.util.Arrays;
+
 /**
  * Keeps track of already computed values of edit distance. 
  * Remarks: To save space, the matrix is kept in a vector.
@@ -29,21 +31,26 @@ public class HMatrix {
 		editDistance = distance;
 		final int size = rowLength * columnHeight;
 		p = new int[size];
-		// Initialize edges of the diagonal band to distance + 1 (i.e.
-		// distance too big)
-		for (int i = 0; i < rowLength - distance - 1; i++) {
-			p[i] = distance + 1; // H(distance + j, j) = distance + 1
-			p[size - i - 1] = distance + 1; // H(i, distance + i) = distance
-			// + 1
+		init();
+	}
+
+	private void init() {
+		final int size = p.length;
+		// Initialize edges of the diagonal band to distance + 1 (i.e. distance too big)
+		for (int i = 0; i < rowLength - editDistance - 1; i++) {
+			p[i] = editDistance + 1; // H(distance + j, j) = distance + 1
+			p[size - i - 1] = editDistance + 1; // H(i, distance + i) = distance + 1
 		}
-		// Initialize items H(i,j) with at least one index equal to zero to
-		// |i - j|
-		for (int j = 0; j < 2 * distance + 1; j++) {
-			p[j * rowLength] = distance + 1 - j; // H(i=0..distance+1,0)=i
-			// FIXME: fordistance == 2 we exceed the array size here.
-      // there's a bug in spell.cc, Jan Daciuk has been notified about it.
-			p[Math.min(p.length - 1, (j + distance + 1) * rowLength + j)] = j; // H(0,j=0..distance+1)=j
+		// Initialize items H(i,j) with at least one index equal to zero to |i - j|
+		for (int j = 0; j < editDistance + 2; j++) {
+			p[j * rowLength] = editDistance + 1 - j; // H(i=0..distance+1,0)=i
+			p[(j + editDistance + 1) * rowLength + j] = j; // H(0,j=0..distance+1)=j
 		}
+	}
+
+	public void reset() {
+		Arrays.fill(p, 0);
+		init();
 	}
 
 	/**
@@ -54,11 +61,11 @@ public class HMatrix {
 	 * @param j
 	 *            - (int) column number.
 	 * @return Item <code>H[i][j]</code>. Remarks: H matrix is really simulated. What is needed is only
-	 *         <code>2 * edit_distance + 1</code> wide band around the diagonal. In fact
+	 *         <code>edit_distance + 2</code> wideband around the diagonal. In fact
 	 *         this diagonal has been pushed up to the upper border of the
 	 *         matrix.
 	 * 
-	 *         The matrix in the vector looks likes this:
+	 *         The matrix in the vector looks like this:
 
 	 * <pre>
 	 * 	    +---------------------+

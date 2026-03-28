@@ -7,6 +7,12 @@ https://github.com/morfologik/morfologik-stemming/blob/master/CHANGES
 
 ======================= morfologik-stemming 2.1.10 =======================
 
+Bug Fixes
+
+ * PR #118: fix HMatrix not being reset between calls to
+   Speller.findReplacementCandidates(), causing incorrect candidates to be
+   returned on repeated calls (Jaume Ortolà).
+
 Other Changes
 
  * Update Maven build plugins to current versions.
