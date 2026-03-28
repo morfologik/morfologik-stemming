@@ -680,6 +680,7 @@
             <extensions>true</extensions>
             <configuration>
               <publishingServerId>central</publishingServerId>
+              <deploymentName>morfologik-stemming-${project.version}</deploymentName>
               <autoPublish>true</autoPublish>
               <waitUntil>published</waitUntil>
             </configuration>

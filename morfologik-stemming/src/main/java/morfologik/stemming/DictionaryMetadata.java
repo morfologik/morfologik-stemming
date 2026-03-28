@@ -84,7 +84,7 @@ public final class DictionaryMetadata {
 
   /**
    * Equivalent characters (treated similarly as equivalent chars with and without
-   * diacritics). For example, Polish <tt>ł</tt> can be specified as equivalent to <tt>l</tt>.
+   * diacritics). For example, Polish <code>ł</code> can be specified as equivalent to <code>l</code>.
    * 
    * This implements a feature similar to hunspell MAP in the affix file.
    */

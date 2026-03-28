@@ -206,8 +206,8 @@ public enum DictionaryAttribute {
 
   /**
    * Replacement pairs for non-obvious candidate search in a speller dictionary.
-   * For example, Polish <tt>rz</tt> is phonetically equivalent to <tt>ż</tt>,
-   * and this may be specified here to allow looking for replacements of <tt>rz</tt> with <tt>ż</tt>
+   * For example, Polish <code>rz</code> is phonetically equivalent to <code>ż</code>,
+   * and this may be specified here to allow looking for replacements of <code>rz</code> with <code>ż</code>
    * and vice versa.
    */
   REPLACEMENT_PAIRS("fsa.dict.speller.replacement-pairs") {
@@ -239,7 +239,7 @@ public enum DictionaryAttribute {
 
   /**
    * Equivalent characters (treated similarly as equivalent chars with and without
-   * diacritics). For example, Polish <tt>ł</tt> can be specified as equivalent to <tt>l</tt>.
+   * diacritics). For example, Polish <code>ł</code> can be specified as equivalent to <code>l</code>.
    * 
    * <p>This implements a feature similar to hunspell MAP in the affix file.
    */
