@@ -52,12 +52,12 @@
     <version.assertj>3.27.7</version.assertj>
     <version.hppc>0.7.2</version.hppc>
     <version.junit>4.13.1</version.junit>
-    <version.randomizedtesting>2.8.3</version.randomizedtesting>
+    <version.randomizedtesting>2.8.4</version.randomizedtesting>
 
-    <version.maven-compiler-plugin>3.14.1</version.maven-compiler-plugin>
-    <version.maven-enforcer-plugin>1.4.1</version.maven-enforcer-plugin>
-    <version.maven-clean-plugin>2.6.1</version.maven-clean-plugin>
-    <version.maven-jar-plugin>3.2.0</version.maven-jar-plugin>
+    <version.maven-compiler-plugin>3.15.0</version.maven-compiler-plugin>
+    <version.maven-enforcer-plugin>3.6.2</version.maven-enforcer-plugin>
+    <version.maven-clean-plugin>3.5.0</version.maven-clean-plugin>
+    <version.maven-jar-plugin>3.5.0</version.maven-jar-plugin>
   </properties>
 
   <modules>
@@ -104,31 +104,31 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.2</version>
+          <version>3.1.4</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>2.4</version>
+          <version>3.4.0</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.10.3</version>
+          <version>3.12.0</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
-          <version>1.8</version>
+          <version>3.2.0</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>3.6.0</version>
+          <version>3.8.0</version>
         </plugin>
 
         <plugin>
@@ -153,19 +153,19 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
-          <version>2.5.2</version>
+          <version>3.1.4</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>2.7</version>
+          <version>3.5.0</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.10</version>
+          <version>3.10.0</version>
         </plugin>
 
         <plugin>
@@ -181,20 +181,20 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
-          <version>1.6</version>
+          <version>3.2.8</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>5.1.2</version>
+          <version>6.0.2</version>
           <extensions>true</extensions>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.18.1</version>
+          <version>3.5.5</version>
         </plugin>
         
         <plugin>
@@ -320,7 +320,7 @@
       </activation>
 
       <properties>
-          <version.forbiddenapis>2.7</version.forbiddenapis>
+          <version.forbiddenapis>3.10</version.forbiddenapis>
           <forbiddenapis.signaturefile>src/forbidden-apis/signatures.txt</forbiddenapis.signaturefile>
       </properties>
 
@@ -542,7 +542,7 @@
           <plugins>
             <plugin>
               <artifactId>maven-antrun-plugin</artifactId>
-              <version>1.8</version>
+              <version>3.2.0</version>
               <executions>
                 <execution>
                   <id>default-cli</id>
@@ -589,7 +589,7 @@
                 <dependency>
                   <groupId>org.apache.ant</groupId>
                   <artifactId>ant</artifactId>
-                  <version>1.10.11</version>
+                  <version>1.10.15</version>
                 </dependency>
               </dependencies>
             </plugin>
