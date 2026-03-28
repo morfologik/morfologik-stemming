@@ -13,6 +13,9 @@ Bug Fixes
    Speller.findReplacementCandidates(), causing incorrect candidates to be
    returned on repeated calls (Jaume Ortolà).
 
+ * GH-38: support ^ (start) and $ (end) anchors and _ (space) in
+   replacement-pairs, following hunspell REP conventions.
+
 Other Changes
 
  * Update Maven build plugins to current versions.
