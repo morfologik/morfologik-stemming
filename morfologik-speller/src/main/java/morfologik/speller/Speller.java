@@ -516,7 +516,7 @@ public class Speller {
         charBuffer = BufferUtils.clearAndEnsureCapacity(charBuffer, MAX_WORD_LENGTH);
         byteBuffer = BufferUtils.clearAndEnsureCapacity(byteBuffer, MAX_WORD_LENGTH);
         final byte[] prevBytes = new byte[0];
-        findRepl(candidates, 0, fsa.getRootNode(), prevBytes, 0, 0);
+        findRepl(candidates, 0, fsa.getRootNode(), prevBytes, 0, 0, -1, null, '\0');
       }
     }
 
@@ -536,7 +536,8 @@ public class Speller {
     return result;
   }
 
-  private void findRepl(List<CandidateData> candidates, final int depth, final int node, final byte[] prevBytes, final int wordIndex, final int candIndex) {
+  private void findRepl(List<CandidateData> candidates, final int depth, final int node, final byte[] prevBytes, final int wordIndex, final int candIndex,
+      final int minLookbackWordIndex, final String lastAnyToOneSource, final char lastAnyToOneTarget) {
     int dist = 0;
     for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
       byteBuffer = BufferUtils.clearAndEnsureCapacity(byteBuffer, prevBytes.length + 1);
@@ -552,7 +553,7 @@ public class Speller {
         byteBuffer.position(0);
         byteBuffer.get(prev);
         if (!fsa.isArcTerminal(arc)) {
-          findRepl(candidates, depth, fsa.getEndNode(arc), prev, wordIndex, candIndex); // note: depth is not incremented
+          findRepl(candidates, depth, fsa.getEndNode(arc), prev, wordIndex, candIndex, minLookbackWordIndex, lastAnyToOneSource, lastAnyToOneTarget); // note: depth is not incremented
         }
         byteBuffer.clear();
       } else if (!c.isError()) { // unmappable characters are silently discarded
@@ -564,7 +565,7 @@ public class Speller {
 
         int lengthReplacement;
         // replacement "any to two"
-        if ((lengthReplacement = matchAnyToTwo(wordIndex, candIndex)) > 0) {
+        if ((lengthReplacement = matchAnyToTwo(wordIndex, candIndex, minLookbackWordIndex, lastAnyToOneSource, lastAnyToOneTarget)) > 0) {
           // the replacement takes place at the end of the candidate
           if (isEndOfCandidate(arc, wordIndex) && (dist = hMatrix.get(depth - 1, depth - 1)) <= effectEditDistance) {
             if (Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 2)) > 0) {
@@ -579,7 +580,7 @@ public class Speller {
             int x = hMatrix.get(depth, depth);
             hMatrix.set(depth, depth, hMatrix.get(depth - 1, depth - 1));
             findRepl(candidates, Math.max(0, depth), fsa.getEndNode(arc), new byte[0], wordIndex + lengthReplacement - 1,
-                candIndex + 1);
+                candIndex + 1, minLookbackWordIndex, lastAnyToOneSource, lastAnyToOneTarget);
             hMatrix.set(depth, depth, x);
           }
         }
@@ -596,7 +597,9 @@ public class Speller {
             }
           }
           if (isArcNotTerminal(arc, candIndex)) {
-            findRepl(candidates, depth, fsa.getEndNode(arc), new byte[0], wordIndex + lengthReplacement, candIndex + 1);
+            String newAnyToOneSource = new String(wordProcessed, wordIndex, lengthReplacement);
+            findRepl(candidates, depth, fsa.getEndNode(arc), new byte[0], wordIndex + lengthReplacement, candIndex + 1,
+                wordIndex + lengthReplacement, newAnyToOneSource, candidate[candIndex]);
           }
         }
         //general
@@ -606,7 +609,8 @@ public class Speller {
             candidates.add(new CandidateData(String.valueOf(candidate, 0, candIndex + 1), dist));
           }
           if (isArcNotTerminal(arc, candIndex)) {
-            findRepl(candidates, depth + 1, fsa.getEndNode(arc), new byte[0], wordIndex + 1, candIndex + 1);
+            findRepl(candidates, depth + 1, fsa.getEndNode(arc), new byte[0], wordIndex + 1, candIndex + 1,
+                minLookbackWordIndex, lastAnyToOneSource, lastAnyToOneTarget);
           }
         }
       }
@@ -742,7 +746,8 @@ public class Speller {
     return 0;
   }
 
-  private int matchAnyToTwo(final int wordIndex, final int candIndex) {
+  private int matchAnyToTwo(final int wordIndex, final int candIndex,
+      final int minLookbackWordIndex, final String lastAnyToOneSource, final char lastAnyToOneTarget) {
     if (candIndex > 0 && candIndex < candidate.length && wordIndex > 0) {
       char[] twoChar = { candidate[candIndex - 1], candidate[candIndex] };
       String sTwoChar = new String(twoChar);
@@ -759,6 +764,13 @@ public class Speller {
           }
           if (i == p.chars.length) {
             if (p.endAnchor && wordIndex - 1 + i != wordLen) continue;
+            // Reject if this match directly reverses a previous anyToOne match at an overlapping position
+            if (wordIndex - 1 < minLookbackWordIndex
+                && lastAnyToOneSource != null
+                && p.chars.length == 1 && p.chars[0] == lastAnyToOneTarget
+                && sTwoChar.equals(lastAnyToOneSource)) {
+              continue;
+            }
             return i;
           }
         }
