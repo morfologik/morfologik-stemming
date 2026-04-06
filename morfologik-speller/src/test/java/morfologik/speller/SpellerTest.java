@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -388,6 +389,34 @@ public class SpellerTest {
     List<String> reps = speller.findReplacements("schänken");
     assertTrue(reps.get(0).equals("Schänken"));
     assertTrue(reps.get(1).equals("schenken"));
+  }
+
+  @Test
+  public void testReciprocalReplacementPairsDoNotProduceZeroDistance() throws IOException {
+    // Searching for "pissara" in a dictionary containing "pissarra", "passara", "passarà".
+    // With reciprocal replacement pairs ss↔s, the bug causes matchAnyToOne (ss→s) followed by
+    // matchAnyToTwo (s→ss) to double-consume word[3]='s', corrupting the HMatrix and making
+    // "passara"/"passarà" appear as distance=0 candidates instead of distance=1.
+    final URL url = getClass().getResource("pissara-test.dict");
+    final Speller speller = new Speller(Dictionary.read(url), 2);
+
+    List<Speller.CandidateData> candidates = speller.findReplacementCandidates("pissara");
+
+    // "pissarra" (one extra 'r') and "passara" (i→a, ss→s) are both valid distance-1 candidates
+    List<String> words = new ArrayList<>();
+    for (Speller.CandidateData cd : candidates) {
+      words.add(cd.getWord());
+    }
+    assertTrue("pissarra should be a suggestion for pissara", words.contains("pissarra"));
+    assertTrue("passara should be a suggestion for pissara", words.contains("passara"));
+    assertTrue("passara should be a suggestion for pissara", words.contains("passarà"));
+
+    // No candidate should have origDistance=0: that would indicate the double-consumption bug.
+    // With FREQ_RANGES=26 and freq=0: origDistance=0 → distance=25, origDistance=1 → distance=51.
+    for (Speller.CandidateData cd : candidates) {
+      int origDistance = cd.getDistance() / Speller.FREQ_RANGES;
+      assertTrue("Candidate '" + cd.getWord() + "' has unexpected origDistance=0", origDistance > 0);
+    }
   }
 
   private int getCutOffDistance(final Speller spell, final String word, final String candidate) {

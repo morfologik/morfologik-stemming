@@ -1,0 +1,4 @@
+fsa.dict.separator=+
+fsa.dict.encoding=utf-8
+fsa.dict.encoder=NONE
+fsa.dict.speller.replacement-pairs=s ss,ss s
