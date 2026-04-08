@@ -24,6 +24,8 @@ Bug Fixes
 
 Other Changes
 
+ * apply spotless (google java format) formatting to sources.
+
  * switch to junit5/ jupiter and randomizedtesting-jupiter
 
  * Update Maven build plugins to current versions.
