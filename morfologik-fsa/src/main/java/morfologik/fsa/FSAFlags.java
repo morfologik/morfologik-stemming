@@ -2,10 +2,7 @@ package morfologik.fsa;
 
 import java.util.Set;
 
-/**
- * FSA automaton flags. Where applicable, flags follow Daciuk's <code>fsa</code>
- * package.
- */
+/** FSA automaton flags. Where applicable, flags follow Daciuk's <code>fsa</code> package. */
 public enum FSAFlags {
   /** Daciuk: flexible FSA encoding. */
   FLEXIBLE(1 << 0),
@@ -25,20 +22,18 @@ public enum FSAFlags {
 
   /**
    * The FSA contains right-language count numbers on states.
-   * 
+   *
    * @see FSA#getRightLanguageCount(int)
    */
   NUMBERS(1 << 8),
 
   /**
-   * The FSA supports legacy built-in separator and filler characters (Daciuk's
-   * FSA package compatibility).
+   * The FSA supports legacy built-in separator and filler characters (Daciuk's FSA package
+   * compatibility).
    */
   SEPARATORS(1 << 9);
 
-  /**
-   * Bit mask for the corresponding flag.
-   */
+  /** Bit mask for the corresponding flag. */
   public final int bits;
 
   /** */
@@ -47,15 +42,15 @@ public enum FSAFlags {
   }
 
   /**
-   * @param flags The bitset with flags. 
-   * @return Returns <code>true</code> iff this flag is set in <code>flags</code>. 
+   * @param flags The bitset with flags.
+   * @return Returns <code>true</code> iff this flag is set in <code>flags</code>.
    */
   public boolean isSet(int flags) {
     return (flags & bits) != 0;
   }
 
   /**
-   * @param flags A set of flags to encode. 
+   * @param flags A set of flags to encode.
    * @return Returns the set of flags encoded as packed <code>short</code>.
    */
   public static short asShort(Set<FSAFlags> flags) {

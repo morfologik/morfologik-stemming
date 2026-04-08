@@ -2,8 +2,6 @@ package morfologik.speller;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import morfologik.speller.HMatrix;
-
 import org.junit.jupiter.api.Test;
 
 public class HMatrixTest {

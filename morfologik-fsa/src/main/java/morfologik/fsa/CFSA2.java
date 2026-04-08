@@ -8,18 +8,19 @@ import java.util.Set;
 
 /**
  * CFSA (Compact Finite State Automaton) binary format implementation, version 2:
+ *
  * <ul>
- *  <li>{@link #BIT_TARGET_NEXT} applicable on all arcs, not necessarily the last one.</li>
- *  <li>v-coded goto field</li>
- *  <li>v-coded perfect hashing numbers, if any</li>
- *  <li>31 most frequent labels integrated with flags byte</li>
+ *   <li>{@link #BIT_TARGET_NEXT} applicable on all arcs, not necessarily the last one.
+ *   <li>v-coded goto field
+ *   <li>v-coded perfect hashing numbers, if any
+ *   <li>31 most frequent labels integrated with flags byte
  * </ul>
- * 
- * <p>The encoding of automaton body is as follows.</p>
- * 
+ *
+ * <p>The encoding of automaton body is as follows.
+ *
  * <pre>
  * ---- CFSA header
- * Byte                            Description 
+ * Byte                            Description
  *       +-+-+-+-+-+-+-+-+\
  *     0 | | | | | | | | | +------ '\'
  *       +-+-+-+-+-+-+-+-+/
@@ -45,27 +46,27 @@ import java.util.Set;
  *     7 | | | | | | | | | +------ label lookup table size
  *       +-+-+-+-+-+-+-+-+/
  *       +-+-+-+-+-+-+-+-+\
- *  8-32 | | | | | | | | | +------ label value lookup table 
+ *  8-32 | | | | | | | | | +------ label value lookup table
  *       : : : : : : : : : |
  *       +-+-+-+-+-+-+-+-+/
- * 
+ *
  * ---- Start of a node; only if automaton was compiled with NUMBERS option.
- * 
+ *
  * Byte
  *        +-+-+-+-+-+-+-+-+\
- *      0 | | | | | | | | | \  
+ *      0 | | | | | | | | | \
  *        +-+-+-+-+-+-+-+-+  +
  *      1 | | | | | | | | |  |      number of strings recognized
  *        +-+-+-+-+-+-+-+-+  +----- by the automaton starting
  *        : : : : : : : : :  |      from this node. v-coding
  *        +-+-+-+-+-+-+-+-+  +
- *        | | | | | | | | | /  
+ *        | | | | | | | | | /
  *        +-+-+-+-+-+-+-+-+/
  *
  * ---- A vector of this node's arcs. An arc's layout depends on the combination of flags.
- * 
- * 1) NEXT bit set, mapped arc label. 
- * 
+ *
+ * 1) NEXT bit set, mapped arc label.
+ *
  *        +----------------------- node pointed to is next
  *        | +--------------------- the last arc of the node
  *        | | +------------------- this arc leads to a final state (acceptor)
@@ -84,116 +85,88 @@ import java.util.Set;
  * </pre>
  */
 public final class CFSA2 extends FSA {
-	/**
-	 * Automaton header version value. 
-	 */
-	public static final byte VERSION = (byte) 0xc6;
+  /** Automaton header version value. */
+  public static final byte VERSION = (byte) 0xc6;
 
-  /**
-   * The target node of this arc follows the last arc of the current state
-   * (no goto field).
-   */
+  /** The target node of this arc follows the last arc of the current state (no goto field). */
   public static final int BIT_TARGET_NEXT = 1 << 7;
 
-  /**
-   * The arc is the last one from the current node's arcs list.
-   */
+  /** The arc is the last one from the current node's arcs list. */
   public static final int BIT_LAST_ARC = 1 << 6;
 
-	/**
-	 * The arc corresponds to the last character of a sequence 
-	 * available when building the automaton (acceptor transition).
-	 */
-	public static final int BIT_FINAL_ARC = 1 << 5;
-
-	/**
-	 * The count of bits assigned to storing an indexed label. 
-	 */
-	static final int LABEL_INDEX_BITS = 5;
-	
-	/**
-	 * Masks only the M bits of a flag byte.
-	 */
-	static final int LABEL_INDEX_MASK = (1 << LABEL_INDEX_BITS) - 1;
-
   /**
-   * Maximum size of the labels index.
+   * The arc corresponds to the last character of a sequence available when building the automaton
+   * (acceptor transition).
    */
+  public static final int BIT_FINAL_ARC = 1 << 5;
+
+  /** The count of bits assigned to storing an indexed label. */
+  static final int LABEL_INDEX_BITS = 5;
+
+  /** Masks only the M bits of a flag byte. */
+  static final int LABEL_INDEX_MASK = (1 << LABEL_INDEX_BITS) - 1;
+
+  /** Maximum size of the labels index. */
   public static final int LABEL_INDEX_SIZE = (1 << LABEL_INDEX_BITS) - 1;
 
-	/**
-	 * An array of bytes with the internal representation of the automaton.
-	 * Please see the documentation of this class for more information on how
-	 * this structure is organized.
-	 */
-	public byte[] arcs;
-
   /**
-   * Flags for this automaton version.
+   * An array of bytes with the internal representation of the automaton. Please see the
+   * documentation of this class for more information on how this structure is organized.
    */
+  public byte[] arcs;
+
+  /** Flags for this automaton version. */
   private final EnumSet<FSAFlags> flags;
 
-	/**
-	 * Label mapping for M-indexed labels.
-	 */
-	public final byte[] labelMapping;
-	
-	/**
-	 * If <code>true</code> states are prepended with numbers.
-	 */
-	private final boolean hasNumbers;
-	
-	/**
-	 * Epsilon node's offset.
-	 */
-	private final int epsilon = 0;
+  /** Label mapping for M-indexed labels. */
+  public final byte[] labelMapping;
 
-	/**
-	 * Reads an automaton from a byte stream.
-	 */
-	CFSA2(InputStream stream) throws IOException {
+  /** If <code>true</code> states are prepended with numbers. */
+  private final boolean hasNumbers;
+
+  /** Epsilon node's offset. */
+  private final int epsilon = 0;
+
+  /** Reads an automaton from a byte stream. */
+  CFSA2(InputStream stream) throws IOException {
     DataInputStream in = new DataInputStream(stream);
 
-		// Read flags.
-		short flagBits = in.readShort();
-		flags = EnumSet.noneOf(FSAFlags.class);
-		for (FSAFlags f : FSAFlags.values()) {
-		    if (f.isSet(flagBits)) {
-		        flags.add(f);
-		    }
-		}
+    // Read flags.
+    short flagBits = in.readShort();
+    flags = EnumSet.noneOf(FSAFlags.class);
+    for (FSAFlags f : FSAFlags.values()) {
+      if (f.isSet(flagBits)) {
+        flags.add(f);
+      }
+    }
 
-		if (flagBits != FSAFlags.asShort(flags)) {
-		    throw new IOException("Unrecognized flags: 0x" + Integer.toHexString(flagBits));
-		}
+    if (flagBits != FSAFlags.asShort(flags)) {
+      throw new IOException("Unrecognized flags: 0x" + Integer.toHexString(flagBits));
+    }
 
-		this.hasNumbers = flags.contains(FSAFlags.NUMBERS);
+    this.hasNumbers = flags.contains(FSAFlags.NUMBERS);
 
-		/*
-		 * Read mapping dictionary.
-		 */
-		int labelMappingSize = in.readByte() & 0xff;
-		labelMapping = new byte[labelMappingSize];
-		in.readFully(labelMapping);
+    /*
+     * Read mapping dictionary.
+     */
+    int labelMappingSize = in.readByte() & 0xff;
+    labelMapping = new byte[labelMappingSize];
+    in.readFully(labelMapping);
 
-		/*
-		 * Read arcs' data.
-		 */
-		arcs = readRemaining(in);		
-	}
+    /*
+     * Read arcs' data.
+     */
+    arcs = readRemaining(in);
+  }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public int getRootNode() {
     // Skip dummy node marking terminating state.
     return getDestinationNodeOffset(getFirstArc(epsilon));
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public final int getFirstArc(int node) {
     if (hasNumbers) {
@@ -203,9 +176,7 @@ public final class CFSA2 extends FSA {
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public final int getNextArc(int arc) {
     if (isArcLast(arc)) {
@@ -215,9 +186,7 @@ public final class CFSA2 extends FSA {
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public int getArc(int node, byte label) {
     for (int arc = getFirstArc(node); arc != 0; arc = getNextArc(arc)) {
@@ -230,9 +199,7 @@ public final class CFSA2 extends FSA {
     return 0;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public int getEndNode(int arc) {
     final int nodeOffset = getDestinationNodeOffset(arc);
@@ -241,9 +208,7 @@ public final class CFSA2 extends FSA {
     return nodeOffset;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public byte getArcLabel(int arc) {
     int index = arcs[arc] & LABEL_INDEX_MASK;
@@ -254,26 +219,20 @@ public final class CFSA2 extends FSA {
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public int getRightLanguageCount(int node) {
     assert getFlags().contains(FSAFlags.NUMBERS) : "This FSA was not compiled with NUMBERS.";
     return readVInt(arcs, node);
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public boolean isArcFinal(int arc) {
     return (arcs[arc] & BIT_FINAL_ARC) != 0;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public boolean isArcTerminal(int arc) {
     return (0 == getDestinationNodeOffset(arc));
@@ -281,7 +240,7 @@ public final class CFSA2 extends FSA {
 
   /**
    * Returns <code>true</code> if this arc has <code>NEXT</code> bit set.
-   * 
+   *
    * @see #BIT_LAST_ARC
    * @param arc The node's arc identifier.
    * @return Returns true if the argument is the last arc of a node.
@@ -299,16 +258,12 @@ public final class CFSA2 extends FSA {
     return (arcs[arc] & BIT_TARGET_NEXT) != 0;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public Set<FSAFlags> getFlags() {
     return flags;
   }
 
-  /**
-   * Returns the address of the node pointed to by this arc.
-   */
+  /** Returns the address of the node pointed to by this arc. */
   final int getDestinationNodeOffset(int arc) {
     if (isNextSet(arc)) {
       /* Follow until the last arc of this state. */
@@ -327,9 +282,7 @@ public final class CFSA2 extends FSA {
     }
   }
 
-  /**
-   * Read the arc's layout and skip as many bytes, as needed, to skip it.
-   */
+  /** Read the arc's layout and skip as many bytes, as needed, to skip it. */
   private int skipArc(int offset) {
     int flag = arcs[offset++];
 
@@ -347,9 +300,7 @@ public final class CFSA2 extends FSA {
     return offset;
   }
 
-  /**
-   * Read a v-int.
-   */
+  /** Read a v-int. */
   static int readVInt(byte[] array, int offset) {
     byte b = array[offset];
     int value = b & 0x7F;
@@ -362,9 +313,7 @@ public final class CFSA2 extends FSA {
     return value;
   }
 
-  /**
-   * Return the byte-length of a v-coded int.
-   */
+  /** Return the byte-length of a v-coded int. */
   static int vIntLength(int value) {
     assert value >= 0 : "Can't v-code negative ints.";
 
@@ -376,9 +325,7 @@ public final class CFSA2 extends FSA {
     return bytes;
   }
 
-  /**
-   * Skip a v-int.
-   */
+  /** Skip a v-int. */
   private int skipVInt(int offset) {
     while (arcs[offset++] < 0) {
       // Do nothing.

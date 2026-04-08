@@ -2,7 +2,6 @@ package morfologik.tools;
 
 import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.IStringConverterFactory;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 

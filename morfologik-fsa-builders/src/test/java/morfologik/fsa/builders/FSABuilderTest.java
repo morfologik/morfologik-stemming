@@ -6,9 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
-
 import morfologik.fsa.FSA;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +28,9 @@ public class FSABuilderTest extends TestBase {
 
   @Test
   public void testHashResizeBug() throws Exception {
-    byte[][] input = { { 0, 1 }, { 0, 2 }, { 1, 1 }, { 2, 1 }, };
+    byte[][] input = {
+      {0, 1}, {0, 2}, {1, 1}, {2, 1},
+    };
 
     FSA fsa = FSABuilder.build(input);
     checkCorrect(input, FSABuilder.build(input));
@@ -39,13 +39,17 @@ public class FSABuilderTest extends TestBase {
 
   @Test
   public void testSmallInput() throws Exception {
-    byte[][] input = { "abc".getBytes("UTF-8"), "bbc".getBytes("UTF-8"), "d".getBytes("UTF-8"), };
+    byte[][] input = {
+      "abc".getBytes("UTF-8"), "bbc".getBytes("UTF-8"), "d".getBytes("UTF-8"),
+    };
     checkCorrect(input, FSABuilder.build(input));
   }
 
   @Test
   public void testLexicographicOrder() throws IOException {
-    byte[][] input = { { 0 }, { 1 }, { (byte) 0xff }, };
+    byte[][] input = {
+      {0}, {1}, {(byte) 0xff},
+    };
     Arrays.sort(input, FSABuilder.LEXICAL_ORDERING);
 
     // Check if lexical ordering is consistent with absolute byte value.

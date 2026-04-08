@@ -1,5 +1,7 @@
 package morfologik.tools;
 
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -10,23 +12,17 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
-
 import morfologik.stemming.Dictionary;
 import morfologik.stemming.DictionaryLookup;
 import morfologik.stemming.WordData;
 
-/**
- * Applies a morphological dictionary automaton to the input. 
- */
+/** Applies a morphological dictionary automaton to the input. */
 @Parameters(
     commandNames = "dict_apply",
     commandDescription = "Applies a dictionary to an input. Each line is considered an input term.")
 public class DictApply extends CliTool {
-  private final static String ARG_ENCODING = "--input-charset";
-  
+  private static final String ARG_ENCODING = "--input-charset";
+
   @Parameter(
       names = {"-i", "--input"},
       required = false,
@@ -36,7 +32,7 @@ public class DictApply extends CliTool {
 
   @Parameter(
       names = {"-d", "--dictionary"},
-      description = "The dictionary (*.dict and a sibling *.info metadata) to apply.", 
+      description = "The dictionary (*.dict and a sibling *.info metadata) to apply.",
       required = true,
       validateValueWith = ValidateFileExists.class)
   private Path dictionary;
@@ -73,19 +69,16 @@ public class DictApply extends CliTool {
     public String nextLine() throws IOException {
       return lineReader.readLine();
     }
-    
+
     @Override
     public void close() throws IOException {
       lineReader.close();
     }
   }
 
-  DictApply() {
-  }
-  
-  public DictApply(Path dictionary,
-                   Path input,
-                   String inputEncoding) {
+  DictApply() {}
+
+  public DictApply(Path dictionary, Path input, String inputEncoding) {
     this.input = checkNotNull(input);
     this.dictionary = checkNotNull(dictionary);
   }
@@ -96,7 +89,7 @@ public class DictApply extends CliTool {
     if (exitStatus != null) {
       return exitStatus;
     }
-    
+
     final DictionaryLookup lookup = new DictionaryLookup(Dictionary.read(this.dictionary));
     try (final LineSupplier input = determineInput()) {
       String line;
@@ -112,9 +105,8 @@ public class DictApply extends CliTool {
           for (WordData wd : wordData) {
             CharSequence stem = wd.getStem();
             CharSequence tag = wd.getTag();
-            System.out.println(line + " => " +
-                ((skipTags || tag == null) ? stem
-                                           : stem + " " + tag));
+            System.out.println(
+                line + " => " + ((skipTags || tag == null) ? stem : stem + " " + tag));
           }
         }
       }
@@ -125,12 +117,14 @@ public class DictApply extends CliTool {
 
   private LineSupplier determineInput() throws IOException {
     if (this.input != null) {
-      return new ReaderLineSupplier(Files.newBufferedReader(this.input, Charset.forName(inputEncoding)));
+      return new ReaderLineSupplier(
+          Files.newBufferedReader(this.input, Charset.forName(inputEncoding)));
     }
 
     final Console c = System.console();
     if (c != null) {
-      System.err.println("NOTE: Using Console for input, character encoding is unknown but should be all right.");
+      System.err.println(
+          "NOTE: Using Console for input, character encoding is unknown but should be all right.");
       return new LineSupplier() {
         @Override
         public String nextLine() throws IOException {
@@ -139,14 +133,16 @@ public class DictApply extends CliTool {
       };
     }
 
-    Charset charset = this.inputEncoding != null ? Charset.forName(this.inputEncoding)
-                                                 : Charset.defaultCharset();
-    System.err.println("NOTE: Using stdin for input, character encoding set to: " + charset.name() +
-        " (use " + ARG_ENCODING + " to override).");
+    Charset charset =
+        this.inputEncoding != null ? Charset.forName(this.inputEncoding) : Charset.defaultCharset();
+    System.err.println(
+        "NOTE: Using stdin for input, character encoding set to: "
+            + charset.name()
+            + " (use "
+            + ARG_ENCODING
+            + " to override).");
     return new ReaderLineSupplier(
-        new BufferedReader(
-            new InputStreamReader(
-                new BufferedInputStream(System.in), charset)));
+        new BufferedReader(new InputStreamReader(new BufferedInputStream(System.in), charset)));
   }
 
   private ExitStatus validateArguments() {

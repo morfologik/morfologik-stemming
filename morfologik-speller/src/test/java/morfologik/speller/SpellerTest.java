@@ -8,9 +8,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import morfologik.stemming.Dictionary;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -25,15 +23,15 @@ public class SpellerTest {
   }
 
   /*
-    @Test
-    public void testAbka() throws Exception {
-        final Speller spell = new Speller(dictionary, 2);
-        System.out.println("Replacements:");
-        for (String s : spell.findReplacements("abka")) {
-            System.out.println(s);
-        }
-    }
-   */
+   @Test
+   public void testAbka() throws Exception {
+       final Speller spell = new Speller(dictionary, 2);
+       System.out.println("Replacements:");
+       for (String s : spell.findReplacements("abka")) {
+           System.out.println(s);
+       }
+   }
+  */
 
   @Test
   public void testRunonWords() throws IOException {
@@ -44,13 +42,14 @@ public class SpellerTest {
     Assertions.assertThat(spell.replaceRunOnWords("AbakaAbace")).contains("Abaka Abace");
     Assertions.assertThat(spell.replaceRunOnWords("abakaAbace")).contains("abaka Abace");
 
-
     // Test on an morphological dictionary - should work as well
     final URL url1 = getClass().getResource("test-infix.dict");
     final Speller spell1 = new Speller(Dictionary.read(url1));
     assertTrue(spell1.replaceRunOnWords("Rzekunia").isEmpty());
-    assertTrue(spell1.replaceRunOnWords("RzekuniaRzeczypospolitej").contains("Rzekunia Rzeczypospolitej"));
-    assertTrue(spell1.replaceRunOnWords("RzekuniaRze").isEmpty()); //Rze is not found but is a prefix
+    assertTrue(
+        spell1.replaceRunOnWords("RzekuniaRzeczypospolitej").contains("Rzekunia Rzeczypospolitej"));
+    assertTrue(
+        spell1.replaceRunOnWords("RzekuniaRze").isEmpty()); // Rze is not found but is a prefix
 
     final URL url2 = getClass().getResource("single-char-word.dict");
     final Speller spell2 = new Speller(Dictionary.read(url2));
@@ -58,7 +57,7 @@ public class SpellerTest {
     assertTrue(spell2.replaceRunOnWords("Alot").contains("A lot"));
     assertTrue(spell2.replaceRunOnWords("ALot").contains("A Lot"));
     assertTrue(spell2.replaceRunOnWords("LotAmusement").contains("Lot Amusement"));
-    //TODO? assertTrue(spell2.replaceRunOnWords("LOTAMUSEMENT").contains("LOT AMUSEMENT"));
+    // TODO? assertTrue(spell2.replaceRunOnWords("LOTAMUSEMENT").contains("LOT AMUSEMENT"));
     assertTrue(spell2.replaceRunOnWords("aalot").contains("aa lot"));
     assertTrue(spell2.replaceRunOnWords("aamusement").contains("a amusement"));
     assertTrue(spell2.replaceRunOnWords("clot").isEmpty());
@@ -90,33 +89,33 @@ public class SpellerTest {
   public void testFindReplacements() throws IOException {
     final Speller spell = new Speller(dictionary, 1);
     assertTrue(spell.findReplacements("abka").contains("abak"));
-    //check if we get only dictionary words...
+    // check if we get only dictionary words...
     List<String> reps = spell.findReplacements("bak");
-    for (final String word: reps) {
+    for (final String word : reps) {
       assertTrue(spell.isInDictionary(word));
     }
-    assertTrue(spell.findReplacements("abka~~").isEmpty()); // 2 characters more -> edit distance too large
+    assertTrue(
+        spell.findReplacements("abka~~").isEmpty()); // 2 characters more -> edit distance too large
     assertTrue(!spell.findReplacements("Rezkunia").contains("Rzekunia"));
 
     final URL url1 = getClass().getResource("test-infix.dict");
     final Speller spell1 = new Speller(Dictionary.read(url1));
     assertTrue(spell1.findReplacements("Rezkunia").contains("Rzekunia"));
-    //diacritics
+    // diacritics
     assertTrue(spell1.findReplacements("Rzękunia").contains("Rzekunia"));
-    //we should get no candidates for correct words
+    // we should get no candidates for correct words
     assertTrue(spell1.isInDictionary("Rzekunia"));
     assertTrue(spell1.findReplacements("Rzekunia").isEmpty());
-    //and no for things that are too different from the dictionary
+    // and no for things that are too different from the dictionary
     assertTrue(spell1.findReplacements("Strefakibica").isEmpty());
-    //nothing for nothing
+    // nothing for nothing
     assertTrue(spell1.findReplacements("").isEmpty());
-    //nothing for weird characters
+    // nothing for weird characters
     assertTrue(spell1.findReplacements("\u0000").isEmpty());
-    //nothing for other characters
+    // nothing for other characters
     assertTrue(spell1.findReplacements("«…»").isEmpty());
-    //nothing for separator
+    // nothing for separator
     assertTrue(spell1.findReplacements("+").isEmpty());
-
   }
 
   @Test
@@ -124,7 +123,7 @@ public class SpellerTest {
     final URL url1 = getClass().getResource("test_freq_iso.dict");
     final Speller spell = new Speller(Dictionary.read(url1));
     assertTrue(spell.isInDictionary("a"));
-    assertTrue(!spell.isInDictionary("aõh")); //non-encodable in UTF-8
+    assertTrue(!spell.isInDictionary("aõh")); // non-encodable in UTF-8
   }
 
   @Test
@@ -137,11 +136,11 @@ public class SpellerTest {
     assertTrue(spell.findReplacements("zółwiową").contains("żółwiową"));
     assertTrue(spell.findReplacements("Żebrowsk").contains("Żebrowski"));
     assertTrue(spell.findReplacements("święto").contains("Święto"));
-    //note: no diacritics here, but we still get matches!
+    // note: no diacritics here, but we still get matches!
     assertTrue(spell.findReplacements("gesla").contains("gęślą"));
     assertTrue(spell.findReplacements("swieto").contains("Święto"));
     assertTrue(spell.findReplacements("zolwiowa").contains("żółwiową"));
-    //using equivalent characters 'x' = 'ź'
+    // using equivalent characters 'x' = 'ź'
     assertTrue(spell.findReplacements("jexn").contains("jaźń"));
     // 'u' = 'ó', so the edit distance is still small...
     assertTrue(spell.findReplacements("zażulv").contains("zażółć"));
@@ -159,9 +158,9 @@ public class SpellerTest {
     final URL url = getClass().getResource("dict-with-freq.dict");
     final Speller spell = new Speller(Dictionary.read(url));
 
-    //check if we get only dictionary words...
+    // check if we get only dictionary words...
     List<String> reps = spell.findReplacements("jist");
-    for (final String word: reps) {
+    for (final String word : reps) {
       assertTrue(spell.isInDictionary(word));
     }
     // get replacements ordered by frequency
@@ -173,7 +172,7 @@ public class SpellerTest {
     assertTrue(reps.get(5).equals("dist"));
     assertTrue(reps.get(6).equals("gist"));
   }
-  
+
   @Test
   public void testFindSimilarWords() throws IOException {
     final URL url = getClass().getResource("dict-with-freq.dict");
@@ -193,29 +192,28 @@ public class SpellerTest {
   public void testConcurrentReplacements() throws IOException {
     final URL url = getClass().getResource("dict-with-freq.dict");
     final Speller spell = new Speller(Dictionary.read(url));
-    //only the longest key is selected in replacement pairs
+    // only the longest key is selected in replacement pairs
     List<String> reps = spell.getAllReplacements("teached", 0, 0);
     assertTrue(reps.contains("teached"));
     assertTrue(reps.contains("taught"));
     assertTrue(!reps.contains("tgheached"));
   }
-  
 
   @Test
   public void testIsMisspelled() throws IOException {
     final URL url = getClass().getResource("test-utf-spell.dict");
     final Speller spell = new Speller(Dictionary.read(url));
-    assertTrue(!spell.isMisspelled("Paragraf22"));  //ignorujemy liczby
-    assertTrue(!spell.isMisspelled("!"));  //ignorujemy znaki przestankowe
-    assertTrue(spell.isMisspelled("dziekie"));  //test, czy znajdujemy błąd
-    assertTrue(!spell.isMisspelled("SłowozGarbem"));  //ignorujemy słowa w stylu wielbłąda
-    assertTrue(!spell.isMisspelled("Ćwikła"));  //i małe litery
-    assertTrue(!spell.isMisspelled("TOJESTTEST"));  //i wielkie litery
+    assertTrue(!spell.isMisspelled("Paragraf22")); // ignorujemy liczby
+    assertTrue(!spell.isMisspelled("!")); // ignorujemy znaki przestankowe
+    assertTrue(spell.isMisspelled("dziekie")); // test, czy znajdujemy błąd
+    assertTrue(!spell.isMisspelled("SłowozGarbem")); // ignorujemy słowa w stylu wielbłąda
+    assertTrue(!spell.isMisspelled("Ćwikła")); // i małe litery
+    assertTrue(!spell.isMisspelled("TOJESTTEST")); // i wielkie litery
     final Speller oldStyleSpell = new Speller(dictionary, 1);
-    assertTrue(oldStyleSpell.isMisspelled("Paragraf22"));  // nie ignorujemy liczby
-    assertTrue(oldStyleSpell.isMisspelled("!"));  //nie ignorujemy znaków przestankowych
+    assertTrue(oldStyleSpell.isMisspelled("Paragraf22")); // nie ignorujemy liczby
+    assertTrue(oldStyleSpell.isMisspelled("!")); // nie ignorujemy znaków przestankowych
     // assertTrue(oldStyleSpell.isMisspelled("SłowozGarbem"));  //ignorujemy słowa w stylu wielbłąda
-    assertTrue(oldStyleSpell.isMisspelled("Abaka"));  //i małe litery
+    assertTrue(oldStyleSpell.isMisspelled("Abaka")); // i małe litery
     final URL url1 = getClass().getResource("test-infix.dict");
     final Speller spell1 = new Speller(Dictionary.read(url1));
     assertTrue(!spell1.isMisspelled("Rzekunia"));
@@ -236,7 +234,7 @@ public class SpellerTest {
     assertTrue(!spell.isCamelCase(""));
     assertTrue(!spell.isCamelCase(null));
   }
-  
+
   @Test
   public void testCapitalizedWord() {
     final Speller spell = new Speller(dictionary, 1);
@@ -254,19 +252,20 @@ public class SpellerTest {
     final URL url = getClass().getResource("test-utf-spell.dict");
     final Speller spell = new Speller(Dictionary.read(url));
     assertTrue(spell.isMisspelled("rzarzerzarzu"));
-    assertEquals("[rzarzerzarzu]",
+    assertEquals(
+        "[rzarzerzarzu]",
         Arrays.toString(spell.getAllReplacements("rzarzerzarzu", 0, 0).toArray()));
   }
 
   @Test
   public void testEditDistanceCalculation() throws IOException {
     final Speller spell = new Speller(dictionary, 5);
-    //test examples from Oflazer's paper
+    // test examples from Oflazer's paper
     assertTrue(getEditDistance(spell, "recoginze", "recognize") == 1);
     assertTrue(getEditDistance(spell, "sailn", "failing") == 3);
     assertTrue(getEditDistance(spell, "abc", "abcd") == 1);
     assertTrue(getEditDistance(spell, "abc", "abcde") == 2);
-    //test words from fsa_spell output
+    // test words from fsa_spell output
     assertTrue(getEditDistance(spell, "abka", "abaka") == 1);
     assertTrue(getEditDistance(spell, "abka", "abakan") == 2);
     assertTrue(getEditDistance(spell, "abka", "abaką") == 2);
@@ -275,8 +274,8 @@ public class SpellerTest {
 
   @Test
   public void testCutOffEditDistance() throws IOException {
-    final Speller spell2 = new Speller(dictionary, 2); //note: threshold = 2
-    //test cut edit distance - reprter / repo from Oflazer
+    final Speller spell2 = new Speller(dictionary, 2); // note: threshold = 2
+    // test cut edit distance - reprter / repo from Oflazer
     assertTrue(getCutOffDistance(spell2, "repo", "reprter") == 1);
     assertTrue(getCutOffDistance(spell2, "reporter", "reporter") == 0);
   }
@@ -310,7 +309,7 @@ public class SpellerTest {
     fw2.write("Clarke\n");
     fw2.write("Clarkiem\n");
     fw2.write("Clarkom\n");
-    
+
     fw2.close();
 
     File dictFile = new File("/tmp/morfologik.dict");
@@ -319,10 +318,10 @@ public class SpellerTest {
     FSABuildTool.main(buildToolOptions);
     Dictionary dictionary = Dictionary.read(dictFile);
     Speller speller = new Speller(dictionary, 3);*/
-    
+
     final URL url = getClass().getResource("reps_dist2.dict");
     final Speller speller = new Speller(Dictionary.read(url), 3);
-    
+
     List<String> reps = speller.findReplacements("Rytmus");
     assertTrue(reps.get(0).equals("Rhythmus"));
     assertTrue(reps.get(1).equals("Mitmuss"));
@@ -415,19 +414,20 @@ public class SpellerTest {
     // With FREQ_RANGES=26 and freq=0: origDistance=0 → distance=25, origDistance=1 → distance=51.
     for (Speller.CandidateData cd : candidates) {
       int origDistance = cd.getDistance() / Speller.FREQ_RANGES;
-      assertTrue(origDistance > 0, "Candidate '" + cd.getWord() + "' has unexpected origDistance=0");
+      assertTrue(
+          origDistance > 0, "Candidate '" + cd.getWord() + "' has unexpected origDistance=0");
     }
   }
 
   private int getCutOffDistance(final Speller spell, final String word, final String candidate) {
-    // assuming there is no pair-replacement 
+    // assuming there is no pair-replacement
     spell.setWordAndCandidate(word, candidate);
-    final int [] ced = new int[spell.getCandLen() - spell.getWordLen()];
+    final int[] ced = new int[spell.getCandLen() - spell.getWordLen()];
     for (int i = 0; i < spell.getCandLen() - spell.getWordLen(); i++) {
       ced[i] = spell.cuted(spell.getWordLen() + i, spell.getWordLen() + i, spell.getWordLen() + i);
     }
     Arrays.sort(ced);
-    //and the min value...
+    // and the min value...
     if (ced.length > 0) {
       return ced[0];
     }

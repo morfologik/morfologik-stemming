@@ -2,31 +2,26 @@ package morfologik.stemming;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Arrays;
 
-/**
- * Attributes applying to {@link Dictionary} and {@link DictionaryMetadata}.
- */
+/** Attributes applying to {@link Dictionary} and {@link DictionaryMetadata}. */
 public enum DictionaryAttribute {
-  /**
-   * Logical fields separator inside the FSA.
-   */
+  /** Logical fields separator inside the FSA. */
   SEPARATOR("fsa.dict.separator") {
     @Override
     public Character fromString(String separator) {
       if (separator == null || separator.length() != 1) {
-        throw new IllegalArgumentException("Attribute " + propertyName
-            + " must be a single character.");
+        throw new IllegalArgumentException(
+            "Attribute " + propertyName + " must be a single character.");
       }
 
       char charValue = separator.charAt(0);
-      if (Character.isHighSurrogate(charValue) ||
-          Character.isLowSurrogate(charValue)) {
+      if (Character.isHighSurrogate(charValue) || Character.isLowSurrogate(charValue)) {
         throw new IllegalArgumentException(
             "Field separator character cannot be part of a surrogate pair: " + separator);
       }
@@ -35,9 +30,7 @@ public enum DictionaryAttribute {
     }
   },
 
-  /**
-   * Character to byte encoding used for strings inside the FSA.
-   */
+  /** Character to byte encoding used for strings inside the FSA. */
   ENCODING("fsa.dict.encoding") {
     @Override
     public Charset fromString(String charsetName) {
@@ -45,9 +38,7 @@ public enum DictionaryAttribute {
     }
   },
 
-  /**
-   * If the FSA dictionary includes frequency data.
-   */
+  /** If the FSA dictionary includes frequency data. */
   FREQUENCY_INCLUDED("fsa.dict.frequency-included") {
     @Override
     public Boolean fromString(String value) {
@@ -55,9 +46,7 @@ public enum DictionaryAttribute {
     }
   },
 
-  /**
-   * If the spelling dictionary is supposed to ignore words containing digits
-   */
+  /** If the spelling dictionary is supposed to ignore words containing digits */
   IGNORE_NUMBERS("fsa.dict.speller.ignore-numbers") {
     @Override
     public Boolean fromString(String value) {
@@ -65,9 +54,7 @@ public enum DictionaryAttribute {
     }
   },
 
-  /**
-   * If the spelling dictionary is supposed to ignore punctuation.
-   */
+  /** If the spelling dictionary is supposed to ignore punctuation. */
   IGNORE_PUNCTUATION("fsa.dict.speller.ignore-punctuation") {
     @Override
     public Boolean fromString(String value) {
@@ -75,9 +62,7 @@ public enum DictionaryAttribute {
     }
   },
 
-  /**
-   * If the spelling dictionary is supposed to ignore CamelCase words.
-   */
+  /** If the spelling dictionary is supposed to ignore CamelCase words. */
   IGNORE_CAMEL_CASE("fsa.dict.speller.ignore-camel-case") {
     @Override
     public Boolean fromString(String value) {
@@ -85,9 +70,7 @@ public enum DictionaryAttribute {
     }
   },
 
-  /**
-   * If the spelling dictionary is supposed to ignore ALL UPPERCASE words.
-   */
+  /** If the spelling dictionary is supposed to ignore ALL UPPERCASE words. */
   IGNORE_ALL_UPPERCASE("fsa.dict.speller.ignore-all-uppercase") {
     @Override
     public Boolean fromString(String value) {
@@ -96,8 +79,8 @@ public enum DictionaryAttribute {
   },
 
   /**
-   * If the spelling dictionary is supposed to ignore diacritics, so that
-   * 'a' would be treated as equivalent to 'ą'.
+   * If the spelling dictionary is supposed to ignore diacritics, so that 'a' would be treated as
+   * equivalent to 'ą'.
    */
   IGNORE_DIACRITICS("fsa.dict.speller.ignore-diacritics") {
     @Override
@@ -106,10 +89,7 @@ public enum DictionaryAttribute {
     }
   },
 
-  /**
-   * if the spelling dictionary is supposed to treat upper and lower case
-   * as equivalent.
-   */
+  /** if the spelling dictionary is supposed to treat upper and lower case as equivalent. */
   CONVERT_CASE("fsa.dict.speller.convert-case") {
     @Override
     public Boolean fromString(String value) {
@@ -117,9 +97,7 @@ public enum DictionaryAttribute {
     }
   },
 
-  /**
-   * If the spelling dictionary is supposed to split runOnWords.
-   */
+  /** If the spelling dictionary is supposed to split runOnWords. */
   RUN_ON_WORDS("fsa.dict.speller.runon-words") {
     @Override
     public Boolean fromString(String value) {
@@ -142,14 +120,18 @@ public enum DictionaryAttribute {
       try {
         return EncoderType.valueOf(value.trim().toUpperCase(Locale.ROOT));
       } catch (IllegalArgumentException e) {
-        throw new IllegalArgumentException("Invalid encoder name '" + value.trim() + "', only these coders are valid: " + Arrays.toString(EncoderType.values()));
+        throw new IllegalArgumentException(
+            "Invalid encoder name '"
+                + value.trim()
+                + "', only these coders are valid: "
+                + Arrays.toString(EncoderType.values()));
       }
     }
   },
 
   /**
-   * Input conversion pairs to replace non-standard characters before search in a speller dictionary.
-   * For example, common ligatures can be replaced here.
+   * Input conversion pairs to replace non-standard characters before search in a speller
+   * dictionary. For example, common ligatures can be replaced here.
    */
   INPUT_CONVERSION("fsa.dict.input-conversion") {
     @Override
@@ -163,11 +145,12 @@ public enum DictionaryAttribute {
             conversionPairs.put(twoStrings[0], twoStrings[1]);
           } else {
             throw new IllegalArgumentException(
-                "Input conversion cannot specify different values for the same input string: " + twoStrings[0]);
+                "Input conversion cannot specify different values for the same input string: "
+                    + twoStrings[0]);
           }
         } else {
-          throw new IllegalArgumentException("Attribute " + propertyName
-              + " is not in the proper format: " + value);
+          throw new IllegalArgumentException(
+              "Attribute " + propertyName + " is not in the proper format: " + value);
         }
       }
       return conversionPairs;
@@ -175,13 +158,12 @@ public enum DictionaryAttribute {
   },
 
   /**
-   * Output conversion pairs to replace non-standard characters before search in a speller dictionary.
-   * For example, standard characters can be replaced here into ligatures.
-   * 
-   * Useful for dictionaries that do have certain standards imposed.
-   * 
+   * Output conversion pairs to replace non-standard characters before search in a speller
+   * dictionary. For example, standard characters can be replaced here into ligatures.
+   *
+   * <p>Useful for dictionaries that do have certain standards imposed.
    */
-  OUTPUT_CONVERSION ("fsa.dict.output-conversion") {
+  OUTPUT_CONVERSION("fsa.dict.output-conversion") {
     @Override
     public LinkedHashMap<String, String> fromString(String value) throws IllegalArgumentException {
       LinkedHashMap<String, String> conversionPairs = new LinkedHashMap<String, String>();
@@ -193,11 +175,12 @@ public enum DictionaryAttribute {
             conversionPairs.put(twoStrings[0], twoStrings[1]);
           } else {
             throw new IllegalArgumentException(
-                "Input conversion cannot specify different values for the same input string: " + twoStrings[0]);
+                "Input conversion cannot specify different values for the same input string: "
+                    + twoStrings[0]);
           }
         } else {
-          throw new IllegalArgumentException("Attribute " + propertyName
-              + " is not in the proper format: " + value);
+          throw new IllegalArgumentException(
+              "Attribute " + propertyName + " is not in the proper format: " + value);
         }
       }
       return conversionPairs;
@@ -205,14 +188,14 @@ public enum DictionaryAttribute {
   },
 
   /**
-   * Replacement pairs for non-obvious candidate search in a speller dictionary.
-   * For example, Polish <code>rz</code> is phonetically equivalent to <code>ż</code>,
-   * and this may be specified here to allow looking for replacements of <code>rz</code> with <code>ż</code>
-   * and vice versa.
+   * Replacement pairs for non-obvious candidate search in a speller dictionary. For example, Polish
+   * <code>rz</code> is phonetically equivalent to <code>ż</code>, and this may be specified here to
+   * allow looking for replacements of <code>rz</code> with <code>ż</code> and vice versa.
    */
   REPLACEMENT_PAIRS("fsa.dict.speller.replacement-pairs") {
     @Override
-    public LinkedHashMap<String, List<String>> fromString(String value) throws IllegalArgumentException {
+    public LinkedHashMap<String, List<String>> fromString(String value)
+        throws IllegalArgumentException {
       LinkedHashMap<String, List<String>> replacementPairs = new LinkedHashMap<>();
       final String[] replacements = value.split(",\\s*");
       for (final String stringPair : replacements) {
@@ -229,8 +212,8 @@ public enum DictionaryAttribute {
             replacementPairs.get(key).add(val);
           }
         } else {
-          throw new IllegalArgumentException("Attribute " + propertyName
-              + " is not in the proper format: " + value);
+          throw new IllegalArgumentException(
+              "Attribute " + propertyName + " is not in the proper format: " + value);
         }
       }
       return replacementPairs;
@@ -238,21 +221,20 @@ public enum DictionaryAttribute {
   },
 
   /**
-   * Equivalent characters (treated similarly as equivalent chars with and without
-   * diacritics). For example, Polish <code>ł</code> can be specified as equivalent to <code>l</code>.
-   * 
+   * Equivalent characters (treated similarly as equivalent chars with and without diacritics). For
+   * example, Polish <code>ł</code> can be specified as equivalent to <code>l</code>.
+   *
    * <p>This implements a feature similar to hunspell MAP in the affix file.
    */
   EQUIVALENT_CHARS("fsa.dict.speller.equivalent-chars") {
     @Override
-    public LinkedHashMap<Character, List<Character>> fromString(String value) throws IllegalArgumentException {
+    public LinkedHashMap<Character, List<Character>> fromString(String value)
+        throws IllegalArgumentException {
       LinkedHashMap<Character, List<Character>> equivalentCharacters = new LinkedHashMap<>();
       final String[] eqChars = value.split(",\\s*");
       for (final String characterPair : eqChars) {
         final String[] twoChars = characterPair.trim().split(" ");
-        if (twoChars.length == 2
-            && twoChars[0].length() == 1
-            && twoChars[1].length() == 1) {
+        if (twoChars.length == 2 && twoChars[0].length() == 1 && twoChars[1].length() == 1) {
           char fromChar = twoChars[0].charAt(0);
           char toChar = twoChars[1].charAt(0);
           if (!equivalentCharacters.containsKey(fromChar)) {
@@ -261,43 +243,33 @@ public enum DictionaryAttribute {
           }
           equivalentCharacters.get(fromChar).add(toChar);
         } else {
-          throw new IllegalArgumentException("Attribute " + propertyName
-              + " is not in the proper format: " + value);
+          throw new IllegalArgumentException(
+              "Attribute " + propertyName + " is not in the proper format: " + value);
         }
       }
       return equivalentCharacters;
     }
   },
 
-  /**
-   * Dictionary license attribute.
-   */
+  /** Dictionary license attribute. */
   LICENSE("fsa.dict.license"),
 
-  /**
-   * Dictionary author.
-   */
+  /** Dictionary author. */
   AUTHOR("fsa.dict.author"),
 
-  /**
-   * Dictionary creation date.
-   */
+  /** Dictionary creation date. */
   CREATION_DATE("fsa.dict.created");
 
-  /**
-   * Property name for this attribute.
-   */
+  /** Property name for this attribute. */
   public final String propertyName;
 
   /**
    * Converts a string to the given attribute's value.
-
-   * @param value The value to convert to an attribute value. 
+   *
+   * @param value The value to convert to an attribute value.
    * @return Returns the attribute's value converted from a string.
-   * 
-   * @throws IllegalArgumentException
-   *             If the input string cannot be converted to the attribute's
-   *             value.
+   * @throws IllegalArgumentException If the input string cannot be converted to the attribute's
+   *     value.
    */
   public Object fromString(String value) throws IllegalArgumentException {
     return value;
@@ -305,8 +277,7 @@ public enum DictionaryAttribute {
 
   /**
    * @param propertyName The property of a {@link DictionaryAttribute}.
-   * @return Return a {@link DictionaryAttribute} associated with
-   * a given {@link #propertyName}. 
+   * @return Return a {@link DictionaryAttribute} associated with a given {@link #propertyName}.
    */
   public static DictionaryAttribute fromPropertyName(String propertyName) {
     DictionaryAttribute value = attrsByPropertyName.get(propertyName);
@@ -316,9 +287,10 @@ public enum DictionaryAttribute {
     return value;
   }
 
-  private static final Map<String,DictionaryAttribute> attrsByPropertyName;
+  private static final Map<String, DictionaryAttribute> attrsByPropertyName;
+
   static {
-    attrsByPropertyName = new HashMap<String,DictionaryAttribute>();
+    attrsByPropertyName = new HashMap<String, DictionaryAttribute>();
     for (DictionaryAttribute attr : DictionaryAttribute.values()) {
       if (attrsByPropertyName.put(attr.propertyName, attr) != null) {
         throw new RuntimeException("Duplicate property key for: " + attr);
@@ -326,9 +298,7 @@ public enum DictionaryAttribute {
     }
   }
 
-  /**
-   * Private enum instance constructor.
-   */
+  /** Private enum instance constructor. */
   private DictionaryAttribute(String propertyName) {
     this.propertyName = propertyName;
   }

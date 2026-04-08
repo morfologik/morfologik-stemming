@@ -1,8 +1,6 @@
 package morfologik.fsa.builders;
 
-/**
- * Minimum/maximum and range.
- */
+/** Minimum/maximum and range. */
 final class MinMax {
   public final int min;
   public final int max;

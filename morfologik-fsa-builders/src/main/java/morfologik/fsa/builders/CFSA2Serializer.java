@@ -3,6 +3,12 @@ package morfologik.fsa.builders;
 import static morfologik.fsa.CFSA2.*;
 import static morfologik.fsa.FSAFlags.*;
 
+import com.carrotsearch.hppc.BoundedProportionalArraySizingStrategy;
+import com.carrotsearch.hppc.IntArrayList;
+import com.carrotsearch.hppc.IntIntHashMap;
+import com.carrotsearch.hppc.IntStack;
+import com.carrotsearch.hppc.cursors.IntCursor;
+import com.carrotsearch.hppc.cursors.IntIntCursor;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.BitSet;
@@ -14,14 +20,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.carrotsearch.hppc.BoundedProportionalArraySizingStrategy;
-import com.carrotsearch.hppc.IntArrayList;
-import com.carrotsearch.hppc.IntIntHashMap;
-import com.carrotsearch.hppc.IntStack;
-import com.carrotsearch.hppc.cursors.IntCursor;
-import com.carrotsearch.hppc.cursors.IntIntCursor;
-
 import morfologik.fsa.CFSA2;
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSAFlags;
@@ -31,52 +29,38 @@ import morfologik.fsa.builders.FSAUtils.IntIntHolder;
 
 /**
  * Serializes in-memory {@link FSA} graphs to {@link CFSA2}.
- * 
- * <p>
- * It is possible to serialize the automaton with numbers required for perfect
- * hashing. See {@link #withNumbers()} method.
- * </p>
- * 
+ *
+ * <p>It is possible to serialize the automaton with numbers required for perfect hashing. See
+ * {@link #withNumbers()} method.
+ *
  * @see CFSA2
  */
 public final class CFSA2Serializer implements FSASerializer {
   private final Logger logger = Logger.getLogger(getClass().getName());
 
-  /**
-   * Supported flags.
-   */
-  private final static EnumSet<FSAFlags> flags = EnumSet.of(NUMBERS, FLEXIBLE, STOPBIT, NEXTBIT);
+  /** Supported flags. */
+  private static final EnumSet<FSAFlags> flags = EnumSet.of(NUMBERS, FLEXIBLE, STOPBIT, NEXTBIT);
 
-  /**
-   * No-state id.
-   */
-  private final static int NO_STATE = -1;
+  /** No-state id. */
+  private static final int NO_STATE = -1;
 
   /**
    * <code>true</code> if we should serialize with numbers.
-   * 
+   *
    * @see #withNumbers()
    */
   private boolean withNumbers;
 
-  /**
-   * A hash map of [state, offset] pairs.
-   */
+  /** A hash map of [state, offset] pairs. */
   private IntIntHashMap offsets = new IntIntHashMap();
 
-  /**
-   * A hash map of [state, right-language-count] pairs.
-   */
+  /** A hash map of [state, right-language-count] pairs. */
   private IntIntHashMap numbers = new IntIntHashMap();
 
-  /**
-   * Scratch array for serializing vints.
-   */
+  /** Scratch array for serializing vints. */
   private final byte[] scratch = new byte[5];
 
-  /**
-   * The most frequent labels for integrating with the flags field.
-   */
+  /** The most frequent labels for integrating with the flags field. */
   private byte[] labelsIndex;
 
   /**
@@ -86,10 +70,10 @@ public final class CFSA2Serializer implements FSASerializer {
   private int[] labelsInvIndex;
 
   /**
-   * Serialize the automaton with the number of right-language sequences in each
-   * node. This is required to implement perfect hashing. The numbering also
-   * preserves the order of input sequences.
-   * 
+   * Serialize the automaton with the number of right-language sequences in each node. This is
+   * required to implement perfect hashing. The numbering also preserves the order of input
+   * sequences.
+   *
    * @return Returns the same object for easier call chaining.
    */
   public CFSA2Serializer withNumbers() {
@@ -99,7 +83,7 @@ public final class CFSA2Serializer implements FSASerializer {
 
   /**
    * Serializes any {@link FSA} to {@link CFSA2} stream.
-   * 
+   *
    * @see #withNumbers()
    * @return Returns <code>os</code> for chaining.
    */
@@ -152,31 +136,31 @@ public final class CFSA2Serializer implements FSASerializer {
     return os;
   }
 
-  /**
-   * Compute a set of labels to be integrated with the flags field.
-   */
+  /** Compute a set of labels to be integrated with the flags field. */
   private void computeLabelsIndex(final FSA fsa) {
     // Compute labels count.
     final int[] countByValue = new int[256];
 
-    fsa.visitAllStates(new StateVisitor() {
-      public boolean accept(int state) {
-        for (int arc = fsa.getFirstArc(state); arc != 0; arc = fsa.getNextArc(arc))
-          countByValue[fsa.getArcLabel(arc) & 0xff]++;
-        return true;
-      }
-    });
+    fsa.visitAllStates(
+        new StateVisitor() {
+          public boolean accept(int state) {
+            for (int arc = fsa.getFirstArc(state); arc != 0; arc = fsa.getNextArc(arc))
+              countByValue[fsa.getArcLabel(arc) & 0xff]++;
+            return true;
+          }
+        });
 
     // Order by descending frequency of counts and increasing label value.
-    Comparator<IntIntHolder> comparator = new Comparator<IntIntHolder>() {
-      public int compare(IntIntHolder o1, IntIntHolder o2) {
-        int countDiff = o2.b - o1.b;
-        if (countDiff == 0) {
-          countDiff = o1.a - o2.a;
-        }
-        return countDiff;
-      }
-    };
+    Comparator<IntIntHolder> comparator =
+        new Comparator<IntIntHolder>() {
+          public int compare(IntIntHolder o1, IntIntHolder o2) {
+            int countDiff = o2.b - o1.b;
+            if (countDiff == 0) {
+              countDiff = o1.a - o2.a;
+            }
+            return countDiff;
+          }
+        };
 
     TreeSet<IntIntHolder> labelAndCount = new TreeSet<IntIntHolder>(comparator);
     for (int label = 0; label < countByValue.length; label++) {
@@ -195,28 +179,25 @@ public final class CFSA2Serializer implements FSASerializer {
     }
   }
 
-  /**
-   * Return supported flags.
-   */
+  /** Return supported flags. */
   @Override
   public Set<FSAFlags> getFlags() {
     return flags;
   }
 
-  /**
-   * Linearization of states.
-   */
+  /** Linearization of states. */
   private IntArrayList linearize(final FSA fsa) throws IOException {
     /*
-     * Compute the states with most inlinks. These should be placed as close to the 
-     * start of the automaton, as possible so that v-coded addresses are tiny.  
+     * Compute the states with most inlinks. These should be placed as close to the
+     * start of the automaton, as possible so that v-coded addresses are tiny.
      */
     final IntIntHashMap inlinkCount = computeInlinkCount(fsa);
 
     /*
      * An array of ordered states for serialization.
      */
-    final IntArrayList linearized = new IntArrayList(0, new BoundedProportionalArraySizingStrategy(1000, 10000, 1.5f));
+    final IntArrayList linearized =
+        new IntArrayList(0, new BoundedProportionalArraySizingStrategy(1000, 10000, 1.5f));
 
     /*
      * Determine which states should be linearized first (at fixed positions) so as to
@@ -224,7 +205,7 @@ public final class CFSA2Serializer implements FSASerializer {
      */
     int maxStates = Integer.MAX_VALUE;
     int minInlinkCount = 2;
-    int [] states = computeFirstStates(inlinkCount, maxStates, minInlinkCount);
+    int[] states = computeFirstStates(inlinkCount, maxStates, minInlinkCount);
 
     /*
      * Compute initial addresses, without node rearrangements.
@@ -233,7 +214,7 @@ public final class CFSA2Serializer implements FSASerializer {
 
     /*
      * Probe for better node arrangements by selecting between [lower, upper]
-     * nodes from the potential candidate nodes list. 
+     * nodes from the potential candidate nodes list.
      */
     IntArrayList sublist = new IntArrayList();
     sublist.buffer = states;
@@ -269,11 +250,12 @@ public final class CFSA2Serializer implements FSASerializer {
   }
 
   /**
-   * Linearize all states, putting <code>states</code> in front of the automaton
-   * and calculating stable state offsets.
+   * Linearize all states, putting <code>states</code> in front of the automaton and calculating
+   * stable state offsets.
    */
-  private int linearizeAndCalculateOffsets(FSA fsa, IntArrayList states, IntArrayList linearized,
-      IntIntHashMap offsets) throws IOException {
+  private int linearizeAndCalculateOffsets(
+      FSA fsa, IntArrayList states, IntArrayList linearized, IntIntHashMap offsets)
+      throws IOException {
     final BitSet visited = new BitSet();
     final IntStack nodes = new IntStack();
     linearized.clear();
@@ -291,14 +273,13 @@ public final class CFSA2Serializer implements FSASerializer {
     nodes.push(fsa.getRootNode());
     while (!nodes.isEmpty()) {
       final int node = nodes.pop();
-      if (visited.get(node))
-        continue;
+      if (visited.get(node)) continue;
 
       linearizeState(fsa, nodes, linearized, visited, node);
     }
 
     /*
-     * Calculate new state offsets. This is iterative. We start with 
+     * Calculate new state offsets. This is iterative. We start with
      * maximum potential offsets and recalculate until converged.
      */
     int MAX_OFFSET = Integer.MAX_VALUE;
@@ -313,32 +294,30 @@ public final class CFSA2Serializer implements FSASerializer {
     return j;
   }
 
-  /**
-   * Add a state to linearized list.
-   */
-  private void linearizeState(final FSA fsa, IntStack nodes, IntArrayList linearized, BitSet visited, int node) {
+  /** Add a state to linearized list. */
+  private void linearizeState(
+      final FSA fsa, IntStack nodes, IntArrayList linearized, BitSet visited, int node) {
     linearized.add(node);
     visited.set(node);
     for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
       if (!fsa.isArcTerminal(arc)) {
         final int target = fsa.getEndNode(arc);
-        if (!visited.get(target))
-          nodes.push(target);
+        if (!visited.get(target)) nodes.push(target);
       }
     }
   }
 
   /**
-   * Compute the set of states that should be linearized first to minimize other
-   * states goto length.
+   * Compute the set of states that should be linearized first to minimize other states goto length.
    */
   private int[] computeFirstStates(IntIntHashMap inlinkCount, int maxStates, int minInlinkCount) {
-    Comparator<IntIntHolder> comparator = new Comparator<FSAUtils.IntIntHolder>() {
-      public int compare(IntIntHolder o1, IntIntHolder o2) {
-        int v = o1.a - o2.a;
-        return v == 0 ? (o1.b - o2.b) : v;
-      } 
-    };
+    Comparator<IntIntHolder> comparator =
+        new Comparator<FSAUtils.IntIntHolder>() {
+          public int compare(IntIntHolder o1, IntIntHolder o2) {
+            int v = o1.a - o2.a;
+            return v == 0 ? (o1.b - o2.b) : v;
+          }
+        };
 
     PriorityQueue<IntIntHolder> stateInlink = new PriorityQueue<IntIntHolder>(1, comparator);
     IntIntHolder scratch = new IntIntHolder();
@@ -356,8 +335,8 @@ public final class CFSA2Serializer implements FSASerializer {
       }
     }
 
-    int [] states = new int [stateInlink.size()];
-    for (int position = states.length; !stateInlink.isEmpty();) {
+    int[] states = new int[stateInlink.size()];
+    for (int position = states.length; !stateInlink.isEmpty(); ) {
       IntIntHolder i = stateInlink.remove();
       states[--position] = i.b;
     }
@@ -365,9 +344,7 @@ public final class CFSA2Serializer implements FSASerializer {
     return states;
   }
 
-  /**
-   * Compute in-link count for each state.
-   */
+  /** Compute in-link count for each state. */
   private IntIntHashMap computeInlinkCount(final FSA fsa) {
     IntIntHashMap inlinkCount = new IntIntHashMap();
     BitSet visited = new BitSet();
@@ -376,8 +353,7 @@ public final class CFSA2Serializer implements FSASerializer {
 
     while (!nodes.isEmpty()) {
       final int node = nodes.pop();
-      if (visited.get(node))
-        continue;
+      if (visited.get(node)) continue;
 
       visited.set(node);
 
@@ -385,8 +361,7 @@ public final class CFSA2Serializer implements FSASerializer {
         if (!fsa.isArcTerminal(arc)) {
           final int target = fsa.getEndNode(arc);
           inlinkCount.putOrAdd(target, 1, 1);
-          if (!visited.get(target))
-            nodes.push(target);
+          if (!visited.get(target)) nodes.push(target);
         }
       }
     }
@@ -394,9 +369,7 @@ public final class CFSA2Serializer implements FSASerializer {
     return inlinkCount;
   }
 
-  /**
-   * Update arc offsets assuming the given goto length.
-   */
+  /** Update arc offsets assuming the given goto length. */
   private int emitNodes(FSA fsa, OutputStream os, IntArrayList linearized) throws IOException {
     int offset = 0;
 
@@ -404,8 +377,7 @@ public final class CFSA2Serializer implements FSASerializer {
     offset += emitNodeData(os, 0);
     if (fsa.getRootNode() != 0)
       offset += emitArc(os, BIT_LAST_ARC, (byte) '^', offsets.get(fsa.getRootNode()));
-    else
-      offset += emitArc(os, BIT_LAST_ARC, (byte) '^', 0);
+    else offset += emitArc(os, BIT_LAST_ARC, (byte) '^', 0);
 
     boolean offsetsChanged = false;
     final int max = linearized.size();
@@ -427,10 +399,9 @@ public final class CFSA2Serializer implements FSASerializer {
     return offsetsChanged ? offset : 0;
   }
 
-  /**
-   * Emit all arcs of a single node.
-   */
-  private int emitNodeArcs(FSA fsa, OutputStream os, final int state, final int nextState) throws IOException {
+  /** Emit all arcs of a single node. */
+  private int emitNodeArcs(FSA fsa, OutputStream os, final int state, final int nextState)
+      throws IOException {
     int offset = 0;
     for (int arc = fsa.getFirstArc(state); arc != 0; arc = fsa.getNextArc(arc)) {
       int targetOffset;
@@ -471,8 +442,7 @@ public final class CFSA2Serializer implements FSASerializer {
 
     int labelIndex = labelsInvIndex[label & 0xff];
     if (labelIndex > 0) {
-      if (os != null)
-        os.write(flags | labelIndex);
+      if (os != null) os.write(flags | labelIndex);
       length++;
     } else {
       if (os != null) {
@@ -519,9 +489,7 @@ public final class CFSA2Serializer implements FSASerializer {
     throw new UnsupportedOperationException("CFSA2 does not support separator. Use .info file.");
   }
 
-  /**
-   * Write a v-int to a byte array.
-   */
+  /** Write a v-int to a byte array. */
   static int writeVInt(byte[] array, int offset, int value) {
     assert value >= 0 : "Can't v-code negative ints.";
 

@@ -4,15 +4,15 @@ import java.nio.ByteBuffer;
 import java.util.*;
 
 /**
- * An iterator that traverses the right language of a given node (all sequences
- * reachable from a given node).
+ * An iterator that traverses the right language of a given node (all sequences reachable from a
+ * given node).
  */
 public final class ByteSequenceIterator implements Iterator<ByteBuffer> {
   /**
-   * Default expected depth of the recursion stack (estimated longest sequence
-   * in the automaton). Buffers expand by the same value if exceeded.
+   * Default expected depth of the recursion stack (estimated longest sequence in the automaton).
+   * Buffers expand by the same value if exceeded.
    */
-  private final static int EXPECTED_MAX_STATES = 15;
+  private static final int EXPECTED_MAX_STATES = 15;
 
   /** The FSA to which this iterator belongs. */
   private final FSA fsa;
@@ -20,10 +20,7 @@ public final class ByteSequenceIterator implements Iterator<ByteBuffer> {
   /** An internal cache for the next element in the FSA */
   private ByteBuffer nextElement;
 
-  /**
-   * A buffer for the current sequence of bytes from the current node to the
-   * root.
-   */
+  /** A buffer for the current sequence of bytes from the current node to the root. */
   private byte[] buffer = new byte[EXPECTED_MAX_STATES];
 
   /** Reusable byte buffer wrapper around {@link #buffer}. */
@@ -37,8 +34,8 @@ public final class ByteSequenceIterator implements Iterator<ByteBuffer> {
 
   /**
    * Create an instance of the iterator iterating over all automaton sequences.
-   * 
-   * @param fsa The automaton to iterate over. 
+   *
+   * @param fsa The automaton to iterate over.
    */
   public ByteSequenceIterator(FSA fsa) {
     this(fsa, fsa.getRootNode());
@@ -46,7 +43,8 @@ public final class ByteSequenceIterator implements Iterator<ByteBuffer> {
 
   /**
    * Create an instance of the iterator for a given node.
-   * @param fsa The automaton to iterate over. 
+   *
+   * @param fsa The automaton to iterate over.
    * @param node The starting node's identifier (can be the {@link FSA#getRootNode()}).
    */
   public ByteSequenceIterator(FSA fsa, int node) {
@@ -59,7 +57,7 @@ public final class ByteSequenceIterator implements Iterator<ByteBuffer> {
 
   /**
    * Restart walking from <code>node</code>. Allows iterator reuse.
-   * 
+   *
    * @param node Restart the iterator from <code>node</code>.
    * @return Returns <code>this</code> for call chaining.
    */
@@ -83,8 +81,8 @@ public final class ByteSequenceIterator implements Iterator<ByteBuffer> {
   }
 
   /**
-   * @return Returns a {@link ByteBuffer} with the sequence corresponding to the
-   *         next final state in the automaton.
+   * @return Returns a {@link ByteBuffer} with the sequence corresponding to the next final state in
+   *     the automaton.
    */
   @Override
   public ByteBuffer next() {
@@ -101,9 +99,7 @@ public final class ByteSequenceIterator implements Iterator<ByteBuffer> {
     }
   }
 
-  /**
-   * Advances to the next available final state.
-   */
+  /** Advances to the next available final state. */
   private final ByteBuffer advance() {
     if (position == 0) {
       return null;
@@ -146,17 +142,13 @@ public final class ByteSequenceIterator implements Iterator<ByteBuffer> {
     return null;
   }
 
-  /**
-   * Not implemented in this iterator.
-   */
+  /** Not implemented in this iterator. */
   @Override
   public void remove() {
     throw new UnsupportedOperationException("Read-only iterator.");
   }
 
-  /**
-   * Descends to a given node, adds its arcs to the stack to be traversed.
-   */
+  /** Descends to a given node, adds its arcs to the stack to be traversed. */
   private void pushNode(int node) {
     // Expand buffers if needed.
     if (position == arcs.length) {

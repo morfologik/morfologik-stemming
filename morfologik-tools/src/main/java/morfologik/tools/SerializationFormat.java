@@ -4,10 +4,7 @@ import morfologik.fsa.builders.CFSA2Serializer;
 import morfologik.fsa.builders.FSA5Serializer;
 import morfologik.fsa.builders.FSASerializer;
 
-/**
- * The serialization and encoding format to use for compressing the
- * automaton.
- */
+/** The serialization and encoding format to use for compressing the automaton. */
 public enum SerializationFormat {
   FSA5 {
     @Override
@@ -20,7 +17,7 @@ public enum SerializationFormat {
     @Override
     CFSA2Serializer getSerializer() {
       return new CFSA2Serializer();
-    }      
+    }
   };
 
   abstract FSASerializer getSerializer();
