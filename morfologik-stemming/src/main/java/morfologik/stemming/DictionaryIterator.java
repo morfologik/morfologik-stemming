@@ -6,8 +6,8 @@ import java.nio.charset.CharsetDecoder;
 import java.util.Iterator;
 
 /**
- * An iterator over {@link WordData} entries of a {@link Dictionary}. The stems can be decoded from compressed format or
- * the compressed form can be preserved.
+ * An iterator over {@link WordData} entries of a {@link Dictionary}. The stems can be decoded from
+ * compressed format or the compressed form can be preserved.
  */
 public final class DictionaryIterator implements Iterator<WordData> {
   private final CharsetDecoder decoder;
@@ -75,17 +75,15 @@ public final class DictionaryIterator implements Iterator<WordData> {
     assert sequenceEncoder.prefixBytes() <= bbSize : sequenceEncoder.getClass() + " >? " + bbSize;
     sepPos = sequenceEncoder.prefixBytes();
     for (; sepPos < bbSize; sepPos++) {
-      if (ba[sepPos] == separator)
-        break;
+      if (ba[sepPos] == separator) break;
     }
 
     /*
      * Decode the stem into stem buffer.
      */
     if (decodeStems) {
-      entry.stemBuffer = sequenceEncoder.decode(entry.stemBuffer,
-                                            inflectedBuffer,
-                                            ByteBuffer.wrap(ba, 0, sepPos));
+      entry.stemBuffer =
+          sequenceEncoder.decode(entry.stemBuffer, inflectedBuffer, ByteBuffer.wrap(ba, 0, sepPos));
     } else {
       entry.stemBuffer = BufferUtils.clearAndEnsureCapacity(entry.stemBuffer, sepPos);
       entry.stemBuffer.put(ba, 0, sepPos);

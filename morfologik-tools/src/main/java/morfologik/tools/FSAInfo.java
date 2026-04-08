@@ -1,35 +1,30 @@
 package morfologik.tools;
 
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
-
 import morfologik.fsa.CFSA;
 import morfologik.fsa.CFSA2;
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSA5;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
-
-/**
- * Print extra information about a compiled automaton file.
- */
+/** Print extra information about a compiled automaton file. */
 @Parameters(
     commandNames = "fsa_info",
     commandDescription = "Print extra information about a compiled automaton file.")
 public class FSAInfo extends CliTool {
   @Parameter(
       names = {"-i", "--input"},
-      description = "The input automaton.", 
+      description = "The input automaton.",
       required = true,
       validateValueWith = ValidateFileExists.class)
   private Path input;
 
-  FSAInfo() {
-  }
+  FSAInfo() {}
 
   public FSAInfo(Path input) {
     this.input = checkNotNull(input);
@@ -69,7 +64,7 @@ public class FSAInfo extends CliTool {
     if (fsa instanceof CFSA2) {
       CFSA2 cfsa2 = (CFSA2) fsa;
 
-      byte [] labelMapping = cfsa2.labelMapping;
+      byte[] labelMapping = cfsa2.labelMapping;
       if (labelMapping != null && labelMapping.length > 0) {
         printf("%-25s :", "Label mapping");
         for (int i = 0; i < labelMapping.length; i++) {
@@ -81,14 +76,15 @@ public class FSAInfo extends CliTool {
     return ExitStatus.SUCCESS;
   }
 
-  /**
-   * Convert a byte to an informative string.
-   */
+  /** Convert a byte to an informative string. */
   static String byteAsChar(byte v) {
     int chr = v & 0xff;
-    return String.format(Locale.ROOT, 
+    return String.format(
+        Locale.ROOT,
         "%s (0x%02x)",
-        (Character.isWhitespace(chr) || chr > 127) ? "[non-printable]" : Character.toString((char) chr),
+        (Character.isWhitespace(chr) || chr > 127)
+            ? "[non-printable]"
+            : Character.toString((char) chr),
         v & 0xFF);
   }
 

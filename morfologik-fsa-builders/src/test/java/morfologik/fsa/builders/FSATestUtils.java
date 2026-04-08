@@ -1,11 +1,11 @@
 package morfologik.fsa.builders;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.nio.ByteBuffer;
 import java.util.*;
-
 import morfologik.fsa.FSA;
 import morfologik.fsa.StateVisitor;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class FSATestUtils {
   /*
@@ -20,9 +20,7 @@ public class FSATestUtils {
     return input;
   }
 
-  /**
-   * Generate a random string.
-   */
+  /** Generate a random string. */
   private static byte[] randomByteSequence(Random rnd, MinMax length, MinMax alphabet) {
     byte[] bytes = new byte[length.min + rnd.nextInt(length.range())];
     for (int i = 0; i < bytes.length; i++) {
@@ -63,27 +61,29 @@ public class FSATestUtils {
   public static void checkMinimal(final FSA fsa) {
     final HashMap<String, Integer> stateLanguages = new HashMap<String, Integer>();
 
-    fsa.visitInPostOrder(new StateVisitor() {
-      private StringBuilder b = new StringBuilder();
+    fsa.visitInPostOrder(
+        new StateVisitor() {
+          private StringBuilder b = new StringBuilder();
 
-      public boolean accept(int state) {
-        List<byte[]> rightLanguage = allSequences(fsa, state);
-        Collections.sort(rightLanguage, FSABuilder.LEXICAL_ORDERING);
+          public boolean accept(int state) {
+            List<byte[]> rightLanguage = allSequences(fsa, state);
+            Collections.sort(rightLanguage, FSABuilder.LEXICAL_ORDERING);
 
-        b.setLength(0);
-        for (byte[] seq : rightLanguage) {
-          b.append(Arrays.toString(seq));
-          b.append(',');
-        }
+            b.setLength(0);
+            for (byte[] seq : rightLanguage) {
+              b.append(Arrays.toString(seq));
+              b.append(',');
+            }
 
-        String full = b.toString();
-        assertFalse(stateLanguages.containsKey(full),
-            "State exists: " + state + " " + full + " " + stateLanguages.get(full));
-        stateLanguages.put(full, state);
+            String full = b.toString();
+            assertFalse(
+                stateLanguages.containsKey(full),
+                "State exists: " + state + " " + full + " " + stateLanguages.get(full));
+            stateLanguages.put(full, state);
 
-        return true;
-      }
-    });
+            return true;
+          }
+        });
   }
 
   static List<byte[]> allSequences(FSA fsa, int state) {
@@ -99,20 +99,34 @@ public class FSATestUtils {
    */
   public static void checkIdentical(FSA fsa1, FSA fsa2) {
     ArrayDeque<String> fromRoot = new ArrayDeque<String>();
-    checkIdentical(fromRoot, fsa1, fsa1.getRootNode(), new BitSet(), fsa2, fsa2.getRootNode(), new BitSet());
+    checkIdentical(
+        fromRoot, fsa1, fsa1.getRootNode(), new BitSet(), fsa2, fsa2.getRootNode(), new BitSet());
   }
 
   /*
-   * 
+   *
    */
-  static void checkIdentical(ArrayDeque<String> fromRoot, FSA fsa1, int node1, BitSet visited1, FSA fsa2, int node2,
+  static void checkIdentical(
+      ArrayDeque<String> fromRoot,
+      FSA fsa1,
+      int node1,
+      BitSet visited1,
+      FSA fsa2,
+      int node2,
       BitSet visited2) {
     int arc1 = fsa1.getFirstArc(node1);
     int arc2 = fsa2.getFirstArc(node2);
 
     if (visited1.get(node1) != visited2.get(node2)) {
-      throw new RuntimeException("Two nodes should either be visited or not visited: "
-          + Arrays.toString(fromRoot.toArray()) + " " + " node1: " + node1 + " " + " node2: " + node2);
+      throw new RuntimeException(
+          "Two nodes should either be visited or not visited: "
+              + Arrays.toString(fromRoot.toArray())
+              + " "
+              + " node1: "
+              + node1
+              + " "
+              + " node2: "
+              + node2);
     }
     visited1.set(node1);
     visited2.set(node2);
@@ -128,37 +142,51 @@ public class FSATestUtils {
 
       if (arc1 == 0 || arc2 == 0) {
         if (arc1 != arc2) {
-          throw new RuntimeException("Different number of labels at path: " + Arrays.toString(fromRoot.toArray()));
+          throw new RuntimeException(
+              "Different number of labels at path: " + Arrays.toString(fromRoot.toArray()));
         }
         break;
       }
     }
 
     if (!labels1.equals(labels2)) {
-      throw new RuntimeException("Different sets of labels at path: " + Arrays.toString(fromRoot.toArray()) + ":\n"
-          + labels1 + "\n" + labels2);
+      throw new RuntimeException(
+          "Different sets of labels at path: "
+              + Arrays.toString(fromRoot.toArray())
+              + ":\n"
+              + labels1
+              + "\n"
+              + labels2);
     }
 
     // recurse.
     for (char chr : labels1) {
       byte label = (byte) chr;
-      fromRoot.push(Character.isLetterOrDigit(chr) ? Character.toString(chr) : Integer.toString(chr));
+      fromRoot.push(
+          Character.isLetterOrDigit(chr) ? Character.toString(chr) : Integer.toString(chr));
 
       arc1 = fsa1.getArc(node1, label);
       arc2 = fsa2.getArc(node2, label);
 
       if (fsa1.isArcFinal(arc1) != fsa2.isArcFinal(arc2)) {
-        throw new RuntimeException("Different final flag on arcs at: " + Arrays.toString(fromRoot.toArray())
-            + ", label: " + label);
+        throw new RuntimeException(
+            "Different final flag on arcs at: "
+                + Arrays.toString(fromRoot.toArray())
+                + ", label: "
+                + label);
       }
 
       if (fsa1.isArcTerminal(arc1) != fsa2.isArcTerminal(arc2)) {
-        throw new RuntimeException("Different terminal flag on arcs at: " + Arrays.toString(fromRoot.toArray())
-            + ", label: " + label);
+        throw new RuntimeException(
+            "Different terminal flag on arcs at: "
+                + Arrays.toString(fromRoot.toArray())
+                + ", label: "
+                + label);
       }
 
       if (!fsa1.isArcTerminal(arc1)) {
-        checkIdentical(fromRoot, fsa1, fsa1.getEndNode(arc1), visited1, fsa2, fsa2.getEndNode(arc2), visited2);
+        checkIdentical(
+            fromRoot, fsa1, fsa1.getEndNode(arc1), visited1, fsa2, fsa2.getEndNode(arc2), visited2);
       }
 
       fromRoot.pop();

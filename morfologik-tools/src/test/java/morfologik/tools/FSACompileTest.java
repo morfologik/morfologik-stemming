@@ -1,5 +1,10 @@
 package morfologik.tools;
 
+import com.carrotsearch.randomizedtesting.jupiter.Randomized;
+import com.carrotsearch.randomizedtesting.jupiter.RandomizedTest;
+import com.carrotsearch.randomizedtesting.jupiter.generators.RandomNumbers;
+import com.carrotsearch.randomizedtesting.jupiter.generators.RandomPicks;
+import com.carrotsearch.randomizedtesting.jupiter.generators.RandomStrings;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,19 +19,11 @@ import java.util.LinkedHashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
-
-import com.carrotsearch.randomizedtesting.jupiter.generators.RandomNumbers;
-import com.carrotsearch.randomizedtesting.jupiter.generators.RandomPicks;
-import com.carrotsearch.randomizedtesting.jupiter.generators.RandomStrings;
 import morfologik.fsa.FSA;
 import morfologik.stemming.BufferUtils;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-
-import com.carrotsearch.randomizedtesting.jupiter.RandomizedTest;
-import com.carrotsearch.randomizedtesting.jupiter.Randomized;
 import org.junit.jupiter.api.io.TempDir;
 
 @Randomized
@@ -37,7 +34,7 @@ public class FSACompileTest extends RandomizedTest {
     final Path output = Files.createTempFile(tempDir, "input", "out");
 
     Set<String> sequences = new LinkedHashSet<>();
-    for (int seqs = RandomNumbers.randomIntInRange(rnd, 0, 100); --seqs >= 0;) {
+    for (int seqs = RandomNumbers.randomIntInRange(rnd, 0, 100); --seqs >= 0; ) {
       sequences.add(RandomStrings.randomAsciiLettersOfLengthBetween(rnd, 1, 10));
     }
 
@@ -45,7 +42,7 @@ public class FSACompileTest extends RandomizedTest {
       Iterator<String> i = sequences.iterator();
       while (i.hasNext()) {
         os.write(i.next().getBytes(StandardCharsets.UTF_8));
-        
+
         // Sometimes don't add trailing '\n'.
         if (!i.hasNext() && rnd.nextBoolean()) {
           break;
@@ -57,21 +54,16 @@ public class FSACompileTest extends RandomizedTest {
         }
       }
     }
-    
+
     SerializationFormat format = RandomPicks.randomFrom(rnd, SerializationFormat.values());
 
-    Assertions.assertThat(new FSACompile(
-        input,
-        output,
-        format,
-        false,
-        false,
-        true).call()).isEqualTo(ExitStatus.SUCCESS);
+    Assertions.assertThat(new FSACompile(input, output, format, false, false, true).call())
+        .isEqualTo(ExitStatus.SUCCESS);
 
     try (InputStream is = Files.newInputStream(output)) {
       FSA fsa = FSA.read(is);
       Assertions.assertThat(fsa).isNotNull();
-      
+
       Set<String> result = new HashSet<>();
       for (ByteBuffer bb : fsa) {
         result.add(BufferUtils.toString(bb, StandardCharsets.UTF_8));
@@ -88,16 +80,20 @@ public class FSACompileTest extends RandomizedTest {
 
     Files.write(input, "abc\n\ndef".getBytes(StandardCharsets.US_ASCII));
 
-    String out = sysouts(new Callable<Void>() {
-       @Override
-      public Void call() throws Exception {
-       FSACompile.main(new String[] {
-           "--exit", "false",
-           "--input", input.toAbsolutePath().toString(), 
-           "--output", output.toAbsolutePath().toString() });
-        return null;
-      }
-    });
+    String out =
+        sysouts(
+            new Callable<Void>() {
+              @Override
+              public Void call() throws Exception {
+                FSACompile.main(
+                    new String[] {
+                      "--exit", "false",
+                      "--input", input.toAbsolutePath().toString(),
+                      "--output", output.toAbsolutePath().toString()
+                    });
+                return null;
+              }
+            });
 
     Assertions.assertThat(out).contains("--ignore-empty");
   }
@@ -109,16 +105,20 @@ public class FSACompileTest extends RandomizedTest {
 
     Files.write(input, "abc\r\ndef\r\n".getBytes(StandardCharsets.US_ASCII));
 
-    String out = sysouts(new Callable<Void>() {
-       @Override
-      public Void call() throws Exception {
-       FSACompile.main(new String[] {
-           "--exit", "false",
-           "--input", input.toAbsolutePath().toString(), 
-           "--output", output.toAbsolutePath().toString() });
-        return null;
-      }
-    });
+    String out =
+        sysouts(
+            new Callable<Void>() {
+              @Override
+              public Void call() throws Exception {
+                FSACompile.main(
+                    new String[] {
+                      "--exit", "false",
+                      "--input", input.toAbsolutePath().toString(),
+                      "--output", output.toAbsolutePath().toString()
+                    });
+                return null;
+              }
+            });
 
     Assertions.assertThat(out).contains("CR");
   }
@@ -130,20 +130,24 @@ public class FSACompileTest extends RandomizedTest {
 
     // Emit UTF-8 BOM prefixed list of three strings.
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    baos.write(new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF });
+    baos.write(new byte[] {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF});
     baos.write("abc\ndef\nxyz".getBytes(StandardCharsets.UTF_8));
     Files.write(input, baos.toByteArray());
 
-    String out = sysouts(new Callable<Void>() {
-       @Override
-      public Void call() throws Exception {
-       FSACompile.main(new String[] {
-           "--exit", "false",
-           "--input", input.toAbsolutePath().toString(), 
-           "--output", output.toAbsolutePath().toString() });
-        return null;
-      }
-    });
+    String out =
+        sysouts(
+            new Callable<Void>() {
+              @Override
+              public Void call() throws Exception {
+                FSACompile.main(
+                    new String[] {
+                      "--exit", "false",
+                      "--input", input.toAbsolutePath().toString(),
+                      "--output", output.toAbsolutePath().toString()
+                    });
+                return null;
+              }
+            });
 
     Assertions.assertThat(out).contains("UTF-8 BOM");
   }

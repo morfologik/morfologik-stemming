@@ -10,19 +10,15 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSA5;
 import morfologik.fsa.FSATraversal;
 import morfologik.fsa.MatchResult;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-/**
- * Tests {@link FSATraversal}.
- */
+/** Tests {@link FSATraversal}. */
 public final class FSATraversalTest extends TestBase {
   private FSA fsa;
 
@@ -33,38 +29,40 @@ public final class FSATraversalTest extends TestBase {
 
   @Test
   public void testAutomatonHasPrefixBug() throws Exception {
-      FSA fsa = FSABuilder.build(Arrays.asList(
-          "a".getBytes(UTF_8),
-          "ab".getBytes(UTF_8),
-          "abc".getBytes(UTF_8),
-          "ad".getBytes(UTF_8),
-          "bcd".getBytes(UTF_8),
-          "bce".getBytes(UTF_8)));
+    FSA fsa =
+        FSABuilder.build(
+            Arrays.asList(
+                "a".getBytes(UTF_8),
+                "ab".getBytes(UTF_8),
+                "abc".getBytes(UTF_8),
+                "ad".getBytes(UTF_8),
+                "bcd".getBytes(UTF_8),
+                "bce".getBytes(UTF_8)));
 
-      FSATraversal fsaTraversal = new FSATraversal(fsa);
-      assertEquals(EXACT_MATCH, fsaTraversal.match("a".getBytes(UTF_8)).kind);
-      assertEquals(EXACT_MATCH, fsaTraversal.match("ab".getBytes(UTF_8)).kind);
-      assertEquals(EXACT_MATCH, fsaTraversal.match("abc".getBytes(UTF_8)).kind);
-      assertEquals(EXACT_MATCH, fsaTraversal.match("ad".getBytes(UTF_8)).kind);
+    FSATraversal fsaTraversal = new FSATraversal(fsa);
+    assertEquals(EXACT_MATCH, fsaTraversal.match("a".getBytes(UTF_8)).kind);
+    assertEquals(EXACT_MATCH, fsaTraversal.match("ab".getBytes(UTF_8)).kind);
+    assertEquals(EXACT_MATCH, fsaTraversal.match("abc".getBytes(UTF_8)).kind);
+    assertEquals(EXACT_MATCH, fsaTraversal.match("ad".getBytes(UTF_8)).kind);
 
-      assertEquals(SEQUENCE_IS_A_PREFIX, fsaTraversal.match("b".getBytes(UTF_8)).kind);
-      assertEquals(SEQUENCE_IS_A_PREFIX, fsaTraversal.match("bc".getBytes(UTF_8)).kind);
+    assertEquals(SEQUENCE_IS_A_PREFIX, fsaTraversal.match("b".getBytes(UTF_8)).kind);
+    assertEquals(SEQUENCE_IS_A_PREFIX, fsaTraversal.match("bc".getBytes(UTF_8)).kind);
 
-      MatchResult m;
-      
-      m = fsaTraversal.match("abcd".getBytes(UTF_8));
-      assertEquals(AUTOMATON_HAS_PREFIX, m.kind);
-      assertEquals(3, m.index);
+    MatchResult m;
 
-      m = fsaTraversal.match("ade".getBytes(UTF_8));
-      assertEquals(AUTOMATON_HAS_PREFIX, m.kind);
-      assertEquals(2, m.index);
+    m = fsaTraversal.match("abcd".getBytes(UTF_8));
+    assertEquals(AUTOMATON_HAS_PREFIX, m.kind);
+    assertEquals(3, m.index);
 
-      m = fsaTraversal.match("ax".getBytes(UTF_8));
-      assertEquals(AUTOMATON_HAS_PREFIX, m.kind);
-      assertEquals(1, m.index);
+    m = fsaTraversal.match("ade".getBytes(UTF_8));
+    assertEquals(AUTOMATON_HAS_PREFIX, m.kind);
+    assertEquals(2, m.index);
 
-      assertEquals(NO_MATCH, fsaTraversal.match("d".getBytes(UTF_8)).kind);
+    m = fsaTraversal.match("ax".getBytes(UTF_8));
+    assertEquals(AUTOMATON_HAS_PREFIX, m.kind);
+    assertEquals(1, m.index);
+
+    assertEquals(NO_MATCH, fsaTraversal.match("d".getBytes(UTF_8)).kind);
   }
 
   @Test
@@ -80,21 +78,16 @@ public final class FSATraversalTest extends TestBase {
 
   @Test
   public void testPerfectHash() throws IOException {
-    byte[][] input = new byte[][] { 
-      { 'a' }, 
-      { 'a', 'b', 'a' }, 
-      { 'a', 'c' }, 
-      { 'b' }, 
-      { 'b', 'a' }, 
-      { 'c' }, };
+    byte[][] input =
+        new byte[][] {
+          {'a'}, {'a', 'b', 'a'}, {'a', 'c'}, {'b'}, {'b', 'a'}, {'c'},
+        };
 
     Arrays.sort(input, FSABuilder.LEXICAL_ORDERING);
     FSA s = FSABuilder.build(input);
 
-    final byte[] fsaData = 
-        new FSA5Serializer().withNumbers()
-                            .serialize(s, new ByteArrayOutputStream())
-                            .toByteArray();
+    final byte[] fsaData =
+        new FSA5Serializer().withNumbers().serialize(s, new ByteArrayOutputStream()).toByteArray();
 
     final FSA5 fsa = FSA.read(new ByteArrayInputStream(fsaData), FSA5.class);
     final FSATraversal traversal = new FSATraversal(fsa);
@@ -112,19 +105,17 @@ public final class FSATraversalTest extends TestBase {
     assertEquals(AUTOMATON_HAS_PREFIX, traversal.perfectHash("abx".getBytes(UTF_8)));
     assertEquals(SEQUENCE_IS_A_PREFIX, traversal.perfectHash("ab".getBytes(UTF_8)));
     assertEquals(NO_MATCH, traversal.perfectHash("d".getBytes(UTF_8)));
-    assertEquals(NO_MATCH, traversal.perfectHash(new byte[] { 0 }));
+    assertEquals(NO_MATCH, traversal.perfectHash(new byte[] {0}));
 
     assertTrue(AUTOMATON_HAS_PREFIX < 0);
     assertTrue(SEQUENCE_IS_A_PREFIX < 0);
     assertTrue(NO_MATCH < 0);
   }
 
-  /**
-     * 
-     */
+  /** */
   @Test
   public void testRecursiveTraversal() {
-    final int[] counter = new int[] { 0 };
+    final int[] counter = new int[] {0};
 
     class Recursion {
       public void dumpNode(final int node) {
@@ -169,9 +160,7 @@ public final class FSATraversalTest extends TestBase {
     assertEquals(new HashSet<String>(Arrays.asList("a")), suffixes(fsa, m.node));
   }
 
-  /**
-   * Return all sequences reachable from a given node, as strings.
-   */
+  /** Return all sequences reachable from a given node, as strings. */
   private HashSet<String> suffixes(FSA fsa, int node) {
     HashSet<String> result = new HashSet<String>();
     for (ByteBuffer bb : fsa.getSequences(node)) {

@@ -1,35 +1,29 @@
 package morfologik.stemming;
 
+import com.carrotsearch.randomizedtesting.jupiter.Randomized;
+import com.carrotsearch.randomizedtesting.jupiter.RandomizedTest;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import com.carrotsearch.randomizedtesting.jupiter.RandomizedTest;
-import com.carrotsearch.randomizedtesting.jupiter.Randomized;
 
 @Randomized
 public class EncodersTest extends RandomizedTest {
   @Test
   public void testSharedPrefix() throws IOException {
     Assertions.assertThat(
-      BufferUtils.sharedPrefixLength(
-          ByteBuffer.wrap(b("abcdef")),
-          ByteBuffer.wrap(b("abcd__"))))
-      .isEqualTo(4);
-    
+            BufferUtils.sharedPrefixLength(
+                ByteBuffer.wrap(b("abcdef")), ByteBuffer.wrap(b("abcd__"))))
+        .isEqualTo(4);
+
     Assertions.assertThat(
-        BufferUtils.sharedPrefixLength(
-            ByteBuffer.wrap(b("")),
-            ByteBuffer.wrap(b("_"))))
+            BufferUtils.sharedPrefixLength(ByteBuffer.wrap(b("")), ByteBuffer.wrap(b("_"))))
         .isEqualTo(0);
 
     Assertions.assertThat(
-        BufferUtils.sharedPrefixLength(
-            ByteBuffer.wrap(b( "abcdef"), 2, 2),
-            ByteBuffer.wrap(b("___cd__"), 3, 2)))
+            BufferUtils.sharedPrefixLength(
+                ByteBuffer.wrap(b("abcdef"), 2, 2), ByteBuffer.wrap(b("___cd__"), 3, 2)))
         .isEqualTo(2);
   }
 

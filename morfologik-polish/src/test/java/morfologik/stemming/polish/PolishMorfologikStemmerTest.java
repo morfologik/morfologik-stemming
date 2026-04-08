@@ -7,15 +7,13 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-
 import morfologik.stemming.IStemmer;
 import morfologik.stemming.WordData;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /*
- * 
+ *
  */
 public class PolishMorfologikStemmerTest {
   /* */
@@ -26,8 +24,9 @@ public class PolishMorfologikStemmerTest {
     assertEquals("żywotopisarstwo", stem(s, "żywotopisarstwie")[0]);
     assertEquals("abradować", stem(s, "abradowałoby")[0]);
 
-    assertArrayEquals(new String[] { "żywotopisarstwo", "subst:sg:loc:n2" }, stem(s, "żywotopisarstwie"));
-    assertArrayEquals(new String[] { "bazia", "subst:pl:inst:f" }, stem(s, "baziami"));
+    assertArrayEquals(
+        new String[] {"żywotopisarstwo", "subst:sg:loc:n2"}, stem(s, "żywotopisarstwie"));
+    assertArrayEquals(new String[] {"bazia", "subst:pl:inst:f"}, stem(s, "baziami"));
 
     // This word is not in the dictionary.
     assertNoStemFor(s, "martygalski");
@@ -85,7 +84,9 @@ public class PolishMorfologikStemmerTest {
     for (WordData wd : response) {
       // Buffer should be copied.
       final ByteBuffer copy = wd.getStemBytes(null);
-      final String stem = new String(copy.array(), copy.arrayOffset() + copy.position(), copy.remaining(), ENCODING);
+      final String stem =
+          new String(
+              copy.array(), copy.arrayOffset() + copy.position(), copy.remaining(), ENCODING);
       // The buffer should be present in stems set.
       Assertions.assertThat(stems.contains(stem)).as(stem).isTrue();
       // Buffer large enough to hold the contents.
@@ -97,7 +98,9 @@ public class PolishMorfologikStemmerTest {
     for (WordData wd : response) {
       // Buffer should be copied.
       final ByteBuffer copy = wd.getTagBytes(null);
-      final String tag = new String(copy.array(), copy.arrayOffset() + copy.position(), copy.remaining(), ENCODING);
+      final String tag =
+          new String(
+              copy.array(), copy.arrayOffset() + copy.position(), copy.remaining(), ENCODING);
       // The buffer should be present in tags set.
       Assertions.assertThat(tags.contains(tag)).as(tag).isTrue();
       // Buffer large enough to hold the contents.
@@ -117,8 +120,7 @@ public class PolishMorfologikStemmerTest {
 
   /* */
   public static String asString(CharSequence s) {
-    if (s == null)
-      return null;
+    if (s == null) return null;
     return s.toString();
   }
 

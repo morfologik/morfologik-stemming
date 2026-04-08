@@ -11,16 +11,14 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import morfologik.fsa.ByteSequenceIterator;
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSATraversal;
 import morfologik.fsa.MatchResult;
 
 /**
- * This class implements a dictionary lookup of an inflected word over a
- * dictionary previously compiled using the 
- * <code>dict_compile</code> tool.
+ * This class implements a dictionary lookup of an inflected word over a dictionary previously
+ * compiled using the <code>dict_compile</code> tool.
  */
 public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
   /** An FSA used for lookups. */
@@ -33,35 +31,29 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
   private final int rootNode;
 
   /** Expand buffers and arrays by this constant. */
-  private final static int EXPAND_SIZE = 10;
+  private static final int EXPAND_SIZE = 10;
 
   /** Private internal array of reusable word data objects. */
   private WordData[] forms = new WordData[0];
 
   /** A "view" over an array implementing */
-  private final ArrayViewList<WordData> formsList = new ArrayViewList<WordData>(
-      forms, 0, forms.length);
+  private final ArrayViewList<WordData> formsList =
+      new ArrayViewList<WordData>(forms, 0, forms.length);
 
   /**
    * Features of the compiled dictionary.
-   * 
+   *
    * @see DictionaryMetadata
    */
   private final DictionaryMetadata dictionaryMetadata;
 
-  /**
-   * Charset encoder for the FSA.
-   */
+  /** Charset encoder for the FSA. */
   private final CharsetEncoder encoder;
 
-  /**
-   * Charset decoder for the FSA.
-   */
+  /** Charset decoder for the FSA. */
   private final CharsetDecoder decoder;
 
-  /**
-   * The FSA we are using.
-   */
+  /** The FSA we are using. */
   private final FSA fsa;
 
   /**
@@ -69,40 +61,28 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
    */
   private final char separatorChar;
 
-  /**
-   * Internal reusable buffer for encoding words into byte arrays using
-   * {@link #encoder}.
-   */
+  /** Internal reusable buffer for encoding words into byte arrays using {@link #encoder}. */
   private ByteBuffer byteBuffer = ByteBuffer.allocate(0);
 
-  /**
-   * Internal reusable buffer for encoding words into byte arrays using
-   * {@link #encoder}.
-   */
+  /** Internal reusable buffer for encoding words into byte arrays using {@link #encoder}. */
   private CharBuffer charBuffer = CharBuffer.allocate(0);
 
-  /**
-   * Reusable match result.
-   */
+  /** Reusable match result. */
   private final MatchResult matchResult = new MatchResult();
 
-  /**
-   * The {@link Dictionary} this lookup is using.
-   */
+  /** The {@link Dictionary} this lookup is using. */
   private final Dictionary dictionary;
 
   private final ISequenceEncoder sequenceEncoder;
 
   /**
-   * Creates a new object of this class using the given FSA for word lookups
-   * and encoding for converting characters to bytes.
-   * 
+   * Creates a new object of this class using the given FSA for word lookups and encoding for
+   * converting characters to bytes.
+   *
    * @param dictionary The dictionary to use for lookups.
-   * @throws IllegalArgumentException
-   *             if FSA's root node cannot be acquired (dictionary is empty).
+   * @throws IllegalArgumentException if FSA's root node cannot be acquired (dictionary is empty).
    */
-  public DictionaryLookup(Dictionary dictionary)
-      throws IllegalArgumentException {
+  public DictionaryLookup(Dictionary dictionary) throws IllegalArgumentException {
     this.dictionary = dictionary;
     this.dictionaryMetadata = dictionary.metadata;
     this.sequenceEncoder = dictionary.metadata.getSequenceEncoderType().get();
@@ -112,8 +92,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
     this.finalStatesIterator = new ByteSequenceIterator(fsa, fsa.getRootNode());
 
     if (dictionaryMetadata == null) {
-      throw new IllegalArgumentException(
-          "Dictionary metadata must not be null.");
+      throw new IllegalArgumentException("Dictionary metadata must not be null.");
     }
 
     decoder = dictionary.metadata.getDecoder();
@@ -122,9 +101,9 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
   }
 
   /**
-   * Searches the automaton for a symbol sequence equal to <code>word</code>,
-   * followed by a separator. The result is a stem (decompressed accordingly
-   * to the dictionary's specification) and an optional tag data.
+   * Searches the automaton for a symbol sequence equal to <code>word</code>, followed by a
+   * separator. The result is a stem (decompressed accordingly to the dictionary's specification)
+   * and an optional tag data.
    */
   @Override
   public List<WordData> lookup(CharSequence word) {
@@ -158,8 +137,8 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
     }
 
     // Try to find a partial match in the dictionary.
-    final MatchResult match = matcher.match(matchResult, byteBuffer
-        .array(), 0, byteBuffer.remaining(), rootNode);
+    final MatchResult match =
+        matcher.match(matchResult, byteBuffer.array(), 0, byteBuffer.remaining(), rootNode);
 
     if (match.kind == SEQUENCE_IS_A_PREFIX) {
       /*
@@ -185,8 +164,7 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
           if (formsCount >= forms.length) {
             forms = Arrays.copyOf(forms, forms.length + EXPAND_SIZE);
             for (int k = 0; k < forms.length; k++) {
-              if (forms[k] == null)
-                forms[k] = new WordData(decoder);
+              if (forms[k] == null) forms[k] = new WordData(decoder);
             }
           }
 
@@ -198,7 +176,8 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
           if (dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
             wordData.update(byteBuffer, word);
           } else {
-            wordData.update(byteBuffer, applyReplacements(word, dictionaryMetadata.getOutputConversionPairs()));
+            wordData.update(
+                byteBuffer, applyReplacements(word, dictionaryMetadata.getOutputConversionPairs()));
           }
 
           /*
@@ -216,9 +195,9 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
           /*
            * Decode the stem into stem buffer.
            */
-          wordData.stemBuffer = sequenceEncoder.decode(wordData.stemBuffer,
-                                                   byteBuffer,
-                                                   ByteBuffer.wrap(ba, 0, sepPos));
+          wordData.stemBuffer =
+              sequenceEncoder.decode(
+                  wordData.stemBuffer, byteBuffer, ByteBuffer.wrap(ba, 0, sepPos));
 
           // Skip separator character.
           sepPos++;
@@ -248,15 +227,15 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
 
   /**
    * Apply partial string replacements from a given map.
-   * 
-   * Useful if the word needs to be normalized somehow (i.e., ligatures,
-   * apostrophes and such).
-   * 
+   *
+   * <p>Useful if the word needs to be normalized somehow (i.e., ligatures, apostrophes and such).
+   *
    * @param word The word to apply replacements to.
    * @param replacements A map of replacements (from-&gt;to).
    * @return new string with all replacements applied.
    */
-  public static String applyReplacements(CharSequence word, LinkedHashMap<String, String> replacements) {
+  public static String applyReplacements(
+      CharSequence word, LinkedHashMap<String, String> replacements) {
     // quite horrible from performance point of view; this should really be a transducer.
     StringBuilder sb = new StringBuilder(word);
     for (final Map.Entry<String, String> e : replacements.entrySet()) {
@@ -271,8 +250,8 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
   }
 
   /**
-   * Return an iterator over all {@link WordData} entries available in the
-   * embedded {@link Dictionary}.
+   * Return an iterator over all {@link WordData} entries available in the embedded {@link
+   * Dictionary}.
    */
   @Override
   public Iterator<WordData> iterator() {
@@ -287,10 +266,10 @@ public final class DictionaryLookup implements IStemmer, Iterable<WordData> {
   }
 
   /**
-   * @return Returns the logical separator character splitting inflected form,
-   *         lemma correction token and a tag. Note that this character is a best-effort
-   *         conversion from a byte in {@link DictionaryMetadata#separator} and
-   *         may not be valid in the target encoding (although this is highly unlikely).
+   * @return Returns the logical separator character splitting inflected form, lemma correction
+   *     token and a tag. Note that this character is a best-effort conversion from a byte in {@link
+   *     DictionaryMetadata#separator} and may not be valid in the target encoding (although this is
+   *     highly unlikely).
    */
   public char getSeparatorChar() {
     return separatorChar;

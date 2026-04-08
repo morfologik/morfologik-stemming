@@ -1,23 +1,19 @@
 package morfologik.tools;
 
-import java.io.PrintStream;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.Callable;
-
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.MissingCommandException;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
+import java.io.PrintStream;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.Callable;
 
-
-/**
- * Base class for command-line applications.
- */
+/** Base class for command-line applications. */
 public abstract class CliTool implements Callable<ExitStatus> {
-  protected final static String ARG_OVERWRITE = "--overwrite";
-  protected final static String ARG_VALIDATE = "--validate";
+  protected static final String ARG_OVERWRITE = "--overwrite";
+  protected static final String ARG_VALIDATE = "--validate";
 
   @Parameter(
       names = {"--exit"},
@@ -41,7 +37,7 @@ public abstract class CliTool implements Callable<ExitStatus> {
 
   /**
    * Call {@link System#exit(int)} at the end of command processing.
-   * 
+   *
    * @param flag Call {@link System#exit(int)} if <code>true</code>.
    */
   public void setCallSystemExit(boolean flag) {
@@ -50,7 +46,7 @@ public abstract class CliTool implements Callable<ExitStatus> {
 
   /**
    * Parse and execute one of the commands.
-   * 
+   *
    * @param args Command line arguments (command and options).
    * @param commands A list of commands.
    */
@@ -64,7 +60,7 @@ public abstract class CliTool implements Callable<ExitStatus> {
       }
       jc.addConverterFactory(new CustomParameterConverters());
       jc.setProgramName("");
-  
+
       ExitStatus exitStatus = ExitStatus.SUCCESS;
       try {
         jc.parse(args);
@@ -98,7 +94,7 @@ public abstract class CliTool implements Callable<ExitStatus> {
       } catch (ParameterException e) {
         System.err.println("Invalid argument: " + e.getMessage());
         System.err.println();
-  
+
         if (jc.getParsedCommand() == null) {
           helpDisplayCommandOptions(System.err, jc);
         } else {
@@ -115,7 +111,7 @@ public abstract class CliTool implements Callable<ExitStatus> {
 
   /**
    * Parse and execute a single command.
-   *  
+   *
    * @param args Command line arguments (command and options).
    * @param command The command to execute.
    */
@@ -186,5 +182,5 @@ public abstract class CliTool implements Callable<ExitStatus> {
     StringBuilder sb = new StringBuilder();
     jc.getUsageFormatter().usage(sb, "");
     pw.print(sb);
-  }  
+  }
 }

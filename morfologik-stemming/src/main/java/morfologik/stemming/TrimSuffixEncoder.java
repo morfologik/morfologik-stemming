@@ -3,35 +3,30 @@ package morfologik.stemming;
 import java.nio.ByteBuffer;
 
 /**
- * Encodes <code>dst</code> relative to <code>src</code> by trimming whatever
- * non-equal suffix <code>src</code> has. The output code is (bytes):
- * 
+ * Encodes <code>dst</code> relative to <code>src</code> by trimming whatever non-equal suffix
+ * <code>src</code> has. The output code is (bytes):
+ *
  * <pre>
  * {K}{suffix}
  * </pre>
- * 
- * where (<code>K</code> - 'A') bytes should be trimmed from the end of
- * <code>src</code> and then the <code>suffix</code> should be appended to the
- * resulting byte sequence.
- * 
- * <p>
- * Examples:
- * </p>
- * 
+ *
+ * where (<code>K</code> - 'A') bytes should be trimmed from the end of <code>src</code> and then
+ * the <code>suffix</code> should be appended to the resulting byte sequence.
+ *
+ * <p>Examples:
+ *
  * <pre>
  * src: foo
  * dst: foobar
  * encoded: Abar
- * 
+ *
  * src: foo
  * dst: bar
  * encoded: Dbar
  * </pre>
  */
 public class TrimSuffixEncoder implements ISequenceEncoder {
-  /**
-   * Maximum encodable single-byte code.
-   */
+  /** Maximum encodable single-byte code. */
   private static final int REMOVE_EVERYTHING = 255;
 
   public ByteBuffer encode(ByteBuffer reuse, ByteBuffer source, ByteBuffer target) {
@@ -42,25 +37,24 @@ public class TrimSuffixEncoder implements ISequenceEncoder {
       sharedPrefix = 0;
     }
 
-    reuse = BufferUtils.clearAndEnsureCapacity(reuse, 1 + target.remaining() - sharedPrefix); 
+    reuse = BufferUtils.clearAndEnsureCapacity(reuse, 1 + target.remaining() - sharedPrefix);
 
-    assert target.hasArray() && 
-           target.position() == 0 && 
-           target.arrayOffset() == 0;
+    assert target.hasArray() && target.position() == 0 && target.arrayOffset() == 0;
 
     final byte suffixTrimCode = (byte) (truncateBytes + 'A');
-    reuse.put(suffixTrimCode)
-         .put(target.array(), sharedPrefix, target.remaining() - sharedPrefix)
-         .flip();
+    reuse
+        .put(suffixTrimCode)
+        .put(target.array(), sharedPrefix, target.remaining() - sharedPrefix)
+        .flip();
 
     return reuse;
   }
-  
+
   @Override
   public int prefixBytes() {
     return 1;
   }
-  
+
   public ByteBuffer decode(ByteBuffer reuse, ByteBuffer source, ByteBuffer encoded) {
     assert encoded.remaining() >= 1;
 
@@ -75,21 +69,15 @@ public class TrimSuffixEncoder implements ISequenceEncoder {
 
     reuse = BufferUtils.clearAndEnsureCapacity(reuse, len1 + len2);
 
-    assert source.hasArray() && 
-           source.position() == 0 && 
-           source.arrayOffset() == 0;
+    assert source.hasArray() && source.position() == 0 && source.arrayOffset() == 0;
 
-    assert encoded.hasArray() && 
-           encoded.position() == 0 && 
-           encoded.arrayOffset() == 0;
+    assert encoded.hasArray() && encoded.position() == 0 && encoded.arrayOffset() == 0;
 
-    reuse.put(source.array(), 0, len1)
-         .put(encoded.array(), 1, len2)
-         .flip();
+    reuse.put(source.array(), 0, len1).put(encoded.array(), 1, len2).flip();
 
     return reuse;
   }
-  
+
   @Override
   public String toString() {
     return getClass().getSimpleName();

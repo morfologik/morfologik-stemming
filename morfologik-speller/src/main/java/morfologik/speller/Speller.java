@@ -11,9 +11,8 @@ import java.nio.charset.CoderResult;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.*;
-
-import morfologik.fsa.FSA;
 import morfologik.fsa.ByteSequenceIterator;
+import morfologik.fsa.FSA;
 import morfologik.fsa.FSATraversal;
 import morfologik.fsa.MatchResult;
 import morfologik.stemming.BufferUtils;
@@ -23,24 +22,21 @@ import morfologik.stemming.DictionaryMetadata;
 import morfologik.stemming.UnmappableInputException;
 
 /**
- * Finds spelling suggestions. Implements K. Oflazer's algorithm as described
- * in: Oflazer, Kemal. 1996.
- * "Error-Tolerant Finite-State Recognition with Applications to Morphological Analysis and Spelling Correction."
- * <i>Computational Linguistics</i> 22 (1): 73–89.
- * 
- * <p>
- * See Jan Daciuk's <code>s_fsa</code> package.
+ * Finds spelling suggestions. Implements K. Oflazer's algorithm as described in: Oflazer, Kemal.
+ * 1996. "Error-Tolerant Finite-State Recognition with Applications to Morphological Analysis and
+ * Spelling Correction." <i>Computational Linguistics</i> 22 (1): 73–89.
+ *
+ * <p>See Jan Daciuk's <code>s_fsa</code> package.
  */
 public class Speller {
-  /**
-   * Maximum length of the word to be checked.
-   */
+  /** Maximum length of the word to be checked. */
   public static final int MAX_WORD_LENGTH = 120;
+
   static final int FREQ_RANGES = 'Z' - 'A' + 1;
   static final int FIRST_RANGE_CODE = 'A'; // less frequent words
 
-  //FIXME: this is an upper limit for replacement searches, we need
-  //proper tree traversal instead of generation of all possible candidates
+  // FIXME: this is an upper limit for replacement searches, we need
+  // proper tree traversal instead of generation of all possible candidates
   static final int UPPER_SEARCH_LIMIT = 15;
   private static final int MIN_WORD_LENGTH = 4;
   private static final int MAX_RECURSION_LEVEL = 6;
@@ -60,6 +56,7 @@ public class Speller {
     final char[] chars;
     final boolean startAnchor;
     final boolean endAnchor;
+
     Pattern(char[] chars, boolean startAnchor, boolean endAnchor) {
       this.chars = chars;
       this.startAnchor = startAnchor;
@@ -69,43 +66,32 @@ public class Speller {
 
   private Map<Character, List<Pattern>> replacementsAnyToOne = new HashMap<>();
   private Map<String, List<Pattern>> replacementsAnyToTwo = new HashMap<>();
+
   /** Keys may carry ^ / $ anchors; values are the replacement strings. */
   private Map<String, List<String>> replacementsTheRest = new HashMap<>();
 
   private boolean containsSeparators = true;
 
-  /**
-   * Internal reusable buffer for encoding words into byte arrays using
-   * {@link #encoder}.
-   */
+  /** Internal reusable buffer for encoding words into byte arrays using {@link #encoder}. */
   private ByteBuffer byteBuffer = ByteBuffer.allocate(MAX_WORD_LENGTH);
 
-  /**
-   * Internal reusable buffer for encoding words into byte arrays using
-   * {@link #encoder}.
-   */
+  /** Internal reusable buffer for encoding words into byte arrays using {@link #encoder}. */
   private CharBuffer charBuffer = CharBuffer.allocate(MAX_WORD_LENGTH);
 
-  /**
-   * Reusable match result.
-   */
+  /** Reusable match result. */
   private final MatchResult matchResult = new MatchResult();
 
   /**
    * Features of the compiled dictionary.
-   * 
+   *
    * @see DictionaryMetadata
    */
   private final DictionaryMetadata dictionaryMetadata;
 
-  /**
-   * Charset encoder for the FSA.
-   */
+  /** Charset encoder for the FSA. */
   private final CharsetEncoder encoder;
 
-  /**
-   * Charset decoder for the FSA.
-   */
+  /** Charset decoder for the FSA. */
   private final CharsetDecoder decoder;
 
   /** An FSA used for lookups. */
@@ -114,9 +100,7 @@ public class Speller {
   /** FSA's root node. */
   private final int rootNode;
 
-  /**
-   * The FSA we are using.
-   */
+  /** The FSA we are using. */
   private final FSA fsa;
 
   /** An iterator for walking along the final states of {@link #fsa}. */
@@ -168,7 +152,8 @@ public class Speller {
   }
 
   private void createReplacementsMaps() {
-    for (Map.Entry<String, List<String>> entry : dictionaryMetadata.getReplacementPairs().entrySet()) {
+    for (Map.Entry<String, List<String>> entry :
+        dictionaryMetadata.getReplacementPairs().entrySet()) {
       String rawKey = entry.getKey();
       boolean startAnchor = isStartAnchored(rawKey);
       boolean endAnchor = isEndAnchored(rawKey);
@@ -223,62 +208,62 @@ public class Speller {
   }
 
   /**
-   * Checks whether the word is misspelled, by performing a series of checks
-   * according to properties of the dictionary.
+   * Checks whether the word is misspelled, by performing a series of checks according to properties
+   * of the dictionary.
    *
-   * If the flag <code>fsa.dict.speller.ignore-punctuation</code> is set, then
-   * all non-alphabetic characters are considered to be correctly spelled.
+   * <p>If the flag <code>fsa.dict.speller.ignore-punctuation</code> is set, then all non-alphabetic
+   * characters are considered to be correctly spelled.
    *
-   * If the flag <code>fsa.dict.speller.ignore-numbers</code> is set, then all
-   * words containing decimal digits are considered to be correctly spelled.
+   * <p>If the flag <code>fsa.dict.speller.ignore-numbers</code> is set, then all words containing
+   * decimal digits are considered to be correctly spelled.
    *
-   * If the flag <code>fsa.dict.speller.ignore-camel-case</code> is set, then
-   * all CamelCase words are considered to be correctly spelled.
+   * <p>If the flag <code>fsa.dict.speller.ignore-camel-case</code> is set, then all CamelCase words
+   * are considered to be correctly spelled.
    *
-   * If the flag <code>fsa.dict.speller.ignore-all-uppercase</code> is set, then
-   * all alphabetic words composed of only uppercase characters are considered
-   * to be correctly spelled.
+   * <p>If the flag <code>fsa.dict.speller.ignore-all-uppercase</code> is set, then all alphabetic
+   * words composed of only uppercase characters are considered to be correctly spelled.
    *
-   * Otherwise, the word is checked in the dictionary. If the test fails, and
-   * the dictionary does not perform any case conversions (as set by
-   * <code>fsa.dict.speller.convert-case</code> flag), then the method returns
-   * false. In case of case conversions, it is checked whether a non-mixed case
-   * word is found in its lowercase version in the dictionary, and for
-   * all-uppercase words, whether the word is found in the dictionary with the
-   * initial uppercase letter.
+   * <p>Otherwise, the word is checked in the dictionary. If the test fails, and the dictionary does
+   * not perform any case conversions (as set by <code>fsa.dict.speller.convert-case</code> flag),
+   * then the method returns false. In case of case conversions, it is checked whether a non-mixed
+   * case word is found in its lowercase version in the dictionary, and for all-uppercase words,
+   * whether the word is found in the dictionary with the initial uppercase letter.
    *
-   * @param word
-   *          - the word to be checked
+   * @param word - the word to be checked
    * @return true if the word is misspelled
-   **/
+   */
   public boolean isMisspelled(final String word) {
     // dictionaries usually do not contain punctuation
     String wordToCheck = word;
     if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
-      wordToCheck = DictionaryLookup.applyReplacements(word, dictionaryMetadata.getInputConversionPairs());
+      wordToCheck =
+          DictionaryLookup.applyReplacements(word, dictionaryMetadata.getInputConversionPairs());
     }
     boolean isAlphabetic = wordToCheck.length() != 1 || isAlphabetic(wordToCheck.charAt(0));
     return wordToCheck.length() > 0
         && (!dictionaryMetadata.isIgnoringPunctuation() || isAlphabetic)
         && (!dictionaryMetadata.isIgnoringNumbers() || containsNoDigit(wordToCheck))
         && !(dictionaryMetadata.isIgnoringCamelCase() && isCamelCase(wordToCheck))
-        && !(dictionaryMetadata.isIgnoringAllUppercase() && isAlphabetic && isAllUppercase(wordToCheck))
+        && !(dictionaryMetadata.isIgnoringAllUppercase()
+            && isAlphabetic
+            && isAllUppercase(wordToCheck))
         && !isInDictionary(wordToCheck)
-        && (!dictionaryMetadata.isConvertingCase() || 
-            !(!isMixedCase(wordToCheck) && 
-                (isInDictionary(wordToCheck.toLowerCase(dictionaryMetadata.getLocale())) 
-                    || isAllUppercase(wordToCheck) && isInDictionary(initialUppercase(wordToCheck)))));
+        && (!dictionaryMetadata.isConvertingCase()
+            || !(!isMixedCase(wordToCheck)
+                && (isInDictionary(wordToCheck.toLowerCase(dictionaryMetadata.getLocale()))
+                    || isAllUppercase(wordToCheck)
+                        && isInDictionary(initialUppercase(wordToCheck)))));
   }
 
   private CharSequence initialUppercase(final String wordToCheck) {
-    return wordToCheck.substring(0, 1) + wordToCheck.substring(1).toLowerCase(dictionaryMetadata.getLocale());
+    return wordToCheck.substring(0, 1)
+        + wordToCheck.substring(1).toLowerCase(dictionaryMetadata.getLocale());
   }
 
   /**
    * Test whether the word is found in the dictionary.
-   * 
-   * @param word
-   *          the word to be tested
+   *
+   * @param word the word to be tested
    * @return True if it is found.
    */
   public boolean isInDictionary(final CharSequence word) {
@@ -289,36 +274,36 @@ public class Speller {
     }
 
     // Try to find a partial match in the dictionary.
-    final MatchResult match = matcher.match(matchResult, byteBuffer.array(), 0, byteBuffer.remaining(), rootNode);
+    final MatchResult match =
+        matcher.match(matchResult, byteBuffer.array(), 0, byteBuffer.remaining(), rootNode);
 
     // Make sure the word doesn't contain a separator if there is an exact match
     if (containsSeparators && match.kind == EXACT_MATCH) {
       containsSeparators = false;
-      for (int i=0; i<word.length(); i++) {
+      for (int i = 0; i < word.length(); i++) {
         if (word.charAt(i) == dictionaryMetadata.getSeparator()) {
           containsSeparators = true;
           break;
         }
       }
     }
-    
+
     if (match.kind == EXACT_MATCH && !containsSeparators) {
       return true;
     }
 
-    return containsSeparators && match.kind == SEQUENCE_IS_A_PREFIX && byteBuffer.remaining() > 0
+    return containsSeparators
+        && match.kind == SEQUENCE_IS_A_PREFIX
+        && byteBuffer.remaining() > 0
         && fsa.getArc(match.node, dictionaryMetadata.getSeparator()) != 0;
   }
 
   /**
-   * Get the frequency value for a word form. It is taken from the first entry
-   * with this word form.
-   * 
-   * @param word
-   *          the word to be tested
+   * Get the frequency value for a word form. It is taken from the first entry with this word form.
+   *
+   * @param word the word to be tested
    * @return frequency value in range: 0..FREQ_RANGE-1 (0: less frequent).
    */
-
   public int getFrequency(final CharSequence word) {
     if (!dictionaryMetadata.isFrequencyIncluded()) {
       return 0;
@@ -331,7 +316,8 @@ public class Speller {
       return 0;
     }
 
-    final MatchResult match = matcher.match(matchResult, byteBuffer.array(), 0, byteBuffer.remaining(), rootNode);
+    final MatchResult match =
+        matcher.match(matchResult, byteBuffer.array(), 0, byteBuffer.remaining(), rootNode);
     if (match.kind == SEQUENCE_IS_A_PREFIX) {
       final int arc = fsa.getArc(match.node, separator);
       if (arc != 0 && !fsa.isArcFinal(arc)) {
@@ -340,7 +326,7 @@ public class Speller {
           final ByteBuffer bb = finalStatesIterator.next();
           final byte[] ba = bb.array();
           final int bbSize = bb.remaining();
-          //the last byte contains the frequency after a separator
+          // the last byte contains the frequency after a separator
           return ba[bbSize - 1] - FIRST_RANGE_CODE;
         }
       }
@@ -349,18 +335,19 @@ public class Speller {
   }
 
   /**
-   * Propose suggestions for misspelled run-on words. This algorithm is inspired
-   * by spell.cc in s_fsa package by Jan Daciuk.
-   * 
-   * @param original
-   *          The original misspelled word.
+   * Propose suggestions for misspelled run-on words. This algorithm is inspired by spell.cc in
+   * s_fsa package by Jan Daciuk.
+   *
+   * @param original The original misspelled word.
    * @return The list of suggested pairs, as CandidateData with space-concatenated strings.
    */
   public List<CandidateData> replaceRunOnWordCandidates(final String original) {
     final List<CandidateData> candidates = new ArrayList<>();
     String wordToCheck = original;
     if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
-      wordToCheck = DictionaryLookup.applyReplacements(original, dictionaryMetadata.getInputConversionPairs());
+      wordToCheck =
+          DictionaryLookup.applyReplacements(
+              original, dictionaryMetadata.getInputConversionPairs());
     }
     if (!isInDictionary(wordToCheck) && dictionaryMetadata.isSupportingRunOnWords()) {
       Locale locale = dictionaryMetadata.getLocale();
@@ -368,12 +355,13 @@ public class Speller {
         // chop from left to right
         final String prefix = wordToCheck.substring(0, i);
         final String suffix = wordToCheck.substring(i);
-        if (isInDictionary(suffix) 
+        if (isInDictionary(suffix)
             // camel case words: e.g. GreatElephant
             || (!isNotCapitalizedWord(suffix) && isInDictionary(suffix.toLowerCase(locale)))) {
           if (isInDictionary(prefix)) {
             addReplacement(candidates, prefix + " " + suffix);
-          } else if (Character.isUpperCase(prefix.charAt(0)) && isInDictionary(prefix.toLowerCase(locale))) {
+          } else if (Character.isUpperCase(prefix.charAt(0))
+              && isInDictionary(prefix.toLowerCase(locale))) {
             // a word that's uppercase just because used at sentence start
             addReplacement(candidates, prefix + " " + suffix);
           }
@@ -384,11 +372,10 @@ public class Speller {
   }
 
   /**
-   * Propose suggestions for misspelled run-on words. This algorithm is inspired
-   * by spell.cc in s_fsa package by Jan Daciuk.
+   * Propose suggestions for misspelled run-on words. This algorithm is inspired by spell.cc in
+   * s_fsa package by Jan Daciuk.
    *
-   * @param original
-   *          The original misspelled word.
+   * @param original The original misspelled word.
    * @return The list of suggested pairs, as space-concatenated strings.
    */
   public List<String> replaceRunOnWords(final String original) {
@@ -404,21 +391,24 @@ public class Speller {
     if (dictionaryMetadata.getOutputConversionPairs().isEmpty()) {
       candidates.add(new CandidateData(replacement, 1));
     } else {
-      candidates.add(new CandidateData(DictionaryLookup.applyReplacements(replacement,
-          dictionaryMetadata.getOutputConversionPairs()), 1));
+      candidates.add(
+          new CandidateData(
+              DictionaryLookup.applyReplacements(
+                  replacement, dictionaryMetadata.getOutputConversionPairs()),
+              1));
     }
   }
 
   /**
    * Find similar words even if the original word is a correct word that exists in the dictionary
-   * 
+   *
    * @param word The original word.
    * @return A list of suggested candidate replacements.
    */
   public ArrayList<CandidateData> findSimilarWordCandidates(String word) {
     return findReplacementCandidates(word, true);
   }
-  
+
   public ArrayList<String> findSimilarWords(String word) {
     final List<CandidateData> result = findSimilarWordCandidates(word);
     final ArrayList<String> resultSuggestions = new ArrayList<>(result.size());
@@ -427,12 +417,11 @@ public class Speller {
     }
     return resultSuggestions;
   }
-  
-  
+
   /**
-   * Find suggestions by using K. Oflazer's algorithm. See Jan Daciuk's s_fsa
-   * package, spell.cc for further explanation.
-   * 
+   * Find suggestions by using K. Oflazer's algorithm. See Jan Daciuk's s_fsa package, spell.cc for
+   * further explanation.
+   *
    * @param word The original misspelled word.
    * @return A list of suggested replacements.
    */
@@ -446,11 +435,10 @@ public class Speller {
     return resultSuggestions;
   }
 
-  
   /**
-   * Find and return suggestions by using K. Oflazer's algorithm. See Jan Daciuk's s_fsa
-   * package, spell.cc for further explanation. This method is identical to
-   * {@link #findReplacements}, but returns candidate terms with their edit distance scores.
+   * Find and return suggestions by using K. Oflazer's algorithm. See Jan Daciuk's s_fsa package,
+   * spell.cc for further explanation. This method is identical to {@link #findReplacements}, but
+   * returns candidate terms with their edit distance scores.
    *
    * @param word The original misspelled word.
    * @return A list of suggested candidate replacements.
@@ -458,17 +446,21 @@ public class Speller {
   public ArrayList<CandidateData> findReplacementCandidates(String word) {
     return findReplacementCandidates(word, false);
   }
-  
-  private ArrayList<CandidateData> findReplacementCandidates(String word, boolean evenIfWordInDictionary) {
+
+  private ArrayList<CandidateData> findReplacementCandidates(
+      String word, boolean evenIfWordInDictionary) {
     hMatrix.reset();
     if (!dictionaryMetadata.getInputConversionPairs().isEmpty()) {
       word = DictionaryLookup.applyReplacements(word, dictionaryMetadata.getInputConversionPairs());
     }
 
-    // candidate strings, including same additional data such as edit distance from the original word.
+    // candidate strings, including same additional data such as edit distance from the original
+    // word.
     List<CandidateData> candidates = new ArrayList<>();
 
-    if (word.length() > 0 && word.length() < MAX_WORD_LENGTH && (!isInDictionary(word) || evenIfWordInDictionary)) {
+    if (word.length() > 0
+        && word.length() < MAX_WORD_LENGTH
+        && (!isInDictionary(word) || evenIfWordInDictionary)) {
       List<String> wordsToCheck = new ArrayList<>();
       if (replacementsTheRest != null && word.length() > 1) {
         for (final String wordChecked : getAllReplacements(word, 0, 0)) {
@@ -478,14 +470,15 @@ public class Speller {
             String lowerWord = wordChecked.toLowerCase(dictionaryMetadata.getLocale());
             String upperWord = wordChecked.toUpperCase(dictionaryMetadata.getLocale());
             if (isInDictionary(lowerWord)) {
-              //add the word as it is in the dictionary, not mixed-case versions of it
+              // add the word as it is in the dictionary, not mixed-case versions of it
               candidates.add(new CandidateData(lowerWord, 0));
             }
             if (isInDictionary(upperWord)) {
               candidates.add(new CandidateData(upperWord, 0));
             }
             if (lowerWord.length() > 1) {
-              String firstUpperWord = Character.toUpperCase(lowerWord.charAt(0)) + lowerWord.substring(1);
+              String firstUpperWord =
+                  Character.toUpperCase(lowerWord.charAt(0)) + lowerWord.substring(1);
               if (isInDictionary(firstUpperWord)) {
                 candidates.add(new CandidateData(firstUpperWord, 0));
               }
@@ -507,7 +500,8 @@ public class Speller {
         }
         wordProcessed = wordChecked.toCharArray();
         wordLen = wordProcessed.length;
-        if (wordLen < MIN_WORD_LENGTH && i > 2) { // three-letter replacements make little sense anyway
+        if (wordLen < MIN_WORD_LENGTH
+            && i > 2) { // three-letter replacements make little sense anyway
           break;
         }
         candidate = new char[MAX_WORD_LENGTH];
@@ -526,7 +520,9 @@ public class Speller {
     final Set<String> words = new HashSet<>();
     final ArrayList<CandidateData> result = new ArrayList<>(candidates.size());
     for (final CandidateData cd : candidates) {
-      String replaced = DictionaryLookup.applyReplacements(cd.getWord(), dictionaryMetadata.getOutputConversionPairs());
+      String replaced =
+          DictionaryLookup.applyReplacements(
+              cd.getWord(), dictionaryMetadata.getOutputConversionPairs());
       // Add only the first occurrence of a given word.
       if (words.add(replaced) && !replaced.equals(word)) {
         result.add(new CandidateData(replaced, cd.origDistance));
@@ -536,8 +532,16 @@ public class Speller {
     return result;
   }
 
-  private void findRepl(List<CandidateData> candidates, final int depth, final int node, final byte[] prevBytes, final int wordIndex, final int candIndex,
-      final int minLookbackWordIndex, final String lastAnyToOneSource, final char lastAnyToOneTarget) {
+  private void findRepl(
+      List<CandidateData> candidates,
+      final int depth,
+      final int node,
+      final byte[] prevBytes,
+      final int wordIndex,
+      final int candIndex,
+      final int minLookbackWordIndex,
+      final String lastAnyToOneSource,
+      final char lastAnyToOneTarget) {
     int dist = 0;
     for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
       byteBuffer = BufferUtils.clearAndEnsureCapacity(byteBuffer, prevBytes.length + 1);
@@ -553,7 +557,16 @@ public class Speller {
         byteBuffer.position(0);
         byteBuffer.get(prev);
         if (!fsa.isArcTerminal(arc)) {
-          findRepl(candidates, depth, fsa.getEndNode(arc), prev, wordIndex, candIndex, minLookbackWordIndex, lastAnyToOneSource, lastAnyToOneTarget); // note: depth is not incremented
+          findRepl(
+              candidates,
+              depth,
+              fsa.getEndNode(arc),
+              prev,
+              wordIndex,
+              candIndex,
+              minLookbackWordIndex,
+              lastAnyToOneSource,
+              lastAnyToOneTarget); // note: depth is not incremented
         }
         byteBuffer.clear();
       } else if (!c.isError()) { // unmappable characters are silently discarded
@@ -565,9 +578,17 @@ public class Speller {
 
         int lengthReplacement;
         // replacement "any to two"
-        if ((lengthReplacement = matchAnyToTwo(wordIndex, candIndex, minLookbackWordIndex, lastAnyToOneSource, lastAnyToOneTarget)) > 0) {
+        if ((lengthReplacement =
+                matchAnyToTwo(
+                    wordIndex,
+                    candIndex,
+                    minLookbackWordIndex,
+                    lastAnyToOneSource,
+                    lastAnyToOneTarget))
+            > 0) {
           // the replacement takes place at the end of the candidate
-          if (isEndOfCandidate(arc, wordIndex) && (dist = hMatrix.get(depth - 1, depth - 1)) <= effectEditDistance) {
+          if (isEndOfCandidate(arc, wordIndex)
+              && (dist = hMatrix.get(depth - 1, depth - 1)) <= effectEditDistance) {
             if (Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 2)) > 0) {
               // there are extra letters in the word after the replacement
               dist = dist + Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 2));
@@ -579,15 +600,24 @@ public class Speller {
           if (isArcNotTerminal(arc, candIndex)) {
             int x = hMatrix.get(depth, depth);
             hMatrix.set(depth, depth, hMatrix.get(depth - 1, depth - 1));
-            findRepl(candidates, Math.max(0, depth), fsa.getEndNode(arc), new byte[0], wordIndex + lengthReplacement - 1,
-                candIndex + 1, minLookbackWordIndex, lastAnyToOneSource, lastAnyToOneTarget);
+            findRepl(
+                candidates,
+                Math.max(0, depth),
+                fsa.getEndNode(arc),
+                new byte[0],
+                wordIndex + lengthReplacement - 1,
+                candIndex + 1,
+                minLookbackWordIndex,
+                lastAnyToOneSource,
+                lastAnyToOneTarget);
             hMatrix.set(depth, depth, x);
           }
         }
-        //replacement "any to one"
+        // replacement "any to one"
         if ((lengthReplacement = matchAnyToOne(wordIndex, candIndex)) > 0) {
           // the replacement takes place at the end of the candidate
-          if (isEndOfCandidate(arc, wordIndex) && (dist = hMatrix.get(depth, depth)) <= effectEditDistance) {
+          if (isEndOfCandidate(arc, wordIndex)
+              && (dist = hMatrix.get(depth, depth)) <= effectEditDistance) {
             if (Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 1)) > 0) {
               // there are extra letters in the word after the replacement
               dist = dist + Math.abs(wordLen - 1 - (wordIndex + lengthReplacement - 1));
@@ -598,19 +628,36 @@ public class Speller {
           }
           if (isArcNotTerminal(arc, candIndex)) {
             String newAnyToOneSource = new String(wordProcessed, wordIndex, lengthReplacement);
-            findRepl(candidates, depth, fsa.getEndNode(arc), new byte[0], wordIndex + lengthReplacement, candIndex + 1,
-                wordIndex + lengthReplacement, newAnyToOneSource, candidate[candIndex]);
+            findRepl(
+                candidates,
+                depth,
+                fsa.getEndNode(arc),
+                new byte[0],
+                wordIndex + lengthReplacement,
+                candIndex + 1,
+                wordIndex + lengthReplacement,
+                newAnyToOneSource,
+                candidate[candIndex]);
           }
         }
-        //general
+        // general
         if (cuted(depth, wordIndex, candIndex) <= effectEditDistance) {
           if ((isEndOfCandidate(arc, wordIndex))
-              && (dist = ed(wordLen - 1 - (wordIndex - depth), depth, wordLen - 1, candIndex)) <= effectEditDistance) {
+              && (dist = ed(wordLen - 1 - (wordIndex - depth), depth, wordLen - 1, candIndex))
+                  <= effectEditDistance) {
             candidates.add(new CandidateData(String.valueOf(candidate, 0, candIndex + 1), dist));
           }
           if (isArcNotTerminal(arc, candIndex)) {
-            findRepl(candidates, depth + 1, fsa.getEndNode(arc), new byte[0], wordIndex + 1, candIndex + 1,
-                minLookbackWordIndex, lastAnyToOneSource, lastAnyToOneTarget);
+            findRepl(
+                candidates,
+                depth + 1,
+                fsa.getEndNode(arc),
+                new byte[0],
+                wordIndex + 1,
+                candIndex + 1,
+                minLookbackWordIndex,
+                lastAnyToOneSource,
+                lastAnyToOneTarget);
           }
         }
       }
@@ -624,7 +671,7 @@ public class Speller {
 
   private boolean isEndOfCandidate(final int arc, final int wordIndex) {
     return (fsa.isArcFinal(arc) || isBeforeSeparator(arc))
-    //candidate has proper length
+        // candidate has proper length
         && (Math.abs(wordLen - 1 - (wordIndex)) <= effectEditDistance);
   }
 
@@ -638,7 +685,7 @@ public class Speller {
 
   /**
    * Calculates edit distance.
-   * 
+   *
    * @param i length of first word (here: misspelled) - 1;
    * @param j length of second word (here: candidate) - 1.
    * @param wordIndex (TODO: javadoc?)
@@ -652,7 +699,9 @@ public class Speller {
     if (areEqual(wordProcessed[wordIndex], candidate[candIndex])) {
       // last characters are the same
       result = hMatrix.get(i, j);
-    } else if (wordIndex > 0 && candIndex > 0 && wordProcessed[wordIndex] == candidate[candIndex - 1]
+    } else if (wordIndex > 0
+        && candIndex > 0
+        && wordProcessed[wordIndex] == candidate[candIndex - 1]
         && wordProcessed[wordIndex - 1] == candidate[candIndex]) {
       // last two characters are transposed
       a = hMatrix.get(i - 1, j - 1); // transposition, e.g. ababab, ababba
@@ -689,11 +738,12 @@ public class Speller {
         return true;
       }
       if (dictionaryMetadata.isConvertingCase()) {
-        //again case conversion only when needed -- we
+        // again case conversion only when needed -- we
         // do not need String.lowercase because we only check
         // single characters, so a cheaper method is enough
         if (Character.isLetter(xn.charAt(0))) {
-          boolean testNeeded = Character.isLowerCase(xn.charAt(0)) != Character.isLowerCase(yn.charAt(0));
+          boolean testNeeded =
+              Character.isLowerCase(xn.charAt(0)) != Character.isLowerCase(yn.charAt(0));
           if (testNeeded) {
             return Character.toLowerCase(xn.charAt(0)) == Character.toLowerCase(yn.charAt(0));
           }
@@ -706,7 +756,7 @@ public class Speller {
 
   /**
    * Calculates cut-off edit distance.
-   * 
+   *
    * @param depth current length of candidates.
    * @param wordIndex (TODO: javadoc?)
    * @param candIndex (TODO: javadoc?)
@@ -714,7 +764,10 @@ public class Speller {
    */
   public int cuted(final int depth, final int wordIndex, final int candIndex) {
     final int l = Math.max(0, depth - effectEditDistance); // min chars from word to consider - 1
-    final int u = Math.min(wordLen - 1 - (wordIndex - depth), depth + effectEditDistance); // max chars from word to
+    final int u =
+        Math.min(
+            wordLen - 1 - (wordIndex - depth),
+            depth + effectEditDistance); // max chars from word to
     // consider - 1
     int minEd = effectEditDistance + 1; // what is to be computed
     int wi = wordIndex + l - depth;
@@ -734,7 +787,9 @@ public class Speller {
       for (final Pattern p : replacementsAnyToOne.get(candidate[candIndex])) {
         if (p.startAnchor && wordIndex != 0) continue;
         int i = 0;
-        while (i < p.chars.length && (wordIndex + i) < wordLen && p.chars[i] == wordProcessed[wordIndex + i]) {
+        while (i < p.chars.length
+            && (wordIndex + i) < wordLen
+            && p.chars[i] == wordProcessed[wordIndex + i]) {
           i++;
         }
         if (i == p.chars.length) {
@@ -746,28 +801,38 @@ public class Speller {
     return 0;
   }
 
-  private int matchAnyToTwo(final int wordIndex, final int candIndex,
-      final int minLookbackWordIndex, final String lastAnyToOneSource, final char lastAnyToOneTarget) {
+  private int matchAnyToTwo(
+      final int wordIndex,
+      final int candIndex,
+      final int minLookbackWordIndex,
+      final String lastAnyToOneSource,
+      final char lastAnyToOneTarget) {
     if (candIndex > 0 && candIndex < candidate.length && wordIndex > 0) {
-      char[] twoChar = { candidate[candIndex - 1], candidate[candIndex] };
+      char[] twoChar = {candidate[candIndex - 1], candidate[candIndex]};
       String sTwoChar = new String(twoChar);
       if (replacementsAnyToTwo.containsKey(sTwoChar)) {
         for (final Pattern p : replacementsAnyToTwo.get(sTwoChar)) {
           if (p.startAnchor && wordIndex - 1 != 0) continue;
-          if (p.chars.length == 2 && wordIndex < wordLen && candidate[candIndex - 1] == wordProcessed[wordIndex - 1]
+          if (p.chars.length == 2
+              && wordIndex < wordLen
+              && candidate[candIndex - 1] == wordProcessed[wordIndex - 1]
               && candidate[candIndex] == wordProcessed[wordIndex]) {
-            return 0; //unnecessary replacements
+            return 0; // unnecessary replacements
           }
           int i = 0;
-          while (i < p.chars.length && (wordIndex - 1 + i) < wordLen && p.chars[i] == wordProcessed[wordIndex - 1 + i]) {
+          while (i < p.chars.length
+              && (wordIndex - 1 + i) < wordLen
+              && p.chars[i] == wordProcessed[wordIndex - 1 + i]) {
             i++;
           }
           if (i == p.chars.length) {
             if (p.endAnchor && wordIndex - 1 + i != wordLen) continue;
-            // Reject if this match directly reverses a previous anyToOne match at an overlapping position
+            // Reject if this match directly reverses a previous anyToOne match at an overlapping
+            // position
             if (wordIndex - 1 < minLookbackWordIndex
                 && lastAnyToOneSource != null
-                && p.chars.length == 1 && p.chars[0] == lastAnyToOneTarget
+                && p.chars.length == 1
+                && p.chars[0] == lastAnyToOneTarget
                 && sTwoChar.equals(lastAnyToOneSource)) {
               continue;
             }
@@ -785,23 +850,26 @@ public class Speller {
 
   /**
    * Copy-paste of Character.isAlphabetic() (needed as we require only 1.6)
-   * 
-   * @param codePoint
-   *          The input character.
+   *
+   * @param codePoint The input character.
    * @return True if the character is a Unicode alphabetic character.
    */
   static boolean isAlphabetic(final int codePoint) {
-    return ((1 << Character.UPPERCASE_LETTER | 1 << Character.LOWERCASE_LETTER | 1 << Character.TITLECASE_LETTER
-        | 1 << Character.MODIFIER_LETTER | 1 << Character.OTHER_LETTER | 1 << Character.LETTER_NUMBER) >> Character
-        .getType(codePoint) & 1) != 0;
+    return ((1 << Character.UPPERCASE_LETTER
+                    | 1 << Character.LOWERCASE_LETTER
+                    | 1 << Character.TITLECASE_LETTER
+                    | 1 << Character.MODIFIER_LETTER
+                    | 1 << Character.OTHER_LETTER
+                    | 1 << Character.LETTER_NUMBER)
+                >> Character.getType(codePoint)
+            & 1)
+        != 0;
   }
 
   /**
-   * Checks whether a string contains a digit. Used for ignoring words with
-   * numbers
-   * 
-   * @param s
-   *          Word to be checked.
+   * Checks whether a string contains a digit. Used for ignoring words with numbers
+   *
+   * @param s Word to be checked.
    * @return True if there is a digit inside the word.
    */
   static boolean containsNoDigit(final String s) {
@@ -814,8 +882,8 @@ public class Speller {
   }
 
   /**
-   * Returns true if <code>str</code> is made up of all-uppercase characters
-   * (ignoring characters for which no upper-/lowercase distinction exists).
+   * Returns true if <code>str</code> is made up of all-uppercase characters (ignoring characters
+   * for which no upper-/lowercase distinction exists).
    */
   boolean isAllUppercase(final String str) {
     for (int i = 0; i < str.length(); i++) {
@@ -828,8 +896,8 @@ public class Speller {
   }
 
   /**
-   * Returns true if <code>str</code> is made up of all-lowercase characters
-   * (ignoring characters for which no upper-/lowercase distinction exists).
+   * Returns true if <code>str</code> is made up of all-lowercase characters (ignoring characters
+   * for which no upper-/lowercase distinction exists).
    */
   boolean isNotAllLowercase(final String str) {
     for (int i = 0; i < str.length(); i++) {
@@ -842,8 +910,7 @@ public class Speller {
   }
 
   /**
-   * @param str
-   *          input string
+   * @param str input string
    */
   boolean isNotCapitalizedWord(final String str) {
     if (isNotEmpty(str) && Character.isUpperCase(str.charAt(0))) {
@@ -860,9 +927,8 @@ public class Speller {
 
   /**
    * Helper method to replace calls to "".equals().
-   * 
-   * @param str
-   *          String to check
+   *
+   * @param str String to check
    * @return true if string is empty OR null
    */
   static boolean isNotEmpty(final String str) {
@@ -870,8 +936,7 @@ public class Speller {
   }
 
   /**
-   * @param str
-   *          input str
+   * @param str input str
    * @return Returns true if str is MixedCase.
    */
   boolean isMixedCase(final String str) {
@@ -880,23 +945,22 @@ public class Speller {
 
   /**
    * @param str The string to check.
-   * @return Returns true if str is CamelCase. Note that German compounds with a dash
-   *         (like "Waschmaschinen-Test") are also considered camel case by this method.
+   * @return Returns true if str is CamelCase. Note that German compounds with a dash (like
+   *     "Waschmaschinen-Test") are also considered camel case by this method.
    */
   public boolean isCamelCase(final String str) {
-    return isNotEmpty(str) && 
-           !isAllUppercase(str) && 
-           isNotCapitalizedWord(str) && 
-           Character.isUpperCase(str.charAt(0)) && 
-           (!(str.length() > 1) || Character.isLowerCase(str.charAt(1))) 
-           && isNotAllLowercase(str);
+    return isNotEmpty(str)
+        && !isAllUppercase(str)
+        && isNotCapitalizedWord(str)
+        && Character.isUpperCase(str.charAt(0))
+        && (!(str.length() > 1) || Character.isLowerCase(str.charAt(1)))
+        && isNotAllLowercase(str);
   }
 
   /**
    * Used to determine whether the dictionary supports case conversions.
-   * 
-   * @return boolean value that answers this question in a deep and meaningful
-   *         way.
+   *
+   * @return boolean value that answers this question in a deep and meaningful way.
    * @since 1.9
    */
   public boolean convertsCase() {
@@ -904,12 +968,9 @@ public class Speller {
   }
 
   /**
-   * @param str
-   *          The string to find the replacements for.
-   * @param fromIndex
-   *          The index from which replacements are found.
-   * @param level
-   *          The recursion level. The search stops if level is &gt; MAX_RECURSION_LEVEL.
+   * @param str The string to find the replacements for.
+   * @param fromIndex The index from which replacements are found.
+   * @param level The recursion level. The search stops if level is &gt; MAX_RECURSION_LEVEL.
    * @return A list of all possible replacements of a {#link str} given string
    */
   public List<String> getAllReplacements(final String str, final int fromIndex, final int level) {
@@ -937,11 +998,17 @@ public class Speller {
         auxIndex = sb.indexOf(stripped, 0) == 0 ? 0 : -1;
       } else if (endAnchor) {
         int expectedIndex = sb.length() - stripped.length();
-        auxIndex = (expectedIndex >= fromIndex && sb.indexOf(stripped, expectedIndex) == expectedIndex) ? expectedIndex : -1;
+        auxIndex =
+            (expectedIndex >= fromIndex && sb.indexOf(stripped, expectedIndex) == expectedIndex)
+                ? expectedIndex
+                : -1;
       } else {
         auxIndex = sb.indexOf(auxKey, fromIndex);
       }
-      if (auxIndex > -1 && (auxIndex < index || (auxIndex == index && !(stripped.length() < keyLength)))) { //select the longest possible key
+      if (auxIndex > -1
+          && (auxIndex < index
+              || (auxIndex == index
+                  && !(stripped.length() < keyLength)))) { // select the longest possible key
         index = auxIndex;
         key = auxKey;
         keyLength = stripped.length();
@@ -952,12 +1019,15 @@ public class Speller {
       for (final String rep : replacementsTheRest.get(key)) {
         // start a branch without replacement (only once per key)
         if (!found) {
-          replaced.addAll(getAllReplacements(str, index + strippedKeyForSelected.length(), level + 1));
+          replaced.addAll(
+              getAllReplacements(str, index + strippedKeyForSelected.length(), level + 1));
           found = true;
         }
         // avoid unnecessary replacements (ex. don't replace L by L·L when L·L already present)
         int ind = sb.indexOf(rep, fromIndex - rep.length() + 1);
-        if (rep.length() > strippedKeyForSelected.length() && ind > -1 && (ind == index || ind == index - rep.length() + 1)) {
+        if (rep.length() > strippedKeyForSelected.length()
+            && ind > -1
+            && (ind == index || ind == index - rep.length() + 1)) {
           continue;
         }
         // start a branch with replacement
@@ -974,13 +1044,10 @@ public class Speller {
   }
 
   /**
-   * Sets up the word and candidate. Used only to test the edit distance in
-   * JUnit tests.
-   * 
-   * @param word
-   *          the first word
-   * @param candidate
-   *          the second word used for edit distance calculation
+   * Sets up the word and candidate. Used only to test the edit distance in JUnit tests.
+   *
+   * @param word the first word
+   * @param candidate the second word used for edit distance calculation
    */
   void setWordAndCandidate(final String word, final String candidate) {
     wordProcessed = word.toCharArray();
@@ -1003,8 +1070,8 @@ public class Speller {
   }
 
   /**
-   * Used to sort candidates according to edit distance, and possibly according
-   * to their frequency in the future.
+   * Used to sort candidates according to edit distance, and possibly according to their frequency
+   * in the future.
    */
   public final class CandidateData implements Comparable<CandidateData> {
     private final String word;

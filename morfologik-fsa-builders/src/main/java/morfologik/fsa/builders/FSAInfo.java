@@ -1,19 +1,13 @@
 package morfologik.fsa.builders;
 
+import com.carrotsearch.hppc.IntIntHashMap;
 import java.util.BitSet;
-
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSA5;
 
-import com.carrotsearch.hppc.IntIntHashMap;
-
-/**
- * Compute additional information about an FSA: number of arcs, nodes, etc.
- */
+/** Compute additional information about an FSA: number of arcs, nodes, etc. */
 public final class FSAInfo {
-  /**
-   * Computes the exact number of states and nodes by recursively traversing the FSA.
-   */
+  /** Computes the exact number of states and nodes by recursively traversing the FSA. */
   private static class NodeVisitor {
     final BitSet visitedArcs = new BitSet();
     final BitSet visitedNodes = new BitSet();
@@ -49,9 +43,7 @@ public final class FSAInfo {
     }
   }
 
-  /**
-   * Computes the exact number of final states.
-   */
+  /** Computes the exact number of final states. */
   private static class FinalStateVisitor {
     final IntIntHashMap visitedNodes = new IntIntHashMap();
 
@@ -69,8 +61,7 @@ public final class FSAInfo {
 
       int fromHere = 0;
       for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
-        if (fsa.isArcFinal(arc))
-          fromHere++;
+        if (fsa.isArcFinal(arc)) fromHere++;
 
         if (!fsa.isArcTerminal(arc)) {
           fromHere += visitNode(fsa.getEndNode(arc));
@@ -81,35 +72,27 @@ public final class FSAInfo {
     }
   }
 
-  /**
-   * Number of nodes in the automaton.
-   */
+  /** Number of nodes in the automaton. */
   public final int nodeCount;
 
   /**
-   * Number of arcs in the automaton, excluding an arcs from the zero node (initial) and an arc from the start node to
-   * the root node.
+   * Number of arcs in the automaton, excluding an arcs from the zero node (initial) and an arc from
+   * the start node to the root node.
    */
   public final int arcsCount;
 
-  /**
-   * Total number of arcs, counting arcs that physically overlap due to merging.
-   */
+  /** Total number of arcs, counting arcs that physically overlap due to merging. */
   public final int arcsCountTotal;
 
-  /**
-   * Number of final states (number of input sequences stored in the automaton).
-   */
+  /** Number of final states (number of input sequences stored in the automaton). */
   public final int finalStatesCount;
 
-  /**
-   * Arcs size (in serialized form).
-   */
+  /** Arcs size (in serialized form). */
   public final int size;
 
   /*
-	 * 
-	 */
+   *
+   */
   public FSAInfo(FSA fsa) {
     final NodeVisitor w = new NodeVisitor(fsa);
     int root = fsa.getRootNode();
@@ -132,8 +115,8 @@ public final class FSAInfo {
   }
 
   /*
-	 * 
-	 */
+   *
+   */
   public FSAInfo(int nodeCount, int arcsCount, int arcsCountTotal, int finalStatesCount) {
     this.nodeCount = nodeCount;
     this.arcsCount = arcsCount;
@@ -143,11 +126,19 @@ public final class FSAInfo {
   }
 
   /*
-	 * 
-	 */
+   *
+   */
   @Override
   public String toString() {
-    return "Nodes: " + nodeCount + ", arcs visited: " + arcsCount + ", arcs total: " + arcsCountTotal
-        + ", final states: " + finalStatesCount + ", size: " + size;
+    return "Nodes: "
+        + nodeCount
+        + ", arcs visited: "
+        + arcsCount
+        + ", arcs total: "
+        + arcsCountTotal
+        + ", final states: "
+        + finalStatesCount
+        + ", size: "
+        + size;
   }
 }

@@ -1,31 +1,30 @@
 package morfologik.fsa.builders;
 
-import java.util.*;
-
-import morfologik.fsa.FSA;
 import static morfologik.fsa.builders.ConstantArcSizeFSA.*;
 
+import java.util.*;
+import morfologik.fsa.FSA;
+
 /**
- * Fast, memory-conservative finite state automaton builder, returning an
- * in-memory {@link FSA} that is a tradeoff between construction speed and
- * memory consumption. Use serializers to compress the returned automaton into
- * more compact form.
- * 
+ * Fast, memory-conservative finite state automaton builder, returning an in-memory {@link FSA} that
+ * is a tradeoff between construction speed and memory consumption. Use serializers to compress the
+ * returned automaton into more compact form.
+ *
  * @see FSASerializer
  */
 public final class FSABuilder {
   /**
    * Debug and information constants.
-   * 
+   *
    * @see FSABuilder#getInfo()
    */
   public enum InfoEntry {
     SERIALIZATION_BUFFER_SIZE("Serialization buffer size"),
-    SERIALIZATION_BUFFER_REALLOCATIONS("Serialization buffer reallocs"), 
-    CONSTANT_ARC_AUTOMATON_SIZE("Constant arc FSA size"), 
-    MAX_ACTIVE_PATH_LENGTH("Max active path"), 
-    STATE_REGISTRY_TABLE_SLOTS("Registry hash slots"), 
-    STATE_REGISTRY_SIZE("Registry hash entries"), 
+    SERIALIZATION_BUFFER_REALLOCATIONS("Serialization buffer reallocs"),
+    CONSTANT_ARC_AUTOMATON_SIZE("Constant arc FSA size"),
+    MAX_ACTIVE_PATH_LENGTH("Max active path"),
+    STATE_REGISTRY_TABLE_SLOTS("Registry hash slots"),
+    STATE_REGISTRY_SIZE("Registry hash entries"),
     ESTIMATED_MEMORY_CONSUMPTION_MB("Estimated mem consumption (MB)");
 
     private final String stringified;
@@ -41,98 +40,76 @@ public final class FSABuilder {
   }
 
   /** A megabyte. */
-  private final static int MB = 1024 * 1024;
+  private static final int MB = 1024 * 1024;
 
-  /**
-   * Internal serialized FSA buffer expand ratio.
-   */
-  private final static int BUFFER_GROWTH_SIZE = 5 * MB;
+  /** Internal serialized FSA buffer expand ratio. */
+  private static final int BUFFER_GROWTH_SIZE = 5 * MB;
 
-  /**
-   * Maximum number of labels from a single state.
-   */
-  private final static int MAX_LABELS = 256;
+  /** Maximum number of labels from a single state. */
+  private static final int MAX_LABELS = 256;
 
-  /**
-   * A comparator comparing full byte arrays. Unsigned byte comparisons ('C'-locale).
-   */
-  public static final Comparator<byte[]> LEXICAL_ORDERING = new Comparator<byte[]>() {
-    public int compare(byte[] o1, byte[] o2) {
-      return FSABuilder.compare(o1, 0, o1.length, o2, 0, o2.length);
-    }
-  };
+  /** A comparator comparing full byte arrays. Unsigned byte comparisons ('C'-locale). */
+  public static final Comparator<byte[]> LEXICAL_ORDERING =
+      new Comparator<byte[]>() {
+        public int compare(byte[] o1, byte[] o2) {
+          return FSABuilder.compare(o1, 0, o1.length, o2, 0, o2.length);
+        }
+      };
 
-  /**
-   * Internal serialized FSA buffer expand ratio.
-   */
+  /** Internal serialized FSA buffer expand ratio. */
   private final int bufferGrowthSize;
 
   /**
-   * Holds serialized and mutable states. Each state is a sequential list of
-   * arcs, the last arc is marked with {@link #BIT_ARC_LAST}.
+   * Holds serialized and mutable states. Each state is a sequential list of arcs, the last arc is
+   * marked with {@link #BIT_ARC_LAST}.
    */
   private byte[] serialized = new byte[0];
 
   /**
-   * Number of bytes already taken in {@link #serialized}. Start from 1 to keep
-   * 0 a sentinel value (for the hash set and final state).
+   * Number of bytes already taken in {@link #serialized}. Start from 1 to keep 0 a sentinel value
+   * (for the hash set and final state).
    */
   private int size;
 
   /**
-   * States on the "active path" (still mutable). Values are addresses of each
-   * state's first arc.
+   * States on the "active path" (still mutable). Values are addresses of each state's first arc.
    */
   private int[] activePath = new int[0];
 
-  /**
-   * Current length of the active path.
-   */
+  /** Current length of the active path. */
   private int activePathLen;
 
-  /**
-   * The next offset at which an arc will be added to the given state on
-   * {@link #activePath}.
-   */
+  /** The next offset at which an arc will be added to the given state on {@link #activePath}. */
   private int[] nextArcOffset = new int[0];
 
-  /**
-   * Root state. If negative, the automaton has been built already and cannot be
-   * extended.
-   */
+  /** Root state. If negative, the automaton has been built already and cannot be extended. */
   private int root;
 
   /**
-   * An epsilon state. The first and only arc of this state points either to the
-   * root or to the terminal state, indicating an empty automaton.
+   * An epsilon state. The first and only arc of this state points either to the root or to the
+   * terminal state, indicating an empty automaton.
    */
   private int epsilon;
 
   /**
-   * Hash set of state addresses in {@link #serialized}, hashed by
-   * {@link #hash(int, int)}. Zero reserved for an unoccupied slot.
+   * Hash set of state addresses in {@link #serialized}, hashed by {@link #hash(int, int)}. Zero
+   * reserved for an unoccupied slot.
    */
   private int[] hashSet = new int[2];
 
-  /**
-   * Number of entries currently stored in {@link #hashSet}.
-   */
+  /** Number of entries currently stored in {@link #hashSet}. */
   private int hashSize = 0;
 
   /**
-   * Previous sequence added to the automaton in {@link #add(byte[], int, int)}.
-   * Used in assertions only.
+   * Previous sequence added to the automaton in {@link #add(byte[], int, int)}. Used in assertions
+   * only.
    */
   private byte[] previous;
 
-  /**
-   * Information about the automaton and its compilation.
-   */
+  /** Information about the automaton and its compilation. */
   private TreeMap<InfoEntry, Object> info;
 
-  /**
-   * {@link #previous} sequence's length, used in assertions only.
-   */
+  /** {@link #previous} sequence's length, used in assertions only. */
   private int previousLength;
 
   /** */
@@ -156,19 +133,22 @@ public final class FSABuilder {
   }
 
   /**
-   * Add a single sequence of bytes to the FSA. The input must be
-   * lexicographically greater than any previously added sequence.
-   * 
-   * @param sequence The array holding input sequence of bytes. 
+   * Add a single sequence of bytes to the FSA. The input must be lexicographically greater than any
+   * previously added sequence.
+   *
+   * @param sequence The array holding input sequence of bytes.
    * @param start Starting offset (inclusive)
    * @param len Length of the input sequence (at least 1 byte).
    */
   public void add(byte[] sequence, int start, int len) {
     assert serialized != null : "Automaton already built.";
-    assert previous == null || len == 0 || compare(previous, 0, previousLength, sequence, start, len) <= 0 : "Input must be sorted: "
-        + Arrays.toString(Arrays.copyOf(previous, previousLength))
-        + " >= "
-        + Arrays.toString(Arrays.copyOfRange(sequence, start, len));
+    assert previous == null
+            || len == 0
+            || compare(previous, 0, previousLength, sequence, start, len) <= 0
+        : "Input must be sorted: "
+            + Arrays.toString(Arrays.copyOf(previous, previousLength))
+            + " >= "
+            + Arrays.toString(Arrays.copyOfRange(sequence, start, len));
     assert setPrevious(sequence, start, len);
 
     // Determine common prefix length.
@@ -224,20 +204,21 @@ public final class FSABuilder {
     info.put(InfoEntry.MAX_ACTIVE_PATH_LENGTH, activePath.length);
     info.put(InfoEntry.STATE_REGISTRY_TABLE_SLOTS, hashSet.length);
     info.put(InfoEntry.STATE_REGISTRY_SIZE, hashSize);
-    info.put(InfoEntry.ESTIMATED_MEMORY_CONSUMPTION_MB, 
+    info.put(
+        InfoEntry.ESTIMATED_MEMORY_CONSUMPTION_MB,
         (this.serialized.length + this.hashSet.length * 4) / (double) MB);
 
-    final FSA fsa = new ConstantArcSizeFSA(java.util.Arrays.copyOf(this.serialized, this.size), epsilon);
+    final FSA fsa =
+        new ConstantArcSizeFSA(java.util.Arrays.copyOf(this.serialized, this.size), epsilon);
     this.serialized = null;
     this.hashSet = null;
     return fsa;
   }
 
   /**
-   * Build a minimal, deterministic automaton from a sorted list of byte
-   * sequences.
-   * 
-   * @param input Input sequences to build automaton from. 
+   * Build a minimal, deterministic automaton from a sorted list of byte sequences.
+   *
+   * @param input Input sequences to build automaton from.
    * @return Returns the automaton encoding all input sequences.
    */
   public static FSA build(byte[][] input) {
@@ -251,10 +232,9 @@ public final class FSABuilder {
   }
 
   /**
-   * Build a minimal, deterministic automaton from an iterable list of byte
-   * sequences.
-   * 
-   * @param input Input sequences to build automaton from. 
+   * Build a minimal, deterministic automaton from an iterable list of byte sequences.
+   *
+   * @param input Input sequences to build automaton from.
    * @return Returns the automaton encoding all input sequences.
    */
   public static FSA build(Iterable<byte[]> input) {
@@ -290,9 +270,7 @@ public final class FSABuilder {
     return serialized[arc + LABEL_OFFSET];
   }
 
-  /**
-   * Fills the target state address of an arc.
-   */
+  /** Fills the target state address of an arc. */
   private void setArcTarget(int arc, int state) {
     arc += ADDRESS_OFFSET + TARGET_ADDRESS_SIZE;
     for (int i = 0; i < TARGET_ADDRESS_SIZE; i++) {
@@ -301,15 +279,13 @@ public final class FSABuilder {
     }
   }
 
-  /**
-   * Returns the address of an arc.
-   */
+  /** Returns the address of an arc. */
   private int getArcTarget(int arc) {
     arc += ADDRESS_OFFSET;
-    return (serialized[arc]           ) << 24 | 
-           (serialized[arc + 1] & 0xff) << 16 | 
-           (serialized[arc + 2] & 0xff) << 8  |
-           (serialized[arc + 3] & 0xff);
+    return (serialized[arc]) << 24
+        | (serialized[arc + 1] & 0xff) << 16
+        | (serialized[arc + 2] & 0xff) << 8
+        | (serialized[arc + 3] & 0xff);
   }
 
   /**
@@ -330,9 +306,9 @@ public final class FSABuilder {
   }
 
   /**
-   * Freeze a state: try to find an equivalent state in the interned states
-   * dictionary first, if found, return it, otherwise, serialize the mutable
-   * state at <code>activePathIndex</code> and return it.
+   * Freeze a state: try to find an equivalent state in the interned states dictionary first, if
+   * found, return it, otherwise, serialize the mutable state at <code>activePathIndex</code> and
+   * return it.
    */
   private int freezeState(final int activePathIndex) {
     final int start = activePath[activePathIndex];
@@ -345,12 +321,11 @@ public final class FSABuilder {
     // Try to locate a state with an identical content in the hash set.
     final int bucketMask = (hashSet.length - 1);
     int slot = hash(start, len) & bucketMask;
-    for (int i = 0;;) {
+    for (int i = 0; ; ) {
       int state = hashSet[slot];
       if (state == 0) {
         state = hashSet[slot] = serialize(activePathIndex);
-        if (++hashSize > hashSet.length / 2)
-          expandAndRehash();
+        if (++hashSize > hashSet.length / 2) expandAndRehash();
         return state;
       } else if (equivalent(state, start, len)) {
         return state;
@@ -360,9 +335,7 @@ public final class FSABuilder {
     }
   }
 
-  /**
-   * Reallocate and rehash the hash set.
-   */
+  /** Reallocate and rehash the hash set. */
   private void expandAndRehash() {
     final int[] newHashSet = new int[hashSet.length * 2];
     final int bucketMask = (newHashSet.length - 1);
@@ -371,7 +344,7 @@ public final class FSABuilder {
       final int state = hashSet[j];
       if (state > 0) {
         int slot = hash(state, stateLength(state)) & bucketMask;
-        for (int i = 0; newHashSet[slot] > 0;) {
+        for (int i = 0; newHashSet[slot] > 0; ) {
           slot = (slot + (++i)) & bucketMask;
         }
         newHashSet[slot] = state;
@@ -380,9 +353,7 @@ public final class FSABuilder {
     this.hashSet = newHashSet;
   }
 
-  /**
-   * The total length of the serialized state data (all arcs).
-   */
+  /** The total length of the serialized state data (all arcs). */
   private int stateLength(int state) {
     int arc = state;
     while (!isArcLast(arc)) {
@@ -391,24 +362,16 @@ public final class FSABuilder {
     return arc - state + ARC_SIZE;
   }
 
-  /**
-   * Return <code>true</code> if two regions in {@link #serialized} are
-   * identical.
-   */
+  /** Return <code>true</code> if two regions in {@link #serialized} are identical. */
   private boolean equivalent(int start1, int start2, int len) {
-    if (start1 + len > size || start2 + len > size)
-      return false;
+    if (start1 + len > size || start2 + len > size) return false;
 
-    while (len-- > 0)
-      if (serialized[start1++] != serialized[start2++])
-        return false;
+    while (len-- > 0) if (serialized[start1++] != serialized[start2++]) return false;
 
     return true;
   }
 
-  /**
-   * Serialize a given state on the active path.
-   */
+  /** Serialize a given state on the active path. */
   private int serialize(final int activePathIndex) {
     expandBuffers();
 
@@ -421,9 +384,7 @@ public final class FSABuilder {
     return newState;
   }
 
-  /**
-   * Hash code of a fragment of {@link #serialized} array.
-   */
+  /** Hash code of a fragment of {@link #serialized} array. */
   private int hash(int start, int byteCount) {
     assert byteCount % ARC_SIZE == 0 : "Not an arc multiply?";
 
@@ -431,16 +392,13 @@ public final class FSABuilder {
     for (int arcs = byteCount / ARC_SIZE; --arcs >= 0; start += ARC_SIZE) {
       h = 17 * h + getArcLabel(start);
       h = 17 * h + getArcTarget(start);
-      if (isArcFinal(start))
-        h += 17;
+      if (isArcFinal(start)) h += 17;
     }
 
     return h;
   }
 
-  /**
-   * Append a new mutable state to the active path.
-   */
+  /** Append a new mutable state to the active path. */
   private void expandActivePath(int size) {
     if (activePath.length < size) {
       final int p = activePath.length;
@@ -448,14 +406,12 @@ public final class FSABuilder {
       nextArcOffset = java.util.Arrays.copyOf(nextArcOffset, size);
 
       for (int i = p; i < size; i++) {
-        nextArcOffset[i] = activePath[i] = allocateState(/* assume max labels count */MAX_LABELS);
+        nextArcOffset[i] = activePath[i] = allocateState(/* assume max labels count */ MAX_LABELS);
       }
     }
   }
 
-  /**
-   * Expand internal buffers for the next state.
-   */
+  /** Expand internal buffers for the next state. */
   private void expandBuffers() {
     if (this.serialized.length < size + ARC_SIZE * MAX_LABELS) {
       serialized = java.util.Arrays.copyOf(serialized, serialized.length + bufferGrowthSize);
@@ -465,7 +421,7 @@ public final class FSABuilder {
 
   /**
    * Allocate space for a state with the given number of outgoing labels.
-   * 
+   *
    * @return state offset
    */
   private int allocateState(int labels) {
@@ -475,9 +431,7 @@ public final class FSABuilder {
     return state;
   }
 
-  /**
-   * Copy <code>current</code> into an internal buffer.
-   */
+  /** Copy <code>current</code> into an internal buffer. */
   private boolean setPrevious(byte[] sequence, int start, int length) {
     if (previous == null || previous.length < length) {
       previous = new byte[length];
@@ -489,8 +443,8 @@ public final class FSABuilder {
   }
 
   /**
-   * Lexicographic order of input sequences. By default, consistent with the "C"
-   * sort (absolute value of bytes, 0-255).
+   * Lexicographic order of input sequences. By default, consistent with the "C" sort (absolute
+   * value of bytes, 0-255).
    */
   private static int compare(byte[] s1, int start1, int lens1, byte[] s2, int start2, int lens2) {
     final int max = Math.min(lens1, lens2);
@@ -498,8 +452,7 @@ public final class FSABuilder {
     for (int i = 0; i < max; i++) {
       final byte c1 = s1[start1++];
       final byte c2 = s2[start2++];
-      if (c1 != c2)
-        return (c1 & 0xff) - (c2 & 0xff);
+      if (c1 != c2) return (c1 & 0xff) - (c2 & 0xff);
     }
 
     return lens1 - lens2;

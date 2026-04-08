@@ -7,5 +7,4 @@ import com.beust.jcommander.Parameters;
     commandNames = "fsa_dump",
     commandDescription = "Dumps all sequences encoded in an automaton.")
 @Deprecated
-public class FSADump extends FSADecompile {
-}
+public class FSADump extends FSADecompile {}

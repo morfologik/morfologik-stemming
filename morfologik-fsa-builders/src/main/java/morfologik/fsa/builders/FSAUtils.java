@@ -1,23 +1,19 @@
 package morfologik.fsa.builders;
 
+import com.carrotsearch.hppc.IntIntHashMap;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.BitSet;
 import java.util.TreeMap;
-
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSA5;
 import morfologik.fsa.FSAFlags;
 import morfologik.fsa.StateVisitor;
 
-import com.carrotsearch.hppc.IntIntHashMap;
-
-/**
- * Other FSA-related utilities not directly associated with the class hierarchy.
- */
+/** Other FSA-related utilities not directly associated with the class hierarchy. */
 public final class FSAUtils {
-  public final static class IntIntHolder {
+  public static final class IntIntHolder {
     public int a;
     public int b;
 
@@ -26,15 +22,13 @@ public final class FSAUtils {
       this.b = b;
     }
 
-    public IntIntHolder() {
-    }
+    public IntIntHolder() {}
   }
 
   /**
-   * Returns the right-language reachable from a given FSA node, formatted as an
-   * input for the graphviz package (expressed in the <code>dot</code>
-   * language).
-   * 
+   * Returns the right-language reachable from a given FSA node, formatted as an input for the
+   * graphviz package (expressed in the <code>dot</code> language).
+   *
    * @param fsa The automaton to visualize.
    * @param node Starting node (subgraph will be visualized unless it's the automaton's root node).
    * @return Returns the dot language description of the automaton.
@@ -50,14 +44,13 @@ public final class FSAUtils {
   }
 
   /**
-   * Saves the right-language reachable from a given FSA node, formatted as an
-   * input for the graphviz package (expressed in the <code>dot</code>
-   * language), to the given writer.
-   * 
-   * @param w The writer to write dot language description of the automaton. 
+   * Saves the right-language reachable from a given FSA node, formatted as an input for the
+   * graphviz package (expressed in the <code>dot</code> language), to the given writer.
+   *
+   * @param w The writer to write dot language description of the automaton.
    * @param fsa The automaton to visualize.
    * @param node Starting node (subgraph will be visualized unless it's the automaton's root node).
-   * @throws IOException Rethrown if an I/O exception occurs. 
+   * @throws IOException Rethrown if an I/O exception occurs.
    */
   public static void toDot(Writer w, FSA fsa, int node) throws IOException {
     w.write("digraph Automaton {\n");
@@ -73,7 +66,8 @@ public final class FSAUtils {
     w.write("}\n");
   }
 
-  private static void visitNode(Writer w, int d, FSA fsa, int s, BitSet visited) throws IOException {
+  private static void visitNode(Writer w, int d, FSA fsa, int s, BitSet visited)
+      throws IOException {
     visited.set(s);
     w.write("  ");
     w.write(Integer.toString(s));
@@ -97,15 +91,13 @@ public final class FSAUtils {
 
       final byte label = fsa.getArcLabel(arc);
       w.write(" [label=\"");
-      if (Character.isLetterOrDigit(label))
-        w.write((char) label);
+      if (Character.isLetterOrDigit(label)) w.write((char) label);
       else {
         w.write("0x");
         w.write(Integer.toHexString(label & 0xFF));
       }
       w.write("\"");
-      if (fsa.isArcFinal(arc))
-        w.write(" arrowhead=\"tee\"");
+      if (fsa.isArcFinal(arc)) w.write(" arrowhead=\"tee\"");
       if (fsa instanceof FSA5) {
         if (((FSA5) fsa).isNextSet(arc)) {
           w.write(" color=\"blue\"");
@@ -126,26 +118,26 @@ public final class FSAUtils {
   }
 
   /**
-   * Calculate fan-out ratio (how many nodes have a given number of outgoing arcs).  
-   * 
-   * @param fsa The automaton to calculate fanout for. 
+   * Calculate fan-out ratio (how many nodes have a given number of outgoing arcs).
+   *
+   * @param fsa The automaton to calculate fanout for.
    * @param root The starting node for calculations.
-   * 
-   * @return The returned map contains keys for the number of outgoing arcs and
-   * an associated value being the number of nodes with that arc number. 
+   * @return The returned map contains keys for the number of outgoing arcs and an associated value
+   *     being the number of nodes with that arc number.
    */
   public static TreeMap<Integer, Integer> calculateFanOuts(final FSA fsa, int root) {
     final int[] result = new int[256];
-    fsa.visitInPreOrder(new StateVisitor() {
-      public boolean accept(int state) {
-        int count = 0;
-        for (int arc = fsa.getFirstArc(state); arc != 0; arc = fsa.getNextArc(arc)) {
-          count++;
-        }
-        result[count]++;
-        return true;
-      }
-    });
+    fsa.visitInPreOrder(
+        new StateVisitor() {
+          public boolean accept(int state) {
+            int count = 0;
+            for (int arc = fsa.getFirstArc(state); arc != 0; arc = fsa.getNextArc(arc)) {
+              count++;
+            }
+            result[count]++;
+            return true;
+          }
+        });
 
     TreeMap<Integer, Integer> output = new TreeMap<Integer, Integer>();
 
@@ -167,28 +159,30 @@ public final class FSAUtils {
   }
 
   /**
-   * Calculate the size of "right language" for each state in an FSA. The right
-   * language is the number of sequences encoded from a given node in the automaton.
-   * 
+   * Calculate the size of "right language" for each state in an FSA. The right language is the
+   * number of sequences encoded from a given node in the automaton.
+   *
    * @param fsa The automaton to calculate right language for.
-   * @return Returns a map with node identifiers as keys and their right language
-   * counts as associated values. 
+   * @return Returns a map with node identifiers as keys and their right language counts as
+   *     associated values.
    */
   public static IntIntHashMap rightLanguageForAllStates(final FSA fsa) {
     final IntIntHashMap numbers = new IntIntHashMap();
 
-    fsa.visitInPostOrder(new StateVisitor() {
-      public boolean accept(int state) {
-        int thisNodeNumber = 0;
-        for (int arc = fsa.getFirstArc(state); arc != 0; arc = fsa.getNextArc(arc)) {
-          thisNodeNumber += (fsa.isArcFinal(arc) ? 1 : 0)
-              + (fsa.isArcTerminal(arc) ? 0 : numbers.get(fsa.getEndNode(arc)));
-        }
-        numbers.put(state, thisNodeNumber);
+    fsa.visitInPostOrder(
+        new StateVisitor() {
+          public boolean accept(int state) {
+            int thisNodeNumber = 0;
+            for (int arc = fsa.getFirstArc(state); arc != 0; arc = fsa.getNextArc(arc)) {
+              thisNodeNumber +=
+                  (fsa.isArcFinal(arc) ? 1 : 0)
+                      + (fsa.isArcTerminal(arc) ? 0 : numbers.get(fsa.getEndNode(arc)));
+            }
+            numbers.put(state, thisNodeNumber);
 
-        return true;
-      }
-    });
+            return true;
+          }
+        });
 
     return numbers;
   }

@@ -1,6 +1,7 @@
 package morfologik.fsa.builders;
 
 import static morfologik.fsa.FSAFlags.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -8,17 +9,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSA5;
 import morfologik.fsa.FSAFlags;
-
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Additional tests for {@link FSA5}.
- */
+/** Additional tests for {@link FSA5}. */
 public final class FSA5Test extends TestBase {
   public List<String> expected = Arrays.asList("a", "aba", "ac", "b", "ba", "c");
 
@@ -67,7 +63,8 @@ public final class FSA5Test extends TestBase {
     assertEquals(Arrays.asList("0 c", "1 b", "2 ba", "3 a", "4 ac", "5 aba"), result);
   }
 
-  public static void walkNode(byte[] buffer, int depth, FSA fsa, int node, int cnt, List<String> result)
+  public static void walkNode(
+      byte[] buffer, int depth, FSA fsa, int node, int cnt, List<String> result)
       throws IOException {
     for (int arc = fsa.getFirstArc(node); arc != 0; arc = fsa.getNextArc(arc)) {
       buffer[depth] = fsa.getArcLabel(arc);

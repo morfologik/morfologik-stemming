@@ -9,9 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-
 import morfologik.fsa.FSA;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -37,8 +35,7 @@ public class DictionaryLookupTest {
       new DictionaryLookup(Dictionary.read(url));
       Assertions.fail();
     } catch (IOException e) {
-      assertThat(e).hasMessageContaining(
-          DictionaryAttribute.ENCODER.propertyName);
+      assertThat(e).hasMessageContaining(DictionaryAttribute.ENCODER.propertyName);
     }
   }
 
@@ -47,10 +44,8 @@ public class DictionaryLookupTest {
     final URL url = this.getClass().getResource("test-prefix.dict");
     final IStemmer s = new DictionaryLookup(Dictionary.read(url));
 
-    assertArrayEquals(new String[] { "Rzeczpospolita", "subst:irreg" },
-        stem(s, "Rzeczypospolitej"));
-    assertArrayEquals(new String[] { "Rzeczpospolita", "subst:irreg" },
-        stem(s, "Rzecząpospolitą"));
+    assertArrayEquals(new String[] {"Rzeczpospolita", "subst:irreg"}, stem(s, "Rzeczypospolitej"));
+    assertArrayEquals(new String[] {"Rzeczpospolita", "subst:irreg"}, stem(s, "Rzecząpospolitą"));
 
     // This word is not in the dictionary.
     assertNoStemFor(s, "martygalski");
@@ -61,11 +56,11 @@ public class DictionaryLookupTest {
     final URL url = this.getClass().getResource("test-prefix.dict");
     final IStemmer s = new DictionaryLookup(Dictionary.read(url));
 
-    assertArrayEquals(new String[] { "Rzeczpospolita", "subst:irreg" },
-        stem(s, "Rzecz\\apospolit\\a"));
+    assertArrayEquals(
+        new String[] {"Rzeczpospolita", "subst:irreg"}, stem(s, "Rzecz\\apospolit\\a"));
 
-    assertArrayEquals(new String[] { "Rzeczpospolita", "subst:irreg" },
-        stem(s, "krowa\\apospolit\\a"));
+    assertArrayEquals(
+        new String[] {"Rzeczpospolita", "subst:irreg"}, stem(s, "krowa\\apospolit\\a"));
   }
 
   /* */
@@ -75,18 +70,17 @@ public class DictionaryLookupTest {
     final IStemmer s = new DictionaryLookup(Dictionary.read(url));
 
     Assertions.assertThat(stem(s, "Rzeczypospolitej"))
-      .containsExactly("Rzeczpospolita", "subst:irreg");
+        .containsExactly("Rzeczpospolita", "subst:irreg");
 
-    Assertions.assertThat(stem(s, "Rzeczyccy"))
-      .containsExactly("Rzeczycki", "adj:pl:nom:m");
+    Assertions.assertThat(stem(s, "Rzeczyccy")).containsExactly("Rzeczycki", "adj:pl:nom:m");
 
     Assertions.assertThat(stem(s, "Rzecząpospolitą"))
-      .containsExactly("Rzeczpospolita", "subst:irreg");
+        .containsExactly("Rzeczpospolita", "subst:irreg");
 
     // This word is not in the dictionary.
     assertNoStemFor(s, "martygalski");
-    
-    // This word uses characters that are outside of the encoding range of the dictionary. 
+
+    // This word uses characters that are outside of the encoding range of the dictionary.
     assertNoStemFor(s, "Rzeczyckiõh");
   }
 
@@ -103,13 +97,13 @@ public class DictionaryLookupTest {
 
     // Make sure a sample of the entries is present.
     Assertions.assertThat(entries)
-      .contains(
-          "Rzekunia Rzekuń subst:sg:gen:m",
-          "Rzeczkowskie Rzeczkowski adj:sg:nom.acc.voc:n+adj:pl:acc.nom.voc:f.n",
-          "Rzecząpospolitą Rzeczpospolita subst:irreg",
-          "Rzeczypospolita Rzeczpospolita subst:irreg",
-          "Rzeczypospolitych Rzeczpospolita subst:irreg",
-          "Rzeczyckiej Rzeczycki adj:sg:gen.dat.loc:f");
+        .contains(
+            "Rzekunia Rzekuń subst:sg:gen:m",
+            "Rzeczkowskie Rzeczkowski adj:sg:nom.acc.voc:n+adj:pl:acc.nom.voc:f.n",
+            "Rzecząpospolitą Rzeczpospolita subst:irreg",
+            "Rzeczypospolita Rzeczpospolita subst:irreg",
+            "Rzeczypospolitych Rzeczpospolita subst:irreg",
+            "Rzeczyckiej Rzeczycki adj:sg:gen.dat.loc:f");
   }
 
   /* */
@@ -155,8 +149,8 @@ public class DictionaryLookupTest {
     Dictionary read = Dictionary.read(url);
     final IStemmer s = new DictionaryLookup(read);
 
-    assertArrayEquals(new String[] { "merge", "001" }, stem(s, "mergeam"));
-    assertArrayEquals(new String[] { "merge", "002" }, stem(s, "merseserăm"));
+    assertArrayEquals(new String[] {"merge", "001"}, stem(s, "mergeam"));
+    assertArrayEquals(new String[] {"merge", "002"}, stem(s, "merseserăm"));
   }
 
   /* */
@@ -165,9 +159,8 @@ public class DictionaryLookupTest {
     final URL url = this.getClass().getResource("test-synth.dict");
     final IStemmer s = new DictionaryLookup(Dictionary.read(url));
 
-    assertArrayEquals(new String[] { "miała", null }, stem(s,
-        "mieć|verb:praet:sg:ter:f:?perf"));
-    assertArrayEquals(new String[] { "a", null }, stem(s, "a|conj"));
+    assertArrayEquals(new String[] {"miała", null}, stem(s, "mieć|verb:praet:sg:ter:f:?perf"));
+    assertArrayEquals(new String[] {"a", null}, stem(s, "a|conj"));
     assertArrayEquals(new String[] {}, stem(s, "dziecko|subst:sg:dat:n"));
 
     // This word is not in the dictionary.
@@ -185,8 +178,7 @@ public class DictionaryLookupTest {
      */
     ArrayList<String> sequences = new ArrayList<String>();
     for (WordData wd : s) {
-      sequences.add("" + wd.getWord() + " " + wd.getStem() + " "
-          + wd.getTag());
+      sequences.add("" + wd.getWord() + " " + wd.getStem() + " " + wd.getTag());
     }
     Collections.sort(sequences);
 
@@ -205,11 +197,12 @@ public class DictionaryLookupTest {
   public void testSeparatorInLookupTerm() throws IOException {
     FSA fsa = FSA.read(getClass().getResourceAsStream("test-separator-in-lookup.fsa"));
 
-    DictionaryMetadata metadata = new DictionaryMetadataBuilder()
-      .separator('+')
-      .encoding("iso8859-1")
-      .encoder(EncoderType.INFIX)
-      .build();
+    DictionaryMetadata metadata =
+        new DictionaryMetadataBuilder()
+            .separator('+')
+            .encoding("iso8859-1")
+            .encoder(EncoderType.INFIX)
+            .build();
 
     final DictionaryLookup s = new DictionaryLookup(new Dictionary(fsa, metadata));
     assertEquals(0, s.lookup("l+A").size());
@@ -225,8 +218,7 @@ public class DictionaryLookupTest {
 
   /* */
   public static String asString(CharSequence s) {
-    if (s == null)
-      return null;
+    if (s == null) return null;
     return s.toString();
   }
 
