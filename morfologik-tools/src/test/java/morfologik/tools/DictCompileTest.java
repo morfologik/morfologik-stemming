@@ -6,29 +6,34 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
+import com.carrotsearch.randomizedtesting.jupiter.generators.RandomNumbers;
+import com.carrotsearch.randomizedtesting.jupiter.generators.RandomPicks;
+import com.carrotsearch.randomizedtesting.jupiter.generators.RandomStrings;
 import morfologik.stemming.Dictionary;
 import morfologik.stemming.DictionaryLookup;
 import morfologik.stemming.DictionaryMetadata;
 import morfologik.stemming.EncoderType;
 import morfologik.stemming.WordData;
 
+import net.bytebuddy.utility.RandomString;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.RepeatedTest;
 
-import com.carrotsearch.randomizedtesting.RandomizedTest;
-import com.carrotsearch.randomizedtesting.annotations.Repeat;
-import com.carrotsearch.randomizedtesting.generators.RandomPicks;
+import com.carrotsearch.randomizedtesting.jupiter.RandomizedTest;
+import com.carrotsearch.randomizedtesting.jupiter.Randomized;
+import org.junit.jupiter.api.io.TempDir;
 
+@Randomized
 public class DictCompileTest extends RandomizedTest {
-  @Test
-  @Repeat(iterations = 200)
-  public void testRoundTrip() throws Exception {
-    final Path input = newTempDir().resolve("dictionary.input");
+  @RepeatedTest(200)
+  public void testRoundTrip(@TempDir Path tempDir, Random rnd) throws Exception {
+    final Path input = tempDir.resolve("dictionary.input");
     final Path metadata = DictionaryMetadata.getExpectedMetadataLocation(input);
 
-    char separator = RandomPicks.randomFrom(getRandom(), new Character [] {
+    char separator = RandomPicks.randomFrom(rnd, new Character [] {
         '|',
         ',',
         '\t',
@@ -37,47 +42,47 @@ public class DictCompileTest extends RandomizedTest {
     try (Writer writer = Files.newBufferedWriter(metadata, StandardCharsets.UTF_8)) {
       DictionaryMetadata.builder()
           .separator(separator)
-          .encoder(randomFrom(EncoderType.values()))
+          .encoder(RandomPicks.randomFrom(rnd, EncoderType.values()))
           .encoding(StandardCharsets.UTF_8)
           .build()
           .write(writer);
     }
 
-    final boolean useTags = randomBoolean();
+    final boolean useTags = rnd.nextBoolean();
 
     Set<String> sequences = new LinkedHashSet<>();
-    for (int seqs = randomIntBetween(0, 100); --seqs >= 0;) {
+    for (int seqs = RandomNumbers.randomIntInRange(rnd, 0, 100); --seqs >= 0;) {
       String base;
-      switch (randomIntBetween(0, 5)) {
+      switch (RandomNumbers.randomIntInRange(rnd, 0, 5)) {
         case 0:
-          base = randomAsciiLettersOfLength(('A' - separator) & 0xff);
+          base = RandomStrings.randomAsciiLettersOfLength(rnd, ('A' - separator) & 0xff);
           break;
 
         default:
-          base = randomAsciiLettersOfLengthBetween(1, 100);
+          base = RandomStrings.randomAsciiLettersOfLengthBetween(rnd,1, 100);
           break;
       }
       
       String inflected;
-      switch (randomIntBetween(0, 5)) {
+      switch (RandomNumbers.randomIntInRange(rnd, 0, 5)) {
         case 0:
           inflected = base;
           break;
 
         case 1:
-          inflected = randomAsciiLettersOfLengthBetween(0, 5) + base;
+          inflected = RandomStrings.randomAsciiLettersOfLengthBetween(rnd,0, 5) + base;
           break;
           
         case 3: 
-          inflected = base + randomAsciiLettersOfLengthBetween(0, 5);
+          inflected = base + RandomStrings.randomAsciiLettersOfLengthBetween(rnd,0, 5);
           break;
 
         case 4:
-          inflected = randomAsciiLettersOfLengthBetween(0, 5) + base + randomAsciiLettersOfLengthBetween(0, 5);
+          inflected = RandomStrings.randomAsciiLettersOfLengthBetween(rnd,0, 5) + base + RandomStrings.randomAsciiLettersOfLengthBetween(rnd,0, 5);
           break;
 
         default:
-          inflected = randomAsciiLettersOfLengthBetween(0, 200);
+          inflected = RandomStrings.randomAsciiLettersOfLengthBetween(rnd,0, 200);
             break;
       }
        
@@ -85,22 +90,22 @@ public class DictCompileTest extends RandomizedTest {
       sequences.add(
           base + separator + 
           inflected +
-          (useTags ? (separator + randomAsciiLettersOfLengthBetween(0, 10)) : ""));
+          (useTags ? (separator + RandomStrings.randomAsciiLettersOfLengthBetween(rnd,0, 10)) : ""));
     }
 
-    final boolean ignoreEmpty = randomBoolean();
+    final boolean ignoreEmpty = rnd.nextBoolean();
     try (Writer writer = Files.newBufferedWriter(input, StandardCharsets.UTF_8)) {
       for (String in : sequences) {
         writer.write(in);
         writer.write('\n');
         
-        if (ignoreEmpty && randomBoolean()) {
+        if (ignoreEmpty && rnd.nextBoolean()) {
           writer.write('\n');
         }
       }
     }
 
-    boolean validate = randomBoolean();
+    boolean validate = rnd.nextBoolean();
     Assertions.assertThat(new DictCompile(input, false, validate, false, false, ignoreEmpty).call())
       .isEqualTo(ExitStatus.SUCCESS);
 

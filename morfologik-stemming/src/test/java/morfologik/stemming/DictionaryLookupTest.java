@@ -1,7 +1,7 @@
 package morfologik.stemming;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -13,8 +13,7 @@ import java.util.LinkedHashMap;
 import morfologik.fsa.FSA;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DictionaryLookupTest {
   @Test
@@ -36,7 +35,7 @@ public class DictionaryLookupTest {
     final URL url = this.getClass().getResource("test-removed-props.dict");
     try {
       new DictionaryLookup(Dictionary.read(url));
-      Assert.fail();
+      Assertions.fail();
     } catch (IOException e) {
       assertThat(e).hasMessageContaining(
           DictionaryAttribute.ENCODER.propertyName);
@@ -139,7 +138,7 @@ public class DictionaryLookupTest {
     final HashSet<WordData> entries = new HashSet<WordData>();
     try {
       entries.add(words.get(0));
-      Assert.fail();
+      Assertions.fail();
     } catch (RuntimeException e) {
       // Expected.
     }

@@ -51,8 +51,8 @@
   <properties>
     <version.assertj>3.27.7</version.assertj>
     <version.hppc>0.7.2</version.hppc>
-    <version.junit>4.13.1</version.junit>
-    <version.randomizedtesting>2.8.4</version.randomizedtesting>
+    <version.junit>6.0.3</version.junit>
+    <version.randomizedtesting>0.1.0</version.randomizedtesting>
 
     <version.maven-compiler-plugin>3.15.0</version.maven-compiler-plugin>
     <version.maven-enforcer-plugin>3.6.2</version.maven-enforcer-plugin>
@@ -376,20 +376,14 @@
       <dependencies>
         <dependency>
           <groupId>com.carrotsearch.randomizedtesting</groupId>
-          <artifactId>randomizedtesting-runner</artifactId>
+          <artifactId>randomizedtesting-jupiter</artifactId>
           <version>${version.randomizedtesting}</version>
           <scope>test</scope>
-          <exclusions>
-            <exclusion><!-- prevents maven-enforcer DependencyConvergence error - bring in our own version below -->
-              <groupId>junit</groupId>
-              <artifactId>junit</artifactId>
-            </exclusion>
-          </exclusions>
         </dependency>
 
         <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>junit-jupiter</artifactId>
           <version>${version.junit}</version>
           <scope>test</scope>
         </dependency>
@@ -407,80 +401,8 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>default-test</id>
-                <phase>none</phase>
-              </execution>
-            </executions>
-          </plugin>
-
-          <plugin>
-            <groupId>com.carrotsearch.randomizedtesting</groupId>
-            <artifactId>junit4-maven-plugin</artifactId>
-            <version>${version.randomizedtesting}</version>
-  
-            <!-- Defaults for all tests (ITs and Unit). -->
             <configuration>
-              <parallelism>auto</parallelism>
-              <heartbeat>30</heartbeat>
-              <jvmOutputAction>pipe,ignore</jvmOutputAction>
-              <leaveTemporary>true</leaveTemporary>
-              <ifNoTests>warn</ifNoTests>
-
-              <assertions>
-                <enable />
-              </assertions>
-
-              <listeners>
-                <report-text showThrowable="true" showStackTraces="true" showOutput="onerror" showStatusOk="true"
-                  showStatusError="true" showStatusFailure="true" showStatusIgnored="true" showSuiteSummary="true" />
-
-                <report-ant-xml mavenExtensions="true" dir="${project.build.directory}/surefire-reports" />
-                <report-json file="${project.build.directory}/test-results.html" />
-              </listeners>
             </configuration>
-
-            <executions>
-              <!-- Defaults for unit tests. -->
-              <execution>
-                <id>unit-tests</id>
-                <phase>test</phase>
-                <goals>
-                  <goal>junit4</goal>
-                </goals>
-                <inherited>true</inherited>
-                <configuration>
-                  <includes>
-                    <include>**/Test*.class</include>
-                    <include>**/*Test.class</include>
-                  </includes>
-                  <excludes>
-                    <exclude>**/*$*</exclude>
-                    <exclude>**/TestBase.class</exclude>
-                  </excludes>
-                </configuration>
-              </execution>
-  
-              <!-- Defaults for integration tests. -->
-              <execution>
-                <id>integration-tests</id>
-                <phase>integration-test</phase>
-                <goals>
-                  <goal>junit4</goal>
-                </goals>
-                <inherited>true</inherited>
-                <configuration>
-                  <includes>
-                    <include>**/IT*.class</include>
-                    <include>**/*IT.class</include>
-                  </includes>
-                  <excludes>
-                    <exclude>**/*$*</exclude>
-                  </excludes>
-                </configuration>
-              </execution>
-            </executions>
           </plugin>
         </plugins>
       </build>

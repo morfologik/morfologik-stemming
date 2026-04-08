@@ -5,10 +5,12 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import com.carrotsearch.randomizedtesting.RandomizedTest;
+import com.carrotsearch.randomizedtesting.jupiter.RandomizedTest;
+import com.carrotsearch.randomizedtesting.jupiter.Randomized;
 
+@Randomized
 public class EncodersTest extends RandomizedTest {
   @Test
   public void testSharedPrefix() throws IOException {

@@ -1,24 +1,25 @@
 package morfologik.fsa.builders;
 
 import static morfologik.fsa.builders.FSATestUtils.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Random;
 
 import morfologik.fsa.FSA;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class FSABuilderTest extends TestBase {
   private static byte[][] input;
   private static byte[][] input2;
 
-  @BeforeClass
-  public static void prepareByteInput() {
-    input = generateRandom(25000, new MinMax(1, 20), new MinMax(0, 255));
-    input2 = generateRandom(40, new MinMax(1, 20), new MinMax(0, 3));
+  @BeforeAll
+  public static void prepareByteInput(Random rnd) {
+    input = generateRandom(rnd, 25000, new MinMax(1, 20), new MinMax(0, 255));
+    input2 = generateRandom(rnd, 40, new MinMax(1, 20), new MinMax(0, 3));
   }
 
   @Test

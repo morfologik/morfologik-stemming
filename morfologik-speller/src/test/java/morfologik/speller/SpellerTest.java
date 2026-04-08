@@ -1,7 +1,7 @@
 package morfologik.speller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URL;
@@ -12,13 +12,13 @@ import java.util.List;
 import morfologik.stemming.Dictionary;
 
 import org.assertj.core.api.Assertions;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class SpellerTest {
   private static Dictionary dictionary;
 
-  @BeforeClass
+  @BeforeAll
   public static void setup() throws Exception {
     final URL url = SpellerTest.class.getResource("slownik.dict");
     dictionary = Dictionary.read(url);
@@ -407,15 +407,15 @@ public class SpellerTest {
     for (Speller.CandidateData cd : candidates) {
       words.add(cd.getWord());
     }
-    assertTrue("pissarra should be a suggestion for pissara", words.contains("pissarra"));
-    assertTrue("passara should be a suggestion for pissara", words.contains("passara"));
-    assertTrue("passara should be a suggestion for pissara", words.contains("passarà"));
+    assertTrue(words.contains("pissarra"), "pissarra should be a suggestion for pissara");
+    assertTrue(words.contains("passara"), "passara should be a suggestion for pissara");
+    assertTrue(words.contains("passarà"), "passara should be a suggestion for pissara");
 
     // No candidate should have origDistance=0: that would indicate the double-consumption bug.
     // With FREQ_RANGES=26 and freq=0: origDistance=0 → distance=25, origDistance=1 → distance=51.
     for (Speller.CandidateData cd : candidates) {
       int origDistance = cd.getDistance() / Speller.FREQ_RANGES;
-      assertTrue("Candidate '" + cd.getWord() + "' has unexpected origDistance=0", origDistance > 0);
+      assertTrue(origDistance > 0, "Candidate '" + cd.getWord() + "' has unexpected origDistance=0");
     }
   }
 

@@ -5,7 +5,7 @@ import java.util.Locale;
 
 import morfologik.stemming.WordData;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /*
  * 

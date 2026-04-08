@@ -6,12 +6,16 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Random;
 
+import com.carrotsearch.randomizedtesting.jupiter.generators.RandomPicks;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import com.carrotsearch.randomizedtesting.RandomizedTest;
+import com.carrotsearch.randomizedtesting.jupiter.RandomizedTest;
+import com.carrotsearch.randomizedtesting.jupiter.Randomized;
 
+@Randomized
 public class DictionaryMetadataTest extends RandomizedTest {
   @Test
   public void testEscapeSeparator() throws IOException {
@@ -26,11 +30,11 @@ public class DictionaryMetadataTest extends RandomizedTest {
   }
 
   @Test
-  public void testWriteMetadata() throws IOException {
+  public void testWriteMetadata(Random rnd) throws IOException {
     StringWriter sw = new StringWriter();
 
-    EncoderType encoder = randomFrom(EncoderType.values());
-    Charset encoding = randomFrom(Arrays.asList(
+    EncoderType encoder = RandomPicks.randomFrom(rnd, EncoderType.values());
+    Charset encoding = RandomPicks.randomFrom(rnd, Arrays.asList(
         StandardCharsets.UTF_8,
         StandardCharsets.ISO_8859_1,
         StandardCharsets.US_ASCII));

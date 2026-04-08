@@ -1,10 +1,10 @@
 package morfologik.speller;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import morfologik.speller.HMatrix;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class HMatrixTest {
   private static final int MAX_WORD_LENGTH = 120;

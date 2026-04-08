@@ -24,6 +24,8 @@ Bug Fixes
 
 Other Changes
 
+ * switch to junit5/ jupiter and randomizedtesting-jupiter
+
  * Update Maven build plugins to current versions.
 
 ======================= morfologik-stemming 2.1.9 =======================
