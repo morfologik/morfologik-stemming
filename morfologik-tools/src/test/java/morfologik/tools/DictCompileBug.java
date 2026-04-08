@@ -5,23 +5,29 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
+import java.util.Random;
 import java.util.Set;
 
+import com.carrotsearch.randomizedtesting.jupiter.generators.RandomNumbers;
+import com.carrotsearch.randomizedtesting.jupiter.generators.RandomPicks;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import com.carrotsearch.randomizedtesting.RandomizedTest;
+import com.carrotsearch.randomizedtesting.jupiter.RandomizedTest;
+import com.carrotsearch.randomizedtesting.jupiter.Randomized;
 
 import morfologik.stemming.Dictionary;
 import morfologik.stemming.DictionaryLookup;
 import morfologik.stemming.DictionaryMetadata;
 import morfologik.stemming.EncoderType;
 import morfologik.stemming.WordData;
+import org.junit.jupiter.api.io.TempDir;
 
+@Randomized
 public class DictCompileBug extends RandomizedTest {
   @Test
-  public void testSeparatorInEncoded() throws Exception {
-    final Path input = newTempDir().resolve("dictionary.input");
+  public void testSeparatorInEncoded(@TempDir Path tempDir, Random rnd) throws Exception {
+    final Path input = tempDir.resolve("dictionary.input");
     final Path metadata = DictionaryMetadata.getExpectedMetadataLocation(input);
 
     char separator = '_';
@@ -35,7 +41,7 @@ public class DictCompileBug extends RandomizedTest {
     }
 
     Set<String> sequences = new LinkedHashSet<>();
-    for (int seqs = randomIntBetween(0, 100); --seqs >= 0;) {
+    for (int seqs = RandomNumbers.randomIntInRange(rnd, 0, 100); --seqs >= 0;) {
       sequences.add("anfragen_anfragen|VER:1:PLU:KJ1:SFT:NEB");
       sequences.add("Anfragen_anfragen|VER:1:PLU:KJ1:SFT:NEB");
     }

@@ -1,7 +1,7 @@
 package morfologik.fsa.builders;
 
 import static morfologik.fsa.FSAFlags.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,9 +15,8 @@ import java.util.HashSet;
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSAFlags;
 
-import org.junit.Test;
-
-import static com.carrotsearch.randomizedtesting.RandomizedTest.*;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 
 public abstract class SerializerTestBase extends TestBase {
   @Test
@@ -195,7 +194,7 @@ public abstract class SerializerTestBase extends TestBase {
 
   @Test
   public void testAutomatonWithNodeNumbers() throws IOException {
-    assumeTrue(createSerializer().getFlags().contains(FSAFlags.NUMBERS));
+    Assumptions.assumeTrue(createSerializer().getFlags().contains(FSAFlags.NUMBERS));
 
     byte[][] input = new byte[][] { 
       { 'a' }, 

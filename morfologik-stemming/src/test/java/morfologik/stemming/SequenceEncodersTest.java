@@ -4,62 +4,61 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
+import com.carrotsearch.randomizedtesting.jupiter.generators.RandomStrings;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import com.carrotsearch.randomizedtesting.RandomizedTest;
-import com.carrotsearch.randomizedtesting.annotations.Name;
-import com.carrotsearch.randomizedtesting.annotations.ParametersFactory;
+import com.carrotsearch.randomizedtesting.jupiter.RandomizedTest;
+import com.carrotsearch.randomizedtesting.jupiter.Randomized;
+import org.junit.jupiter.params.provider.ValueSource;
 
+@Randomized
+@ParameterizedClass
+@EnumSource(EncoderType.class)
 public class SequenceEncodersTest extends RandomizedTest {
     private final ISequenceEncoder coder;
 
-    public SequenceEncodersTest(@Name("coder") ISequenceEncoder coder)
-    {
-        this.coder = coder;
-    }
-
-    @ParametersFactory
-    public static List<Object[]> testFactory() {
-        List<Object[]> encoders = new ArrayList<>();
-        for (EncoderType t : EncoderType.values()) {    
-            encoders.add(new Object [] {t.get()});
-        }
-        return encoders;
+    public SequenceEncodersTest(EncoderType coderType) {
+        this.coder = coderType.get();
     }
 
     @Test
-    public void testEncodeSuffixOnRandomSequences() {
+    public void testEncodeSuffixOnRandomSequences(Random rnd) {
         for (int i = 0; i < 10000; i++) {
-            assertRoundtripEncode(
-                randomAsciiLettersOfLengthBetween(0, 500),
-                randomAsciiLettersOfLengthBetween(0, 500));
+            assertRoundtripEncode(rnd,
+                RandomStrings.randomAsciiLettersOfLengthBetween(rnd, 0, 500),
+                    RandomStrings.randomAsciiLettersOfLengthBetween(rnd, 0, 500));
         }
     }
 
     @Test
-    public void testEncodeSamples() {
-        assertRoundtripEncode("", "");
-        assertRoundtripEncode("abc", "ab");
-        assertRoundtripEncode("abc", "abx");
-        assertRoundtripEncode("ab", "abc");
-        assertRoundtripEncode("xabc", "abc");
-        assertRoundtripEncode("axbc", "abc");
-        assertRoundtripEncode("axybc", "abc");
-        assertRoundtripEncode("axybc", "abc");
-        assertRoundtripEncode("azbc", "abcxy");
+    public void testEncodeSamples(Random rnd) {
+        assertRoundtripEncode(rnd, "", "");
+        assertRoundtripEncode(rnd, "abc", "ab");
+        assertRoundtripEncode(rnd, "abc", "abx");
+        assertRoundtripEncode(rnd, "ab", "abc");
+        assertRoundtripEncode(rnd, "xabc", "abc");
+        assertRoundtripEncode(rnd, "axbc", "abc");
+        assertRoundtripEncode(rnd, "axybc", "abc");
+        assertRoundtripEncode(rnd, "axybc", "abc");
+        assertRoundtripEncode(rnd, "azbc", "abcxy");
 
-        assertRoundtripEncode("Niemcami", "Niemiec");
-        assertRoundtripEncode("Niemiec", "Niemcami");
+        assertRoundtripEncode(rnd, "Niemcami", "Niemiec");
+        assertRoundtripEncode(rnd, "Niemiec", "Niemcami");
     }
 
-    private void assertRoundtripEncode(String srcString, String dstString) {
-        ByteBuffer source = ByteBuffer.wrap(srcString.getBytes(UTF8));
-        ByteBuffer target = ByteBuffer.wrap(dstString.getBytes(UTF8));
+    private void assertRoundtripEncode(Random rnd, String srcString, String dstString) {
+        ByteBuffer source = ByteBuffer.wrap(srcString.getBytes(StandardCharsets.UTF_8));
+        ByteBuffer target = ByteBuffer.wrap(dstString.getBytes(StandardCharsets.UTF_8));
 
-        ByteBuffer encoded = coder.encode(ByteBuffer.allocate(randomInt(30)), source, target);
-        ByteBuffer decoded = coder.decode(ByteBuffer.allocate(randomInt(30)), source, encoded);
+        ByteBuffer encoded = coder.encode(ByteBuffer.allocate(rnd.nextInt(30)), source, target);
+        ByteBuffer decoded = coder.decode(ByteBuffer.allocate(rnd.nextInt(30)), source, encoded);
 
         if (!decoded.equals(target)) {
             System.out.println("src: " + BufferUtils.toString(source, StandardCharsets.UTF_8));

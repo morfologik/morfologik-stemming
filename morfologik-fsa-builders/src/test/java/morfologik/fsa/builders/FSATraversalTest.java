@@ -2,7 +2,7 @@ package morfologik.fsa.builders;
 
 import static java.nio.charset.StandardCharsets.*;
 import static morfologik.fsa.MatchResult.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -11,8 +11,9 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import morfologik.fsa.FSA;
 import morfologik.fsa.FSA5;
@@ -25,7 +26,7 @@ import morfologik.fsa.MatchResult;
 public final class FSATraversalTest extends TestBase {
   private FSA fsa;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     fsa = FSA.read(this.getClass().getResourceAsStream("en_tst.dict"));
   }
@@ -100,7 +101,7 @@ public final class FSATraversalTest extends TestBase {
 
     int i = 0;
     for (byte[] seq : input) {
-      assertEquals(new String(seq), i++, traversal.perfectHash(seq));
+      Assertions.assertEquals(i++, traversal.perfectHash(seq));
     }
 
     // Check if the total number of sequences is encoded at the root node.

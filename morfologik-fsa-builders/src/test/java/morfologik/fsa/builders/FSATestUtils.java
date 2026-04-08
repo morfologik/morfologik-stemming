@@ -5,16 +5,14 @@ import java.util.*;
 
 import morfologik.fsa.FSA;
 import morfologik.fsa.StateVisitor;
-import static com.carrotsearch.randomizedtesting.RandomizedTest.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FSATestUtils {
   /*
    * Generate a sorted list of random sequences.
    */
-  public static byte[][] generateRandom(int count, MinMax length, MinMax alphabet) {
+  public static byte[][] generateRandom(Random rnd, int count, MinMax length, MinMax alphabet) {
     final byte[][] input = new byte[count][];
-    final Random rnd = new Random(randomLong());
     for (int i = 0; i < count; i++) {
       input[i] = randomByteSequence(rnd, length, alphabet);
     }
@@ -79,8 +77,8 @@ public class FSATestUtils {
         }
 
         String full = b.toString();
-        assertFalse("State exists: " + state + " " + full + " " + stateLanguages.get(full),
-            stateLanguages.containsKey(full));
+        assertFalse(stateLanguages.containsKey(full),
+            "State exists: " + state + " " + full + " " + stateLanguages.get(full));
         stateLanguages.put(full, state);
 
         return true;

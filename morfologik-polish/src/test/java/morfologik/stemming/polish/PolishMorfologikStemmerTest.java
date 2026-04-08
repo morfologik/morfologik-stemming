@@ -1,6 +1,6 @@
 package morfologik.stemming.polish;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -12,7 +12,7 @@ import morfologik.stemming.IStemmer;
 import morfologik.stemming.WordData;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /*
  * 
@@ -20,7 +20,7 @@ import org.junit.Test;
 public class PolishMorfologikStemmerTest {
   /* */
   @Test
-  public void testLexemes() throws IOException {
+  public void testLexemes() {
     PolishStemmer s = new PolishStemmer();
 
     assertEquals("żywotopisarstwo", stem(s, "żywotopisarstwie")[0]);
@@ -35,8 +35,8 @@ public class PolishMorfologikStemmerTest {
 
   /* */
   @Test
-  public void listUniqueTags() throws IOException {
-    HashSet<String> forms = new HashSet<String>();
+  public void listUniqueTags() {
+    HashSet<String> forms = new HashSet<>();
     boolean hadMissing = false;
     for (WordData wd : new PolishStemmer()) {
       final CharSequence chs = wd.getTag();
@@ -87,7 +87,7 @@ public class PolishMorfologikStemmerTest {
       final ByteBuffer copy = wd.getStemBytes(null);
       final String stem = new String(copy.array(), copy.arrayOffset() + copy.position(), copy.remaining(), ENCODING);
       // The buffer should be present in stems set.
-      assertTrue(stem, stems.contains(stem));
+      Assertions.assertThat(stems.contains(stem)).as(stem).isTrue();
       // Buffer large enough to hold the contents.
       assertSame(temp, wd.getStemBytes(temp));
       // The copy and the clone should be identical.
@@ -99,7 +99,7 @@ public class PolishMorfologikStemmerTest {
       final ByteBuffer copy = wd.getTagBytes(null);
       final String tag = new String(copy.array(), copy.arrayOffset() + copy.position(), copy.remaining(), ENCODING);
       // The buffer should be present in tags set.
-      assertTrue(tag, tags.contains(tag));
+      Assertions.assertThat(tags.contains(tag)).as(tag).isTrue();
       // Buffer large enough to hold the contents.
       temp.clear();
       assertSame(temp, wd.getTagBytes(temp));
@@ -124,7 +124,7 @@ public class PolishMorfologikStemmerTest {
 
   /* */
   public static String[] stem(IStemmer s, String word) {
-    ArrayList<String> result = new ArrayList<String>();
+    ArrayList<String> result = new ArrayList<>();
     for (WordData wd : s.lookup(word)) {
       result.add(asString(wd.getStem()));
       result.add(asString(wd.getTag()));

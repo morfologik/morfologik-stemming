@@ -11,28 +11,34 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import com.carrotsearch.randomizedtesting.jupiter.generators.RandomNumbers;
+import com.carrotsearch.randomizedtesting.jupiter.generators.RandomPicks;
+import com.carrotsearch.randomizedtesting.jupiter.generators.RandomStrings;
 import morfologik.fsa.FSA;
 import morfologik.stemming.BufferUtils;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
-import com.carrotsearch.randomizedtesting.RandomizedTest;
-import com.carrotsearch.randomizedtesting.annotations.Repeat;
+import com.carrotsearch.randomizedtesting.jupiter.RandomizedTest;
+import com.carrotsearch.randomizedtesting.jupiter.Randomized;
+import org.junit.jupiter.api.io.TempDir;
 
+@Randomized
 public class FSACompileTest extends RandomizedTest {
-  @Test
-  @Repeat(iterations = 100)
-  public void testCliInvocation() throws Exception {
-    final Path input = newTempFile();
-    final Path output = newTempFile();
+  @RepeatedTest(100)
+  public void testCliInvocation(@TempDir Path tempDir, Random rnd) throws Exception {
+    final Path input = Files.createTempFile(tempDir, "input", "in");
+    final Path output = Files.createTempFile(tempDir, "input", "out");
 
     Set<String> sequences = new LinkedHashSet<>();
-    for (int seqs = randomIntBetween(0, 100); --seqs >= 0;) {
-      sequences.add(randomAsciiLettersOfLengthBetween(1, 10));
+    for (int seqs = RandomNumbers.randomIntInRange(rnd, 0, 100); --seqs >= 0;) {
+      sequences.add(RandomStrings.randomAsciiLettersOfLengthBetween(rnd, 1, 10));
     }
 
     try (OutputStream os = Files.newOutputStream(input)) {
@@ -41,18 +47,18 @@ public class FSACompileTest extends RandomizedTest {
         os.write(i.next().getBytes(StandardCharsets.UTF_8));
         
         // Sometimes don't add trailing '\n'.
-        if (!i.hasNext() && randomBoolean()) {
+        if (!i.hasNext() && rnd.nextBoolean()) {
           break;
         } else {
           os.write('\n');
-          if (randomBoolean()) {
+          if (rnd.nextBoolean()) {
             os.write('\n');
           }
         }
       }
     }
     
-    SerializationFormat format = randomFrom(SerializationFormat.values());
+    SerializationFormat format = RandomPicks.randomFrom(rnd, SerializationFormat.values());
 
     Assertions.assertThat(new FSACompile(
         input,
@@ -76,9 +82,9 @@ public class FSACompileTest extends RandomizedTest {
   }
 
   @Test
-  public void testEmptyWarning() throws Exception {
-    final Path input = newTempFile();
-    final Path output = newTempFile();
+  public void testEmptyWarning(@TempDir Path tempDir, Random rnd) throws Exception {
+    final Path input = Files.createTempFile(tempDir, "input", "in");
+    final Path output = Files.createTempFile(tempDir, "input", "out");
 
     Files.write(input, "abc\n\ndef".getBytes(StandardCharsets.US_ASCII));
 
@@ -97,9 +103,9 @@ public class FSACompileTest extends RandomizedTest {
   }
 
   @Test
-  public void testCrWarning() throws Exception {
-    final Path input = newTempFile();
-    final Path output = newTempFile();
+  public void testCrWarning(@TempDir Path tempDir, Random rnd) throws Exception {
+    final Path input = Files.createTempFile(tempDir, "input", "in");
+    final Path output = Files.createTempFile(tempDir, "input", "out");
 
     Files.write(input, "abc\r\ndef\r\n".getBytes(StandardCharsets.US_ASCII));
 
@@ -118,14 +124,14 @@ public class FSACompileTest extends RandomizedTest {
   }
 
   @Test
-  public void testBomWarning() throws Exception {
-    final Path input = newTempFile();
-    final Path output = newTempFile();
+  public void testBomWarning(@TempDir Path tempDir) throws Exception {
+    final Path input = Files.createTempFile(tempDir, "input", "in");
+    final Path output = Files.createTempFile(tempDir, "input", "out");
 
     // Emit UTF-8 BOM prefixed list of three strings.
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     baos.write(new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF });
-    baos.write("abc\ndef\nxyz".getBytes(UTF8));
+    baos.write("abc\ndef\nxyz".getBytes(StandardCharsets.UTF_8));
     Files.write(input, baos.toByteArray());
 
     String out = sysouts(new Callable<Void>() {
