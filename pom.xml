@@ -396,12 +396,26 @@
         </dependency>
       </dependencies>
 
+    </profile>
+
+    <profile>
+      <id>profile.ci-toolchain</id>
+
+      <activation>
+        <property>
+          <name>env.CI</name>
+        </property>
+      </activation>
+
       <build>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
+              <jdkToolchain>
+                <version>21</version>
+              </jdkToolchain>
             </configuration>
           </plugin>
         </plugins>
