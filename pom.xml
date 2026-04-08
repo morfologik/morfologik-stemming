@@ -177,8 +177,7 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${version.maven-compiler-plugin}</version>
           <configuration>
-            <source>${maven.compiler.source}</source>
-            <target>${maven.compiler.target}</target>
+            <release>${maven.compiler.source}</release>
           </configuration>
         </plugin>
 
@@ -411,11 +410,50 @@
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>default-testCompile</id>
+                <goals><goal>testCompile</goal></goals>
+                <configuration>
+                  <jdkToolchain>
+                    <version>21</version>
+                  </jdkToolchain>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <jdkToolchain>
                 <version>21</version>
               </jdkToolchain>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-toolchains-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>toolchain</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <toolchains>
+                <jdk>
+                  <version>[21,)</version>
+                </jdk>
+                <jdk>
+                  <version>17</version>
+                </jdk>
+              </toolchains>
             </configuration>
           </plugin>
         </plugins>
