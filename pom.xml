@@ -217,6 +217,7 @@
                 <reflowLongStrings>true</reflowLongStrings>
                 <formatJavadoc>true</formatJavadoc>
               </googleJavaFormat>
+              <lineEndings>UNIX</lineEndings>
             </java>
           </configuration>
           <executions>
