@@ -302,9 +302,9 @@
     </profile>
 
     <profile>
-      <id>profile.require-java17</id>
+      <id>profile.require-java11</id>
       <activation>
-        <file><exists>etc/profiles/require-java17.enabled</exists></file>
+        <file><exists>etc/profiles/require-java11.enabled</exists></file>
       </activation>
 
       <properties>
@@ -312,33 +312,6 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       </properties>
-
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-enforcer-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>enforce-environment</id>
-                <goals>
-                  <goal>enforce</goal>
-                </goals>
-                <inherited>true</inherited>
-                <configuration>
-                <!-- Temporarily avoid the incompatibility in enforcer and jigsaw (commons-lang 2.6). 
-                  <rules combine.children="append">
-                    <requireJavaVersion>
-                      <version>1.7.0</version>
-                    </requireJavaVersion>
-                  </rules> 
-                -->
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
     </profile>
 
     <profile>
