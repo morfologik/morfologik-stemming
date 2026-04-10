@@ -30,6 +30,9 @@ Other Changes
 
  * Update Maven build plugins to current versions.
 
+ * Require Java 21 for compiling the project. The output jar remains Java 11 
+   compatible.
+
 ======================= morfologik-stemming 2.1.9 =======================
 
 Other Changes
